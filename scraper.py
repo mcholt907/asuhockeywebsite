@@ -108,6 +108,16 @@ def _fetch_and_parse_players_from_url(url, headers):
                 weight = cells[8].text.strip() if cells[8] else ""
                 shoots = cells[9].text.strip() if cells[9] else ""
                 
+                # Skip rows that are actually statistics/summary rows (not players)
+                # These rows have "NCAA" or other non-numeric values in the number field
+                # and don't represent actual players
+                if number and (number.upper() == "NCAA" or number.upper().startswith("TOTAL")):
+                    continue
+                
+                # Also skip if name is clearly not a player name (just numbers)
+                if name and name.isdigit():
+                    continue
+                
                 player_data_item = {
                     "number": number,
                     "name": name,
