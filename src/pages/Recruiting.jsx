@@ -80,7 +80,7 @@ function Recruiting() {
         rel="noopener noreferrer"
         className="profile-link"
       >
-        View Profile
+        View Elite Prospects Profile
       </a>
     </div>
   );
