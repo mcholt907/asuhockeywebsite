@@ -135,22 +135,22 @@ async function getHockeyData() {
 }
 
 // API endpoint for recruiting data
-app.get('/api/recruiting', async (req, res) => {
+app.get('/api/recruits', async (req, res) => {
   try {
-    console.log('[API /recruiting] Fetching recruiting data...');
+    console.log('[API /recruits] Fetching recruiting data...');
 
     // Try to get fresh data from Elite Prospects scraper
     let recruitingData = await fetchRecruitingData();
 
     // If scraping failed or returned empty data, fall back to static JSON file
     if (!recruitingData || Object.keys(recruitingData).length === 0) {
-      console.log('[API /recruiting] Scraper returned empty data, falling back to static JSON file');
+      console.log('[API /recruits] Scraper returned empty data, falling back to static JSON file');
       try {
         const fileData = await fs.readFile(HOCKEY_DATA_PATH, 'utf-8');
         const parsedData = JSON.parse(fileData);
         recruitingData = parsedData.recruiting || {};
       } catch (fileError) {
-        console.error('[API /recruiting] Error reading fallback JSON file:', fileError.message);
+        console.error('[API /recruits] Error reading fallback JSON file:', fileError.message);
         return res.status(500).json({
           error: 'Failed to fetch recruiting data',
           message: 'Both scraper and fallback file failed'
