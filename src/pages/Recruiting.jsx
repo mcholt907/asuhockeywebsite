@@ -22,11 +22,8 @@ function Recruiting() {
 
           for (const season of seasons) {
             if (Array.isArray(data[season])) {
-              filteredData[season] = data[season].filter(
-                recruit => recruit &&
-                  recruit.name &&
-                  (recruit.number === '' || recruit.number === undefined || /^[0-9]+$/.test(String(recruit.number)))
-              );
+              // Just use the data as-is since we already cleaned it in the JSON
+              filteredData[season] = data[season];
             } else {
               filteredData[season] = [];
             }
