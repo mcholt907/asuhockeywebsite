@@ -73,10 +73,6 @@ const apiLimiter = rateLimit({
 // Apply rate limiting to all API routes
 app.use('/api/', apiLimiter);
 
-app.get('/', (req, res) => {
-  res.send('ASU Hockey Fan Site Backend');
-});
-
 // API endpoint for news
 app.get('/api/news', async (req, res) => {
   try {
