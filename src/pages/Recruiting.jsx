@@ -56,6 +56,18 @@ function Recruiting() {
       <div className="recruit-card">
         <div className="card-front">
           <div className="card-bg-gfx"></div>
+          {recruit.player_photo && (
+            <div className="recruit-photo-container">
+              <img
+                src={recruit.player_photo}
+                alt={recruit.name}
+                className="recruit-photo"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
+            </div>
+          )}
           <div className="recruit-info">
             <h3>{recruit.name}</h3>
             <div className="stats-row">
