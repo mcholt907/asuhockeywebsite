@@ -1,0 +1,313 @@
+/* Schedule.css - Modern Card Design */
+.schedule-page {
+  animation: fadeIn 0.6s ease;
+}
+
+.schedule-page h1 {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--asu-maroon);
+  margin-bottom: 32px;
+  letter-spacing: -0.02em;
+}
+
+/* Team Record Card */
+.team-record {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 48px;
+}
+
+.record-card {
+  background: linear-gradient(135deg, var(--white) 0%, #f8f9fb 100%);
+  border-radius: var(--border-radius-xl);
+  padding: 24px 40px;
+  box-shadow: var(--shadow-lg);
+  border: 2px solid var(--border-color);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-base);
+}
+
+.record-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: var(--gradient-gold);
+}
+
+.record-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-2xl);
+  border-color: var(--asu-gold);
+}
+
+.record-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.record-stats {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+
+.stat-value {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--asu-maroon);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+
+.stat-separator {
+  font-size: 2rem;
+  font-weight: 300;
+  color: var(--text-light);
+  padding: 0 4px;
+  margin-bottom: 8px;
+}
+
+/* Schedule List - Modern Card Grid */
+.schedule-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.schedule-item {
+  background: linear-gradient(135deg, var(--white) 0%, #fafbfc 100%);
+  border-radius: var(--border-radius-lg);
+  padding: 24px 28px;
+  box-shadow: var(--shadow-md);
+  border: 2px solid var(--border-color);
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 120px 1fr 200px auto;
+  gap: 24px;
+  align-items: center;
+}
+
+.schedule-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  background: var(--gradient-gold);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.schedule-item:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--asu-gold);
+}
+
+.schedule-item:hover::before {
+  opacity: 1;
+}
+
+/* Home vs Away Styling */
+.schedule-item.home::after {
+  content: 'HOME';
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  padding: 4px 10px;
+  background: var(--gradient-primary);
+  color: var(--white);
+  border-radius: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.schedule-item.away::after {
+  content: 'AWAY';
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  padding: 4px 10px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  color: var(--asu-maroon);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+}
+
+/* Date & Time Column */
+.game-date-time {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.game-date {
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: var(--asu-maroon);
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+
+.game-time {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  background: var(--light-bg);
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+/* Game Info Column */
+.game-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.game-opponent {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  letter-spacing: -0.01em;
+}
+
+.status-indicator {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-transform: lowercase;
+  letter-spacing: 0;
+  background: var(--light-bg);
+  color: var(--text-secondary);
+}
+
+.schedule-item.home .status-indicator {
+  background: rgba(140, 29, 64, 0.1);
+  color: var(--asu-maroon);
+}
+
+.schedule-item.away .status-indicator {
+  background: rgba(255, 198, 39, 0.15);
+  color: #8B6F00;
+}
+
+.game-notes {
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--text-light);
+}
+
+.game-location {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.game-location::before {
+  content: '📍';
+  font-size: 1rem;
+}
+
+/* Result Column */
+.game-result {
+  font-weight: 800;
+  font-size: 1.3rem;
+  padding: 10px 20px;
+  border-radius: var(--border-radius-md);
+  background: var(--gradient-gold);
+  color: var(--asu-maroon);
+  white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+  align-self: center;
+  text-align: center;
+  min-width: fit-content;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .schedule-item {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .schedule-item.home::after,
+  .schedule-item.away::after {
+    top: auto;
+    bottom: 12px;
+    right: 12px;
+  }
+
+  .game-date-time {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .game-opponent {
+    font-size: 1.2rem;
+  }
+
+  .game-result {
+    width: 100%;
+    text-align: center;
+  }
+
+  .schedule-item::before {
+    width: 100%;
+    height: 4px;
+    top: 0;
+    bottom: auto;
+  }
+}

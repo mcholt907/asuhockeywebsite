@@ -1,0 +1,262 @@
+/* Roster.css */
+.roster-page {
+  animation: fadeIn 0.5s ease;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.roster-page h1 {
+  text-align: center;
+  margin-bottom: 40px;
+  color: var(--asu-maroon);
+  font-size: 2.25rem;
+  animation: fadeIn 0.6s ease;
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.page-header h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--asu-maroon);
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+
+/* Modern Position Filter */
+.roster-controls {
+  display: flex;
+  justify-content: center;
+  margin: 32px 0;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.position-filter {
+  display: flex;
+  gap: 12px;
+  background: var(--white);
+  padding: 8px;
+  border-radius: 50px;
+  box-shadow: var(--shadow-md);
+  border: 2px solid var(--border-color);
+}
+
+.position-filter button {
+  padding: 12px 28px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.position-filter button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--gradient-primary);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+  z-index: 0;
+}
+
+.position-filter button:hover {
+  color: var(--asu-maroon);
+  transform: scale(1.05);
+}
+
+.position-filter button.active {
+  background: var(--gradient-primary);
+  color: var(--white);
+  box-shadow: var(--shadow-maroon);
+}
+
+.position-filter button.active::before {
+  opacity: 1;
+}
+
+.position-filter button>* {
+  position: relative;
+  z-index: 1;
+}
+
+/* Roster Content - Modern Grid Layout */
+.roster-content {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.position-group {
+  margin-bottom: 64px;
+  animation: slideUp 0.6s var(--cubic-smooth);
+}
+
+.position-group h2 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--asu-maroon);
+  margin-bottom: 28px;
+  padding-bottom: 12px;
+  border-bottom: 3px solid var(--asu-gold);
+  display: inline-block;
+}
+
+/* Modern Table Styling (keeping table structure but modernizing) */
+.roster-table-container {
+  background: var(--white);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 2px solid var(--border-color);
+  overflow: hidden;
+  margin-bottom: 40px;
+  transition: all var(--transition-base);
+}
+
+.roster-table-container:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+/* Table Styles */
+.roster-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.roster-table thead th {
+  background: var(--gradient-primary);
+  color: var(--white);
+  padding: 18px 20px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-bottom: 4px solid var(--asu-gold);
+  white-space: nowrap;
+  position: relative;
+}
+
+.roster-table thead th::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gradient-gold);
+  opacity: 0.5;
+}
+
+.roster-table tbody tr {
+  border-bottom: 1px solid var(--border-color-light);
+  transition: all var(--transition-base);
+}
+
+.roster-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.roster-table tbody tr:hover {
+  background: linear-gradient(90deg, rgba(255, 198, 39, 0.08) 0%, rgba(255, 198, 39, 0.03) 100%);
+  transform: scale(1.01);
+  box-shadow: inset 4px 0 0 var(--asu-gold);
+}
+
+.roster-table td {
+  padding: 16px 20px;
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+/* Specific Columns Styling */
+.roster-table td:first-child {
+  /* Number */
+  font-family: 'Inter', monospace;
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--asu-maroon);
+  background: linear-gradient(135deg, rgba(140, 29, 64, 0.05) 0%, transparent 100%);
+}
+
+.roster-table td:nth-child(3) a {
+  /* Player Name */
+  color: var(--text-primary);
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 1rem;
+  position: relative;
+  transition: color var(--transition-base);
+}
+
+.roster-table td:nth-child(3) a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--gradient-gold);
+  transition: width var(--transition-base);
+}
+
+.roster-table td:nth-child(3) a:hover {
+  color: var(--asu-maroon);
+}
+
+.roster-table td:nth-child(3) a:hover::after {
+  width: 100%;
+}
+
+.flag-icon {
+  width: 24px;
+  height: auto;
+  border-radius: 3px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  vertical-align: middle;
+  transition: transform var(--transition-base);
+}
+
+.roster-table tr:hover .flag-icon {
+  transform: scale(1.1);
+}
+
+/* Loading/Error */
+.loading-message,
+.error-message {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-secondary);
+}
+
+/* Responsive Table */
+@media (max-width: 900px) {
+  .roster-table-container {
+    overflow-x: auto;
+    border-radius: var(--border-radius-md);
+  }
+
+  .roster-table thead th {
+    font-size: 0.8rem;
+    padding: 12px 16px;
+  }
+
+  .roster-table td {
+    padding: 12px 16px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+}

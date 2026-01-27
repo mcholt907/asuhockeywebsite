@@ -1,0 +1,689 @@
+{
+  "timestamp": "2026-01-27T15:16:10.884Z",
+  "data": [
+    {
+      "date": "2025-10-03",
+      "time": "7:00 p.m. (MST)",
+      "opponent": "#6 Penn State",
+      "location": "Mullett Arena",
+      "status": "Home",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4826"
+        },
+        {
+          "text": "Recap",
+          "url": "https://thesundevils.com/news/2025/10/4/14-hockeys-electric-three-goal-period-cant-top-no-5-penn-state"
+        }
+      ],
+      "result": "L 3-6"
+    },
+    {
+      "date": "2025-10-04",
+      "time": "5:00 p.m. (MST)",
+      "opponent": "#6 Penn State",
+      "location": "Mullett Arena",
+      "status": "Home",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4827"
+        },
+        {
+          "text": "Recap",
+          "url": "https://thesundevils.com/news/2025/10/5/no-14-hockey-concludes-season-opener-against-no-5-penn-state"
+        }
+      ],
+      "result": "L 2-4"
+    },
+    {
+      "date": "2025-10-10",
+      "time": "7:00 p.m. (MST)",
+      "opponent": "Notre Dame",
+      "location": "Mullett Arena",
+      "status": "Home",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/18353"
+        },
+        {
+          "text": "Recap",
+          "url": "https://thesundevils.com/news/2025/10/11/rookies-shine-in-no-15-arizona-states-takedown-of-notre-dame"
+        }
+      ],
+      "result": "W 5-3"
+    },
+    {
+      "date": "2025-10-11",
+      "time": "7:00 p.m. (MST)",
+      "opponent": "Alaska-Fairbanks",
+      "location": "Mullett Arena",
+      "status": "Home",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4828"
+        },
+        {
+          "text": "Recap",
+          "url": "https://thesundevils.com/news/2025/10/12/no-15-hockey-handles-alaska-fairbanks-to-win-29th-annual-ice-breaker-tournament"
+        }
+      ],
+      "result": "W 5-2"
+    },
+    {
+      "date": "2025-10-17",
+      "time": "5:07 p.m. (MST)",
+      "opponent": "Augustana",
+      "location": "Midco Arena",
+      "status": "Away",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4830"
+        },
+        {
+          "text": "Recap",
+          "url": "https://thesundevils.com/news/2025/10/18/schimek-extends-point-streak-to-five-games-as-15-hockey-falls-to-augustana"
+        }
+      ],
+      "result": "L 2-4"
+    },
+    {
+      "date": "2025-10-18",
+      "time": "4:07 p.m. (MST)",
+      "opponent": "Augustana",
+      "location": "Midco Arena",
+      "status": "Away",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4831"
+        }
+      ],
+      "result": "L 2-5"
+    },
+    {
+      "date": "2025-10-31",
+      "time": "4:05 p.m. (MST)",
+      "opponent": "Miami",
+      "location": "Goggin Ice Center",
+      "status": "Away",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4832"
+        },
+        {
+          "text": "Recap",
+          "url": "https://thesundevils.com/news/2025/11/1/becks-first-career-ncaa-goal-lifts-hockey-to-victory-in-conference-opener-over-miami"
+        }
+      ],
+      "result": "W 4-1"
+    },
+    {
+      "date": "2025-11-01",
+      "time": "3:05 p.m. (MST)",
+      "opponent": "Miami",
+      "location": "Goggin Ice Center",
+      "status": "Away",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4833"
+        },
+        {
+          "text": "Recap",
+          "url": "https://thesundevils.com/news/2025/11/2/lucius-extends-point-streak-to-five-games-in-hockeys-5-2-en-defeat-at-miami"
+        }
+      ],
+      "result": "L 2-5"
+    },
+    {
+      "date": "2025-11-07",
+      "time": "7:00 p.m. (MST)",
+      "opponent": "#20 Colorado College",
+      "location": "Mullett Arena",
+      "status": "Home",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4834"
+        },
+        {
+          "text": "Recap",
+          "url": "https://thesundevils.com/news/2025/11/8/hockeys-comeback-thriller-ends-in-a-shootout-to-earn-two-points-in-nchc-play"
+        }
+      ],
+      "result": "T 3-3"
+    },
+    {
+      "date": "2025-11-08",
+      "time": "5:00 p.m. (MST)",
+      "opponent": "#20 Colorado College",
+      "location": "Mullett Arena",
+      "status": "Home",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4836"
+        },
+        {
+          "text": "Recap",
+          "url": "https://thesundevils.com/news/2025/11/9/hockey-drops-series-finale-to-no-20-colorado-college"
+        }
+      ],
+      "result": "L 1-3"
+    },
+    {
+      "date": "2025-11-14",
+      "time": "6:07 p.m. (MST)",
+      "opponent": "#6 North Dakota",
+      "location": "Ralph Engelstad Arena",
+      "status": "Away",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4835"
+        },
+        {
+          "text": "Recap",
+          "url": "https://thesundevils.com/news/2025/11/15/schimek-records-20th-career-multi-point-game-in-hockeys-defeat-to-6-north-dakota"
+        }
+      ],
+      "result": "L 2-5"
+    },
+    {
+      "date": "2025-11-15",
+      "time": "5:07 p.m. (MST)",
+      "opponent": "#6 North Dakota",
+      "location": "Ralph Engelstad Arena",
+      "status": "Away",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4837"
+        },
+        {
+          "text": "Recap",
+          "url": "https://thesundevils.com/news/2025/11/16/hockeys-second-period-surge-leads-to-road-win-over-6-north-dakota"
+        }
+      ],
+      "result": "W 4-2"
+    },
+    {
+      "date": "2025-11-21",
+      "time": "7:00 p.m. (MST)",
+      "opponent": "#3 Denver",
+      "location": "Mullett Arena",
+      "status": "Home",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4838"
+        }
+      ],
+      "result": "L 1-7"
+    },
+    {
+      "date": "2025-11-22",
+      "time": "5:00 p.m. (MST)",
+      "opponent": "#3 Denver",
+      "location": "Mullett Arena",
+      "status": "Home",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4839"
+        },
+        {
+          "text": "Recap",
+          "url": "https://thesundevils.com/news/2025/11/23/potter-plays-hero-in-hockeys-3-2-overtime-win-over-3-denver"
+        }
+      ],
+      "result": "W 3-2"
+    },
+    {
+      "date": "2025-11-28",
+      "time": "3:00 p.m. (MST)",
+      "opponent": "RV Ohio State",
+      "location": "Mullett Arena",
+      "status": "Home",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4840"
+        },
+        {
+          "text": "Recap",
+          "url": "https://thesundevils.com/news/2025/11/29/hockey-comes-from-behind-takes-game-one-against-ohio-state-in-overtime-thriller"
+        }
+      ],
+      "result": "W 3-2"
+    },
+    {
+      "date": "2025-11-29",
+      "time": "5:00 p.m. (MST)",
+      "opponent": "RV Ohio State",
+      "location": "Mullett Arena",
+      "status": "Home",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4849"
+        }
+      ],
+      "result": "W 4-3"
+    },
+    {
+      "date": "2025-12-12",
+      "time": "6:07 p.m. (MST)",
+      "opponent": "#5 Minnesota Duluth",
+      "location": "Amsoil Arena",
+      "status": "Away",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4842"
+        }
+      ],
+      "result": "L 1-3"
+    },
+    {
+      "date": "2025-12-13",
+      "time": "4:07 p.m. (MST)",
+      "opponent": "#5 Minnesota Duluth",
+      "location": "Amsoil Arena",
+      "status": "Away",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4845"
+        },
+        {
+          "text": "Recap",
+          "url": "https://thesundevils.com/news/2025/12/14/hockeys-6-3-win-over-no-5-minnesota-duluth-features-milestone-nights-for-schimek-and-lucius"
+        }
+      ],
+      "result": "W 6-3"
+    },
+    {
+      "date": "2025-12-27",
+      "time": "3:00 p.m. (MST)",
+      "opponent": "#8 Dartmouth",
+      "location": "Thompson Arena",
+      "status": "Away",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4841"
+        },
+        {
+          "text": "Recap",
+          "url": "https://thesundevils.com/news/2025/12/28/four-unanswered-goals-lead-hockey-to-a-5-1-victory-over-no-8-dartmouth"
+        }
+      ],
+      "result": "W 5-1"
+    },
+    {
+      "date": "2025-12-28",
+      "time": "1:00 p.m. (MST)",
+      "opponent": "#8 Dartmouth",
+      "location": "Thompson Arena",
+      "status": "Away",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4853"
+        }
+      ],
+      "result": "L 1-4"
+    },
+    {
+      "date": "2026-01-02",
+      "time": "7:00 p.m. (MST)",
+      "opponent": "Alaska Anchorage",
+      "location": "Mullett Arena",
+      "status": "Home",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4844"
+        },
+        {
+          "text": "Recap",
+          "url": "https://thesundevils.com/news/2026/01/3/hockey-dominates-alaska-anchorage-to-open-2026-desert-hockey-classic"
+        }
+      ],
+      "result": "W 7-2"
+    },
+    {
+      "date": "2026-01-03",
+      "time": "7:00 p.m. (MST)",
+      "opponent": "Air Force",
+      "location": "Mullett Arena",
+      "status": "Home",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4843"
+        },
+        {
+          "text": "Recap",
+          "url": "https://thesundevils.com/news/2026/01/4/hockey-wins-third-straight-desert-hockey-classic-recap"
+        }
+      ],
+      "result": "W 5-2"
+    },
+    {
+      "date": "2026-01-09",
+      "time": "7:00 p.m. (MST)",
+      "opponent": "Miami",
+      "location": "Mullett Arena",
+      "status": "Home",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4846"
+        }
+      ],
+      "result": "L 1-2"
+    },
+    {
+      "date": "2026-01-10",
+      "time": "5:00 p.m. (MST)",
+      "opponent": "Miami",
+      "location": "Mullett Arena",
+      "status": "Home",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4854"
+        }
+      ],
+      "result": "W 1-0"
+    },
+    {
+      "date": "2026-01-23",
+      "time": "7:00 p.m. (MST)",
+      "opponent": "#4 North Dakota",
+      "location": "Mullett Arena",
+      "status": "Home",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4847"
+        },
+        {
+          "text": "Recap",
+          "url": "https://thesundevils.com/news/2026/01/24/hockey-drops-series-opener-to-4-north-dakota"
+        }
+      ],
+      "result": "L 4-7"
+    },
+    {
+      "date": "2026-01-24",
+      "time": "5:00 p.m. (MST)",
+      "opponent": "#4 North Dakota",
+      "location": "Mullett Arena",
+      "status": "Home",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4855"
+        },
+        {
+          "text": "Recap",
+          "url": "https://thesundevils.com/news/2026/01/25/hockey-drops-game-two-at-home-against-no-4-north-dakota"
+        }
+      ],
+      "result": "L 3-5"
+    },
+    {
+      "date": "2026-01-30",
+      "time": "7:00 p.m. (MST)",
+      "opponent": "Colorado College",
+      "location": "Ed Robson Arena",
+      "status": "Away",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": []
+    },
+    {
+      "date": "2026-01-31",
+      "time": "6:00 p.m. (MST)",
+      "opponent": "Colorado College",
+      "location": "Ed Robson Arena",
+      "status": "Away",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": []
+    },
+    {
+      "date": "2026-02-06",
+      "time": "7:00 p.m. (MST)",
+      "opponent": "St. Cloud State",
+      "location": "Mullett Arena",
+      "status": "Home",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": []
+    },
+    {
+      "date": "2026-02-07",
+      "time": "5:00 p.m. (MST)",
+      "opponent": "St. Cloud State",
+      "location": "Mullett Arena",
+      "status": "Home",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": []
+    },
+    {
+      "date": "2026-02-13",
+      "time": "5:00 p.m. (MST)",
+      "opponent": "Western Michigan",
+      "location": "Lawson Ice Arena",
+      "status": "Away",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": []
+    },
+    {
+      "date": "2026-02-14",
+      "time": "4:00 p.m. (MST)",
+      "opponent": "Western Michigan",
+      "location": "Lawson Ice Arena",
+      "status": "Away",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": []
+    },
+    {
+      "date": "2026-02-20",
+      "time": "7:00 p.m. (MST)",
+      "opponent": "Omaha",
+      "location": "Mullett Arena",
+      "status": "Home",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": []
+    },
+    {
+      "date": "2026-02-21",
+      "time": "5:00 p.m. (MST)",
+      "opponent": "Omaha",
+      "location": "Mullett Arena",
+      "status": "Home",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": []
+    },
+    {
+      "date": "2026-02-27",
+      "time": "7:00 p.m. (MST)",
+      "opponent": "Denver",
+      "location": "Magness Arena",
+      "status": "Away",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": []
+    },
+    {
+      "date": "2026-02-28",
+      "time": "6:00 p.m. (MST)",
+      "opponent": "Denver",
+      "location": "Magness Arena",
+      "status": "Away",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": []
+    },
+    {
+      "date": "2026-03-06",
+      "time": "TBA",
+      "opponent": "Frozen Faceoff Quarterfinals",
+      "location": "TBD",
+      "status": "TBD",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": []
+    },
+    {
+      "date": "2026-03-14",
+      "time": "TBA",
+      "opponent": "Frozen Faceoff Semifinals",
+      "location": "TBD",
+      "status": "TBD",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": []
+    },
+    {
+      "date": "2026-03-21",
+      "time": "TBA",
+      "opponent": "Frozen Faceoff Championship",
+      "location": "TBD",
+      "status": "TBD",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": []
+    },
+    {
+      "date": "2026-03-26",
+      "time": "TBA",
+      "opponent": "NCAA Regionals",
+      "location": "TBD",
+      "status": "TBD",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": []
+    },
+    {
+      "date": "2026-04-09",
+      "time": "TBA",
+      "opponent": "NCAA Frozen Four",
+      "location": "T-Mobile Arena",
+      "status": "TBD",
+      "notes": "",
+      "tv": "",
+      "radio": "",
+      "links": []
+    }
+  ],
+  "cacheDuration": 86400000
+}

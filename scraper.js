@@ -1,0 +1,585 @@
+const axios = require('axios');
+const cheerio = require('cheerio');
+const { saveToCache, getFromCache } = require('./src/scripts/caching-system');
+const Parser = require('rss-parser');
+const path = require('path');
+const config = require('./config/scraper-config');
+const { requestWithRetry, delayBetweenRequests } = require('./utils/request-helper');
+
+const parser = new Parser();
+
+async function scrapeSunDevilsNewsList() {
+  const url = config.urls.sunDevilsNews;
+  console.log(`[Sun Devils News] Attempting to fetch news from: ${url}`);
+  try {
+    const { data } = await requestWithRetry(url);
+    const $ = cheerio.load(data);
+    const articles = [];
+
+    $('tr.news-table-item').each((i, element) => {
+      const row = $(element);
+      const titleElement = row.find('td:first-child a');
+      const title = titleElement.text().trim();
+      let link = titleElement.attr('href');
+      const date = row.find('td:last-child').text().trim();
+
+      if (link && !link.startsWith('http')) {
+        link = `https://thesundevils.com${link}`;
+      }
+
+      if (title && link && date) {
+        articles.push({
+          title,
+          link,
+          date,
+          source: 'TheSunDevils.com',
+        });
+      }
+    });
+
+    console.log(`[Sun Devils News] Scraped ${articles.length} articles.`);
+    return articles;
+  } catch (error) {
+    console.error('[Sun Devils News] Error scraping news list:', error.message);
+    return [];
+  }
+}
+
+async function scrapeSunDevilsRSS() {
+  const feedUrl = config.urls.sunDevilsRSS;
+  console.log(`Fetching Sun Devils news from RSS feed: ${feedUrl}`);
+  try {
+    // Fetch the raw RSS feed as text, with a User-Agent header
+    const { data: rssText } = await requestWithRetry(feedUrl, {
+      responseType: 'text'
+    });
+
+    // Clean the text and parse it
+    const feed = await parser.parseString(rssText.trim());
+
+    const articles = feed.items.map(item => ({
+      title: item.title,
+      link: item.link,
+      date: item.pubDate ? new Date(item.pubDate).toLocaleDateString() : 'Date not found',
+      source: 'TheSunDevils.com (RSS)'
+    }));
+    console.log(`Scraped ${articles.length} articles from TheSunDevils.com RSS feed`);
+    return articles;
+  } catch (error) {
+    console.error('Error scraping TheSunDevils.com RSS feed:', error.message);
+    return [];
+  }
+}
+
+async function scrapeCHN() {
+  const url = config.urls.chnNews;
+  console.log(`[CHN Scraper] Attempting to fetch CHN news from: ${url}`);
+  try {
+    const { data } = await requestWithRetry(url);
+    console.log('[CHN Scraper] Successfully fetched data from URL.');
+    const $ = cheerio.load(data);
+    console.log('[CHN Scraper] Cheerio loaded HTML data.');
+    const articles = [];
+    const listItems = $('div.newslist ul li');
+    console.log(`[CHN Scraper] Found ${listItems.length} list items with selector 'div.newslist ul li'.`);
+
+    listItems.each((i, element) => {
+      const listItem = $(element);
+      const linkTag = listItem.find('a');
+      const title = linkTag.text().trim();
+      let link = linkTag.attr('href');
+
+      let dateText = listItem.contents().filter(function () {
+        return this.type === 'text' && $(this).text().trim() !== '';
+      }).first().text().trim();
+      if (dateText.endsWith('—')) {
+        dateText = dateText.slice(0, -1).trim();
+      }
+
+      console.log(`[CHN Scraper] Processing item ${i + 1}: Title '${title}', Link '${link}', Raw Date '${dateText}'`);
+
+      if (link && !link.startsWith('http')) {
+        link = `https://www.collegehockeynews.com${link}`;
+      }
+
+      if (title && link && dateText) {
+        articles.push({
+          title,
+          link,
+          date: dateText || 'Date not found',
+          source: 'CollegeHockeyNews.com'
+        });
+      } else {
+        console.log(`[CHN Scraper] Skipping item ${i + 1} due to missing title, link, or date. Title: '${title}', Link: '${link}', Date: '${dateText}'`);
+      }
+    });
+    console.log(`[CHN Scraper] Successfully scraped ${articles.length} articles from CollegeHockeyNews.com`);
+    return articles;
+  } catch (error) {
+    console.error('[CHN Scraper] Error scraping CollegeHockeyNews.com:', error.message);
+    if (error.response) {
+      console.error('[CHN Scraper] Response status:', error.response.status);
+    }
+    return [];
+  }
+}
+
+async function scrapeUSCHO() {
+  const url = config.urls.uscho;
+  console.log(`[USCHO Scraper] Attempting to fetch USCHO news from: ${url}`);
+  try {
+    const { data } = await requestWithRetry(url);
+    console.log('[USCHO Scraper] Successfully fetched data from URL.');
+    const $ = cheerio.load(data);
+    console.log('[USCHO Scraper] Cheerio loaded HTML data.');
+    const articles = [];
+
+    const widget = $('div.widget_links.legacy_sidebar').filter((i, el) => {
+      return $(el).find('div.block-title span:contains("Recent Arizona State Stories")').length > 0;
+    });
+    console.log(`[USCHO Scraper] Found ${widget.length} widget(s) matching criteria.`);
+
+    if (widget.length > 0) {
+      const articleLinks = widget.find('a');
+      console.log(`[USCHO Scraper] Found ${articleLinks.length} 'a' items (article links) within the widget.`);
+
+      articleLinks.each((i, element) => {
+        const linkElement = $(element);
+        const linkHref = linkElement.attr('href');
+
+        const title = linkElement.clone().children('.parendate').remove().end().text().trim();
+        const dateSpan = linkElement.find('span.parendate');
+        let date = 'Date not found';
+        if (dateSpan.length > 0) {
+          date = dateSpan.text().trim();
+        }
+
+        console.log(`[USCHO Scraper] Processing item ${i + 1}: Title '${title}', Link '${linkHref}', Date '${date}'`);
+
+        let fullLink = linkHref;
+        if (fullLink && !fullLink.startsWith('http')) {
+          fullLink = `https://www.uscho.com${fullLink}`;
+        }
+
+        if (title && fullLink && date) {
+          articles.push({
+            title,
+            link: fullLink,
+            date,
+            source: 'USCHO.com'
+          });
+        } else {
+          console.log(`[USCHO Scraper] Skipping item ${i + 1} due to missing title, link, or date. Title: '${title}', Link: '${fullLink}', Date: '${date}'`);
+        }
+      });
+    }
+    console.log(`[USCHO Scraper] Successfully scraped ${articles.length} articles from USCHO.com`);
+    return articles;
+  } catch (error) {
+    console.error('[USCHO Scraper] Error scraping USCHO.com:', error.message);
+    if (error.response) {
+      console.error('[USCHO Scraper] Response status:', error.response.status);
+    }
+    return [];
+  }
+}
+
+async function scrapeSunDevilsSchedule(year) {
+  const scheduleUrl = config.urls.sunDevilsSchedule(year);
+  console.log(`[Schedule Scraper] Attempting to fetch schedule from: ${scheduleUrl}`);
+
+  try {
+    const { data } = await requestWithRetry(scheduleUrl);
+    console.log('[Schedule Scraper] Successfully fetched HTML data.');
+    const $ = cheerio.load(data);
+    console.log('[Schedule Scraper] Cheerio loaded HTML data.');
+
+    const games = [];
+    const scheduleItems = $('div.schedule-event-item');
+    console.log(`[Schedule Scraper] Found ${scheduleItems.length} items with selector 'div.schedule-event-item'.`);
+
+    const monthMap = {
+      'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3, 'may': 4, 'jun': 5,
+      'jul': 6, 'aug': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dec': 11
+    };
+
+    scheduleItems.each((index, element) => {
+      const item = $(element);
+      let game = {
+        date: 'TBD',
+        time: 'TBD',
+        opponent: 'TBD',
+        location: 'TBD',
+        status: 'TBD', // Home/Away
+        notes: '', // For Exhibition, etc.
+        tv: '',
+        radio: '',
+        links: []
+      };
+
+      try {
+        // Date and Time
+        let monthStr, dayStr, timeStr;
+
+        // Desktop date/time
+        const desktopDateBox = item.find('div.schedule-event-item__date-desktop strong.schedule-event-grid-date__box');
+        if (desktopDateBox.length) {
+          monthStr = desktopDateBox.find('time').eq(0).text().trim();
+          dayStr = desktopDateBox.find('time').eq(1).text().trim();
+        }
+
+        const desktopTimeFooter = item.find('div.schedule-event-grid-date__footer strong.schedule-event-grid-date__time');
+        if (desktopTimeFooter.length) {
+          timeStr = desktopTimeFooter.first().text().trim();
+        }
+
+        // Fallback to mobile if desktop is incomplete
+        if (!monthStr || !dayStr) {
+          const mobileDateBox = item.find('div.schedule-event-grid-date-mobile strong.schedule-event-grid-date-mobile__box');
+          if (mobileDateBox.length) {
+            monthStr = mobileDateBox.find('time').eq(0).text().trim();
+            dayStr = mobileDateBox.find('time.schedule-event-grid-date-mobile__day').text().trim();
+          }
+        }
+
+        if (monthStr && dayStr) {
+          const monthIndex = monthMap[monthStr.toLowerCase().substring(0, 3)];
+          let gameYear = parseInt(String(year), 10); // Explicitly use radix 10
+          // If month is Jan-Jul (indices 0-6), it's part of the *end* year of the "YYYY-YY" season
+          if (typeof monthIndex === 'number' && monthIndex < config.seasonBoundary.boundaryMonth) {
+            gameYear = parseInt(String(year), 10) + 1;
+          }
+
+          const parsedDate = new Date(gameYear, monthIndex, parseInt(dayStr, 10));
+          if (!isNaN(parsedDate)) {
+            game.date = parsedDate.toISOString().split('T')[0];
+          } else {
+            console.warn(`[Schedule Scraper] Could not parse date for item ${index + 1}. Month: ${monthStr}, Day: ${dayStr}, Year: ${gameYear}`);
+          }
+        } else {
+          console.warn(`[Schedule Scraper] Missing month or day for item ${index + 1}. Month: '${monthStr}', Day: '${dayStr}'`);
+        }
+
+        if (timeStr) game.time = timeStr;
+
+        // Result (Win/Loss/Tie and Score)
+        const resultLabel = item.find('.schedule-event-grid-result__label');
+        if (resultLabel.length > 0) {
+          const clone = resultLabel.clone();
+          clone.find('.sr-only').remove();
+          const textWithoutSr = clone.text().trim(); // E.g., "W 4-1" or "L 3-6" or "T 2-2"
+
+          if (textWithoutSr) {
+            game.result = textWithoutSr.replace(/\s+/g, ' ').trim(); // Normalize spaces
+          }
+        }
+
+        // Location
+        game.location = item.find('.schedule-event-item__location').text().trim() || 'TBD';
+
+        // Opponent and Home/Away Status
+        const opponentNameElement = item.find('strong.schedule-default-event__name');
+        let fullOpponentText = opponentNameElement.text().trim();
+        const statusDivider = item.find('strong.schedule-default-event__divider').text().trim().toLowerCase();
+
+        if (statusDivider === 'vs.') {
+          game.status = 'Home';
+          game.opponent = fullOpponentText.replace(/^vs\.\s*/i, '').trim();
+        } else if (statusDivider === 'at') {
+          game.status = 'Away';
+          game.opponent = fullOpponentText.replace(/^at\s*/i, '').trim();
+        } else { // No 'vs.' or 'at' divider, assume it's part of the name or a non-game event description
+          game.opponent = fullOpponentText;
+        }
+
+        if (item.text().toLowerCase().includes('exhibition')) {
+          game.notes = 'Exhibition';
+          // Clean opponent name if "Exhibition" was part of it (e.g. "vs. Opponent (Exhibition)")
+          game.opponent = game.opponent.replace(/\s*\(exhibition\)/i, '').trim();
+        }
+
+        // Links (e.g., Event Details, Tickets)
+        const foundLinks = new Set();
+        item.find('a.schedule-event-item__link').each((_, linkEl) => {
+          const linkTitle = $(linkEl).text().trim();
+          let linkUrl = $(linkEl).attr('href');
+
+          if (linkUrl && !linkUrl.startsWith('http')) {
+            linkUrl = `https://thesundevils.com${linkUrl}`;
+          }
+
+          if (linkTitle && linkUrl && !foundLinks.has(linkUrl)) {
+            game.links.push({ text: linkTitle, url: linkUrl });
+            foundLinks.add(linkUrl);
+          }
+        });
+
+        if (game.opponent && game.opponent !== 'TBD' && game.date !== 'TBD') {
+          games.push(game);
+        } else {
+          console.warn(`[Schedule Scraper] Skipping item ${index + 1} due to missing critical info (opponent/date). Opponent: ${game.opponent}, Date: ${game.date}`);
+        }
+
+      } catch (e) {
+        console.error(`[Schedule Scraper] Error parsing game item ${index + 1}: `, e.message);
+        console.log("[Schedule Scraper] Problematic item HTML:", item.html());
+      }
+    });
+
+    console.log(`[Schedule Scraper] Scraped ${games.length} games successfully.`);
+    if (games.length === 0 && scheduleItems.length > 0) {
+      console.warn("[Schedule Scraper] Selector found items, but no games parsed. Check parsing logic/HTML.");
+    } else if (games.length === 0 && scheduleItems.length === 0) {
+      console.warn("[Schedule Scraper] Main selector 'div.schedule-event-item' found no items.");
+    }
+    return games;
+
+  } catch (error) {
+    console.error('[Schedule Scraper] Error fetching or parsing schedule page:', error.message);
+    if (error.response) {
+      console.error(`[Schedule Scraper] Response Status: ${error.response.status}`);
+    }
+    throw new Error('Failed to scrape schedule data or no data found.');
+  }
+}
+
+async function fetchScheduleData() {
+  const cacheKey = 'asu_hockey_schedule';
+  const targetSeasonStartYear = config.seasons.current;
+  const fullCacheKey = cacheKey + '_' + targetSeasonStartYear;
+
+  console.log(`[Cache System] Attempting to fetch schedule for season starting: ${targetSeasonStartYear}`);
+
+  try {
+    const cachedData = await getFromCache(fullCacheKey); // getFromCache returns data directly, not an object with a 'data' property
+    if (cachedData) { // Check if cachedData is not null or undefined
+      console.log(`[Cache System] Schedule data found in cache for ${targetSeasonStartYear}. Returning cached data.`);
+      return cachedData; // Return the array of games directly
+    }
+  } catch (error) {
+    console.error('[Cache System] Error reading from cache:', error.message);
+  }
+
+  console.log(`[Cache System] No cache found or cache is stale for ${targetSeasonStartYear}. Scraping live data.`);
+  try {
+    const scheduleData = await scrapeSunDevilsSchedule(targetSeasonStartYear);
+    if (scheduleData && scheduleData.length > 0) {
+      console.log(`[Cache System] Successfully scraped ${scheduleData.length} games. Saving to cache for ${targetSeasonStartYear}.`);
+      await saveToCache(scheduleData, fullCacheKey); // Swapped arguments: (data, filename)
+    } else {
+      console.log(`[Cache System] No schedule data returned from scraper for ${targetSeasonStartYear}. Not caching.`);
+    }
+    return scheduleData; // Return the array of games
+  } catch (error) {
+    console.error(`[FetchScheduleData] Error fetching schedule: ${error.message}`);
+    return []; // Return empty array on error
+  }
+}
+
+async function fetchNewsData() {
+  const ASU_HOCKEY_NEWS_CACHE_KEY = 'asu_hockey_news'; // Just the base key
+
+  console.log(`[Cache System] Attempting to fetch news data with cache key: ${ASU_HOCKEY_NEWS_CACHE_KEY}`);
+
+  try {
+    const cachedArticles = await getFromCache(ASU_HOCKEY_NEWS_CACHE_KEY);
+    if (cachedArticles) {
+      console.log('[Cache System] News data found in cache. Returning cached data.');
+      // The 'getFromCache' for news might return an object { data: articles, timestamp: ... }
+      // or just articles. Adjust based on caching-system.js behavior.
+      // Assuming it returns the data directly for now or an object with a 'data' property.
+      return Array.isArray(cachedArticles) ? cachedArticles : (cachedArticles.data || []);
+    }
+  } catch (error) {
+    console.error('[Cache System] Error reading news from cache:', error.message);
+  }
+
+  console.log('[Cache System] No news cache found or cache is stale. Scraping live news data.');
+  try {
+    const sunDevilsArticles = await scrapeSunDevilsNewsList();
+    await delayBetweenRequests();
+    const chnArticles = await scrapeCHN();
+    await delayBetweenRequests();
+    const uschoArticles = await scrapeUSCHO();
+
+    let allArticles = [...sunDevilsArticles, ...chnArticles, ...uschoArticles];
+
+    if (allArticles.length > 0) {
+      const uniqueArticles = [];
+      const seenLinks = new Set();
+      for (const article of allArticles) {
+        if (article.link && !seenLinks.has(article.link)) {
+          uniqueArticles.push(article);
+          seenLinks.add(article.link);
+        } else if (!article.link && article.title) {
+          const key = `title:${article.title}`;
+          if (!seenLinks.has(key)) {
+            uniqueArticles.push(article);
+            seenLinks.add(key);
+          }
+        } else if (!article.link && !article.title) { // Handles articles with no link and no title (if any)
+          uniqueArticles.push(article);
+        }
+      }
+      allArticles = uniqueArticles;
+    }
+
+    allArticles.sort((a, b) => {
+      let dateA = null, dateB = null;
+      try { if (a.date && a.date !== 'Date not found') dateA = new Date(a.date); } catch (e) { /* ignore */ }
+      try { if (b.date && b.date !== 'Date not found') dateB = new Date(b.date); } catch (e) { /* ignore */ }
+
+      if (dateA && dateB && !isNaN(dateA) && !isNaN(dateB)) {
+        return dateB - dateA;
+      } else if (dateA && !isNaN(dateA)) {
+        return -1;
+      } else if (dateB && !isNaN(dateB)) {
+        return 1;
+      }
+      // Fallback sorting if dates are not available/parseable
+      if (a.source && b.source) {
+        if (a.source < b.source) return -1;
+        if (a.source > b.source) return 1;
+      }
+      if (a.title && b.title) {
+        if (a.title < b.title) return -1;
+        if (a.title > b.title) return 1;
+      }
+      return 0;
+    });
+
+    if (allArticles.length > 0) {
+      console.log(`[Cache System] Successfully scraped ${allArticles.length} news articles. Saving to cache.`);
+      await saveToCache(allArticles, ASU_HOCKEY_NEWS_CACHE_KEY); // Swapped arguments: (data, filename)
+    } else {
+      console.log('[Cache System] No news articles returned from scrapers. Not caching.');
+    }
+    return allArticles; // Return the array of articles
+  } catch (error) {
+    console.error('[FetchNewsData] Error fetching live news data:', error.message);
+    return []; // Return empty array on error
+  }
+}
+
+async function scrapeCHNStats() {
+  const url = config.urls.chnStats(config.seasons.stats);
+  console.log(`[CHN Stats Scraper] Attempting to fetch stats from: ${url}`);
+  try {
+    const { data } = await requestWithRetry(url);
+    const $ = cheerio.load(data);
+    const stats = {
+      skaters: [],
+      goalies: [],
+    };
+
+    // Scrape Skaters
+    const skaterTable = $('#skaters');
+    const skaterHeaders = [];
+    skaterTable.find('thead tr:last-child th').each((i, el) => {
+      skaterHeaders.push($(el).text().trim());
+    });
+
+    skaterTable.find('tbody tr').each((i, row) => {
+      const rowData = {};
+      $(row).find('td').each((j, cell) => {
+        const header = skaterHeaders[j] || `col_${j}`;
+        rowData[header] = $(cell).text().trim();
+      });
+      stats.skaters.push(rowData);
+    });
+
+    // Scrape Goalies
+    const goalieTable = $('table:contains("Goaltending")');
+    const goalieHeaders = [];
+    goalieTable.find('thead tr:last-child th').each((i, el) => {
+      goalieHeaders.push($(el).text().trim());
+    });
+
+    goalieTable.find('tbody tr').each((i, row) => {
+      const rowData = {};
+      $(row).find('td').each((j, cell) => {
+        const header = goalieHeaders[j] || `col_${j}`;
+        rowData[header] = $(cell).text().trim();
+      });
+      if (Object.keys(rowData).length > 0 && rowData[goalieHeaders[0]]) {
+        stats.goalies.push(rowData);
+      }
+    });
+
+    console.log(`[CHN Stats Scraper] Scraped ${stats.skaters.length} skaters and ${stats.goalies.length} goalies.`);
+    return stats;
+  } catch (error) {
+    console.error('[CHN Stats Scraper] Error scraping stats:', error.message);
+    return { skaters: [], goalies: [] };
+  }
+}
+
+async function scrapeCHNRoster() {
+  const url = 'https://www.collegehockeynews.com/reports/roster/Arizona-State/61';
+  console.log(`[CHN Roster Scraper] Attempting to fetch roster from: ${url}`);
+  try {
+    const { data } = await requestWithRetry(url);
+    const $ = cheerio.load(data);
+    const players = [];
+
+    $('table').each((i, table) => {
+      const headers = [];
+      $(table).find('thead th').each((j, th) => {
+        const text = $(th).text().trim();
+        headers.push(text);
+      });
+
+      // Heuristic: Check if headers contain "Name" or "Player"
+      const hasName = headers.some(h => h.includes('Name') || h.includes('Player'));
+
+      if (hasName) {
+        $(table).find('tbody tr').each((j, tr) => {
+          const cells = $(tr).find('td');
+          // Skip section headers (e.g. "Defensemen", "2026") which usually have 1-2 cells
+          if (cells.length < 5) return;
+
+          const row = {};
+          cells.each((k, td) => {
+            const header = headers[k] || `col_${k}`;
+            row[header] = $(td).text().trim();
+          });
+
+          // Normalize keys
+          let nameVal = row['Name'] || row['Player'];
+
+          // Handle "Last, First" format if present
+          if (nameVal && nameVal.includes(',')) {
+            const parts = nameVal.split(',').map(s => s.trim());
+            if (parts.length === 2) {
+              nameVal = `${parts[1]} ${parts[0]}`; // First Last
+            }
+          }
+
+          if (nameVal) {
+            // Clean trailing chars
+            nameVal = nameVal.replace(/\s*\(\w+\)$/, '').trim();
+
+            const playerObj = {
+              Player: nameVal,
+              '#': row['No.'] || row['#'] || '',
+              Pos: row['Pos'] || row['Pos.'] || row['Position'] || '',
+              Ht: row['Ht.'] || row['Height'] || row['Ht'] || '-',
+              Wt: row['Wt.'] || row['Weight'] || row['Wt'] || '-',
+              DOB: row['DOB'] || row['Born'] || '-',
+              Hometown: row['Hometown'] || row['Birthplace'] || '-'
+            };
+            players.push(playerObj);
+          }
+        });
+      }
+    });
+
+    console.log(`[CHN Roster Scraper] Scraped ${players.length} players.`);
+    return players;
+  } catch (error) {
+    console.error('[CHN Roster Scraper] Error scraping roster:', error.message);
+    return [];
+  }
+}
+
+module.exports = { fetchNewsData, fetchScheduleData, scrapeCHNStats, scrapeCHNRoster };

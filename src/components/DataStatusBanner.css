@@ -1,0 +1,37 @@
+/* DataStatusBanner.css */
+.data-status-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.data-status-banner.cache {
+  background-color: #fff3cd;
+  border: 1px solid #ffeeba;
+  color: #856404;
+}
+
+.data-status-banner.error {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+}
+
+.warning-icon, .error-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.warning-icon {
+  fill: #856404;
+}
+
+.error-icon {
+  fill: #721c24;
+}

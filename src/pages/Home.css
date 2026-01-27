@@ -1,0 +1,463 @@
+/* Home.css */
+.home-page {
+  animation: fadeIn 0.5s ease;
+}
+
+/* Hero Section */
+.hero {
+  background: var(--gradient-primary);
+  color: var(--white);
+  padding: 100px 24px;
+  text-align: center;
+  margin-bottom: 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('https://thesundevils.com/images/2023/8/16/Mullett_Arena_Exterior_Web.jpg?width=1920&quality=80&format=jpg') no-repeat center center/cover;
+  opacity: 0.12;
+  z-index: 1;
+  animation: subtle-zoom 20s ease-in-out infinite alternate;
+}
+
+@keyframes subtle-zoom {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.05);
+  }
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 198, 39, 0.1) 0%, transparent 70%);
+  animation: rotate-glow 30s linear infinite;
+  z-index: 2;
+  pointer-events: none;
+}
+
+@keyframes rotate-glow {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 3;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.hero h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+  letter-spacing: -0.02em;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.8s var(--cubic-smooth);
+}
+
+.hero p {
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.95);
+  max-width: 600px;
+  margin: 0 auto;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.8s var(--cubic-smooth) 0.1s both;
+}
+
+/* Sections */
+.home-page>section,
+.two-column>section {
+  margin-bottom: 60px;
+}
+
+/* Section Header */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  position: relative;
+}
+
+.section-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gradient-gold);
+  border-radius: 10px;
+}
+
+.section-header h2,
+.home-page h2 {
+  font-size: 2rem;
+  color: var(--asu-maroon);
+  margin: 0;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+/* View More Links */
+.view-more {
+  text-align: center;
+  margin-top: 32px;
+}
+
+.view-more a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  background: var(--white);
+  border: 2px solid var(--asu-maroon);
+  border-radius: 50px;
+  color: var(--asu-maroon);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1rem;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.view-more a::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: var(--gradient-primary);
+  transition: left var(--transition-slow);
+  z-index: 0;
+}
+
+.view-more a:hover::before {
+  left: 0;
+}
+
+.view-more a:hover {
+  color: var(--white);
+  border-color: var(--asu-maroon);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-maroon);
+}
+
+.view-more a>* {
+  position: relative;
+  z-index: 1;
+}
+
+/* Two Column Layout */
+.two-column {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Stats Cards */
+.spotlight-content {
+  display: grid;
+  gap: 24px;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, var(--white) 0%, #f8f9fb 100%);
+  padding: 28px;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  text-align: center;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-base);
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--gradient-gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--transition-slow);
+}
+
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at top right, rgba(255, 198, 39, 0.05), transparent);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+  pointer-events: none;
+}
+
+.stat-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--asu-gold);
+}
+
+.stat-card:hover::before {
+  transform: scaleX(1);
+}
+
+.stat-card:hover::after {
+  opacity: 1;
+}
+
+.stat-value {
+  font-size: 3rem;
+  font-weight: 800;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.stat-label {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+
+.hometown-map {
+  background: var(--white);
+  padding: 28px;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+  transition: all var(--transition-base);
+  overflow: hidden;
+}
+
+.hometown-map:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.hometown-map h3 {
+  margin-top: 0;
+  color: var(--text-primary);
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.hometown-map img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--border-radius-sm);
+  transition: transform var(--transition-slow);
+}
+
+.hometown-map:hover img {
+  transform: scale(1.02);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero {
+    padding: 60px 20px;
+  }
+
+  .hero h1 {
+    font-size: 1.8rem;
+  }
+
+  .two-column {
+    grid-template-columns: 1fr;
+    padding: 0 20px;
+  }
+
+  .spotlight-content {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+}
+
+/* --- Game Day Mode --- */
+.game-day-ticker {
+  background: var(--asu-gold);
+  color: var(--asu-maroon);
+  font-weight: 800;
+  padding: 10px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.9rem;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.ticker-content {
+  display: inline-block;
+  animation: scrollTicker 20s linear infinite;
+  padding-left: 100%;
+}
+
+@keyframes scrollTicker {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.hero.hero-game-day {
+  background: linear-gradient(135deg, #000 0%, var(--asu-maroon-dark) 80%);
+  border-bottom: 4px solid var(--asu-gold);
+  padding: 60px 24px;
+}
+
+.game-day-badge {
+  background: var(--asu-gold);
+  color: var(--asu-maroon);
+  padding: 6px 16px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  display: inline-block;
+}
+
+.game-day-hero-content h1 {
+  font-size: 3.5rem;
+  margin-top: 10px;
+}
+
+.game-day-hero-content .vs {
+  font-family: serif;
+  font-style: italic;
+  color: var(--asu-gold);
+  font-size: 2rem;
+  vertical-align: middle;
+  margin: 0 10px;
+}
+
+.game-info-hero {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin: 30px 0;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 20px;
+  border-radius: var(--border-radius-md);
+  display: inline-flex;
+}
+
+.info-block {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+.info-block .label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 5px;
+}
+
+.info-block .value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: white;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.btn-primary,
+.btn-secondary {
+  display: inline-block;
+  padding: 12px 30px;
+  border-radius: 30px;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.btn-primary {
+  background: var(--asu-gold);
+  color: var(--asu-maroon);
+  border: 2px solid var(--asu-gold);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+}
+
+.btn-primary:hover,
+.btn-secondary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn-secondary:hover {
+  background: white;
+  color: var(--asu-maroon);
+}
+
+@media (max-width: 768px) {
+  .game-day-hero-content h1 {
+    font-size: 2rem;
+  }
+
+  .game-info-hero {
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+  }
+}

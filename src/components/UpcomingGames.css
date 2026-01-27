@@ -1,0 +1,60 @@
+/* src/components/UpcomingGames.css */
+.upcoming-games-widget {
+  /* Styles for the overall widget container, if any, can go here */
+  /* For now, focusing on the list itself */
+}
+
+.upcoming-games-widget ul {
+  list-style-type: none;
+  padding-left: 0;
+  margin-top: 10px; /* Add some space above the list if DataStatusBanner is not present */
+}
+
+.upcoming-games-widget li {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-color, #e0e0e0); /* Use CSS variable from App.css or a fallback */
+  display: flex;
+  flex-direction: column; /* Stack elements vertically initially */
+  gap: 4px; /* Space between date/time and opponent line */
+}
+
+.upcoming-games-widget li:last-child {
+  border-bottom: none;
+}
+
+.upcoming-games-widget .game-date-time-display {
+  font-weight: 600;
+  color: var(--text-primary, #333);
+  font-size: 0.95rem;
+}
+
+.upcoming-games-widget .game-opponent-display {
+  color: var(--text-secondary, #555);
+  font-size: 0.9rem;
+}
+
+.upcoming-games-widget .game-location-display {
+  font-size: 0.85rem;
+  color: #777;
+  font-style: italic;
+}
+
+/* Optional: for a more horizontal layout if desired, could be added via media query or by default */
+/* @media (min-width: 480px) {
+  .upcoming-games-widget li {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .upcoming-games-widget .game-date-time-display {
+    margin-right: 10px;
+  }
+} */
+
+.loading-message,
+.error-message,
+.no-games {
+  padding: 10px 0;
+  color: var(--text-secondary, #666);
+  font-style: italic;
+} 

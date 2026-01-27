@@ -1,0 +1,242 @@
+/* src/pages/Recruiting.css */
+.recruiting-page {
+  animation: fadeIn 0.5s ease;
+  padding-bottom: 60px;
+}
+
+.recruiting-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.recruiting-header h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--asu-maroon);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: -0.05em;
+}
+
+.recruiting-header .subtitle {
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* --- Season Selector --- */
+.season-selector {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 50px;
+}
+
+.season-btn {
+  background: white;
+  border: 1px solid var(--border-color);
+  padding: 12px 30px;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--text-secondary);
+  box-shadow: var(--shadow-sm);
+}
+
+.season-btn:hover {
+  transform: translateY(-2px);
+  color: var(--asu-gold);
+  border-color: var(--asu-gold);
+}
+
+.season-btn.active {
+  background: var(--asu-maroon);
+  color: white;
+  border-color: var(--asu-maroon);
+  box-shadow: var(--shadow-md);
+}
+
+/* --- Recruits Grid & Holocards --- */
+.recruits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 40px;
+}
+
+.recruit-card-wrapper {
+  perspective: 1000px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.recruit-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3/4;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  border-radius: 20px;
+  box-shadow: var(--shadow-lg);
+  cursor: pointer;
+}
+
+.recruit-card-wrapper:hover .recruit-card {
+  transform: rotateY(5deg) rotateX(5deg) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.card-front {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  border-radius: 20px;
+  border: 4px solid var(--asu-gold);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Background Graphics */
+.card-bg-gfx {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    radial-gradient(circle at 10% 10%, rgba(255, 198, 39, 0.2) 0%, transparent 20%),
+    linear-gradient(45deg, transparent 48%, rgba(255, 255, 255, 0.05) 50%, transparent 52%);
+  background-size: 100% 100%, 20px 20px;
+  z-index: 1;
+}
+
+.recruit-info {
+  position: relative;
+  z-index: 2;
+  margin-top: auto;
+  background: linear-gradient(to top, rgba(140, 29, 64, 0.95), transparent);
+  padding: 20px;
+  padding-top: 60px;
+  color: white;
+}
+
+.recruit-info h3 {
+  font-size: 1.8rem;
+  margin: 0 0 10px 0;
+  line-height: 1;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.stats-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.stat-badge {
+  background: var(--asu-gold);
+  color: var(--asu-maroon);
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.stat-text {
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.origin-row,
+.team-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  margin-bottom: 5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 3px;
+}
+
+.origin-row:last-child {
+  border-bottom: none;
+}
+
+.label {
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+
+.value {
+  font-weight: 600;
+  text-align: right;
+}
+
+.card-shine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(125deg, transparent 40%, rgba(255, 255, 255, 0.3) 45%, transparent 50%);
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.recruit-card-wrapper:hover .card-shine {
+  animation: shine 1s;
+}
+
+@keyframes shine {
+  0% {
+    transform: translateX(-100%) translateY(-100%);
+  }
+
+  100% {
+    transform: translateX(100%) translateY(100%);
+  }
+}
+
+.profile-link {
+  text-align: center;
+  background: var(--asu-maroon);
+  color: white;
+  text-decoration: none;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.profile-link:hover {
+  background: var(--asu-maroon-dark);
+}
+
+.no-recruits {
+  text-align: center;
+  grid-column: 1 / -1;
+  padding: 60px;
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  background: var(--light-bg);
+  border-radius: var(--border-radius-lg);
+}
+
+@media (max-width: 600px) {
+  .recruits-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .recruit-card {
+    aspect-ratio: auto;
+    min-height: 300px;
+  }
+}

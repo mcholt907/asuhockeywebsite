@@ -1,0 +1,316 @@
+/* News.css - Magazine Layout */
+.news-page {
+  animation: fadeIn 0.5s ease;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.news-page h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: var(--asu-maroon);
+  font-size: 2.5rem;
+  font-weight: 800;
+  position: relative;
+  letter-spacing: -0.02em;
+}
+
+/* --- Filters --- */
+.news-filters {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 8px 20px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+  border-color: var(--asu-gold);
+  color: var(--asu-maroon);
+}
+
+.filter-btn.active {
+  background-color: var(--asu-maroon);
+  border-color: var(--asu-maroon);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+/* --- Magazine Layout --- */
+.news-magazine-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* Hero Section */
+.news-hero {
+  width: 100%;
+}
+
+.hero-card {
+  display: block;
+  position: relative;
+  width: 100%;
+  min-height: 400px;
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  text-decoration: none;
+  background-color: var(--dark-bg);
+  box-shadow: var(--shadow-lg);
+  transition: transform 0.3s ease;
+  color: white;
+}
+
+.hero-card:hover {
+  transform: scale(1.01);
+}
+
+/* Abstract Hockey Pattern Background - Ice Texture */
+.hero-bg-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #1a1a1a;
+  background-image:
+    /* Maroon/Gold Glows */
+    radial-gradient(circle at 10% 20%, rgba(255, 198, 39, 0.3) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(140, 29, 64, 0.5) 0%, transparent 40%),
+    /* Ice Scratches Effect */
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.03) 0px, rgba(255, 255, 255, 0.03) 1px, transparent 1px, transparent 10px),
+    repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.02) 0px, rgba(255, 255, 255, 0.02) 1px, transparent 1px, transparent 15px);
+  opacity: 1;
+  z-index: 1;
+  transition: transform 10s ease, opacity 0.3s;
+}
+
+.hero-card:hover .hero-bg-pattern {
+  transform: scale(1.05);
+  /* Subtle zoom of background */
+  opacity: 0.8;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 40px;
+  /* Premium glass-morphism gradient */
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.6) 40%, transparent 100%);
+  backdrop-filter: blur(2px);
+  /* Slight blur to emphasis text */
+}
+
+.hero-meta {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.source-badge {
+  background-color: var(--asu-gold);
+  color: var(--asu-maroon);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.hero-content h2 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0 0 20px 0;
+  line-height: 1.1;
+  color: white;
+  max-width: 90%;
+}
+
+.read-more {
+  color: var(--asu-gold);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.9rem;
+}
+
+/* Featured Section */
+.news-featured {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.featured-card {
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  padding: 24px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.featured-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--asu-gold);
+}
+
+.featured-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.source-text {
+  color: var(--asu-maroon);
+}
+
+.featured-card h3 {
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Compact Feed */
+.news-feed {
+  background: var(--white);
+  padding: 30px;
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--border-color);
+}
+
+.feed-header {
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  margin-top: 0;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--light-bg);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.compact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 20px;
+}
+
+.compact-item {
+  display: block;
+  text-decoration: none;
+  padding: 15px;
+  border-radius: var(--border-radius-sm);
+  transition: background-color 0.1s;
+  border-bottom: 1px solid var(--light-bg);
+}
+
+.compact-item:hover {
+  background-color: var(--light-bg);
+}
+
+.compact-content h4 {
+  margin: 0 0 8px 0;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.compact-item:hover h4 {
+  color: var(--asu-maroon);
+}
+
+.compact-meta {
+  font-size: 0.8rem;
+  color: var(--text-light);
+  display: flex;
+  gap: 10px;
+}
+
+.source-sm {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* Animations */
+.fade-in {
+  animation: fadeIn 0.6s ease forwards;
+  opacity: 0;
+}
+
+.fade-in-delay-1 {
+  animation: fadeIn 0.6s ease 0.2s forwards;
+  opacity: 0;
+}
+
+.fade-in-delay-2 {
+  animation: fadeIn 0.6s ease 0.4s forwards;
+  opacity: 0;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero-card {
+    min-height: 300px;
+  }
+
+  .hero-content {
+    min-height: 300px;
+    padding: 20px;
+  }
+
+  .hero-content h2 {
+    font-size: 1.75rem;
+  }
+
+  .compact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .news-filters {
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding-bottom: 10px;
+  }
+}
