@@ -536,8 +536,8 @@
     "2027-2028": [
       {
         "number": "",
-        "name": "Jimmy Egan (F)",
-        "position": "",
+        "name": "Jimmy Egan",
+        "position": "F",
         "age": "17",
         "birth_year": "2008",
         "birthplace": "Mahtomedi, MN, USA",
@@ -548,25 +548,27 @@
       },
       {
         "number": "",
-        "name": "Booker Toninato (F)",
-        "position": "",
+        "name": "Colton Lien",
+        "position": "F",
+        "age": "17",
+        "birth_year": "2008",
+        "birthplace": "Highlands Ranch, CO, USA",
+        "height": "6'2\"",
+        "weight": "183",
+        "shoots": "L",
+        "player_link": "https://www.eliteprospects.com/player/934676/colton-lien"
+      },
+      {
+        "number": "",
+        "name": "Booker Toninato",
+        "position": "F",
         "age": "17",
         "birth_year": "2008",
         "birthplace": "Allen, TX, USA",
         "height": "5'11\"",
         "weight": "165",
         "shoots": "R",
-        "player_link": "https://www.eliteprospects.com/player/617647/booker-toninato"
-      },
-      {
-        "number": "NCAA",
-        "name": "19",
-        "position": "",
-        "age": "8",
-        "birth_year": "-",
-        "birthplace": "2",
-        "height": "6",
-        "weight": "136",
+        "player_link": "https://www.eliteprospects.com/player/617647/booker-toninato""weight": "136",
         "shoots": "103",
         "player_link": ""
       },
