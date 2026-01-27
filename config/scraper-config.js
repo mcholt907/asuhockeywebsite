@@ -1,13 +1,14 @@
 // Scraper Configuration
 // Centralized configuration for all scraper functions
 
-module.exports = {
-  // Season configuration
-  seasons: {
-    current: parseInt(process.env.CURRENT_SEASON_YEAR) || 2025,
-    stats: process.env.STATS_SEASON || '20252026'
-  },
+const CURRENT_SEASON = process.env.CURRENT_SEASON || '2025-2026';
+const FUTURE_SEASONS = [
+  '2026-2027',
+  '2027-2028',
+  '2028-2029'
+];
 
+module.exports = {
   // HTTP Configuration
   http: {
     userAgent: process.env.USER_AGENT || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36',

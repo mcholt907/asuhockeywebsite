@@ -8,7 +8,8 @@ from typing import List
 CURRENT_SEASON = os.getenv('CURRENT_SEASON', '2025-2026')
 FUTURE_SEASONS: List[str] = [
     "2026-2027",
-    "2027-2028"
+    "2027-2028",
+    "2028-2029"
 ]
 
 # Base URL
