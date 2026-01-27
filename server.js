@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const compression = require('compression'); // Add compression for performance
 const { fetchNewsData, fetchScheduleData, scrapeCHNStats } = require('./scraper'); // Import the news fetching function and new stats fetching function
+const { fetchRecruitingData } = require('./recruiting-scraper'); // Import recruiting scraper
 const { saveToCache, getFromCache } = require('./src/scripts/caching-system');
 const fs = require('fs').promises; // For reading roster/recruit data later
 const path = require('path');
@@ -133,9 +134,42 @@ async function getHockeyData() {
   }
 }
 
-// API endpoint for roster data
-// API endpoint for roster data
-// API endpoint for roster data
+// API endpoint for recruiting data
+app.get('/api/recruiting', async (req, res) => {
+  try {
+    console.log('[API /recruiting] Fetching recruiting data...');
+
+    // Try to get fresh data from Elite Prospects scraper
+    let recruitingData = await fetchRecruitingData();
+
+    // If scraping failed or returned empty data, fall back to static JSON file
+    if (!recruitingData || Object.keys(recruitingData).length === 0) {
+      console.log('[API /recruiting] Scraper returned empty data, falling back to static JSON file');
+      try {
+        const fileData = await fs.readFile(HOCKEY_DATA_PATH, 'utf-8');
+        const parsedData = JSON.parse(fileData);
+        recruitingData = parsedData.recruiting || {};
+      } catch (fileError) {
+        console.error('[API /recruiting] Error reading fallback JSON file:', fileError.message);
+        return res.status(500).json({
+          error: 'Failed to fetch recruiting data',
+          message: 'Both scraper and fallback file failed'
+        });
+      }
+    }
+
+    console.log('[API /recruiting] Successfully returning recruiting data');
+    res.json(recruitingData);
+  } catch (error) {
+    console.error('[API /recruiting] Error:', error.message);
+    res.status(500).json({
+      error: 'Failed to fetch recruiting data',
+      message: error.message
+    });
+  }
+});
+
+// API endpoint for roster data (from static JSON or future scraper)
 app.get('/api/roster', async (req, res) => {
   try {
     const hockeyData = await getHockeyData();
