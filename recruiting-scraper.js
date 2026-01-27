@@ -4,11 +4,49 @@ const config = require('./config/scraper-config');
 const { requestWithRetry, delayBetweenRequests } = require('./utils/request-helper');
 
 /**
+ * Scrapes player photo URL from Elite Prospects player profile page
+ * @param {string} playerLink - Full URL to player's Elite Prospects profile
+ * @returns {string} URL of player photo, or empty string if not found
+ */
+async function scrapePlayerPhoto(playerLink) {
+    if (!playerLink) return '';
+
+    try {
+        console.log(`[Photo Scraper] Fetching photo from: ${playerLink}`);
+        const { data } = await requestWithRetry(playerLink);
+        const $ = cheerio.load(data);
+
+        // Look for player photo using the ProfileImage class (actual player headshot)
+        // This is the correct selector based on testing
+        let photoUrl = '';
+        const playerPhoto = $('.ProfileImage_profileImage__JLd31').attr('src') ||
+            $('img.ProfileImage_profileImage__JLd31').attr('src') ||
+            $('img[src*="files.eliteprospects.com/layout/players"]').first().attr('src') ||
+            $('img[alt*="player"]').first().attr('src');
+
+        if (playerPhoto) {
+            // Make sure it's a full URL
+            photoUrl = playerPhoto.startsWith('http') ? playerPhoto : `https://www.eliteprospects.com${playerPhoto}`;
+            console.log(`[Photo Scraper] Found photo: ${photoUrl}`);
+        } else {
+            console.log(`[Photo Scraper] No photo found for ${playerLink}`);
+        }
+
+        return photoUrl;
+    } catch (error) {
+        console.error(`[Photo Scraper] Error scraping photo from ${playerLink}:`, error.message);
+        return '';
+    }
+}
+
+/**
  * Scrapes Elite Prospects recruiting data for a specific season
+ * Enhanced version that also fetches player photos
  * @param {string} season - Season in format "2026-2027"
+ * @param {boolean} includePhotos - Whether to scrape individual player photos (slower)
  * @returns {Array} Array of player objects with recruiting information
  */
-async function scrapeEliteProspectsRecruiting(season) {
+async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
     const url = `https://www.eliteprospects.com/team/18066/arizona-state-univ/${season}?tab=stats`;
     console.log(`[EP Recruiting Scraper] Fetching recruiting data for ${season} from: ${url}`);
 
@@ -22,13 +60,14 @@ async function scrapeEliteProspectsRecruiting(season) {
 
         console.log(`[EP Recruiting Scraper] Found ${playerRows.length} potential player rows`);
 
-        playerRows.each((index, row) => {
+        for (let index = 0; index < playerRows.length; index++) {
+            const row = playerRows[index];
             const $row = $(row);
             const cells = $row.find('td.SortTable_trow__T6wLH');
 
             // Skip if not enough cells (likely a header or section row)
             if (cells.length < 10) {
-                return;
+                continue;
             }
 
             try {
@@ -38,7 +77,7 @@ async function scrapeEliteProspectsRecruiting(season) {
                 // Skip statistics/summary rows (they have "NCAA" or numbers as the number field)
                 if (number && (number.toUpperCase() === 'NCAA' || number.toUpperCase().startsWith('TOTAL'))) {
                     console.log(`[EP Recruiting Scraper] Skipping statistics row with number: ${number}`);
-                    return;
+                    continue;
                 }
 
                 // Get player name and link
@@ -58,7 +97,7 @@ async function scrapeEliteProspectsRecruiting(season) {
                 // Skip if name is just a number (invalid row)
                 if (name && !isNaN(name)) {
                     console.log(`[EP Recruiting Scraper] Skipping invalid row with numeric name: ${name}`);
-                    return;
+                    continue;
                 }
 
                 // Extract other fields
@@ -82,6 +121,16 @@ async function scrapeEliteProspectsRecruiting(season) {
                 const weight = $(cells[8]).text().trim();
                 const shoots = $(cells[9]).text().trim();
 
+                const fullPlayerLink = playerLink ? `https://www.eliteprospects.com${playerLink}` : '';
+
+                // Scrape player photo if requested
+                let player_photo = '';
+                if (includePhotos && fullPlayerLink) {
+                    player_photo = await scrapePlayerPhoto(fullPlayerLink);
+                    // Add delay after each photo request to be respectful
+                    await delayBetweenRequests();
+                }
+
                 // Only add if we have a valid player name
                 if (name && name.length > 0) {
                     const player = {
@@ -94,16 +143,17 @@ async function scrapeEliteProspectsRecruiting(season) {
                         height: height || '',
                         weight: weight || '',
                         shoots: shoots || '',
-                        player_link: playerLink ? `https://www.eliteprospects.com${playerLink}` : ''
+                        player_link: fullPlayerLink,
+                        player_photo: player_photo
                     };
 
                     players.push(player);
-                    console.log(`[EP Recruiting Scraper] Added player: ${name} (${position})`);
+                    console.log(`[EP Recruiting Scraper] Added player: ${name} (${position})${player_photo ? ' with photo' : ''}`);
                 }
             } catch (error) {
                 console.error(`[EP Recruiting Scraper] Error parsing row ${index}:`, error.message);
             }
-        });
+        }
 
         console.log(`[EP Recruiting Scraper] Successfully scraped ${players.length} players for ${season}`);
         return players;
@@ -117,16 +167,17 @@ async function scrapeEliteProspectsRecruiting(season) {
 /**
  * Fetches recruiting data for all configured future seasons
  * Uses caching to avoid excessive scraping
+ * @param {boolean} includePhotos - Whether to scrape player photos (much slower)
  * @returns {Object} Object with season keys and player arrays as values
  */
-async function fetchRecruitingData() {
+async function fetchRecruitingData(includePhotos = false) {
     const RECRUITING_CACHE_KEY = 'asu_hockey_recruiting';
 
     console.log(`[Cache System] Attempting to fetch recruiting data with cache key: ${RECRUITING_CACHE_KEY}`);
 
     try {
         const cachedData = await getFromCache(RECRUITING_CACHE_KEY);
-        if (cachedData) {
+        if (cachedData && !includePhotos) {
             console.log('[Cache System] Recruiting data found in cache. Returning cached data.');
             return cachedData;
         }
@@ -140,9 +191,9 @@ async function fetchRecruitingData() {
         const recruitingData = {};
 
         // Scrape data for each future season configured
-        for (const season of config.FUTURE_SEASONS || ['2026-2027', '2027-2028']) {
-            console.log(`[Recruiting] Scraping season: ${season}`);
-            const players = await scrapeEliteProspectsRecruiting(season);
+        for (const season of config.FUTURE_SEASONS || ['2026-2027', '2027-2028', '2028-2029']) {
+            console.log(`[Recruiting] Scraping season: ${season}${includePhotos ? ' with photos' : ''}`);
+            const players = await scrapeEliteProspectsRecruiting(season, includePhotos);
             recruitingData[season] = players;
 
             // Add delay between requests to be respectful
@@ -167,5 +218,6 @@ async function fetchRecruitingData() {
 
 module.exports = {
     fetchRecruitingData,
-    scrapeEliteProspectsRecruiting
+    scrapeEliteProspectsRecruiting,
+    scrapePlayerPhoto
 };
