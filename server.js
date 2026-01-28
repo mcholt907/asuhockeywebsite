@@ -137,31 +137,17 @@ async function getHockeyData() {
 // API endpoint for recruiting data
 app.get('/api/recruits', async (req, res) => {
   try {
-    console.log('[API /recruits] Fetching recruiting data...');
+    console.log('[API /recruits] Fetching recruiting data from static JSON file...');
 
-    // Try to get fresh data from Elite Prospects scraper
-    let recruitingData = await fetchRecruitingData();
+    // Read directly from the static JSON file since we've manually added player photos
+    const fileData = await fs.readFile(HOCKEY_DATA_PATH, 'utf-8');
+    const parsedData = JSON.parse(fileData);
+    const recruitingData = parsedData.recruiting || {};
 
-    // If scraping failed or returned empty data, fall back to static JSON file
-    if (!recruitingData || Object.keys(recruitingData).length === 0) {
-      console.log('[API /recruits] Scraper returned empty data, falling back to static JSON file');
-      try {
-        const fileData = await fs.readFile(HOCKEY_DATA_PATH, 'utf-8');
-        const parsedData = JSON.parse(fileData);
-        recruitingData = parsedData.recruiting || {};
-      } catch (fileError) {
-        console.error('[API /recruits] Error reading fallback JSON file:', fileError.message);
-        return res.status(500).json({
-          error: 'Failed to fetch recruiting data',
-          message: 'Both scraper and fallback file failed'
-        });
-      }
-    }
-
-    console.log('[API /recruiting] Successfully returning recruiting data');
+    console.log('[API /recruits] Successfully returning recruiting data from JSON file');
     res.json(recruitingData);
   } catch (error) {
-    console.error('[API /recruiting] Error:', error.message);
+    console.error('[API /recruits] Error reading recruiting data:', error.message);
     res.status(500).json({
       error: 'Failed to fetch recruiting data',
       message: error.message
