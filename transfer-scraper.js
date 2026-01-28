@@ -4,10 +4,9 @@
  * Uses axios/cheerio for simple HTML scraping
  */
 
-const axios = require('axios');
 const cheerio = require('cheerio');
 const { saveToCache, getFromCache } = require('./src/scripts/caching-system');
-const { requestWithRetry, delayBetweenRequests } = require('./utils/request-helper');
+const { requestWithRetry } = require('./utils/request-helper');
 
 const TRANSFERS_URL = 'https://www.eliteprospects.com/team/18066/arizona-state-univ/transfers';
 const CACHE_KEY = 'asu_transfers';
@@ -19,6 +18,18 @@ const CACHE_TTL = 3600000; // 1 hour in ms
 function extractPlayerId(url) {
     const match = url.match(/\/player\/(\d+)\//);
     return match ? match[1] : null;
+}
+
+/**
+ * Extract date from transfer detail URL (format: /transfer/2026/01/15/...)
+ */
+function extractDateFromUrl(url) {
+    if (!url) return '';
+    const dateMatch = url.match(/\/transfer\/(\d{4})\/(\d{2})\/(\d{2})\//);
+    if (dateMatch) {
+        return `${dateMatch[1]}-${dateMatch[2]}-${dateMatch[3]}`;
+    }
+    return '';
 }
 
 /**
@@ -47,122 +58,134 @@ async function scrapeTransferData() {
         const incoming = [];
         const outgoing = [];
 
-        // Parse the transfers page structure
-        // Look for sections with "Joining" and "Leaving"
+        // The page has tables for "Joining" and "Leaving" sections
+        // Each section has a header and a table with player data
 
-        // Find all transfer entries
-        $('table.transfers, .transfers-table, div.transfer-list').each((i, table) => {
-            $(table).find('tr, .transfer-item').each((j, row) => {
+        // Find all section containers with headers
+        $('section, div.transaction-section, div[class*="TransferSection"], div[class*="transfer"]').each((i, section) => {
+            const $section = $(section);
+            const sectionText = $section.text().toLowerCase();
+
+            // Determine direction from section header
+            let direction = '';
+            if (sectionText.includes('joining') || sectionText.includes('incoming')) {
+                direction = 'incoming';
+            } else if (sectionText.includes('leaving') || sectionText.includes('outgoing')) {
+                direction = 'outgoing';
+            }
+
+            if (!direction) return;
+
+            // Find table rows in this section
+            $section.find('tr').each((j, row) => {
                 const $row = $(row);
-                const text = $row.text();
-
-                // Skip header rows
-                if (text.includes('Player') && text.includes('From')) return;
-
-                const playerLink = $row.find('a[href*="/player/"]').first();
-                const teamLinks = $row.find('a[href*="/team/"]');
-
-                if (playerLink.length) {
-                    const playerName = playerLink.text().trim();
-                    const playerUrl = playerLink.attr('href');
-                    const playerId = extractPlayerId(playerUrl);
-
-                    // Get the team info
-                    const fromTeam = teamLinks.first().text().trim();
-                    const fromTeamUrl = teamLinks.first().attr('href');
-
-                    if (playerName) {
-                        // Determine direction based on context or section
-                        const entry = {
-                            playerName,
-                            playerUrl: playerUrl ? `https://www.eliteprospects.com${playerUrl}` : '',
-                            playerId,
-                            fromTeam,
-                            fromTeamUrl: fromTeamUrl ? `https://www.eliteprospects.com${fromTeamUrl}` : ''
-                        };
-
-                        // Will need to determine direction from page structure
-                        incoming.push(entry);
-                    }
-                }
+                parseTransferRow($, $row, direction, incoming, outgoing);
             });
         });
 
-        // Alternative parsing - look for common EP page structure
-        // The page typically has sections for "Joining" and "Leaving"
+        // Alternative: Parse by looking for table elements directly
+        // EP uses tables with class patterns like TransferTable
+        $('table').each((i, table) => {
+            const $table = $(table);
+            const $prevHeader = $table.prevAll('h2, h3, [class*="Header"]').first();
+            const headerText = $prevHeader.text().toLowerCase();
 
-        // Parse "Joining Arizona State Univ." section
-        let currentSection = '';
-        $('h2, h3, .section-title').each((i, header) => {
-            const headerText = $(header).text().toLowerCase();
+            let direction = '';
             if (headerText.includes('joining')) {
-                currentSection = 'joining';
+                direction = 'incoming';
             } else if (headerText.includes('leaving')) {
-                currentSection = 'leaving';
+                direction = 'outgoing';
             }
+
+            if (!direction) return;
+
+            $table.find('tr').each((j, row) => {
+                const $row = $(row);
+                parseTransferRow($, $row, direction, incoming, outgoing);
+            });
         });
 
-        // Fallback: parse all player links on the page
-        const allPlayerLinks = $('a[href*="/player/"]');
-        const seenPlayers = new Set();
+        // Fallback: Parse using the known pattern from URL content
+        // Look for patterns like: [Player Name (Pos)] followed by [Team Name]
+        const bodyText = $('body').html() || '';
 
-        allPlayerLinks.each((i, link) => {
-            const $link = $(link);
-            const playerUrl = $link.attr('href');
-            const playerName = $link.text().trim();
+        // Find all player links and their context
+        let currentSection = 'unknown';
+        const elements = $('h2, h3, a[href*="/player/"], a[href*="/team/"], a[href*="/transfer/"]');
 
-            // Skip if already seen or empty
-            if (!playerName || seenPlayers.has(playerUrl)) return;
-            seenPlayers.add(playerUrl);
+        let lastPlayer = null;
+        let lastTeam = null;
+        let lastDetail = null;
 
-            // Extract position from text like "Jonas Woo (D)" 
-            const positionMatch = playerName.match(/\(([DFG])\)$/);
-            const position = positionMatch ? positionMatch[1] : '';
-            const cleanName = playerName.replace(/\s*\([DFG]\)$/, '').trim();
+        elements.each((i, el) => {
+            const $el = $(el);
+            const tagName = el.tagName?.toLowerCase();
+            const href = $el.attr('href') || '';
+            const text = $el.text().trim();
 
-            // Find the associated team link (usually next sibling or nearby)
-            const $parent = $link.parent();
-            const teamLink = $parent.find('a[href*="/team/"]').first();
-            const teamName = teamLink.length ? teamLink.text().trim() : '';
-            const teamUrl = teamLink.length ? teamLink.attr('href') : '';
-
-            // Find detail link for date info
-            const detailLink = $parent.find('a[href*="/transfer/"]').first();
-            const detailUrl = detailLink.length ? detailLink.attr('href') : '';
-
-            // Parse date from detail URL if available (format: /transfer/2026/01/15/...)
-            let transferDate = '';
-            if (detailUrl) {
-                const dateMatch = detailUrl.match(/\/transfer\/(\d{4})\/(\d{2})\/(\d{2})\//);
-                if (dateMatch) {
-                    transferDate = `${dateMatch[1]}-${dateMatch[2]}-${dateMatch[3]}`;
+            // Track section headers
+            if (tagName === 'h2' || tagName === 'h3') {
+                const headerText = text.toLowerCase();
+                if (headerText.includes('joining')) {
+                    currentSection = 'incoming';
+                } else if (headerText.includes('leaving')) {
+                    currentSection = 'outgoing';
+                } else if (headerText.includes('recalled') || headerText.includes('reassigned')) {
+                    currentSection = 'skip'; // Skip this section
                 }
+                return;
             }
 
-            const entry = {
-                playerName: cleanName,
-                position,
-                playerUrl: playerUrl.startsWith('http') ? playerUrl : `https://www.eliteprospects.com${playerUrl}`,
-                playerId: extractPlayerId(playerUrl),
-                team: teamName,
-                teamUrl: teamUrl ? (teamUrl.startsWith('http') ? teamUrl : `https://www.eliteprospects.com${teamUrl}`) : '',
-                transferDate,
-                detailUrl: detailUrl ? `https://www.eliteprospects.com${detailUrl}` : ''
-            };
+            if (currentSection === 'skip' || currentSection === 'unknown') return;
 
-            // Determine direction based on section context
-            // For now, parse based on page structure
-            const parentText = $parent.parent().text().toLowerCase();
-            if (parentText.includes('joining') || parentText.includes('incoming')) {
-                entry.direction = 'incoming';
-                incoming.push(entry);
-            } else if (parentText.includes('leaving') || parentText.includes('outgoing')) {
-                entry.direction = 'outgoing';
-                outgoing.push(entry);
-            } else {
-                // Default to incoming if unclear
-                entry.direction = 'unknown';
-                incoming.push(entry);
+            // Found a player link
+            if (href.includes('/player/')) {
+                // If we had a previous player without team, add them anyway
+                if (lastPlayer && !lastPlayer.team && lastTeam) {
+                    lastPlayer.team = lastTeam.name;
+                    lastPlayer.teamUrl = lastTeam.url;
+                }
+
+                // Extract position from text like "Jonas Woo (D)"
+                const positionMatch = text.match(/\(([DFG])\)$/);
+                const position = positionMatch ? positionMatch[1] : '';
+                const cleanName = text.replace(/\s*\([DFG]\)$/, '').trim();
+
+                lastPlayer = {
+                    playerName: cleanName,
+                    position,
+                    playerUrl: href.startsWith('http') ? href : `https://www.eliteprospects.com${href}`,
+                    playerId: extractPlayerId(href),
+                    team: '',
+                    teamUrl: '',
+                    transferDate: '',
+                    direction: currentSection
+                };
+                lastTeam = null;
+                lastDetail = null;
+            }
+            // Found a team link (next after player)
+            else if (href.includes('/team/') && lastPlayer && !lastPlayer.team) {
+                lastTeam = { name: text, url: href.startsWith('http') ? href : `https://www.eliteprospects.com${href}` };
+                lastPlayer.team = lastTeam.name;
+                lastPlayer.teamUrl = lastTeam.url;
+            }
+            // Found a detail link (extract date)
+            else if (href.includes('/transfer/') && lastPlayer) {
+                lastPlayer.transferDate = extractDateFromUrl(href);
+
+                // Now we have complete data, add the player
+                const targetArray = lastPlayer.direction === 'incoming' ? incoming : outgoing;
+
+                // Check if already added
+                const exists = targetArray.some(p => p.playerId === lastPlayer.playerId);
+                if (!exists) {
+                    targetArray.push({ ...lastPlayer });
+                }
+
+                lastPlayer = null;
+                lastTeam = null;
+                lastDetail = null;
             }
         });
 
@@ -173,6 +196,10 @@ async function scrapeTransferData() {
         };
 
         console.log(`[Transfer Scraper] Found ${incoming.length} incoming, ${outgoing.length} outgoing transfers`);
+
+        // Log details for debugging
+        incoming.forEach(t => console.log(`  [JOINING] ${t.playerName} (${t.position}) from ${t.team}`));
+        outgoing.forEach(t => console.log(`  [LEAVING] ${t.playerName} (${t.position}) to ${t.team}`));
 
         // Cache the results
         await saveToCache({
@@ -201,24 +228,40 @@ async function scrapeTransferData() {
 }
 
 /**
- * Fetch player photo from their profile page
+ * Parse a transfer table row
  */
-async function fetchPlayerPhoto(playerUrl) {
-    if (!playerUrl) return null;
+function parseTransferRow($, $row, direction, incoming, outgoing) {
+    const playerLink = $row.find('a[href*="/player/"]').first();
+    const teamLink = $row.find('a[href*="/team/"]').first();
+    const detailLink = $row.find('a[href*="/transfer/"]').first();
 
-    try {
-        await delayBetweenRequests();
-        const { data: html } = await requestWithRetry(playerUrl);
-        const $ = cheerio.load(html);
+    if (!playerLink.length) return;
 
-        // Look for profile image
-        const photoUrl = $('.ProfileImage_profileImage__JLd31').attr('src') ||
-            $('img[src*="files.eliteprospects.com/layout/players"]').first().attr('src');
+    const playerText = playerLink.text().trim();
+    const positionMatch = playerText.match(/\(([DFG])\)$/);
+    const position = positionMatch ? positionMatch[1] : '';
+    const cleanName = playerText.replace(/\s*\([DFG]\)$/, '').trim();
 
-        return photoUrl || null;
-    } catch (error) {
-        console.error(`[Transfer Scraper] Error fetching photo for ${playerUrl}:`, error.message);
-        return null;
+    const playerUrl = playerLink.attr('href') || '';
+    const teamName = teamLink.length ? teamLink.text().trim() : '';
+    const teamUrl = teamLink.length ? teamLink.attr('href') || '' : '';
+    const detailUrl = detailLink.length ? detailLink.attr('href') || '' : '';
+
+    const entry = {
+        playerName: cleanName,
+        position,
+        playerUrl: playerUrl.startsWith('http') ? playerUrl : `https://www.eliteprospects.com${playerUrl}`,
+        playerId: extractPlayerId(playerUrl),
+        team: teamName,
+        teamUrl: teamUrl.startsWith('http') ? teamUrl : (teamUrl ? `https://www.eliteprospects.com${teamUrl}` : ''),
+        transferDate: extractDateFromUrl(detailUrl),
+        direction
+    };
+
+    const targetArray = direction === 'incoming' ? incoming : outgoing;
+    const exists = targetArray.some(p => p.playerId === entry.playerId);
+    if (!exists && entry.playerName) {
+        targetArray.push(entry);
     }
 }
 
@@ -243,6 +286,5 @@ if (require.main === module) {
 }
 
 module.exports = {
-    scrapeTransferData,
-    fetchPlayerPhoto
+    scrapeTransferData
 };

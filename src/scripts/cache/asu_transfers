@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-01-28T15:08:03.734Z",
+  "timestamp": "2026-01-28T15:16:24.507Z",
   "data": {
     "data": {
       "incoming": [
@@ -8,39 +8,37 @@
           "position": "D",
           "playerUrl": "https://www.eliteprospects.com/player/597734/jonas-woo",
           "playerId": "597734",
-          "team": "",
-          "teamUrl": "",
-          "transferDate": "",
-          "detailUrl": "",
-          "direction": "unknown"
+          "team": "Medicine Hat Tigers",
+          "teamUrl": "https://www.eliteprospects.com/team/859/medicine-hat-tigers",
+          "transferDate": "2026-01-15",
+          "direction": "incoming"
         },
         {
           "playerName": "Colton Lien",
           "position": "F",
           "playerUrl": "https://www.eliteprospects.com/player/934676/colton-lien",
           "playerId": "934676",
-          "team": "",
-          "teamUrl": "",
-          "transferDate": "",
-          "detailUrl": "",
-          "direction": "unknown"
-        },
+          "team": "Okanagan HA Colorado 16U AAA",
+          "teamUrl": "https://www.eliteprospects.com/team/41784/okanagan-ha-colorado-16u-aaa",
+          "transferDate": "2026-01-12",
+          "direction": "incoming"
+        }
+      ],
+      "outgoing": [
         {
           "playerName": "Justin Cloutier",
           "position": "F",
           "playerUrl": "https://www.eliteprospects.com/player/649101/justin-cloutier",
           "playerId": "649101",
-          "team": "",
-          "teamUrl": "",
-          "transferDate": "",
-          "detailUrl": "",
-          "direction": "unknown"
+          "team": "Soo Greyhounds",
+          "teamUrl": "https://www.eliteprospects.com/team/620/soo-greyhounds",
+          "transferDate": "2026-01-05",
+          "direction": "outgoing"
         }
       ],
-      "outgoing": [],
-      "lastUpdated": "2026-01-28T15:08:03.732Z"
+      "lastUpdated": "2026-01-28T15:16:24.505Z"
     },
-    "timestamp": 1769612883734
+    "timestamp": 1769613384506
   },
   "cacheDuration": 86400000
 }
