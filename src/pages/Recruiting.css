@@ -425,23 +425,124 @@
   font-style: italic;
 }
 
+/* Mobile: Horizontal scrolling carousel with compact cards */
 @media (max-width: 600px) {
-  .transfers-grid {
-    grid-template-columns: 1fr;
+  .transfers-section {
+    margin-bottom: 30px;
+    padding-bottom: 25px;
   }
 
-  .transfer-team-info {
-    flex-direction: column;
+  .section-title {
+    font-size: 1.4rem;
+    margin-bottom: 5px;
+  }
+
+  .section-subtitle {
+    font-size: 0.85rem;
+    margin-bottom: 15px;
+  }
+
+  /* Horizontal scrolling container */
+  .transfers-grid {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 12px;
+    padding: 5px 15px 15px 15px;
+    margin: 0 -15px;
+    /* Extend to edges */
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    /* Firefox */
+  }
+
+  .transfers-grid::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
+  }
+
+  /* Compact card design */
+  .transfer-card {
+    flex: 0 0 auto;
+    width: 200px;
+    min-width: 200px;
+    padding: 12px 15px;
+    scroll-snap-align: start;
+  }
+
+  .transfer-card:hover {
+    transform: none;
+    /* Disable hover lift on mobile */
+  }
+
+  .transfer-player-info {
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .transfer-badge {
+    font-size: 0.55rem;
+    padding: 3px 8px;
+    order: -1;
+    /* Move badge to top */
+    width: 100%;
     text-align: center;
-    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .transfer-player-name {
+    font-size: 1rem;
+    width: 100%;
+    text-align: center;
+  }
+
+  .transfer-position {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+  }
+
+  /* Compact team info - single line */
+  .transfer-team-info {
+    flex-direction: row;
+    padding: 8px 10px;
+    gap: 6px;
+    font-size: 0.8rem;
   }
 
   .team-from,
   .team-to {
+    font-size: 0.75rem;
     text-align: center;
+    flex: 1;
+    line-height: 1.2;
   }
 
   .transfer-arrow {
-    transform: rotate(90deg);
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  .transfer-date {
+    font-size: 0.7rem;
+    text-align: center;
+    margin-top: 5px;
+  }
+}
+
+/* Scroll indicator hint for mobile */
+@media (max-width: 600px) {
+  .transfers-section::after {
+    content: '← swipe →';
+    display: block;
+    text-align: center;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    opacity: 0.6;
+    margin-top: 8px;
+    font-style: italic;
   }
 }
