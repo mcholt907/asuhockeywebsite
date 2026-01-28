@@ -1,29 +1,36 @@
 // src/pages/Recruiting.jsx
 import React, { useState, useEffect } from 'react';
-import { getRecruits } from '../services/api';
+import { getRecruits, getTransfers } from '../services/api';
 import './Recruiting.css';
 
 function Recruiting() {
   const [recruitsBySeason, setRecruitsBySeason] = useState({});
+  const [transfers, setTransfers] = useState({ incoming: [], outgoing: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [sortedSeasons, setSortedSeasons] = useState([]);
   const [activeSeason, setActiveSeason] = useState(null);
 
   useEffect(() => {
-    const fetchRecruitingData = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await getRecruits();
-        if (typeof data === 'object' && data !== null) {
+
+        // Fetch both recruits and transfers in parallel
+        const [recruitData, transferData] = await Promise.all([
+          getRecruits(),
+          getTransfers()
+        ]);
+
+        // Process recruit data
+        if (typeof recruitData === 'object' && recruitData !== null) {
           const filteredData = {};
-          let seasons = Object.keys(data);
+          let seasons = Object.keys(recruitData);
 
           for (const season of seasons) {
-            if (Array.isArray(data[season])) {
-              // Just use the data as-is since we already cleaned it in the JSON
-              filteredData[season] = data[season];
+            if (Array.isArray(recruitData[season])) {
+              filteredData[season] = recruitData[season];
             } else {
               filteredData[season] = [];
             }
@@ -37,16 +44,75 @@ function Recruiting() {
           setSortedSeasons([]);
           setError('Could not load recruiting data.');
         }
+
+        // Process transfer data
+        if (transferData && (transferData.incoming || transferData.outgoing)) {
+          setTransfers(transferData);
+        }
+
       } catch (err) {
-        console.error('Error fetching recruits:', err);
+        console.error('Error fetching data:', err);
         setError('Failed to load recruiting data.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchRecruitingData();
+    fetchData();
   }, []);
+
+  // Calculate days ago from date
+  const getDaysAgo = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return '1 day ago';
+    return `${diffDays} days ago`;
+  };
+
+  // Transfer Card Component
+  const TransferCard = ({ transfer, direction }) => (
+    <div className={`transfer-card ${direction}`}>
+      <div className="transfer-player-info">
+        <div className="transfer-badge">
+          {direction === 'incoming' ? 'JOINING' : 'LEAVING'}
+        </div>
+        <h3 className="transfer-player-name">
+          <a
+            href={transfer.playerUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {transfer.playerName}
+          </a>
+        </h3>
+        {transfer.position && (
+          <span className="transfer-position">{transfer.position}</span>
+        )}
+      </div>
+      <div className="transfer-team-info">
+        {direction === 'incoming' ? (
+          <>
+            <span className="team-from">{transfer.team || 'Unknown Team'}</span>
+            <span className="transfer-arrow">→</span>
+            <span className="team-to">Arizona State</span>
+          </>
+        ) : (
+          <>
+            <span className="team-from">Arizona State</span>
+            <span className="transfer-arrow">→</span>
+            <span className="team-to">{transfer.team || 'Unknown Team'}</span>
+          </>
+        )}
+      </div>
+      {transfer.transferDate && (
+        <div className="transfer-date">{getDaysAgo(transfer.transferDate)}</div>
+      )}
+    </div>
+  );
 
   const RecruitCard = ({ recruit }) => (
     <div className="recruit-card-wrapper">
@@ -97,6 +163,8 @@ function Recruiting() {
   if (loading) return <div className="page-container"><p className="loading-message">Scouting the future...</p></div>;
   if (error) return <div className="page-container"><p className="error-message">{error}</p></div>;
 
+  const hasTransfers = (transfers.incoming?.length > 0 || transfers.outgoing?.length > 0);
+
   return (
     <div className="page-container recruiting-page">
       <div className="recruiting-header">
@@ -104,29 +172,49 @@ function Recruiting() {
         <p className="subtitle">The Next Generation of Sun Devil Hockey</p>
       </div>
 
-      <div className="season-selector">
-        {sortedSeasons.map(season => (
-          <button
-            key={season}
-            className={`season-btn ${activeSeason === season ? 'active' : ''}`}
-            onClick={() => setActiveSeason(season)}
-          >
-            {season} Class
-          </button>
-        ))}
-      </div>
+      {/* Recent Transfers Section */}
+      {hasTransfers && (
+        <section className="transfers-section">
+          <h2 className="section-title">Recent Transfers</h2>
+          <p className="section-subtitle">Latest player movements</p>
 
-      <div className="recruits-grid fade-in">
-        {recruitsBySeason[activeSeason] && recruitsBySeason[activeSeason].length > 0 ? (
-          recruitsBySeason[activeSeason].map((recruit, idx) => (
-            <RecruitCard key={idx} recruit={recruit} />
-          ))
-        ) : (
-          <div className="no-recruits">
-            <p>No commitments announced for the {activeSeason} class yet.</p>
+          <div className="transfers-grid">
+            {transfers.incoming?.map((transfer, idx) => (
+              <TransferCard key={`in-${idx}`} transfer={transfer} direction="incoming" />
+            ))}
+            {transfers.outgoing?.map((transfer, idx) => (
+              <TransferCard key={`out-${idx}`} transfer={transfer} direction="outgoing" />
+            ))}
           </div>
-        )}
-      </div>
+        </section>
+      )}
+
+      {/* Recruiting Classes Section */}
+      <section className="recruits-section">
+        <div className="season-selector">
+          {sortedSeasons.map(season => (
+            <button
+              key={season}
+              className={`season-btn ${activeSeason === season ? 'active' : ''}`}
+              onClick={() => setActiveSeason(season)}
+            >
+              {season} Class
+            </button>
+          ))}
+        </div>
+
+        <div className="recruits-grid fade-in">
+          {recruitsBySeason[activeSeason] && recruitsBySeason[activeSeason].length > 0 ? (
+            recruitsBySeason[activeSeason].map((recruit, idx) => (
+              <RecruitCard key={idx} recruit={recruit} />
+            ))
+          ) : (
+            <div className="no-recruits">
+              <p>No commitments announced for the {activeSeason} class yet.</p>
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const compression = require('compression'); // Add compression for performance
 const { fetchNewsData, fetchScheduleData, scrapeCHNStats } = require('./scraper'); // Import the news fetching function and new stats fetching function
+const { scrapeTransferData } = require('./transfer-scraper'); // Import transfer scraper
 const { saveToCache, getFromCache } = require('./src/scripts/caching-system');
 const fs = require('fs').promises; // For reading roster/recruit data later
 const path = require('path');
@@ -149,6 +150,22 @@ app.get('/api/recruits', async (req, res) => {
     console.error('[API /recruits] Error reading recruiting data:', error.message);
     res.status(500).json({
       error: 'Failed to fetch recruiting data',
+      message: error.message
+    });
+  }
+});
+
+// API endpoint for transfer data (incoming/outgoing transfers)
+app.get('/api/transfers', async (req, res) => {
+  try {
+    console.log('[API /transfers] Fetching transfer data...');
+    const transferData = await scrapeTransferData();
+    console.log(`[API /transfers] Returning ${transferData.incoming?.length || 0} incoming, ${transferData.outgoing?.length || 0} outgoing transfers`);
+    res.json(transferData);
+  } catch (error) {
+    console.error('[API /transfers] Error:', error.message);
+    res.status(500).json({
+      error: 'Failed to fetch transfer data',
       message: error.message
     });
   }

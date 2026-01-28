@@ -15,7 +15,7 @@ export const getNews = async () => {
     // The backend /api/news returns an object like { data: articles[], source: 'live'/'cache', timestamp }
     // We want to return this whole object so the component can access the source.
     if (response.data && typeof response.data === 'object' && response.data.data !== undefined) {
-      return response.data; 
+      return response.data;
     }
     console.error('News data received from API is not in the expected format:', response.data);
     return { data: [], source: 'error', error: 'Invalid data format from API' }; // Return error state
@@ -52,9 +52,25 @@ export const getRecruits = async () => {
     return response.data; // Expects an object like { "YYYY-YYYY": [recruits] }
   } catch (error) {
     console.error('Error fetching recruits:', error);
-    return {}; 
+    return {};
   }
 };
+
+/**
+ * Fetches transfer/transaction data.
+ * @returns {Promise<Object>} A promise that resolves to an object with incoming and outgoing transfers.
+ *                            Returns empty object on error.
+ */
+export const getTransfers = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/transfers`);
+    return response.data; // Expects { incoming: [...], outgoing: [...], lastUpdated: ... }
+  } catch (error) {
+    console.error('Error fetching transfers:', error);
+    return { incoming: [], outgoing: [], lastUpdated: null };
+  }
+};
+
 
 /**
  * Fetches the game schedule.

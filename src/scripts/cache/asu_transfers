@@ -1,0 +1,46 @@
+{
+  "timestamp": "2026-01-28T15:08:03.734Z",
+  "data": {
+    "data": {
+      "incoming": [
+        {
+          "playerName": "Jonas Woo",
+          "position": "D",
+          "playerUrl": "https://www.eliteprospects.com/player/597734/jonas-woo",
+          "playerId": "597734",
+          "team": "",
+          "teamUrl": "",
+          "transferDate": "",
+          "detailUrl": "",
+          "direction": "unknown"
+        },
+        {
+          "playerName": "Colton Lien",
+          "position": "F",
+          "playerUrl": "https://www.eliteprospects.com/player/934676/colton-lien",
+          "playerId": "934676",
+          "team": "",
+          "teamUrl": "",
+          "transferDate": "",
+          "detailUrl": "",
+          "direction": "unknown"
+        },
+        {
+          "playerName": "Justin Cloutier",
+          "position": "F",
+          "playerUrl": "https://www.eliteprospects.com/player/649101/justin-cloutier",
+          "playerId": "649101",
+          "team": "",
+          "teamUrl": "",
+          "transferDate": "",
+          "detailUrl": "",
+          "direction": "unknown"
+        }
+      ],
+      "outgoing": [],
+      "lastUpdated": "2026-01-28T15:08:03.732Z"
+    },
+    "timestamp": 1769612883734
+  },
+  "cacheDuration": 86400000
+}
