@@ -5,7 +5,6 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const compression = require('compression'); // Add compression for performance
 const { fetchNewsData, fetchScheduleData, scrapeCHNStats } = require('./scraper'); // Import the news fetching function and new stats fetching function
-const { fetchRecruitingData } = require('./recruiting-scraper'); // Import recruiting scraper
 const { saveToCache, getFromCache } = require('./src/scripts/caching-system');
 const fs = require('fs').promises; // For reading roster/recruit data later
 const path = require('path');
