@@ -1,6 +1,7 @@
-/* Schedule.css - Modern Card Design */
 .schedule-page {
   animation: fadeIn 0.6s ease;
+  padding-bottom: 60px;
+  /* Prevent footer overlap */
 }
 
 .schedule-page h1 {
