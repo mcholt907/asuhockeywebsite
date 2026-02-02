@@ -48,8 +48,10 @@ function App() {
                 <li style={{ '--i': 5 }}><NavLink to="/stats" onClick={closeMenu}>Stats</NavLink></li>
                 <li style={{ '--i': 6 }}><NavLink to="/recruiting" onClick={closeMenu}>Recruiting</NavLink></li>
                 <li style={{ '--i': 7 }}><NavLink to="/alumni" onClick={closeMenu}>Where Are They Now?</NavLink></li>
+                {/* Hidden for now
                 <li style={{ '--i': 8 }}><NavLink to="/about" onClick={closeMenu}>About</NavLink></li>
                 <li style={{ '--i': 9 }}><NavLink to="/contact" onClick={closeMenu}>Contact</NavLink></li>
+                */}
               </ul>
             </nav>
           </div>
@@ -64,8 +66,10 @@ function App() {
             <Route path="/recruiting" element={<Recruiting />} />
             <Route path="/alumni" element={<Alumni />} />
             <Route path="/stats" element={<Stats />} />
+            {/* Hidden for now
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            */}
           </Routes>
         </main>
 
