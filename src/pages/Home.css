@@ -461,3 +461,55 @@
     flex-direction: column;
   }
 }
+
+/* Logo Hero Styling */
+.logo-hero-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.site-main-logo {
+  max-width: 600px;
+  width: 90%;
+  height: auto;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+  margin-bottom: 1rem;
+  animation: logoFloat 6s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.site-subtitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--white);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  margin-top: 5px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .site-main-logo {
+    max-width: 100%;
+  }
+
+  .site-subtitle {
+    font-size: 1.1rem;
+    padding: 0 10px;
+  }
+}

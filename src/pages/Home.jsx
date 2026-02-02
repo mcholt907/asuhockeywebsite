@@ -73,10 +73,14 @@ function Home() {
               </div>
             </div>
           ) : (
-            <>
-              <h1>Arizona State University Men's Ice Hockey</h1>
-              <p>Your source for the latest news, stats, and recruiting updates</p>
-            </>
+            <div className="logo-hero-content">
+              <img
+                src="/assets/site-logo.png"
+                alt="Forks Up Pucks - ASU Hockey Fan Site"
+                className="site-main-logo"
+              />
+              <p className="site-subtitle">Your ultimate source for Sun Devil Hockey</p>
+            </div>
           )}
         </div>
       </section>
