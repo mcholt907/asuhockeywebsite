@@ -75,7 +75,7 @@ function Home() {
           ) : (
             <div className="logo-hero-content">
               <img
-                src="/assets/site-logo.png"
+                src="/assets/site-logo.jpg"
                 alt="Forks Up Pucks - ASU Hockey Fan Site"
                 className="site-main-logo"
               />
