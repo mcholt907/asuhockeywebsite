@@ -12,6 +12,7 @@ import Recruiting from './pages/Recruiting';
 import Stats from './pages/Stats';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import Alumni from './pages/Alumni';
 
 // Global Components
 import GlobalNotificationBanner from './components/GlobalNotificationBanner';
@@ -46,8 +47,9 @@ function App() {
                 <li style={{ '--i': 4 }}><NavLink to="/roster" onClick={closeMenu}>Roster</NavLink></li>
                 <li style={{ '--i': 5 }}><NavLink to="/stats" onClick={closeMenu}>Stats</NavLink></li>
                 <li style={{ '--i': 6 }}><NavLink to="/recruiting" onClick={closeMenu}>Recruiting</NavLink></li>
-                <li style={{ '--i': 7 }}><NavLink to="/about" onClick={closeMenu}>About</NavLink></li>
-                <li style={{ '--i': 8 }}><NavLink to="/contact" onClick={closeMenu}>Contact</NavLink></li>
+                <li style={{ '--i': 7 }}><NavLink to="/alumni" onClick={closeMenu}>Where Are They Now?</NavLink></li>
+                <li style={{ '--i': 8 }}><NavLink to="/about" onClick={closeMenu}>About</NavLink></li>
+                <li style={{ '--i': 9 }}><NavLink to="/contact" onClick={closeMenu}>Contact</NavLink></li>
               </ul>
             </nav>
           </div>
@@ -60,6 +62,7 @@ function App() {
             <Route path="/roster" element={<Roster />} />
             <Route path="/schedule" element={<Schedule />} />
             <Route path="/recruiting" element={<Recruiting />} />
+            <Route path="/alumni" element={<Alumni />} />
             <Route path="/stats" element={<Stats />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
@@ -81,6 +84,7 @@ function App() {
                   <li><NavLink to="/roster">Roster</NavLink></li>
                   <li><NavLink to="/stats">Stats</NavLink></li>
                   <li><NavLink to="/recruiting">Recruiting</NavLink></li>
+                  <li><NavLink to="/alumni">Where Are They Now?</NavLink></li>
                 </ul>
               </nav>
             </div>

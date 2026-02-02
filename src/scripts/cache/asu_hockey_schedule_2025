@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-01-27T15:16:10.884Z",
+  "timestamp": "2026-02-02T17:19:05.403Z",
   "data": [
     {
       "date": "2025-10-03",
@@ -528,7 +528,13 @@
       "notes": "",
       "tv": "",
       "radio": "",
-      "links": []
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4857"
+        }
+      ],
+      "result": "W 6-5"
     },
     {
       "date": "2026-01-31",
@@ -539,7 +545,17 @@
       "notes": "",
       "tv": "",
       "radio": "",
-      "links": []
+      "links": [
+        {
+          "text": "Box score",
+          "url": "https://thesundevils.com/boxscore/4848"
+        },
+        {
+          "text": "Recap",
+          "url": "https://thesundevils.com/news/2026/02/1/hockey-unable-to-complete-sweep-at-colorado-college"
+        }
+      ],
+      "result": "L 1-4"
     },
     {
       "date": "2026-02-06",

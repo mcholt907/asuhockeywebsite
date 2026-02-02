@@ -378,6 +378,7 @@ async function fetchScheduleData() {
 
 async function fetchNewsData() {
   const ASU_HOCKEY_NEWS_CACHE_KEY = 'asu_hockey_news'; // Just the base key
+  const NEWS_CACHE_DURATION = 60 * 60 * 1000; // 1 hour in ms
 
   console.log(`[Cache System] Attempting to fetch news data with cache key: ${ASU_HOCKEY_NEWS_CACHE_KEY}`);
 
@@ -450,7 +451,7 @@ async function fetchNewsData() {
 
     if (allArticles.length > 0) {
       console.log(`[Cache System] Successfully scraped ${allArticles.length} news articles. Saving to cache.`);
-      await saveToCache(allArticles, ASU_HOCKEY_NEWS_CACHE_KEY); // Swapped arguments: (data, filename)
+      await saveToCache(allArticles, ASU_HOCKEY_NEWS_CACHE_KEY, NEWS_CACHE_DURATION); // 1 hour cache
     } else {
       console.log('[Cache System] No news articles returned from scrapers. Not caching.');
     }
@@ -462,6 +463,19 @@ async function fetchNewsData() {
 }
 
 async function scrapeCHNStats() {
+  const STATS_CACHE_KEY = 'asu_hockey_stats';
+
+  // Check cache first
+  try {
+    const cachedStats = await getFromCache(STATS_CACHE_KEY);
+    if (cachedStats) {
+      console.log('[CHN Stats Scraper] Returning cached stats data.');
+      return cachedStats;
+    }
+  } catch (error) {
+    console.log('[CHN Stats Scraper] No valid cache found.');
+  }
+
   const url = config.urls.chnStats(config.seasons.stats);
   console.log(`[CHN Stats Scraper] Attempting to fetch stats from: ${url}`);
   try {
@@ -507,6 +521,12 @@ async function scrapeCHNStats() {
     });
 
     console.log(`[CHN Stats Scraper] Scraped ${stats.skaters.length} skaters and ${stats.goalies.length} goalies.`);
+
+    // Save to cache (24 hours default)
+    if (stats.skaters.length > 0 || stats.goalies.length > 0) {
+      await saveToCache(stats, STATS_CACHE_KEY);
+    }
+
     return stats;
   } catch (error) {
     console.error('[CHN Stats Scraper] Error scraping stats:', error.message);
@@ -515,6 +535,19 @@ async function scrapeCHNStats() {
 }
 
 async function scrapeCHNRoster() {
+  const ROSTER_CACHE_KEY = 'asu_hockey_roster';
+
+  // Check cache first
+  try {
+    const cachedRoster = await getFromCache(ROSTER_CACHE_KEY);
+    if (cachedRoster) {
+      console.log('[CHN Roster Scraper] Returning cached roster data.');
+      return cachedRoster;
+    }
+  } catch (error) {
+    console.log('[CHN Roster Scraper] No valid cache found.');
+  }
+
   const url = 'https://www.collegehockeynews.com/reports/roster/Arizona-State/61';
   console.log(`[CHN Roster Scraper] Attempting to fetch roster from: ${url}`);
   try {
@@ -575,6 +608,12 @@ async function scrapeCHNRoster() {
     });
 
     console.log(`[CHN Roster Scraper] Scraped ${players.length} players.`);
+
+    // Save to cache (24 hours default)
+    if (players.length > 0) {
+      await saveToCache(players, ROSTER_CACHE_KEY);
+    }
+
     return players;
   } catch (error) {
     console.error('[CHN Roster Scraper] Error scraping roster:', error.message);

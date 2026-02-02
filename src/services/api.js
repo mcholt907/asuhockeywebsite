@@ -71,6 +71,21 @@ export const getTransfers = async () => {
   }
 };
 
+/**
+ * Fetches alumni data (Where Are They Now?).
+ * @returns {Promise<Object>} A promise that resolves to an object with skaters, goalies, and lastUpdated.
+ *                            Returns empty object on error.
+ */
+export const getAlumni = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/alumni`);
+    return response.data; // Expects { skaters: [...], goalies: [...], lastUpdated: ... }
+  } catch (error) {
+    console.error('Error fetching alumni:', error);
+    return { skaters: [], goalies: [], lastUpdated: null };
+  }
+};
+
 
 /**
  * Fetches the game schedule.

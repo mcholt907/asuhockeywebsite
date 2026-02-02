@@ -1,0 +1,365 @@
+/* Alumni.css - Where Are They Now? Page Styling V3 */
+
+.alumni-page {
+    animation: fadeIn 0.5s ease;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+/* Header */
+.alumni-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.alumni-header h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--asu-maroon);
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+}
+
+.alumni-header .subtitle {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+/* Controls / Tab Toggle */
+.alumni-controls {
+    display: flex;
+    justify-content: center;
+    margin: 32px 0;
+}
+
+.alumni-controls .position-filter {
+    display: flex;
+    gap: 12px;
+    background: var(--white);
+    padding: 8px;
+    border-radius: 50px;
+    box-shadow: var(--shadow-md);
+    border: 2px solid var(--border-color);
+}
+
+.alumni-controls .position-filter button {
+    padding: 12px 28px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.95rem;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.alumni-controls .position-filter button:hover {
+    color: var(--asu-maroon);
+    transform: scale(1.05);
+}
+
+.alumni-controls .position-filter button.active,
+.alumni-controls .position-filter button.active:hover,
+.alumni-controls .position-filter button.active:focus {
+    background: var(--gradient-primary);
+    color: #FFFFFF !important;
+    box-shadow: var(--shadow-maroon);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* Content Area */
+.alumni-content {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* Table Container */
+.alumni-table-container {
+    background: var(--white);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 2px solid var(--border-color);
+    overflow: hidden;
+    transition: all var(--transition-base);
+}
+
+.alumni-table-container:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+/* Table */
+.alumni-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.alumni-table thead th {
+    background: var(--gradient-primary);
+    color: var(--white);
+    padding: 16px 14px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: 4px solid var(--asu-gold);
+}
+
+/* Rank Column */
+.rank-col {
+    width: 40px;
+    text-align: center !important;
+}
+
+.rank-cell {
+    width: 40px;
+    text-align: center;
+}
+
+.rank-number {
+    font-weight: 700;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Stats Columns */
+.stat-col {
+    text-align: center !important;
+    width: 45px;
+}
+
+.stat-cell {
+    text-align: center;
+    font-family: 'Inter', monospace;
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.stat-highlight {
+    font-weight: 700;
+    color: var(--asu-maroon);
+}
+
+/* Table Rows */
+.alumni-table tbody tr {
+    border-bottom: 1px solid var(--border-color-light);
+    transition: all var(--transition-base);
+}
+
+.alumni-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.alumni-table tbody tr:hover {
+    background: linear-gradient(90deg, rgba(255, 198, 39, 0.08) 0%, rgba(255, 198, 39, 0.03) 100%);
+}
+
+/* Continuation row (same player, different team) */
+.continuation-row {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.continuation-row:hover {
+    background: linear-gradient(90deg, rgba(255, 198, 39, 0.12) 0%, rgba(255, 198, 39, 0.05) 100%) !important;
+}
+
+/* Totals row */
+.totals-row {
+    background: rgba(140, 29, 64, 0.05);
+    font-style: italic;
+}
+
+.totals-row:hover {
+    background: rgba(140, 29, 64, 0.08) !important;
+}
+
+.totals-label {
+    color: var(--text-light);
+    font-style: italic;
+    font-size: 0.85rem;
+}
+
+.alumni-table td {
+    padding: 12px 14px;
+    color: var(--text-primary);
+    vertical-align: middle;
+}
+
+/* Player Name */
+.player-name-cell {
+    font-weight: 600;
+    min-width: 160px;
+}
+
+.player-link {
+    color: var(--text-primary);
+    text-decoration: none;
+    position: relative;
+    transition: color var(--transition-base);
+}
+
+.player-link:hover {
+    color: var(--asu-maroon);
+}
+
+.position-badge {
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-size: 0.85em;
+}
+
+/* Team Cell */
+.team-cell {
+    min-width: 150px;
+}
+
+.team-link {
+    color: var(--asu-maroon);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color var(--transition-base);
+}
+
+.team-link:hover {
+    color: var(--asu-maroon-light);
+    text-decoration: underline;
+}
+
+/* League Cell */
+.league-cell {
+    min-width: 80px;
+}
+
+.league-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color var(--transition-base);
+}
+
+.league-link:hover {
+    color: var(--asu-maroon);
+}
+
+/* No Data */
+.no-data {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+}
+
+/* Last Updated */
+.last-updated {
+    text-align: center;
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-color);
+}
+
+.last-updated p {
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
+
+/* Loading / Error */
+.loading-message,
+.error-message {
+    text-align: center;
+    padding: 80px 20px;
+    font-size: 1.1rem;
+}
+
+.loading-message {
+    color: var(--text-secondary);
+}
+
+.error-message {
+    color: #D32F2F;
+}
+
+/* Mobile / Responsive */
+@media (max-width: 900px) {
+    .alumni-table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        /* Hide scrollbar on Firefox */
+    }
+
+    .alumni-table-container::-webkit-scrollbar {
+        display: none;
+        /* Hide scrollbar on Chrome/Safari */
+    }
+
+    .alumni-table {
+        min-width: 700px;
+    }
+
+    /* Scroll hint for mobile users */
+    .alumni-content::after {
+        content: '← swipe to see more →';
+        display: block;
+        text-align: center;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        opacity: 0.6;
+        margin-top: 12px;
+        font-style: italic;
+    }
+}
+
+@media (max-width: 768px) {
+    .alumni-page {
+        padding: 16px;
+    }
+
+    .alumni-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .alumni-header .subtitle {
+        font-size: 0.95rem;
+    }
+
+    .alumni-controls .position-filter {
+        padding: 6px;
+        gap: 8px;
+    }
+
+    .alumni-controls .position-filter button {
+        padding: 10px 16px;
+        font-size: 0.85rem;
+    }
+
+    .alumni-table thead th {
+        font-size: 0.7rem;
+        padding: 12px 10px;
+        white-space: nowrap;
+    }
+
+    .alumni-table td {
+        padding: 10px 10px;
+        font-size: 0.85rem;
+    }
+
+    .stat-col {
+        width: 35px;
+    }
+}
+
+@media (max-width: 480px) {
+    .alumni-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .alumni-controls .position-filter button {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+}

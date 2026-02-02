@@ -70,7 +70,8 @@
   background: var(--gradient-primary);
   opacity: 0;
   transition: opacity var(--transition-base);
-  z-index: 0;
+  z-index: -1;
+  /* Behind the button text */
 }
 
 .position-filter button:hover {
@@ -80,12 +81,19 @@
 
 .position-filter button.active {
   background: var(--gradient-primary);
-  color: var(--white);
+  color: var(--white) !important;
   box-shadow: var(--shadow-maroon);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .position-filter button.active::before {
   opacity: 1;
+}
+
+/* Ensure button text is above the ::before pseudo-element */
+.position-filter button {
+  isolation: isolate;
+  /* Creates stacking context */
 }
 
 .position-filter button>* {
@@ -247,6 +255,15 @@
   .roster-table-container {
     overflow-x: auto;
     border-radius: var(--border-radius-md);
+    -webkit-overflow-scrolling: touch;
+    /* Smooth scrolling on iOS */
+    scrollbar-width: none;
+    /* Hide scrollbar on Firefox */
+  }
+
+  .roster-table-container::-webkit-scrollbar {
+    display: none;
+    /* Hide scrollbar on Chrome/Safari */
   }
 
   .roster-table thead th {
@@ -258,5 +275,17 @@
     padding: 12px 16px;
     font-size: 0.9rem;
     white-space: nowrap;
+  }
+
+  /* Scroll hint for mobile users */
+  .roster-section::after {
+    content: '← swipe to see more →';
+    display: block;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    opacity: 0.6;
+    margin-top: 12px;
+    font-style: italic;
   }
 }

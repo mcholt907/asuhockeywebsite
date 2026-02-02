@@ -10,7 +10,7 @@ const { requestWithRetry } = require('./utils/request-helper');
 
 const TRANSFERS_URL = 'https://www.eliteprospects.com/team/18066/arizona-state-univ/transfers';
 const CACHE_KEY = 'asu_transfers';
-const CACHE_TTL = 3600000; // 1 hour in ms
+const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours in ms
 
 /**
  * Extract player ID from Elite Prospects URL

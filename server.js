@@ -6,6 +6,7 @@ const rateLimit = require('express-rate-limit');
 const compression = require('compression'); // Add compression for performance
 const { fetchNewsData, fetchScheduleData, scrapeCHNStats } = require('./scraper'); // Import the news fetching function and new stats fetching function
 const { scrapeTransferData } = require('./transfer-scraper'); // Import transfer scraper
+const { scrapeAlumniData } = require('./alumni-scraper'); // Import alumni scraper
 const { saveToCache, getFromCache } = require('./src/scripts/caching-system');
 const fs = require('fs').promises; // For reading roster/recruit data later
 const path = require('path');
@@ -166,6 +167,22 @@ app.get('/api/transfers', async (req, res) => {
     console.error('[API /transfers] Error:', error.message);
     res.status(500).json({
       error: 'Failed to fetch transfer data',
+      message: error.message
+    });
+  }
+});
+
+// API endpoint for alumni data (Where Are They Now?)
+app.get('/api/alumni', async (req, res) => {
+  try {
+    console.log('[API /alumni] Fetching alumni data...');
+    const alumniData = await scrapeAlumniData();
+    console.log(`[API /alumni] Returning ${alumniData.skaters?.length || 0} skaters, ${alumniData.goalies?.length || 0} goalies`);
+    res.json(alumniData);
+  } catch (error) {
+    console.error('[API /alumni] Error:', error.message);
+    res.status(500).json({
+      error: 'Failed to fetch alumni data',
       message: error.message
     });
   }
@@ -377,6 +394,17 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
+// Production: Serve React static files
+if (isProduction) {
+  // Serve static files from the React build folder
+  app.use(express.static(path.join(__dirname, 'build')));
+
+  // Catch-all handler for React Router (must be after API routes)
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+  });
+}
+
 app.listen(port, () => {
   console.log(`\n🚀 ASU Hockey Website Server`);
   console.log(`================================`);
@@ -388,5 +416,6 @@ app.listen(port, () => {
   console.log(`  Recruits:  http://localhost:${port}/api/recruits`);
   console.log(`  Schedule:  http://localhost:${port}/api/schedule`);
   console.log(`  Stats:     http://localhost:${port}/api/stats`);
+  console.log(`  Alumni:    http://localhost:${port}/api/alumni`);
   console.log(`================================\n`);
 });
