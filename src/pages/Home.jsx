@@ -74,11 +74,7 @@ function Home() {
             </div>
           ) : (
             <div className="logo-hero-content">
-              <img
-                src="/assets/site-logo.jpg"
-                alt="Forks Up Pucks - ASU Hockey Fan Site"
-                className="site-main-logo"
-              />
+              {/* Logo is now part of the hero-jersey.jpg background */}
               <p className="site-subtitle">Your ultimate source for Sun Devil Hockey</p>
             </div>
           )}
