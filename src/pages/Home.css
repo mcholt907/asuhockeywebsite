@@ -3,9 +3,9 @@
   animation: fadeIn 0.5s ease;
 }
 
-/* Hero Section - Full Jersey Image */
+/* Hero Section - Full Jersey Image (background-image set inline in JSX) */
 .hero {
-  background: rgb(140, 29, 64) url('/assets/hero-jersey.jpg') no-repeat center center;
+  background-color: rgb(140, 29, 64);
   background-size: cover;
   color: var(--white);
   padding: 60px 24px;
