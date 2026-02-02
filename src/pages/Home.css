@@ -19,22 +19,7 @@
   justify-content: center;
 }
 
-/* Add a gold stripe at the bottom like a jersey trim */
-.hero::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 12px;
-  background:
-    linear-gradient(90deg,
-      var(--asu-gold) 0%,
-      #FFD700 50%,
-      var(--asu-gold) 100%);
-  border-top: 2px solid var(--white);
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
-}
+/* Gold stripe removed - hero is now purely the background image */
 
 .hero-content {
   position: relative;

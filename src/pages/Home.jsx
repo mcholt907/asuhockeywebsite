@@ -59,8 +59,8 @@ function Home() {
           backgroundRepeat: 'no-repeat'
         }}
       >
-        <div className="hero-content">
-          {gameDay ? (
+        {gameDay && (
+          <div className="hero-content">
             <div className="game-day-hero-content fade-in">
               <span className="game-day-badge">TODAY'S MATCHUP</span>
               <h1>Arizona State <span className="vs">VS</span> {gameDay.opponent}</h1>
@@ -79,13 +79,9 @@ function Home() {
                 <a href="https://thesundevils.com" target="_blank" rel="noreferrer" className="btn-secondary">Listen Live</a>
               </div>
             </div>
-          ) : (
-            <div className="logo-hero-content">
-              {/* Logo is now part of the hero-jersey.jpg background */}
-              <p className="site-subtitle">Your ultimate source for Sun Devil Hockey</p>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
+        {/* When no game day, hero shows just the jersey background image */}
       </section>
 
       <section className="latest-news">
