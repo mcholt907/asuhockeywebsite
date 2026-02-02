@@ -5,7 +5,7 @@
 
 /* Hero Section - Full Jersey Image */
 .hero {
-  background: rgb(140, 29, 64) url('/assets/hero-jersey.jpg') no-repeat center center;
+  background: rgb(140, 29, 64) url('/assets/hero-jersey.png') no-repeat center center;
   background-size: cover;
   color: var(--white);
   padding: 60px 24px;
