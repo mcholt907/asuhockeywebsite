@@ -70,19 +70,51 @@ In Render dashboard → Your service → **Environment**:
 
 ---
 
-## Step 5: Custom Domain (Optional)
+## Step 5: Configure Custom Domain (forksuppucks.com)
 
-1. In Render → Settings → Custom Domains
-2. Add your domain: `asuhockeyfan.com`
-3. Update DNS records at your registrar:
+### In Render Dashboard
+
+1. Go to your service → **Settings** → **Custom Domains**
+2. Click **"Add Custom Domain"**
+3. Enter: `forksuppucks.com` and `www.forksuppucks.com`
+4. Render will show you a target hostname (like `asuhockey.onrender.com`)
+
+### In Squarespace DNS
+
+1. Log into [Squarespace Domains](https://account.squarespace.com/domains)
+2. Click **forksuppucks.com** → **DNS Settings**
+3. Add these records:
+
+**For root domain (forksuppucks.com):**
+
+```
+Type: A
+Host: @
+Data: 216.24.57.1  (Render's IP - they may provide a different one)
+```
+
+**For www subdomain:**
+
+```
+Type: CNAME
+Host: www
+Data: asuhockey.onrender.com  (your Render URL)
+```
+
+1. **Update `CORS_ORIGINS`** in Render environment variables:
 
    ```
-   Type: CNAME
-   Name: www
-   Value: asuhockey.onrender.com
+   CORS_ORIGINS=https://forksuppucks.com,https://www.forksuppucks.com
    ```
 
-4. Update `CORS_ORIGINS` to include your custom domain
+2. Wait 10-60 minutes for DNS propagation
+
+### Verify SSL
+
+Render automatically provisions HTTPS certificates. After DNS propagates, visit:
+
+- <https://forksuppucks.com>
+- <https://www.forksuppucks.com>
 
 ---
 
