@@ -74,7 +74,7 @@ function News() {
 
       {/* Filters */}
       <div className="news-filters">
-        {['All', 'Official', 'CHN', 'USCHO'].map(f => (
+        {['All', 'Official', 'CHN'].map(f => (
           <button
             key={f}
             className={`filter-btn ${filter === f ? 'active' : ''}`}

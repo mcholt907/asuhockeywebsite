@@ -16,6 +16,7 @@ import Alumni from './pages/Alumni';
 
 // Global Components
 import GlobalNotificationBanner from './components/GlobalNotificationBanner';
+import MobileBottomNav from './components/MobileBottomNav';
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -107,6 +108,7 @@ function App() {
         </footer>
 
         <GlobalNotificationBanner />
+        <MobileBottomNav />
       </div>
     </BrowserRouter>
   );

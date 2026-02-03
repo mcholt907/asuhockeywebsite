@@ -175,8 +175,7 @@ function Recruiting() {
       {/* Recent Transfers Section */}
       {hasTransfers && (
         <section className="transfers-section">
-          <h2 className="section-title">Recent Transfers</h2>
-          <p className="section-subtitle">Latest player movements</p>
+          <h2 className="section-title">Latest Player Movements</h2>
 
           <div className="transfers-grid">
             {transfers.incoming?.map((transfer, idx) => (
