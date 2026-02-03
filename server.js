@@ -194,6 +194,19 @@ app.get('/api/roster', async (req, res) => {
     const hockeyData = await getHockeyData();
     let roster = hockeyData ? (hockeyData.roster || []) : [];
 
+    // Build a map of recruits for shoots data lookup
+    const recruitShootsMap = new Map();
+    if (hockeyData && hockeyData.recruiting) {
+      Object.values(hockeyData.recruiting).forEach(recruitList => {
+        recruitList.forEach(recruit => {
+          if (recruit.name && recruit.shoots) {
+            recruitShootsMap.set(recruit.name.toLowerCase().trim(), recruit.shoots);
+          }
+        });
+      });
+    }
+
+
     // Merge live roster data (full details)
     try {
       // Import on demand or move top-level if preferred, but for now we need the new export
@@ -204,10 +217,40 @@ app.get('/api/roster', async (req, res) => {
 
       // Create a map of existing players for easier lookup by name
       const existingMap = new Map();
+      const lastNameMap = new Map(); // Map by last name for fuzzy matching
       roster.forEach(p => {
-        const cleanName = p.name.replace(/\s*\([A-Z]+\)\s*/i, '').trim().toLowerCase();
+        const cleanName = p.name.replace(/\s*\([A-Z\/]+\)\s*/i, '').trim().toLowerCase();
         existingMap.set(cleanName, p);
+        // Also create a map by last name for fuzzy matching
+        const nameParts = cleanName.split(' ');
+        if (nameParts.length >= 2) {
+          const lastName = nameParts[nameParts.length - 1];
+          if (!lastNameMap.has(lastName)) {
+            lastNameMap.set(lastName, []);
+          }
+          lastNameMap.get(lastName).push(p);
+        }
       });
+
+      // Helper to find player by exact match or last name match
+      const findExistingPlayer = (chnName) => {
+        const lowerName = chnName.toLowerCase();
+        // Try exact match first
+        if (existingMap.has(lowerName)) {
+          return existingMap.get(lowerName);
+        }
+        // Try matching by last name (for "Sam" vs "Samuel" cases)
+        const nameParts = lowerName.split(' ');
+        if (nameParts.length >= 2) {
+          const lastName = nameParts[nameParts.length - 1];
+          const candidates = lastNameMap.get(lastName) || [];
+          if (candidates.length === 1) {
+            // Only one player with this last name - likely a match
+            return candidates[0];
+          }
+        }
+        return null;
+      };
 
       liveRoster.forEach(p => {
         // CHN keys: #, Player, Yr, Pos, S/C, Ht, Wt, DOB, Hometown, Last Team
@@ -216,16 +259,15 @@ app.get('/api/roster', async (req, res) => {
 
         // Clean name (sometimes has trailing spaces or chars)
         let name = rawName.trim();
-        const lowerName = name.toLowerCase();
 
         // Calculate nationality from hometown
         const hometown = p.Hometown || '';
         const nationality = determineNationality(hometown);
 
-        // Check if existing
-        if (existingMap.has(lowerName)) {
+        // Check if existing (with fuzzy matching)
+        const existingPlayer = findExistingPlayer(name);
+        if (existingPlayer) {
           // Update existing player if fields are missing
-          const existingPlayer = existingMap.get(lowerName);
 
           if (!existingPlayer.number || existingPlayer.number === '-' || existingPlayer.number === '') {
             existingPlayer.number = p['#'] || existingPlayer.number;
@@ -258,13 +300,19 @@ app.get('/api/roster', async (req, res) => {
           let pos = p.Pos || '';
           let displayName = pos ? `${name} (${pos})` : name;
 
+          // Try to get shoots from CHN, then from recruiting data
+          let shoots = p['S/C'] || '';
+          if (!shoots || shoots === '-') {
+            shoots = recruitShootsMap.get(name.toLowerCase().trim()) || '-';
+          }
+
           const newPlayer = {
             number: p['#'] || '',
             name: displayName,
             position: pos,
             height: p.Ht || '-',
             weight: p.Wt || '-',
-            shoots: p['S/C'] || '-', // Shoots/Catches
+            shoots: shoots, // Shoots/Catches
             born: p.DOB || '-',
             birthplace: p.Hometown || '-',
             nationality: nationality,
@@ -272,7 +320,7 @@ app.get('/api/roster', async (req, res) => {
           };
           roster.push(newPlayer);
           // Add to map to prevent duplicates if CHN lists twice (unlikely)
-          existingMap.set(lowerName, newPlayer);
+          existingMap.set(name.toLowerCase(), newPlayer);
         }
       });
 

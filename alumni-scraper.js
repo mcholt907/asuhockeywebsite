@@ -268,12 +268,12 @@ async function scrapeAllPages(type) {
 async function scrapeAlumniData() {
     console.log('[Alumni Scraper] Starting to scrape alumni data...');
 
-    // Check cache first
+    // Check cache first - caching system handles TTL automatically
     try {
         const cached = await getFromCache(CACHE_KEY);
-        if (cached && cached.timestamp && (Date.now() - cached.timestamp) < CACHE_TTL) {
+        if (cached) {
             console.log('[Alumni Scraper] Returning cached alumni data');
-            return cached.data;
+            return cached;
         }
     } catch (error) {
         console.log('[Alumni Scraper] No valid cache found, scraping fresh data');
@@ -304,22 +304,20 @@ async function scrapeAlumniData() {
             nhlEntries.forEach(p => console.log(`  - ${p.name} (${p.team})`));
         }
 
-        // Cache results
-        await saveToCache({
-            data: result,
-            timestamp: Date.now()
-        }, CACHE_KEY);
+        // Cache results - pass result directly, caching system wraps with timestamp
+        await saveToCache(result, CACHE_KEY, CACHE_TTL);
 
         return result;
 
     } catch (error) {
         console.error('[Alumni Scraper] Error:', error.message);
 
+        // Try to return stale cache on error
         try {
             const cached = await getFromCache(CACHE_KEY);
-            if (cached && cached.data) {
+            if (cached) {
                 console.log('[Alumni Scraper] Returning stale cached data');
-                return cached.data;
+                return cached;
             }
         } catch (e) { }
 

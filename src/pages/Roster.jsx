@@ -15,11 +15,12 @@ function Roster() {
         setError(null);
         const rosterData = await getRoster();
         if (Array.isArray(rosterData)) {
-          // Filter out invalid players (non-numeric jersey numbers, missing names)
+          // Filter out invalid players (missing names or non-numeric jersey numbers)
+          // Numbers can be in format "30", "#30", or "#30" 
           const filteredPlayers = rosterData.filter(
             player => player &&
               player.name &&
-              (player.number && /^[0-9]+$/.test(String(player.number)))
+              (player.number && /^#?[0-9]+$/.test(String(player.number).trim()))
           );
           setPlayers(filteredPlayers);
         } else {
@@ -38,11 +39,23 @@ function Roster() {
     fetchRosterData();
   }, []);
 
-  // Group players by position
+  // Group players by position - check both 'position' field and name pattern for compatibility
+  const isGoalie = (p) => {
+    const pos = (p.position || '').toUpperCase();
+    const name = p.name || '';
+    return pos === 'G' || name.includes('(G)');
+  };
+
+  const isDefenseman = (p) => {
+    const pos = (p.position || '').toUpperCase();
+    const name = p.name || '';
+    return pos === 'D' || name.includes('(D)');
+  };
+
   const playersByPosition = {
-    goaltenders: players.filter(p => p.name && p.name.includes('(G)')),
-    defensemen: players.filter(p => p.name && p.name.includes('(D)')),
-    forwards: players.filter(p => p.name && !p.name.includes('(G)') && !p.name.includes('(D)'))
+    goaltenders: players.filter(p => isGoalie(p)),
+    defensemen: players.filter(p => isDefenseman(p)),
+    forwards: players.filter(p => !isGoalie(p) && !isDefenseman(p) && p.name)
   };
 
   // Filter based on selected position
@@ -74,6 +87,12 @@ function Roster() {
   // Helper to get nationality
   const getNationality = (player) => {
     return player.nationality || player.Nationality || 'USA';
+  };
+
+  // Helper to get shoots - show blank instead of '-' for missing data
+  const getShoots = (player) => {
+    const val = player.S || player.shoots || '';
+    return val === '-' ? '' : val;
   };
 
   if (loading) {
@@ -162,7 +181,7 @@ function Roster() {
                           getPlayerName(player)
                         )}
                       </td>
-                      <td>{player.S || player.shoots || '-'}</td>
+                      <td>{getShoots(player)}</td>
                       <td>{player.Ht || player.height || '-'}</td>
                       <td>{player.Wt || player.weight || '-'}</td>
                       <td>{player.Born || player.born || player.birth_year || '-'}</td>
@@ -217,7 +236,7 @@ function Roster() {
                           getPlayerName(player)
                         )}
                       </td>
-                      <td>{player.S || player.shoots || '-'}</td>
+                      <td>{getShoots(player)}</td>
                       <td>{player.Ht || player.height || '-'}</td>
                       <td>{player.Wt || player.weight || '-'}</td>
                       <td>{player.Born || player.born || player.birth_year || '-'}</td>
@@ -272,7 +291,7 @@ function Roster() {
                           getPlayerName(player)
                         )}
                       </td>
-                      <td>{player.S || player.shoots || '-'}</td>
+                      <td>{getShoots(player)}</td>
                       <td>{player.Ht || player.height || '-'}</td>
                       <td>{player.Wt || player.weight || '-'}</td>
                       <td>{player.Born || player.born || player.birth_year || '-'}</td>

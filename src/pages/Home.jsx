@@ -120,10 +120,6 @@ function Home() {
               <div className="stat-value">181</div>
               <div className="stat-label">Average Weight</div>
             </div>
-            <div className="hometown-map">
-              <h3>Player Hometowns</h3>
-              <img src="/assets/player-map.png" alt="Player hometown map" />
-            </div>
           </div>
         </section>
       </div>
