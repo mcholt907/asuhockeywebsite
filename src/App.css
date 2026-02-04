@@ -2,11 +2,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  /* Brand Colors */
-  --asu-maroon: #8C1D40;
-  --asu-gold: #FFC627;
-  --asu-maroon-dark: #6C1631;
-  --asu-maroon-light: #A8264A;
+  /* Brand Colors - matched to jersey stripe */
+  --asu-maroon: #5C1530;
+  --asu-gold: #E8A833;
+  --asu-maroon-dark: #4D1426;
+  --asu-maroon-light: #742038;
 
   /* Neutral Colors */
   --dark-bg: #1A1A1A;
@@ -97,6 +97,10 @@ main {
 /* --- Header & Navigation --- */
 header {
   background-color: var(--asu-maroon);
+  background-image: url('./assets/header-stripe.png');
+  background-size: auto 100%;
+  background-repeat: repeat-x;
+  background-position: center;
   color: var(--white);
   height: var(--header-height);
   position: sticky;
@@ -104,20 +108,23 @@ header {
   z-index: 1000;
   box-shadow: var(--shadow-md);
   backdrop-filter: blur(10px);
-  /* For supported browsers */
+  border-top: 2px solid var(--white);
 }
 
 .header-container {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 24px;
   height: 100%;
+  position: relative;
 }
 
 .logo {
+  position: absolute;
+  left: 24px;
   display: flex;
   align-items: center;
   gap: 12px;
