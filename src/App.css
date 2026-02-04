@@ -3,14 +3,14 @@
 
 :root {
   /* Brand Colors - matched to jersey stripe */
-  --asu-maroon: #5C1530;
+  --asu-maroon: #43141A;
   --asu-gold: #E8A833;
-  --asu-maroon-dark: #4D1426;
-  --asu-maroon-light: #742038;
+  --asu-maroon-dark: #331014;
+  --asu-maroon-light: #5C1D24;
 
-  /* Neutral Colors */
-  --dark-bg: #1A1A1A;
-  --darker-bg: #121212;
+  /* Neutral Colors - gold card backgrounds */
+  --dark-bg: #E8A833;
+  --darker-bg: #D49530;
   --light-bg: #F8F9FA;
   --white: #FFFFFF;
   --black: #000000;

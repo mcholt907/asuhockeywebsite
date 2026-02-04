@@ -140,13 +140,13 @@ function Stats() {
           className={`control-btn ${activeTab === 'skaters' ? 'active' : ''}`}
           onClick={() => setActiveTab('skaters')}
         >
-          Skaters
+          <span>Skaters</span>
         </button>
         <button
           className={`control-btn ${activeTab === 'goalies' ? 'active' : ''}`}
           onClick={() => setActiveTab('goalies')}
         >
-          Goalies
+          <span>Goalies</span>
         </button>
       </div>
 

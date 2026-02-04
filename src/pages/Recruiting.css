@@ -95,7 +95,7 @@
   position: absolute;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  background: linear-gradient(135deg, var(--dark-bg) 0%, var(--asu-maroon-dark) 100%);
   border-radius: 20px;
   border: 4px solid var(--asu-gold);
   overflow: hidden;
@@ -130,7 +130,7 @@
   border: 4px solid var(--asu-gold);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
   z-index: 2;
-  background: #1a1a1a;
+  background: var(--dark-bg);
 }
 
 .recruit-photo {

@@ -14,7 +14,7 @@
   background: #ffffff;
   border-radius: 16px;
   padding: 20px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
@@ -25,7 +25,7 @@
   top: 20px;
   z-index: 100;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(0,0,0,0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .source-filter {
@@ -122,15 +122,15 @@
   background-color: #ffffff;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  border: 1px solid rgba(0,0,0,0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .news-feed-item:hover {
   transform: translateY(-6px);
-  box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
 }
 
 .news-thumbnail {
@@ -194,8 +194,9 @@
 }
 
 .news-date {
-  color: #888;
+  color: var(--asu-maroon);
   font-size: 0.85rem;
+  font-weight: 600;
 }
 
 .news-summary {
@@ -248,40 +249,40 @@
   }
 }
 
-/* Dark mode support */
+/* Dark mode support - gold backgrounds with maroon text */
 @media (prefers-color-scheme: dark) {
   .news-controls {
-    background-color: #1a1a1a;
-    border-color: rgba(255,255,255,0.1);
+    background-color: var(--dark-bg);
+    border-color: rgba(67, 20, 26, 0.2);
   }
 
   .news-feed-item {
-    background-color: #1a1a1a;
-    border-color: rgba(255,255,255,0.1);
+    background-color: var(--dark-bg);
+    border-color: rgba(67, 20, 26, 0.2);
   }
 
   .search-box input {
-    background-color: #2a2a2a;
-    border-color: #333;
-    color: #fff;
+    background-color: white;
+    border-color: var(--asu-maroon);
+    color: var(--asu-maroon);
   }
 
   .search-box input:focus {
-    background-color: #2a2a2a;
+    background-color: white;
   }
 
   .news-title a {
-    color: #fff;
+    color: var(--asu-maroon);
   }
 
   .news-summary {
-    color: #999;
+    color: var(--asu-maroon-dark);
   }
 
   .loading-message,
   .error-message,
   .no-news {
-    background: #222;
-    color: #999;
+    background: var(--darker-bg);
+    color: var(--asu-maroon);
   }
 }
