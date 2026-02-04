@@ -53,11 +53,6 @@ function Home() {
       {/* Hero Section */}
       <section
         className={`hero ${gameDay ? 'hero-game-day' : ''}`}
-        style={{
-          backgroundImage: `url(${process.env.PUBLIC_URL}/assets/hero-jersey.jpg)`,
-          backgroundPosition: 'center center',
-          backgroundRepeat: 'no-repeat'
-        }}
       >
         {gameDay && (
           <div className="hero-content">
