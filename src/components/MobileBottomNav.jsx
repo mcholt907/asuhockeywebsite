@@ -54,10 +54,28 @@ const navItems = [
 
 function MobileBottomNav() {
     const location = useLocation();
+    const [showScrollHint, setShowScrollHint] = React.useState(true);
+    const scrollRef = React.useRef(null);
+
+    const handleScroll = (e) => {
+        const { scrollLeft, scrollWidth, clientWidth } = e.target;
+        // Hide hint once user scrolls even a little
+        if (scrollLeft > 10) {
+            setShowScrollHint(false);
+        }
+        // Show hint again if scrolled back to start and there's more content
+        if (scrollLeft === 0 && scrollWidth > clientWidth) {
+            setShowScrollHint(true);
+        }
+    };
 
     return (
         <nav className="mobile-bottom-nav">
-            <div className="bottom-nav-scroll">
+            <div
+                className="bottom-nav-scroll"
+                ref={scrollRef}
+                onScroll={handleScroll}
+            >
                 {navItems.map((item) => (
                     <NavLink
                         key={item.path}
@@ -69,6 +87,13 @@ function MobileBottomNav() {
                     </NavLink>
                 ))}
             </div>
+            {showScrollHint && (
+                <div className="scroll-hint">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+                    </svg>
+                </div>
+            )}
         </nav>
     );
 }
