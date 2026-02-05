@@ -10,7 +10,7 @@
   margin-bottom: 30px;
 }
 
-.news-controls {
+.news-controls-static {
   background: #ffffff;
   border-radius: 16px;
   padding: 20px;
@@ -20,13 +20,15 @@
   gap: 20px;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 30px;
-  position: sticky;
-  top: 20px;
+  margin-bottom: 40px;
   z-index: 100;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(0, 0, 0, 0.05);
+  position: static;
+  /* Default to static for mobile/tablet/laptop */
 }
+
+
 
 .source-filter {
   display: flex;
@@ -220,7 +222,7 @@
 }
 
 /* Responsive design */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .news-feed-container {
     padding: 15px;
   }
@@ -229,6 +231,11 @@
     padding: 15px;
     flex-direction: column;
     align-items: stretch;
+    position: static !important;
+    /* Force disable sticky on mobile/tablet to prevent overlap */
+    top: auto !important;
+    z-index: auto;
+    margin-bottom: 20px;
   }
 
   .source-filter {
@@ -242,6 +249,9 @@
   .news-items {
     grid-template-columns: 1fr;
     gap: 20px;
+    margin-top: 30px;
+    /* Extra space to prevent overlap with controls */
+    clear: both;
   }
 
   .news-title {
@@ -251,7 +261,7 @@
 
 /* Dark mode support - gold backgrounds with maroon text */
 @media (prefers-color-scheme: dark) {
-  .news-controls {
+  .news-controls-static {
     background-color: var(--dark-bg);
     border-color: rgba(67, 20, 26, 0.2);
   }

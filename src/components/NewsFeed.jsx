@@ -83,9 +83,9 @@ function NewsFeed({ limit = 0 }) { // Added limit prop, default to 0 (no limit u
 
   return (
     <div className="news-feed-container">
-      <header className="news-feed-header">
+      <div className="news-feed-header">
         {/* <h2>ASU Hockey News</h2> Removed, as Home.jsx has a section title */}
-        <div className="news-controls">
+        <div className="news-controls-static">
           <div className="source-filter">
             {sources.map(source => (
               <button
@@ -107,7 +107,7 @@ function NewsFeed({ limit = 0 }) { // Added limit prop, default to 0 (no limit u
             />
           </div>
         </div>
-      </header>
+      </div>
 
       <div className="news-items">
         {loading && <p className="loading-message">Loading news...</p>}

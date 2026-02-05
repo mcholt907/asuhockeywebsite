@@ -11,11 +11,13 @@
   background-position: center center;
   background-repeat: no-repeat;
   background-size: cover;
+  image-rendering: -webkit-optimize-contrast;
+  /* Sharper scaling */
   color: var(--white);
   padding: 0;
   height: 60vh;
   min-height: 400px;
-  max-height: 600px;
+  max-height: 500px;
   width: 100%;
   text-align: center;
   margin-bottom: 60px;
