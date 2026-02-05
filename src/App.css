@@ -231,31 +231,35 @@ header {
 
 /* --- Footer --- */
 footer {
-  background-color: var(--dark-bg);
+  background-color: var(--asu-maroon);
   color: var(--text-light);
-  padding: 60px 0 30px;
+  padding: 30px 0 20px;
+  /* Reduced padding */
   border-top: 4px solid var(--asu-gold);
 }
 
 .footer-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 40px;
+  gap: 20px;
+  /* Reduced gap */
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 24px;
 }
 
 .footer-logo img {
-  height: 50px;
+  height: 40px;
+  /* Slightly smaller logo */
   margin-bottom: 15px;
-  opacity: 0.9;
+  opacity: 1;
 }
 
 .footer-links h3,
 .footer-social h3 {
-  color: var(--white);
-  margin-bottom: 20px;
+  color: var(--asu-gold);
+  /* Gold headings for contrast */
+  margin-bottom: 15px;
   font-size: 1.1rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -273,13 +277,15 @@ footer {
 }
 
 .footer-links a {
-  color: var(--text-light);
+  color: rgba(255, 255, 255, 0.85);
+  /* High contrast off-white */
   text-decoration: none;
   transition: color 0.2s;
 }
 
 .footer-links a:hover {
   color: var(--asu-gold);
+  /* Gold on hover */
 }
 
 .social-icons {
