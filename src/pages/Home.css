@@ -287,6 +287,23 @@
   }
 }
 
+@media (max-width: 480px) {
+  .spotlight-content {
+    grid-template-columns: 1fr;
+    /* Force stack on small mobile */
+  }
+
+  .stat-card {
+    padding: 20px;
+    /* Reduce padding */
+  }
+
+  .stat-value {
+    font-size: 2.5rem;
+    /* Reduce font size */
+  }
+}
+
 /* --- Game Day Mode --- */
 .game-day-ticker {
   background: var(--asu-gold);
