@@ -38,14 +38,14 @@ function getFromCache(filename, ignoreExpiration = false) {
   try {
     if (!fs.existsSync(cacheFilePath)) {
       console.log(`Cache file not found: ${cacheFilePath}`);
-      Sentry.metrics.count('cache.miss', 1, { tags: { key: filename, reason: 'missing' } });
+      Sentry.metrics.count('cache.miss', 1, { attributes: { key: filename, reason: 'missing' } });
       return null;
     }
 
     const fileContents = fs.readFileSync(cacheFilePath, 'utf8');
     if (!fileContents) {
       console.log(`Cache file is empty: ${cacheFilePath}`);
-      Sentry.metrics.count('cache.miss', 1, { tags: { key: filename, reason: 'empty' } });
+      Sentry.metrics.count('cache.miss', 1, { attributes: { key: filename, reason: 'empty' } });
       return null;
     }
 
@@ -58,22 +58,22 @@ function getFromCache(filename, ignoreExpiration = false) {
     if (currentTime - cacheTime > cacheDuration) {
       if (ignoreExpiration) {
         console.log(`Cache expired for ${filename} but returning stale data (ignoreExpiration=true)`);
-        Sentry.metrics.count('cache.stale_used', 1, { tags: { key: filename } });
+        Sentry.metrics.count('cache.stale_used', 1, { attributes: { key: filename } });
         return cacheData.data;
       }
 
       console.log(`Cache expired for ${filename}`);
       fs.unlinkSync(cacheFilePath); // Optionally delete expired cache
-      Sentry.metrics.count('cache.miss', 1, { tags: { key: filename, reason: 'expired' } });
+      Sentry.metrics.count('cache.miss', 1, { attributes: { key: filename, reason: 'expired' } });
       return null;
     }
 
     console.log(`Cache hit for ${filename}`);
-    Sentry.metrics.count('cache.hit', 1, { tags: { key: filename } });
+    Sentry.metrics.count('cache.hit', 1, { attributes: { key: filename } });
     return cacheData.data; // Return only the data part, as scraper.js expects
   } catch (error) {
     console.error(`Error reading cache for ${filename}:`, error);
-    Sentry.metrics.count('cache.error', 1, { tags: { key: filename } });
+    Sentry.metrics.count('cache.error', 1, { attributes: { key: filename } });
 
     // If there's an error (e.g., corrupted JSON), treat it as a cache miss
     if (fs.existsSync(cacheFilePath)) {
