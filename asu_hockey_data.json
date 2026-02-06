@@ -1,10 +1,22 @@
 {
-  "last_updated": "2025-05-29T14:47:56.107278",
+  "last_updated": "2026-02-03T08:45:50.472704",
   "roster": [
     {
-      "number": "",
-      "name": "Connor Hasley (G)",
-      "position": "",
+      "number": "#30",
+      "name": "Chase Hamm",
+      "position": "G",
+      "age": "24",
+      "birth_year": "2002",
+      "birthplace": "Saskatoon, SK, CAN",
+      "height": "5'9\"",
+      "weight": "168",
+      "shoots": "L",
+      "player_link": "https://www.eliteprospects.com/player/403386/chase-hamm"
+    },
+    {
+      "number": "#33",
+      "name": "Connor Hasley",
+      "position": "G",
       "age": "24",
       "birth_year": "2001",
       "birthplace": "North Tonawanda, NY, USA",
@@ -14,9 +26,9 @@
       "player_link": "https://www.eliteprospects.com/player/415041/connor-hasley"
     },
     {
-      "number": "",
-      "name": "Samuel Urban (G)",
-      "position": "",
+      "number": "#31",
+      "name": "Samuel Urban",
+      "position": "G",
       "age": "20",
       "birth_year": "2005",
       "birthplace": "Dolne Kockovce, SVK",
@@ -26,10 +38,10 @@
       "player_link": "https://www.eliteprospects.com/player/653043/samuel-urban"
     },
     {
-      "number": "",
-      "name": "Richard Baran (D)",
-      "position": "",
-      "age": "19",
+      "number": "#5",
+      "name": "Richard Baran",
+      "position": "D",
+      "age": "20",
       "birth_year": "2005",
       "birthplace": "Bratislava, SVK",
       "height": "6'1\"",
@@ -38,46 +50,94 @@
       "player_link": "https://www.eliteprospects.com/player/794994/richard-baran"
     },
     {
-      "number": "",
-      "name": "Morgan Brady (D)",
-      "position": "",
-      "age": "20",
-      "birth_year": "2005",
-      "birthplace": "Woking, AB, CAN",
-      "height": "6'2\"",
-      "weight": "207",
-      "shoots": "R",
-      "player_link": "https://www.eliteprospects.com/player/661778/morgan-brady"
-    },
-    {
-      "number": "",
-      "name": "Noah Lapointe (D)",
-      "position": "",
-      "age": "18",
-      "birth_year": "2006",
-      "birthplace": "Burr Ridge, IL, USA",
-      "height": "6'0\"",
-      "weight": "196",
+      "number": "#74",
+      "name": "Brasen Boser",
+      "position": "D",
+      "age": "21",
+      "birth_year": "2004",
+      "birthplace": "Minot, ND, USA",
+      "height": "5'11\"",
+      "weight": "176",
       "shoots": "L",
-      "player_link": "https://www.eliteprospects.com/player/597829/noah-lapointe"
+      "player_link": "https://www.eliteprospects.com/player/623741/brasen-boser"
     },
     {
-      "number": "",
-      "name": "Ryland Randle (D)",
-      "position": "",
-      "age": "19",
-      "birth_year": "2006",
+      "number": "#37",
+      "name": "Sam Court",
+      "position": "D",
+      "age": "22",
+      "birth_year": "2004",
       "birthplace": "Winnipeg, MB, CAN",
       "height": "5'10\"",
-      "weight": "165",
-      "shoots": "L",
-      "player_link": "https://www.eliteprospects.com/player/693764/ryland-randle"
+      "weight": "190",
+      "shoots": "R",
+      "player_link": "https://www.eliteprospects.com/player/572087/sam-court"
     },
     {
-      "number": "",
-      "name": "Sam Alfano (RW)",
-      "position": "",
+      "number": "#9",
+      "name": "Anthony Dowd",
+      "position": "D",
+      "age": "22",
+      "birth_year": "2003",
+      "birthplace": "Point Pleasant Beach, NJ, USA",
+      "height": "5'7\"",
+      "weight": "152",
+      "shoots": "R",
+      "player_link": "https://www.eliteprospects.com/player/599134/anthony-dowd"
+    },
+    {
+      "number": "#3",
+      "name": "Justin Kipkie",
+      "position": "D",
+      "age": "20",
+      "birth_year": "2005",
+      "birthplace": "Calgary, AB, CAN",
+      "height": "6'4\"",
+      "weight": "216",
+      "shoots": "L",
+      "player_link": "https://www.eliteprospects.com/player/535603/justin-kipkie"
+    },
+    {
+      "number": "#7",
+      "name": "Joel Kjellberg",
+      "position": "D",
       "age": "21",
+      "birth_year": "2004",
+      "birthplace": "Nacka, SWE",
+      "height": "6'0\"",
+      "weight": "190",
+      "shoots": "R",
+      "player_link": "https://www.eliteprospects.com/player/566399/joel-kjellberg"
+    },
+    {
+      "number": "#10",
+      "name": "Tucker Ness",
+      "position": "D",
+      "age": "23",
+      "birth_year": "2002",
+      "birthplace": "Plymouth, MN, USA",
+      "height": "6'3\"",
+      "weight": "218",
+      "shoots": "R",
+      "player_link": "https://www.eliteprospects.com/player/645494/tucker-ness"
+    },
+    {
+      "number": "#89",
+      "name": "Tony Achille",
+      "position": "F",
+      "age": "24",
+      "birth_year": "2002",
+      "birthplace": "Hingham, MA, USA",
+      "height": "6'0\"",
+      "weight": "174",
+      "shoots": "L",
+      "player_link": "https://www.eliteprospects.com/player/483786/tony-achille"
+    },
+    {
+      "number": "#27",
+      "name": "Sam Alfano",
+      "position": "RW",
+      "age": "22",
       "birth_year": "2004",
       "birthplace": "Hamilton, ON, CAN",
       "height": "6'4\"",
@@ -86,33 +146,21 @@
       "player_link": "https://www.eliteprospects.com/player/600871/sam-alfano"
     },
     {
-      "number": "",
-      "name": "Michael Barron (F)",
-      "position": "",
-      "age": "18",
-      "birth_year": "2006",
-      "birthplace": "Canton, MI, USA",
-      "height": "5'5\"",
-      "weight": "168",
-      "shoots": "R",
-      "player_link": "https://www.eliteprospects.com/player/787780/michael-barron"
+      "number": "#2",
+      "name": "Jack Beck",
+      "position": "RW/LW",
+      "age": "22",
+      "birth_year": "2003",
+      "birthplace": "Richmond Hill, ON, CAN",
+      "height": "6'0\"",
+      "weight": "181",
+      "shoots": "L",
+      "player_link": "https://www.eliteprospects.com/player/614373/jack-beck"
     },
     {
-      "number": "",
-      "name": "Casey Brown (F)",
-      "position": "",
-      "age": "19",
-      "birth_year": "2006",
-      "birthplace": "Regina, SK, CAN",
-      "height": "5'11\"",
-      "weight": "168",
-      "shoots": "R",
-      "player_link": "https://www.eliteprospects.com/player/715229/casey-brown"
-    },
-    {
-      "number": "",
-      "name": "Carmelo Crandell (F)",
-      "position": "",
+      "number": "#14",
+      "name": "Carmelo Crandell",
+      "position": "F",
       "age": "20",
       "birth_year": "2005",
       "birthplace": "St. Albert, AB, CAN",
@@ -122,22 +170,34 @@
       "player_link": "https://www.eliteprospects.com/player/643476/carmelo-crandell"
     },
     {
-      "number": "",
-      "name": "Carson McGinley (F)",
-      "position": "",
+      "number": "#48",
+      "name": "Benjamin Kevan",
+      "position": "RW",
       "age": "19",
-      "birth_year": "2006",
-      "birthplace": "Phoenix, AZ, USA",
-      "height": "5'9\"",
-      "weight": "165",
+      "birth_year": "2007",
+      "birthplace": "Fairfield, CA, USA",
+      "height": "6'1\"",
+      "weight": "179",
       "shoots": "R",
-      "player_link": "https://www.eliteprospects.com/player/784826/carson-mcginley"
+      "player_link": "https://www.eliteprospects.com/player/746971/benjamin-kevan"
     },
     {
-      "number": "",
-      "name": "Sean McGurn (C)",
-      "position": "",
-      "age": "22",
+      "number": "#51",
+      "name": "Cruz Lucius",
+      "position": "RW",
+      "age": "21",
+      "birth_year": "2004",
+      "birthplace": "Lawrence, KS, USA",
+      "height": "6'0\"",
+      "weight": "179",
+      "shoots": "R",
+      "player_link": "https://www.eliteprospects.com/player/512107/cruz-lucius"
+    },
+    {
+      "number": "#16",
+      "name": "Sean McGurn",
+      "position": "C",
+      "age": "23",
       "birth_year": "2002",
       "birthplace": "Ottawa, ON, CAN",
       "height": "5'10\"",
@@ -146,10 +206,10 @@
       "player_link": "https://www.eliteprospects.com/player/402767/sean-mcgurn"
     },
     {
-      "number": "",
-      "name": "Logan Morrell (F)",
-      "position": "",
-      "age": "21",
+      "number": "#19",
+      "name": "Logan Morrell",
+      "position": "C",
+      "age": "22",
       "birth_year": "2003",
       "birthplace": "Mesa, AZ, USA",
       "height": "6'3\"",
@@ -158,9 +218,9 @@
       "player_link": "https://www.eliteprospects.com/player/511910/logan-morrell"
     },
     {
-      "number": "",
-      "name": "Ty Nash (W/C)",
-      "position": "",
+      "number": "#22",
+      "name": "Ty Nash",
+      "position": "W/C",
       "age": "22",
       "birth_year": "2003",
       "birthplace": "Scottsdale, AZ, USA",
@@ -170,10 +230,22 @@
       "player_link": "https://www.eliteprospects.com/player/511906/ty-nash"
     },
     {
-      "number": "",
-      "name": "Noah Powell (RW)",
-      "position": "",
-      "age": "20",
+      "number": "#12",
+      "name": "Cullen Potter",
+      "position": "C/LW",
+      "age": "19",
+      "birth_year": "2007",
+      "birthplace": "Minneapolis, MN, USA",
+      "height": "5'10\"",
+      "weight": "172",
+      "shoots": "L",
+      "player_link": "https://www.eliteprospects.com/player/577155/cullen-potter"
+    },
+    {
+      "number": "#15",
+      "name": "Noah Powell",
+      "position": "RW",
+      "age": "21",
       "birth_year": "2005",
       "birthplace": "Northbrook, IL, USA",
       "height": "6'2\"",
@@ -182,9 +254,9 @@
       "player_link": "https://www.eliteprospects.com/player/674718/noah-powell"
     },
     {
-      "number": "",
-      "name": "Bennett Schimek (F)",
-      "position": "",
+      "number": "#23",
+      "name": "Bennett Schimek",
+      "position": "F",
       "age": "22",
       "birth_year": "2003",
       "birthplace": "Mendota Heights, MN, USA",
@@ -194,10 +266,10 @@
       "player_link": "https://www.eliteprospects.com/player/512109/bennett-schimek"
     },
     {
-      "number": "",
-      "name": "Kyle Smolen (F)",
-      "position": "",
-      "age": "22",
+      "number": "#25",
+      "name": "Kyle Smolen",
+      "position": "F",
+      "age": "23",
       "birth_year": "2002",
       "birthplace": "Crystal Lake, IL, USA",
       "height": "5'11\"",
@@ -206,160 +278,16 @@
       "player_link": "https://www.eliteprospects.com/player/397854/kyle-smolen"
     },
     {
-      "number": "",
-      "name": "Cole Spicer (C)",
-      "position": "",
-      "age": "20",
-      "birth_year": "2004",
-      "birthplace": "Grand Forks, ND, USA",
-      "height": "5'10\"",
-      "weight": "183",
-      "shoots": "L",
-      "player_link": "https://www.eliteprospects.com/player/623833/cole-spicer"
-    },
-    {
-      "number": "",
-      "name": "John Waldron (F)",
-      "position": "",
-      "age": "22",
-      "birth_year": "2002",
-      "birthplace": "Batavia, IL, USA",
-      "height": "6'1\"",
-      "weight": "185",
-      "shoots": "R",
-      "player_link": "https://www.eliteprospects.com/player/481491/john-waldron"
-    },
-    {
-      "number": "",
-      "name": "Braxton Whitehead (F)",
-      "position": "",
-      "age": "20",
+      "number": "#49",
+      "name": "Braxton Whitehead",
+      "position": "F",
+      "age": "21",
       "birth_year": "2004",
       "birthplace": "Palmer, AK, USA",
       "height": "5'10\"",
       "weight": "163",
       "shoots": "R",
       "player_link": "https://www.eliteprospects.com/player/558800/braxton-whitehead"
-    },
-    {
-      "number": "NCAA",
-      "name": "19",
-      "position": "",
-      "age": "8",
-      "birth_year": "-",
-      "birthplace": "2",
-      "height": "6",
-      "weight": "136",
-      "shoots": "103",
-      "player_link": ""
-    },
-    {
-      "number": "NCAA",
-      "name": "18",
-      "position": "",
-      "age": "6",
-      "birth_year": "-",
-      "birthplace": "6",
-      "height": "2",
-      "weight": "129",
-      "shoots": "94",
-      "player_link": ""
-    },
-    {
-      "number": "NCAA",
-      "name": "18",
-      "position": "",
-      "age": "21",
-      "birth_year": "0",
-      "birthplace": "-",
-      "height": "-",
-      "weight": "115",
-      "shoots": "112",
-      "player_link": ""
-    },
-    {
-      "number": "NCAA",
-      "name": "17",
-      "position": "",
-      "age": "17",
-      "birth_year": "1",
-      "birthplace": "-",
-      "height": "-",
-      "weight": "116",
-      "shoots": "121",
-      "player_link": ""
-    },
-    {
-      "number": "NCAA",
-      "name": "7",
-      "position": "",
-      "age": "16",
-      "birth_year": "3",
-      "birthplace": "-",
-      "height": "-",
-      "weight": "68",
-      "shoots": "106",
-      "player_link": ""
-    },
-    {
-      "number": "NCAA",
-      "name": "22",
-      "position": "",
-      "age": "11",
-      "birth_year": "3",
-      "birthplace": "-",
-      "height": "-",
-      "weight": "121",
-      "shoots": "97",
-      "player_link": ""
-    },
-    {
-      "number": "NCAA",
-      "name": "21",
-      "position": "",
-      "age": "13",
-      "birth_year": "1",
-      "birthplace": "-",
-      "height": "-",
-      "weight": "109",
-      "shoots": "86",
-      "player_link": ""
-    },
-    {
-      "number": "NCAA",
-      "name": "8",
-      "position": "",
-      "age": "21",
-      "birth_year": "5",
-      "birthplace": "-",
-      "height": "-",
-      "weight": "77",
-      "shoots": "123",
-      "player_link": ""
-    },
-    {
-      "number": "NCAA",
-      "name": "10",
-      "position": "",
-      "age": "19",
-      "birth_year": "3",
-      "birthplace": "-",
-      "height": "-",
-      "weight": "91",
-      "shoots": "130",
-      "player_link": ""
-    },
-    {
-      "number": "NCAA",
-      "name": "5",
-      "position": "",
-      "age": "22",
-      "birth_year": "2",
-      "birthplace": "-",
-      "height": "-",
-      "weight": "56",
-      "shoots": "116",
-      "player_link": ""
     }
   ],
   "recruiting": {
@@ -372,49 +300,45 @@
         "birth_year": "2006",
         "birthplace": "Toronto, ON, CAN",
         "height": "6'3\"",
-        "weight": "179",
+        "weight": "185",
         "shoots": "L",
-        "player_link": "https://www.eliteprospects.com/player/597710/marko-bilic",
-        "player_photo": "https://files.eliteprospects.com/layout/players/1-bilic,-marko-(45)-ep.jpg"
+        "player_link": "https://www.eliteprospects.com/player/597710/marko-bilic"
       },
       {
         "number": "",
         "name": "Noah Lapointe",
         "position": "D",
-        "age": "18",
+        "age": "19",
         "birth_year": "2006",
         "birthplace": "Burr Ridge, IL, USA",
         "height": "6'0\"",
         "weight": "196",
         "shoots": "L",
-        "player_link": "https://www.eliteprospects.com/player/597829/noah-lapointe",
-        "player_photo": "https://files.eliteprospects.com/layout/players/n20-lapointe,-noah-(61)-ep.jpg"
+        "player_link": "https://www.eliteprospects.com/player/597829/noah-lapointe"
       },
       {
         "number": "",
         "name": "Jonas Woo",
         "position": "D",
-        "age": "18",
+        "age": "19",
         "birth_year": "2006",
         "birthplace": "Winnipeg, MB, CAN",
-        "height": "6'0\"",
+        "height": "5'10\"",
         "weight": "181",
-        "shoots": "L",
-        "player_link": "https://www.eliteprospects.com/player/597734/jonas-woo",
-        "player_photo": "https://files.eliteprospects.com/layout/players/18-woo,-jonas-(13)-ep.jpg"
+        "shoots": "R",
+        "player_link": "https://www.eliteprospects.com/player/597734/jonas-woo"
       },
       {
         "number": "",
         "name": "Michael Barron",
         "position": "F",
-        "age": "18",
+        "age": "19",
         "birth_year": "2006",
         "birthplace": "Canton, MI, USA",
         "height": "5'5\"",
         "weight": "168",
         "shoots": "R",
-        "player_link": "https://www.eliteprospects.com/player/787780/michael-barron",
-        "player_photo": "https://files.eliteprospects.com/layout/players/n13-barron,-michael-(30)-ep.jpg"
+        "player_link": "https://www.eliteprospects.com/player/787780/michael-barron"
       },
       {
         "number": "",
@@ -423,11 +347,10 @@
         "age": "18",
         "birth_year": "2007",
         "birthplace": "Calgary, AB, CAN",
-        "height": "5'10\"",
-        "weight": "174",
+        "height": "6'2\"",
+        "weight": "207",
         "shoots": "R",
-        "player_link": "https://www.eliteprospects.com/player/577109/nathan-behm",
-        "player_photo": "https://files.eliteprospects.com/layout/players/dw_14---nathan-behm-kam-020125-(114).jpg"
+        "player_link": "https://www.eliteprospects.com/player/577109/nathan-behm"
       },
       {
         "number": "",
@@ -439,8 +362,7 @@
         "height": "5'8\"",
         "weight": "150",
         "shoots": "R",
-        "player_link": "https://www.eliteprospects.com/player/577143/ryder-betzold",
-        "player_photo": "https://files.eliteprospects.com/layout/players/n74-betzold,-ryder-(27)-ep.jpg"
+        "player_link": "https://www.eliteprospects.com/player/577143/ryder-betzold"
       },
       {
         "number": "",
@@ -449,37 +371,34 @@
         "age": "18",
         "birth_year": "2007",
         "birthplace": "Scottsdale, AZ, USA",
-        "height": "5'9\"",
-        "weight": "161",
+        "height": "6'2\"",
+        "weight": "190",
         "shoots": "L",
-        "player_link": "https://www.eliteprospects.com/player/577115/brandon-gorzynski",
-        "player_photo": "https://files.eliteprospects.com/layout/players/n15-gorzynski,-brandon-(10)-ep.jpg"
+        "player_link": "https://www.eliteprospects.com/player/577115/brandon-gorzynski"
       },
       {
         "number": "",
         "name": "Landon Hafele",
         "position": "F",
-        "age": "17",
+        "age": "18",
         "birth_year": "2007",
         "birthplace": "Fairbanks, AK, USA",
-        "height": "5'10\"",
-        "weight": "161",
+        "height": "6'0\"",
+        "weight": "187",
         "shoots": "L",
-        "player_link": "https://www.eliteprospects.com/player/747970/landon-hafele",
-        "player_photo": "https://files.eliteprospects.com/layout/players/10-hafele,-landon-(75)-ep.jpg"
+        "player_link": "https://www.eliteprospects.com/player/747970/landon-hafele"
       },
       {
         "number": "",
         "name": "Benjamin Kevan",
         "position": "RW",
-        "age": "18",
+        "age": "19",
         "birth_year": "2007",
         "birthplace": "Fairfield, CA, USA",
-        "height": "6'0\"",
-        "weight": "183",
+        "height": "6'1\"",
+        "weight": "179",
         "shoots": "R",
-        "player_link": "https://www.eliteprospects.com/player/746971/benjamin-kevan",
-        "player_photo": "https://files.eliteprospects.com/layout/players/7-kevan,-ben-(86)-ep.jpg"
+        "player_link": "https://www.eliteprospects.com/player/746971/benjamin-kevan"
       },
       {
         "number": "",
@@ -491,60 +410,55 @@
         "height": "5'10\"",
         "weight": "163",
         "shoots": "R",
-        "player_link": "https://www.eliteprospects.com/player/576997/dylan-krayer",
-        "player_photo": "https://files.eliteprospects.com/layout/players/17-krayer,-dylan-(31)-ep.jpg"
+        "player_link": "https://www.eliteprospects.com/player/576997/dylan-krayer"
       },
       {
         "number": "",
         "name": "George Lovell",
         "position": "F",
-        "age": "17",
+        "age": "18",
         "birth_year": "2007",
         "birthplace": "Hingham, MA, USA",
         "height": "5'6\"",
-        "weight": "130",
+        "weight": "137",
         "shoots": "R",
-        "player_link": "https://www.eliteprospects.com/player/893547/george-lovell",
-        "player_photo": "https://files.eliteprospects.com/layout/players/n22-lovell,-george-(57)-ep.jpg"
+        "player_link": "https://www.eliteprospects.com/player/893547/george-lovell"
       },
       {
         "number": "",
         "name": "Bryce Mattern",
         "position": "F",
-        "age": "17",
+        "age": "18",
         "birth_year": "2007",
         "birthplace": "West Fargo, ND, USA",
         "height": "5'9\"",
         "weight": "170",
         "shoots": "L",
-        "player_link": "https://www.eliteprospects.com/player/951295/bryce-mattern",
-        "player_photo": "https://files.eliteprospects.com/layout/players/9-mattern,-bryce-(35)-ep.jpg"
+        "player_link": "https://www.eliteprospects.com/player/951295/bryce-mattern"
       },
       {
         "number": "",
         "name": "Teddy Merrill",
         "position": "F",
-        "age": "17",
-        "birth_year": "2008",
+        "age": "20",
+        "birth_year": "2005",
         "birthplace": "Scottsdale, AZ, USA",
-        "height": "5'10\"",
-        "weight": "165",
-        "shoots": "L",
-        "player_link": "https://www.eliteprospects.com/player/704486/teddy-merrill",
-        "player_photo": "https://files.eliteprospects.com/layout/players/n12-merrill,-teddy-(44)-ep.jpg"
+        "height": "6'0\"",
+        "weight": "185",
+        "shoots": "R",
+        "player_link": "https://www.eliteprospects.com/player/704486/teddy-merrill"
       },
       {
         "number": "",
         "name": "Lukas Sawchyn",
         "position": "RW",
         "age": "18",
-        "birth_year": "2006",
+        "birth_year": "2007",
         "birthplace": "Grande Prairie, AB, CAN",
-        "height": "6'0\"",
-        "weight": "192",
+        "height": "5'10\"",
+        "weight": "174",
         "shoots": "R",
-        "player_link": "https://www.eliteprospects.com/player/785511/lukas-sawchyn",
-        "player_photo": "https://files.eliteprospects.com/layout/players/ee5e0-d383fa7d-40d6-4dc4-8cc4-72f169df1cac.jpg"
+        "player_link": "https://www.eliteprospects.com/player/785511/lukas-sawchyn"
       }
     ],
     "2027-2028": [
@@ -558,21 +472,19 @@
         "height": "6'2\"",
         "weight": "187",
         "shoots": "L",
-        "player_link": "https://www.eliteprospects.com/player/862398/jimmy-egan",
-        "player_photo": "https://files.eliteprospects.com/layout/players/11-egan,-jimmy-(19)-ep.jpg"
+        "player_link": "https://www.eliteprospects.com/player/862398/jimmy-egan"
       },
       {
         "number": "",
         "name": "Colton Lien",
         "position": "F",
-        "age": "17",
-        "birth_year": "2008",
+        "age": "16",
+        "birth_year": "2009",
         "birthplace": "Highlands Ranch, CO, USA",
-        "height": "6'2\"",
-        "weight": "183",
+        "height": "6'4\"",
+        "weight": "185",
         "shoots": "L",
-        "player_link": "https://www.eliteprospects.com/player/934676/colton-lien",
-        "player_photo": "https://files.eliteprospects.com/layout/players/17-lien,-colton-(13)-ep.jpg"
+        "player_link": "https://www.eliteprospects.com/player/934676/colton-lien"
       },
       {
         "number": "",
@@ -582,25 +494,9 @@
         "birth_year": "2008",
         "birthplace": "Allen, TX, USA",
         "height": "5'11\"",
-        "weight": "165",
+        "weight": "176",
         "shoots": "R",
-        "player_link": "https://www.eliteprospects.com/player/617647/booker-toninato",
-        "player_photo": "https://files.eliteprospects.com/layout/players/10-toninato,-booker-(18)-ep.jpg"
-      }
-    ],
-    "2028-2029": [
-      {
-        "number": "",
-        "name": "Rian Marquardt",
-        "position": "D",
-        "age": "16",
-        "birth_year": "2009",
-        "birthplace": "Hugo, MN, USA",
-        "height": "6'2\"",
-        "weight": "190",
-        "shoots": "L",
-        "player_link": "https://www.eliteprospects.com/player/951201/rian-marquardt",
-        "player_photo": "https://files.eliteprospects.com/layout/players/b3f2e-63bf3b9c-614a-4a5f-bac8-484f9fa32435.jpg"
+        "player_link": "https://www.eliteprospects.com/player/617647/booker-toninato"
       }
     ]
   }

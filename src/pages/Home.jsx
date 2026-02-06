@@ -69,17 +69,20 @@ function Home() {
                   <span className="value">{gameDay.location}</span>
                 </div>
               </div>
-              <div className="hero-actions">
-                <a href="/schedule" className="btn-primary">Game Center</a>
-                <a href="https://foxsports910.iheart.com/" target="_blank" rel="noreferrer" className="btn-listen-live-img">
-                  <img src="/assets/fox-sports-910.jpg" alt="Listen on Fox Sports 910" />
-                </a>
-              </div>
+            </div>
+            <div className="hero-actions">
+              <a href="/schedule" className="btn-primary">Game Center</a>
+              <a href="https://foxsports910.iheart.com/" target="_blank" rel="noreferrer" className="btn-hero-logo btn-logo-fox">
+                <img src="/assets/fox-sports-910.jpg" alt="Listen on Fox Sports 910" />
+              </a>
+              <a href="https://nchchockey.com/tv/" target="_blank" rel="noreferrer" className="btn-hero-logo btn-logo-nchc">
+                <img src="/assets/nchc-tv.png" alt="Watch on NCHC.tv" />
+              </a>
             </div>
           </div>
         )}
         {/* When no game day, hero shows just the jersey background image */}
-      </section>
+      </section >
 
       <section className="latest-news">
         <div className="section-header">
@@ -120,7 +123,7 @@ function Home() {
           </div>
         </section>
       </div>
-    </div>
+    </div >
   );
 }
 

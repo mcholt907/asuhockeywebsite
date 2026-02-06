@@ -1,6 +1,18 @@
 {
-  "timestamp": "2026-02-02T17:19:12.935Z",
+  "timestamp": "2026-02-06T15:34:10.609Z",
   "data": [
+    {
+      "title": "Hockey welcomes St. Cloud State to Mullett Arena for the weekend",
+      "link": "https://thesundevils.com/news/2026/02/4/hockey-plays-host-to-st-cloud-state-at-mullett-arena-for-the-first-time-in-series-history",
+      "date": "February 04, 2026",
+      "source": "TheSunDevils.com"
+    },
+    {
+      "title": "Schimek earns third career NCHC Forward of the Week honor",
+      "link": "https://thesundevils.com/news/2026/02/3/bennett-schimek-earns-third-career-nchc-forward-of-the-week-honor",
+      "date": "February 03, 2026",
+      "source": "TheSunDevils.com"
+    },
     {
       "title": "Hockey unable to complete sweep at Colorado College",
       "link": "https://thesundevils.com/news/2026/02/1/hockey-unable-to-complete-sweep-at-colorado-college",
@@ -86,18 +98,6 @@
       "source": "TheSunDevils.com"
     },
     {
-      "title": "Greg Powers joins Matt Shott Arizona Hockey Legacy Foundation Advisory Board",
-      "link": "https://thesundevils.com/news/2026/01/2/greg-powers-joins-matt-shott-arizona-hockey-legacy-foundation-advisory-board",
-      "date": "January 02, 2026",
-      "source": "TheSunDevils.com"
-    },
-    {
-      "title": "Hockey starts six-game home stand hosting Desert Hockey Classic",
-      "link": "https://thesundevils.com/news/2025/12/31/hockey-starts-six-game-home-stand-hosting-desert-hockey-classic",
-      "date": "December 31, 2025",
-      "source": "TheSunDevils.com"
-    },
-    {
       "title": "Cruzin' To The Net",
       "link": "https://www.collegehockeynews.com/news/2025/12/12_Cruzin-To-The-Net.php",
       "date": "Dec. 12",
@@ -134,5 +134,5 @@
       "source": "CollegeHockeyNews.com"
     }
   ],
-  "cacheDuration": 86400000
+  "cacheDuration": 3600000
 }

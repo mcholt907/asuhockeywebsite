@@ -101,6 +101,8 @@ function NewsFeed({ limit = 0 }) { // Added limit prop, default to 0 (no limit u
           <div className="search-box">
             <input
               type="text"
+              id="news-search"
+              name="news-search"
               placeholder="Search news..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}

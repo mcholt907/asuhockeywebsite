@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-02-02T17:19:05.403Z",
+  "timestamp": "2026-02-05T21:20:20.476Z",
   "data": [
     {
       "date": "2025-10-03",
@@ -456,6 +456,10 @@
         {
           "text": "Box score",
           "url": "https://thesundevils.com/boxscore/4846"
+        },
+        {
+          "text": "Recap",
+          "url": "https://thesundevils.com/news/2026/01/10/hockey-drops-series-opener-to-miami-oh"
         }
       ],
       "result": "L 1-2"
@@ -522,7 +526,7 @@
     {
       "date": "2026-01-30",
       "time": "7:00 p.m. (MST)",
-      "opponent": "Colorado College",
+      "opponent": "RV Colorado College",
       "location": "Ed Robson Arena",
       "status": "Away",
       "notes": "",
@@ -532,6 +536,10 @@
         {
           "text": "Box score",
           "url": "https://thesundevils.com/boxscore/4857"
+        },
+        {
+          "text": "Recap",
+          "url": "https://thesundevils.com/news/2026/01/31/kjellberg-schimek-team-up-to-secure-hockeys-overtime-road-win-at-colorado-college"
         }
       ],
       "result": "W 6-5"
@@ -539,7 +547,7 @@
     {
       "date": "2026-01-31",
       "time": "6:00 p.m. (MST)",
-      "opponent": "Colorado College",
+      "opponent": "RV Colorado College",
       "location": "Ed Robson Arena",
       "status": "Away",
       "notes": "",

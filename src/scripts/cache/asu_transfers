@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-02-02T17:53:28.205Z",
+  "timestamp": "2026-02-04T21:06:45.396Z",
   "data": {
     "data": {
       "incoming": [
@@ -26,6 +26,16 @@
       ],
       "outgoing": [
         {
+          "playerName": "John Waldron",
+          "position": "F",
+          "playerUrl": "https://www.eliteprospects.com/player/481491/john-waldron",
+          "playerId": "481491",
+          "team": "Toledo Walleye",
+          "teamUrl": "https://www.eliteprospects.com/team/4517/toledo-walleye",
+          "transferDate": "2026-02-02",
+          "direction": "outgoing"
+        },
+        {
           "playerName": "Justin Cloutier",
           "position": "F",
           "playerUrl": "https://www.eliteprospects.com/player/649101/justin-cloutier",
@@ -36,9 +46,9 @@
           "direction": "outgoing"
         }
       ],
-      "lastUpdated": "2026-02-02T17:53:28.204Z"
+      "lastUpdated": "2026-02-04T21:06:45.395Z"
     },
-    "timestamp": 1770054808205
+    "timestamp": 1770239205396
   },
   "cacheDuration": 86400000
 }

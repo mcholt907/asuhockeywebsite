@@ -462,6 +462,17 @@
   /* Ensure logo fits without distortion */
 }
 
+/* Specific tuning for visual balance */
+.btn-logo-fox img {
+  padding: 4px;
+  /* Minimal padding to maximize size */
+}
+
+.btn-logo-nchc img {
+  padding: 10px;
+  /* consistent padding to reduce visual weight */
+}
+
 .btn-hero-logo:hover {
   transform: translateY(-3px) scale(1.05);
   filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
@@ -480,7 +491,10 @@
   }
 
   .hero-actions {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
   }
 }
 
