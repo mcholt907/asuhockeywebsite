@@ -399,6 +399,8 @@
   display: flex;
   gap: 20px;
   justify-content: center;
+  align-items: center;
+  /* Ensure all buttons center vertically */
 }
 
 .btn-primary,
@@ -435,23 +437,35 @@
   color: var(--asu-maroon);
 }
 
-.btn-listen-live-img {
-  display: block;
-  height: 50px;
-  /* Adjust height to match button size */
+/* Hero Action Buttons (Image Links) */
+.btn-hero-logo {
+  display: flex;
+  align-items: center;
+  /* Center vertically */
+  height: 48px;
+  /* Fixed height identical to Game Center button */
+  padding: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  /* Ensure image fits within radius */
   transition: transform 0.3s;
+  background-color: rgba(0, 0, 0, 0.2);
+  /* Subtle backing for contrast */
 }
 
-.btn-listen-live-img img {
+.btn-hero-logo img {
   height: 100%;
   width: auto;
+  /* Allow width to adjust naturally */
   display: block;
-  border-radius: 8px;
-  /* Slight rounding */
+  object-fit: contain;
+  /* Ensure logo fits without distortion */
 }
 
-.btn-listen-live-img:hover {
-  transform: translateY(-3px) scale(1.02);
+.btn-hero-logo:hover {
+  transform: translateY(-3px) scale(1.05);
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+  background-color: rgba(0, 0, 0, 0.3);
 }
 
 @media (max-width: 768px) {
