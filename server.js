@@ -1,5 +1,19 @@
 // server.js
 require('dotenv').config(); // Load environment variables
+const Sentry = require('@sentry/node');
+const { nodeProfilingIntegration } = require('@sentry/profiling-node');
+
+Sentry.init({
+  dsn: process.env.REACT_APP_SENTRY_DSN,
+  integrations: [
+    nodeProfilingIntegration(),
+  ],
+  // Performance Monitoring
+  tracesSampleRate: 1.0, //  Capture 100% of the transactions
+  // Set sampling rate for profiling - this is relative to tracesSampleRate
+  profilesSampleRate: 1.0,
+});
+
 const express = require('express');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -14,6 +28,11 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 5000;
 const isProduction = process.env.NODE_ENV === 'production';
+
+// Sentry: The request handler must be the first middleware on the app
+app.use(Sentry.Handlers.requestHandler());
+// TracingHandler creates a trace for every incoming request
+app.use(Sentry.Handlers.tracingHandler());
 
 // Performance: Enable gzip compression
 app.use(compression());
@@ -436,6 +455,10 @@ app.get('/api/stats', async (req, res) => {
 
 // Serve the React application's static files from the 'build' directory
 app.use(express.static(path.join(__dirname, 'build')));
+
+
+// Sentry Error Handler must be after all controllers and before other error middleware (if any)
+app.use(Sentry.Handlers.errorHandler());
 
 // For any other request, serve the React app's index.html file
 app.get('*', (req, res) => {

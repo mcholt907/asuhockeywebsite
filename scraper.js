@@ -1,4 +1,5 @@
 const axios = require('axios');
+const Sentry = require('@sentry/node');
 const cheerio = require('cheerio');
 const { saveToCache, getFromCache } = require('./src/scripts/caching-system');
 const Parser = require('rss-parser');
@@ -362,7 +363,11 @@ async function fetchScheduleData() {
 
   console.log(`[Cache System] No cache found or cache is stale for ${targetSeasonStartYear}. Scraping live data.`);
   try {
+    const startTime = Date.now();
     const scheduleData = await scrapeSunDevilsSchedule(targetSeasonStartYear);
+    const duration = Date.now() - startTime;
+    Sentry.metrics.distribution('scraper.schedule.duration', duration, { unit: 'millisecond' });
+
     if (scheduleData && scheduleData.length > 0) {
       console.log(`[Cache System] Successfully scraped ${scheduleData.length} games. Saving to cache for ${targetSeasonStartYear}.`);
       await saveToCache(scheduleData, fullCacheKey); // Swapped arguments: (data, filename)
@@ -416,6 +421,7 @@ async function fetchNewsData() {
 // Extracted scraping logic to reused function
 async function refreshNewsCache(cacheKey, duration) {
   console.log('[News Scraper] Starting live scrape...');
+  const startTime = Date.now();
   try {
     const sunDevilsArticles = await scrapeSunDevilsNewsList();
     await delayBetweenRequests();
@@ -478,6 +484,10 @@ async function refreshNewsCache(cacheKey, duration) {
   } catch (error) {
     console.error('[FetchNewsData] Error fetching live news data:', error.message);
     return [];
+  } finally {
+    const totalDuration = Date.now() - startTime;
+    Sentry.metrics.distribution('scraper.news.duration', totalDuration, { unit: 'millisecond' });
+    console.log(`[News Scraper] Finished in ${totalDuration}ms`);
   }
 }
 
@@ -497,6 +507,7 @@ async function scrapeCHNStats() {
 
   const url = config.urls.chnStats(config.seasons.stats);
   console.log(`[CHN Stats Scraper] Attempting to fetch stats from: ${url}`);
+  const startTime = Date.now();
   try {
     const { data } = await requestWithRetry(url);
     const $ = cheerio.load(data);
@@ -550,6 +561,9 @@ async function scrapeCHNStats() {
   } catch (error) {
     console.error('[CHN Stats Scraper] Error scraping stats:', error.message);
     return { skaters: [], goalies: [] };
+  } finally {
+    const duration = Date.now() - startTime;
+    Sentry.metrics.distribution('scraper.stats.duration', duration, { unit: 'millisecond' });
   }
 }
 
