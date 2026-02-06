@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-02-04T23:09:54.169Z",
+  "timestamp": "2026-02-06T16:40:39.205Z",
   "data": {
     "skaters": [
       {
@@ -60,7 +60,7 @@
         "league": "USHL",
         "leagueUrl": "https://www.eliteprospects.com/league/ushl/stats",
         "isTotals": false,
-        "gp": "41",
+        "gp": "42",
         "g": "11",
         "a": "34",
         "tp": "45",
@@ -92,7 +92,7 @@
         "league": "NHL",
         "leagueUrl": "https://www.eliteprospects.com/league/nhl/stats",
         "isTotals": false,
-        "gp": "56",
+        "gp": "57",
         "g": "18",
         "a": "21",
         "tp": "39",
@@ -108,10 +108,10 @@
         "league": "totals",
         "leagueUrl": "",
         "isTotals": true,
-        "gp": "35",
+        "gp": "36",
         "g": "17",
-        "a": "16",
-        "tp": "33",
+        "a": "17",
+        "tp": "34",
         "pim": "2"
       },
       {
@@ -124,10 +124,10 @@
         "league": "ECHL",
         "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
         "isTotals": false,
-        "gp": "32",
+        "gp": "33",
         "g": "16",
-        "a": "16",
-        "tp": "32",
+        "a": "17",
+        "tp": "33",
         "pim": "2"
       },
       {
@@ -156,10 +156,10 @@
         "league": "ECHL",
         "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
         "isTotals": false,
-        "gp": "39",
-        "g": "13",
+        "gp": "40",
+        "g": "14",
         "a": "20",
-        "tp": "33",
+        "tp": "34",
         "pim": "20"
       },
       {
@@ -220,7 +220,7 @@
         "league": "totals",
         "leagueUrl": "",
         "isTotals": true,
-        "gp": "33",
+        "gp": "34",
         "g": "7",
         "a": "23",
         "tp": "30",
@@ -236,7 +236,7 @@
         "league": "ECHL",
         "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
         "isTotals": false,
-        "gp": "31",
+        "gp": "32",
         "g": "7",
         "a": "23",
         "tp": "30",
@@ -268,10 +268,10 @@
         "league": "ECHL",
         "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
         "isTotals": false,
-        "gp": "36",
+        "gp": "37",
         "g": "10",
-        "a": "14",
-        "tp": "24",
+        "a": "16",
+        "tp": "26",
         "pim": "31"
       },
       {
@@ -284,11 +284,27 @@
         "league": "Denmark",
         "leagueUrl": "https://www.eliteprospects.com/league/denmark/stats",
         "isTotals": false,
-        "gp": "37",
-        "g": "10",
+        "gp": "38",
+        "g": "11",
         "a": "11",
-        "tp": "21",
+        "tp": "22",
         "pim": "22"
+      },
+      {
+        "name": "Ryder Betzold",
+        "position": "F",
+        "playerUrl": "https://www.eliteprospects.com/player/577143/ryder-betzold",
+        "playerId": "577143",
+        "team": "Sioux Falls Stampede",
+        "teamUrl": "https://www.eliteprospects.com/team/904/sioux-falls-stampede",
+        "league": "USHL",
+        "leagueUrl": "https://www.eliteprospects.com/league/ushl/stats",
+        "isTotals": false,
+        "gp": "42",
+        "g": "10",
+        "a": "12",
+        "tp": "22",
+        "pim": "24"
       },
       {
         "name": "Artem Shlaine",
@@ -371,22 +387,6 @@
         "pim": "6"
       },
       {
-        "name": "Ryder Betzold",
-        "position": "F",
-        "playerUrl": "https://www.eliteprospects.com/player/577143/ryder-betzold",
-        "playerId": "577143",
-        "team": "Sioux Falls Stampede",
-        "teamUrl": "https://www.eliteprospects.com/team/904/sioux-falls-stampede",
-        "league": "USHL",
-        "leagueUrl": "https://www.eliteprospects.com/league/ushl/stats",
-        "isTotals": false,
-        "gp": "41",
-        "g": "10",
-        "a": "10",
-        "tp": "20",
-        "pim": "24"
-      },
-      {
         "name": "Jack Becker",
         "position": "C/RW",
         "playerUrl": "https://www.eliteprospects.com/player/248382/jack-becker",
@@ -444,10 +444,10 @@
         "league": "ECHL",
         "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
         "isTotals": false,
-        "gp": "38",
-        "g": "2",
+        "gp": "39",
+        "g": "3",
         "a": "13",
-        "tp": "15",
+        "tp": "16",
         "pim": "29"
       },
       {
@@ -460,10 +460,10 @@
         "league": "ECHL",
         "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
         "isTotals": false,
-        "gp": "38",
+        "gp": "39",
         "g": "8",
-        "a": "6",
-        "tp": "14",
+        "a": "7",
+        "tp": "15",
         "pim": "15"
       },
       {
@@ -524,7 +524,7 @@
         "league": "totals",
         "leagueUrl": "",
         "isTotals": true,
-        "gp": "29",
+        "gp": "30",
         "g": "4",
         "a": "7",
         "tp": "11",
@@ -556,7 +556,7 @@
         "league": "ECHL",
         "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
         "isTotals": false,
-        "gp": "5",
+        "gp": "6",
         "g": "0",
         "a": "2",
         "tp": "2",
@@ -620,7 +620,7 @@
         "league": "ECHL",
         "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
         "isTotals": false,
-        "gp": "28",
+        "gp": "29",
         "g": "4",
         "a": "5",
         "tp": "9",
@@ -860,7 +860,7 @@
         "league": "totals",
         "leagueUrl": "",
         "isTotals": true,
-        "gp": "11",
+        "gp": "12",
         "g": "0",
         "a": "1",
         "tp": "1",
@@ -892,11 +892,27 @@
         "league": "ECHL",
         "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
         "isTotals": false,
-        "gp": "6",
+        "gp": "7",
         "g": "0",
         "a": "1",
         "tp": "1",
         "pim": "0"
+      },
+      {
+        "name": "Lukas Sillinger",
+        "position": "W/C",
+        "playerUrl": "https://www.eliteprospects.com/player/287466/lukas-sillinger",
+        "playerId": "287466",
+        "team": "Greensboro Gargoyles",
+        "teamUrl": "https://www.eliteprospects.com/team/43333/greensboro-gargoyles",
+        "league": "ECHL",
+        "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
+        "isTotals": false,
+        "gp": "-",
+        "g": "-",
+        "a": "-",
+        "tp": "-",
+        "pim": "-"
       }
     ],
     "goalies": [
@@ -994,9 +1010,9 @@
         "league": "NHL",
         "leagueUrl": "https://www.eliteprospects.com/league/nhl/stats",
         "isTotals": false,
-        "gp": "32",
-        "gaa": "2.83",
-        "svPct": ".903"
+        "gp": "33",
+        "gaa": "2.81",
+        "svPct": ".904"
       },
       {
         "name": "Ben Kraws",
@@ -1008,9 +1024,9 @@
         "league": "totals",
         "leagueUrl": "",
         "isTotals": true,
-        "gp": "18",
-        "gaa": "3.36",
-        "svPct": ".900"
+        "gp": "19",
+        "gaa": "3.27",
+        "svPct": ".902"
       },
       {
         "name": "Ben Kraws",
@@ -1036,9 +1052,9 @@
         "league": "ECHL",
         "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
         "isTotals": false,
-        "gp": "14",
-        "gaa": "3.10",
-        "svPct": ".912"
+        "gp": "15",
+        "gaa": "3.00",
+        "svPct": ".914"
       },
       {
         "name": "Gibson Homer",
@@ -1069,7 +1085,7 @@
         "svPct": ".833"
       }
     ],
-    "lastUpdated": "2026-02-04T23:09:54.168Z"
+    "lastUpdated": "2026-02-06T16:40:39.200Z"
   },
   "cacheDuration": 86400000
 }

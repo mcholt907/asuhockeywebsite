@@ -38,8 +38,39 @@ def _extract_season_from_url(url):
         return match.group(1)
     return "unknown_season"
 
+def _fetch_player_photo(player_url, headers):
+    """
+    Fetches the player's profile page and extracts the main profile image URL.
+    """
+    try:
+        # We need a small delay to be polite
+        # delay_between_requests(0.5) # Assuming specific delay handled by caller
+        
+        response = request_with_retry(player_url, headers, max_retries=2, timeout=10)
+        if not response:
+            return ""
+            
+        soup = BeautifulSoup(response.content, 'html.parser')
+        
+        # Selector found by browser agent: img[class^="ProfileImage_profileImage"]
+        # Or specific class: .ProfileImage_profileImage__JLd31
+        # Let's use the prefix selector for robustness against hash changes
+        
+        # BeautifulSoup css selector for 'starts with' is slightly different or standard css
+        # img[class^="ProfileImage_profileImage"]
+        
+        img_tag = soup.select_one('img[class*="ProfileImage_profileImage"]')
+        
+        if img_tag and img_tag.has_attr('src'):
+            return img_tag['src']
+            
+        return ""
+    except Exception as e:
+        print(f"Error scraping photo from {player_url}: {e}")
+        return ""
+
 # Core parsing logic, refactored into a helper function
-def _fetch_and_parse_players_from_url(url, headers):
+def _fetch_and_parse_players_from_url(url, headers, fetch_photos=True):
     try:
         response = request_with_retry(url, headers, max_retries=config.MAX_RETRIES, timeout=config.REQUEST_TIMEOUT)
         if response is None:
@@ -118,6 +149,18 @@ def _fetch_and_parse_players_from_url(url, headers):
                 if name and name.isdigit():
                     continue
                 
+                
+                # Fetch player photo only if requested and link exists
+                player_photo = ""
+                if fetch_photos and player_link:
+                     try:
+                        # Simple caching within the run could be good, but for now simple fetch
+                        # Only fetch if it looks like an EP link
+                        if "eliteprospects.com" in player_link:
+                             player_photo = _fetch_player_photo(player_link, headers)
+                     except Exception as e:
+                        print(f"Warning: Could not fetch photo for {name}: {e}")
+
                 player_data_item = {
                     "number": number,
                     "name": name,
@@ -128,7 +171,8 @@ def _fetch_and_parse_players_from_url(url, headers):
                     "height": height,
                     "weight": weight,
                     "shoots": shoots,
-                    "player_link": player_link
+                    "player_link": player_link,
+                    "player_photo": player_photo
                 }
                 player_data_list.append(player_data_item)
             except Exception as e:
@@ -139,14 +183,16 @@ def _fetch_and_parse_players_from_url(url, headers):
 
 def scrape_asu_hockey_roster(roster_url, headers):
     print(f"Scraping main roster from: {roster_url}")
-    return _fetch_and_parse_players_from_url(roster_url, headers)
+    # Skip photos for main roster to speed up scrape
+    return _fetch_and_parse_players_from_url(roster_url, headers, fetch_photos=False)
 
 def scrape_recruits_for_future_seasons(season_urls, headers):
     recruits_by_season = {}
     for url in season_urls:
         season = _extract_season_from_url(url)
         print(f"Scraping recruits for season {season} from: {url}")
-        player_list = _fetch_and_parse_players_from_url(url, headers)
+        # Fetch photos for recruits!
+        player_list = _fetch_and_parse_players_from_url(url, headers, fetch_photos=True)
         if player_list: # Only add season if players were found
             recruits_by_season[season] = player_list
         else:
