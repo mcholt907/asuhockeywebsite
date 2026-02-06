@@ -382,20 +382,40 @@ async function fetchNewsData() {
 
   console.log(`[Cache System] Attempting to fetch news data with cache key: ${ASU_HOCKEY_NEWS_CACHE_KEY}`);
 
+  let cachedArticles = null;
   try {
-    const cachedArticles = await getFromCache(ASU_HOCKEY_NEWS_CACHE_KEY);
+    // 1. Try to get valid cache
+    cachedArticles = await getFromCache(ASU_HOCKEY_NEWS_CACHE_KEY);
     if (cachedArticles) {
-      console.log('[Cache System] News data found in cache. Returning cached data.');
-      // The 'getFromCache' for news might return an object { data: articles, timestamp: ... }
-      // or just articles. Adjust based on caching-system.js behavior.
-      // Assuming it returns the data directly for now or an object with a 'data' property.
+      console.log('[Cache System] Valid news data found in cache. Returning cached data.');
       return Array.isArray(cachedArticles) ? cachedArticles : (cachedArticles.data || []);
     }
+
+    // 2. Cache expired or missing. Try to get STALE cache for immediate response (SWR)
+    console.log('[Cache System] Cache expired or missing. Checking for stale collection...');
+    const staleArticles = await getFromCache(ASU_HOCKEY_NEWS_CACHE_KEY, true); // ignoreExpiration = true
+
+    if (staleArticles) {
+      console.log('[Cache System] Stale news found. Returning immediately and refreshing in background.');
+      // Trigger background refresh (no await)
+      refreshNewsCache(ASU_HOCKEY_NEWS_CACHE_KEY, NEWS_CACHE_DURATION).catch(err =>
+        console.error('[Background Refresh] Failed:', err)
+      );
+      return Array.isArray(staleArticles) ? staleArticles : (staleArticles.data || []);
+    }
+
   } catch (error) {
     console.error('[Cache System] Error reading news from cache:', error.message);
   }
 
-  console.log('[Cache System] No news cache found or cache is stale. Scraping live news data.');
+  // 3. No cache (valid or stale) found. Must wait for scrape.
+  console.log('[Cache System] No cache found at all. Scraping live news data (User must wait).');
+  return await refreshNewsCache(ASU_HOCKEY_NEWS_CACHE_KEY, NEWS_CACHE_DURATION);
+}
+
+// Extracted scraping logic to reused function
+async function refreshNewsCache(cacheKey, duration) {
+  console.log('[News Scraper] Starting live scrape...');
   try {
     const sunDevilsArticles = await scrapeSunDevilsNewsList();
     await delayBetweenRequests();
@@ -418,7 +438,7 @@ async function fetchNewsData() {
             uniqueArticles.push(article);
             seenLinks.add(key);
           }
-        } else if (!article.link && !article.title) { // Handles articles with no link and no title (if any)
+        } else if (!article.link && !article.title) {
           uniqueArticles.push(article);
         }
       }
@@ -437,7 +457,6 @@ async function fetchNewsData() {
       } else if (dateB && !isNaN(dateB)) {
         return 1;
       }
-      // Fallback sorting if dates are not available/parseable
       if (a.source && b.source) {
         if (a.source < b.source) return -1;
         if (a.source > b.source) return 1;
@@ -451,14 +470,14 @@ async function fetchNewsData() {
 
     if (allArticles.length > 0) {
       console.log(`[Cache System] Successfully scraped ${allArticles.length} news articles. Saving to cache.`);
-      await saveToCache(allArticles, ASU_HOCKEY_NEWS_CACHE_KEY, NEWS_CACHE_DURATION); // 1 hour cache
+      await saveToCache(allArticles, cacheKey, duration);
     } else {
       console.log('[Cache System] No news articles returned from scrapers. Not caching.');
     }
-    return allArticles; // Return the array of articles
+    return allArticles;
   } catch (error) {
     console.error('[FetchNewsData] Error fetching live news data:', error.message);
-    return []; // Return empty array on error
+    return [];
   }
 }
 

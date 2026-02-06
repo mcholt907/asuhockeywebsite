@@ -27,7 +27,7 @@ function saveToCache(data, filename, duration = DEFAULT_CACHE_DURATION) {
   console.log(`Data saved to cache at ${cacheFilePath}`);
 }
 
-function getFromCache(filename) {
+function getFromCache(filename, ignoreExpiration = false) {
   if (!filename) {
     console.error('Filename not provided to getFromCache');
     return null;
@@ -42,8 +42,8 @@ function getFromCache(filename) {
 
     const fileContents = fs.readFileSync(cacheFilePath, 'utf8');
     if (!fileContents) {
-        console.log(`Cache file is empty: ${cacheFilePath}`);
-        return null;
+      console.log(`Cache file is empty: ${cacheFilePath}`);
+      return null;
     }
 
     const cacheData = JSON.parse(fileContents);
@@ -53,6 +53,11 @@ function getFromCache(filename) {
 
     // Check if cache is still valid
     if (currentTime - cacheTime > cacheDuration) {
+      if (ignoreExpiration) {
+        console.log(`Cache expired for ${filename} but returning stale data (ignoreExpiration=true)`);
+        return cacheData.data;
+      }
+
       console.log(`Cache expired for ${filename}`);
       fs.unlinkSync(cacheFilePath); // Optionally delete expired cache
       return null;
@@ -64,12 +69,12 @@ function getFromCache(filename) {
     console.error(`Error reading cache for ${filename}:`, error);
     // If there's an error (e.g., corrupted JSON), treat it as a cache miss
     if (fs.existsSync(cacheFilePath)) {
-        try {
-            fs.unlinkSync(cacheFilePath); // Attempt to delete corrupted cache file
-            console.log(`Deleted corrupted cache file: ${cacheFilePath}`);
-        } catch (delError) {
-            console.error(`Error deleting corrupted cache file ${cacheFilePath}:`, delError);
-        }
+      try {
+        fs.unlinkSync(cacheFilePath); // Attempt to delete corrupted cache file
+        console.log(`Deleted corrupted cache file: ${cacheFilePath}`);
+      } catch (delError) {
+        console.error(`Error deleting corrupted cache file ${cacheFilePath}:`, delError);
+      }
     }
     return null;
   }
