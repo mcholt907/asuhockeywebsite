@@ -30,9 +30,9 @@ const port = process.env.PORT || 5000;
 const isProduction = process.env.NODE_ENV === 'production';
 
 // Sentry: The request handler must be the first middleware on the app
-app.use(Sentry.Handlers.requestHandler());
-// TracingHandler creates a trace for every incoming request
-app.use(Sentry.Handlers.tracingHandler());
+// Sentry: The request handler and tracing handler are no longer needed in v8+
+// app.use(Sentry.Handlers.requestHandler());
+// app.use(Sentry.Handlers.tracingHandler());
 
 // Performance: Enable gzip compression
 app.use(compression());
@@ -458,7 +458,8 @@ app.use(express.static(path.join(__dirname, 'build')));
 
 
 // Sentry Error Handler must be after all controllers and before other error middleware (if any)
-app.use(Sentry.Handlers.errorHandler());
+// Sentry Error Handler (v8+)
+Sentry.setupExpressErrorHandler(app);
 
 // For any other request, serve the React app's index.html file
 app.get('*', (req, res) => {
