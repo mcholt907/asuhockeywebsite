@@ -51,7 +51,7 @@
   --border-radius-md: 10px;
   --border-radius-lg: 16px;
   --border-radius-xl: 20px;
-  --header-height: 80px;
+  --header-height: 110px;
 
   /* Animations */
   --transition-fast: 150ms ease-in-out;
@@ -132,7 +132,7 @@ header {
 }
 
 .logo img {
-  height: 48px;
+  height: 65px;
   width: auto;
   transition: transform 0.3s ease;
 }
@@ -175,8 +175,8 @@ header {
   color: var(--white);
   /* White text usually */
   text-decoration: none;
-  padding: 10px 16px;
-  font-size: 0.95rem;
+  padding: 12px 20px;
+  font-size: 1.1rem;
   font-weight: 500;
   border-radius: var(--border-radius-sm);
   transition: all 0.2s ease;
