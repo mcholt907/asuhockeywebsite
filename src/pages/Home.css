@@ -480,9 +480,20 @@
 }
 
 @media (max-width: 768px) {
+  .hero.hero-game-day {
+    padding-top: 120px;
+    /* Ensure content clears ticker/header */
+    align-items: flex-start;
+    /* Stop centering vertically to avoid being cut off at top */
+    height: auto;
+    min-height: 600px;
+    /* Give it enough room */
+  }
+
   .game-day-hero-content h1 {
     font-size: 2rem;
   }
+
 
   .game-info-hero {
     flex-direction: column;
