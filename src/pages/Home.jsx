@@ -71,7 +71,9 @@ function Home() {
               </div>
               <div className="hero-actions">
                 <a href="/schedule" className="btn-primary">Game Center</a>
-                <a href="https://thesundevils.com" target="_blank" rel="noreferrer" className="btn-secondary">Listen Live</a>
+                <a href="https://foxsports910.iheart.com/" target="_blank" rel="noreferrer" className="btn-listen-live-img">
+                  <img src="/assets/fox-sports-910.jpg" alt="Listen on Fox Sports 910" />
+                </a>
               </div>
             </div>
           </div>

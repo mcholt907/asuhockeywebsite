@@ -435,6 +435,25 @@
   color: var(--asu-maroon);
 }
 
+.btn-listen-live-img {
+  display: block;
+  height: 50px;
+  /* Adjust height to match button size */
+  transition: transform 0.3s;
+}
+
+.btn-listen-live-img img {
+  height: 100%;
+  width: auto;
+  display: block;
+  border-radius: 8px;
+  /* Slight rounding */
+}
+
+.btn-listen-live-img:hover {
+  transform: translateY(-3px) scale(1.02);
+}
+
 @media (max-width: 768px) {
   .game-day-hero-content h1 {
     font-size: 2rem;
