@@ -22,12 +22,16 @@ const { fetchNewsData, fetchScheduleData, scrapeCHNStats } = require('./scraper'
 const { scrapeTransferData } = require('./transfer-scraper'); // Import transfer scraper
 const { scrapeAlumniData } = require('./alumni-scraper'); // Import alumni scraper
 const { saveToCache, getFromCache } = require('./src/scripts/caching-system');
+const { startScheduler } = require('./src/scripts/scheduler'); // Import scheduler
 const fs = require('fs').promises; // For reading roster/recruit data later
 const path = require('path');
 
 const app = express();
 const port = process.env.PORT || 5000;
 const isProduction = process.env.NODE_ENV === 'production';
+
+// Start the background scheduler
+startScheduler();
 
 // Sentry: The request handler must be the first middleware on the app
 // Sentry: The request handler and tracing handler are no longer needed in v8+
@@ -238,7 +242,7 @@ app.get('/api/roster', async (req, res) => {
       const existingMap = new Map();
       const lastNameMap = new Map(); // Map by last name for fuzzy matching
       roster.forEach(p => {
-        const cleanName = p.name.replace(/\s*\([A-Z\/]+\)\s*/i, '').trim().toLowerCase();
+        const cleanName = p.name.replace(/\s*\([A-Z/]+\)\s*/i, '').trim().toLowerCase();
         existingMap.set(cleanName, p);
         // Also create a map by last name for fuzzy matching
         const nameParts = cleanName.split(' ');
