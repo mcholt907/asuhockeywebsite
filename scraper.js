@@ -1,13 +1,9 @@
-const axios = require('axios');
+// Imports
 const Sentry = require('@sentry/node');
 const cheerio = require('cheerio');
 const { saveToCache, getFromCache } = require('./src/scripts/caching-system');
-const Parser = require('rss-parser');
-const path = require('path');
 const config = require('./config/scraper-config');
 const { requestWithRetry, delayBetweenRequests } = require('./utils/request-helper');
-
-const parser = new Parser();
 
 async function scrapeSunDevilsNewsList() {
   const url = config.urls.sunDevilsNews;
@@ -46,31 +42,7 @@ async function scrapeSunDevilsNewsList() {
   }
 }
 
-async function scrapeSunDevilsRSS() {
-  const feedUrl = config.urls.sunDevilsRSS;
-  console.log(`Fetching Sun Devils news from RSS feed: ${feedUrl}`);
-  try {
-    // Fetch the raw RSS feed as text, with a User-Agent header
-    const { data: rssText } = await requestWithRetry(feedUrl, {
-      responseType: 'text'
-    });
-
-    // Clean the text and parse it
-    const feed = await parser.parseString(rssText.trim());
-
-    const articles = feed.items.map(item => ({
-      title: item.title,
-      link: item.link,
-      date: item.pubDate ? new Date(item.pubDate).toLocaleDateString() : 'Date not found',
-      source: 'TheSunDevils.com (RSS)'
-    }));
-    console.log(`Scraped ${articles.length} articles from TheSunDevils.com RSS feed`);
-    return articles;
-  } catch (error) {
-    console.error('Error scraping TheSunDevils.com RSS feed:', error.message);
-    return [];
-  }
-}
+// scrapeSunDevilsRSS removed (unused dead code)
 
 async function scrapeCHN() {
   const url = config.urls.chnNews;
@@ -125,65 +97,7 @@ async function scrapeCHN() {
   }
 }
 
-async function scrapeUSCHO() {
-  const url = config.urls.uscho;
-  console.log(`[USCHO Scraper] Attempting to fetch USCHO news from: ${url}`);
-  try {
-    const { data } = await requestWithRetry(url);
-    console.log('[USCHO Scraper] Successfully fetched data from URL.');
-    const $ = cheerio.load(data);
-    console.log('[USCHO Scraper] Cheerio loaded HTML data.');
-    const articles = [];
-
-    const widget = $('div.widget_links.legacy_sidebar').filter((i, el) => {
-      return $(el).find('div.block-title span:contains("Recent Arizona State Stories")').length > 0;
-    });
-    console.log(`[USCHO Scraper] Found ${widget.length} widget(s) matching criteria.`);
-
-    if (widget.length > 0) {
-      const articleLinks = widget.find('a');
-      console.log(`[USCHO Scraper] Found ${articleLinks.length} 'a' items (article links) within the widget.`);
-
-      articleLinks.each((i, element) => {
-        const linkElement = $(element);
-        const linkHref = linkElement.attr('href');
-
-        const title = linkElement.clone().children('.parendate').remove().end().text().trim();
-        const dateSpan = linkElement.find('span.parendate');
-        let date = 'Date not found';
-        if (dateSpan.length > 0) {
-          date = dateSpan.text().trim();
-        }
-
-        console.log(`[USCHO Scraper] Processing item ${i + 1}: Title '${title}', Link '${linkHref}', Date '${date}'`);
-
-        let fullLink = linkHref;
-        if (fullLink && !fullLink.startsWith('http')) {
-          fullLink = `https://www.uscho.com${fullLink}`;
-        }
-
-        if (title && fullLink && date) {
-          articles.push({
-            title,
-            link: fullLink,
-            date,
-            source: 'USCHO.com'
-          });
-        } else {
-          console.log(`[USCHO Scraper] Skipping item ${i + 1} due to missing title, link, or date. Title: '${title}', Link: '${fullLink}', Date: '${date}'`);
-        }
-      });
-    }
-    console.log(`[USCHO Scraper] Successfully scraped ${articles.length} articles from USCHO.com`);
-    return articles;
-  } catch (error) {
-    console.error('[USCHO Scraper] Error scraping USCHO.com:', error.message);
-    if (error.response) {
-      console.error('[USCHO Scraper] Response status:', error.response.status);
-    }
-    return [];
-  }
-}
+// USCHO scraper removed as per user request (latency/value trade-off)
 
 async function scrapeSunDevilsSchedule(year) {
   const scheduleUrl = config.urls.sunDevilsSchedule(year);
@@ -426,10 +340,8 @@ async function refreshNewsCache(cacheKey, duration) {
     const sunDevilsArticles = await scrapeSunDevilsNewsList();
     await delayBetweenRequests();
     const chnArticles = await scrapeCHN();
-    await delayBetweenRequests();
-    const uschoArticles = await scrapeUSCHO();
 
-    let allArticles = [...sunDevilsArticles, ...chnArticles, ...uschoArticles];
+    let allArticles = [...sunDevilsArticles, ...chnArticles];
 
     if (allArticles.length > 0) {
       const uniqueArticles = [];
