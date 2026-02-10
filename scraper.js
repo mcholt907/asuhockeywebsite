@@ -2,6 +2,11 @@
 const Sentry = require('@sentry/node');
 const cheerio = require('cheerio');
 const { saveToCache, getFromCache } = require('./src/scripts/caching-system');
+// In-memory cache variables (Request Coalescing)
+let newsPromise = null;
+let schedulePromise = null;
+let statsPromise = null;
+
 const config = require('./config/scraper-config');
 const { requestWithRetry, delayBetweenRequests } = require('./utils/request-helper');
 
@@ -276,23 +281,36 @@ async function fetchScheduleData() {
   }
 
   console.log(`[Cache System] No cache found or cache is stale for ${targetSeasonStartYear}. Scraping live data.`);
-  try {
-    const startTime = Date.now();
-    const scheduleData = await scrapeSunDevilsSchedule(targetSeasonStartYear);
-    const duration = Date.now() - startTime;
-    Sentry.metrics.distribution('scraper.schedule.duration', duration, { unit: 'millisecond' });
 
-    if (scheduleData && scheduleData.length > 0) {
-      console.log(`[Cache System] Successfully scraped ${scheduleData.length} games. Saving to cache for ${targetSeasonStartYear}.`);
-      await saveToCache(scheduleData, fullCacheKey); // Swapped arguments: (data, filename)
-    } else {
-      console.log(`[Cache System] No schedule data returned from scraper for ${targetSeasonStartYear}. Not caching.`);
-    }
-    return scheduleData; // Return the array of games
-  } catch (error) {
-    console.error(`[FetchScheduleData] Error fetching schedule: ${error.message}`);
-    return []; // Return empty array on error
+  // Request Coalescing
+  if (schedulePromise) {
+    console.log('[Cache System] Schedule scrape already in progress. Returning shared promise.');
+    return await schedulePromise;
   }
+
+  schedulePromise = (async () => {
+    try {
+      const startTime = Date.now();
+      const scheduleData = await scrapeSunDevilsSchedule(targetSeasonStartYear);
+      const duration = Date.now() - startTime;
+      Sentry.metrics.distribution('scraper.schedule.duration', duration, { unit: 'millisecond' });
+
+      if (scheduleData && scheduleData.length > 0) {
+        console.log(`[Cache System] Successfully scraped ${scheduleData.length} games. Saving to cache for ${targetSeasonStartYear}.`);
+        await saveToCache(scheduleData, fullCacheKey);
+      } else {
+        console.log(`[Cache System] No schedule data returned from scraper for ${targetSeasonStartYear}. Not caching.`);
+      }
+      return scheduleData;
+    } catch (error) {
+      console.error(`[FetchScheduleData] Error fetching schedule: ${error.message}`);
+      return [];
+    } finally {
+      schedulePromise = null;
+    }
+  })();
+
+  return await schedulePromise;
 }
 
 async function fetchNewsData() {
@@ -329,7 +347,20 @@ async function fetchNewsData() {
 
   // 3. No cache (valid or stale) found. Must wait for scrape.
   console.log('[Cache System] No cache found at all. Scraping live news data (User must wait).');
-  return await refreshNewsCache(ASU_HOCKEY_NEWS_CACHE_KEY, NEWS_CACHE_DURATION);
+
+  // Request Coalescing: If a scrape is already in progress, return that promise
+  if (newsPromise) {
+    console.log('[Cache System] News scrape already in progress. Returning shared promise.');
+    return await newsPromise;
+  }
+
+  // Start new scrape and store promise
+  newsPromise = refreshNewsCache(ASU_HOCKEY_NEWS_CACHE_KEY, NEWS_CACHE_DURATION)
+    .finally(() => {
+      newsPromise = null; // Clear promise when done
+    });
+
+  return await newsPromise;
 }
 
 // Extracted scraping logic to reused function
@@ -419,64 +450,76 @@ async function scrapeCHNStats() {
 
   const url = config.urls.chnStats(config.seasons.stats);
   console.log(`[CHN Stats Scraper] Attempting to fetch stats from: ${url}`);
-  const startTime = Date.now();
-  try {
-    const { data } = await requestWithRetry(url);
-    const $ = cheerio.load(data);
-    const stats = {
-      skaters: [],
-      goalies: [],
-    };
 
-    // Scrape Skaters
-    const skaterTable = $('#skaters');
-    const skaterHeaders = [];
-    skaterTable.find('thead tr:last-child th').each((i, el) => {
-      skaterHeaders.push($(el).text().trim());
-    });
-
-    skaterTable.find('tbody tr').each((i, row) => {
-      const rowData = {};
-      $(row).find('td').each((j, cell) => {
-        const header = skaterHeaders[j] || `col_${j}`;
-        rowData[header] = $(cell).text().trim();
-      });
-      stats.skaters.push(rowData);
-    });
-
-    // Scrape Goalies
-    const goalieTable = $('table:contains("Goaltending")');
-    const goalieHeaders = [];
-    goalieTable.find('thead tr:last-child th').each((i, el) => {
-      goalieHeaders.push($(el).text().trim());
-    });
-
-    goalieTable.find('tbody tr').each((i, row) => {
-      const rowData = {};
-      $(row).find('td').each((j, cell) => {
-        const header = goalieHeaders[j] || `col_${j}`;
-        rowData[header] = $(cell).text().trim();
-      });
-      if (Object.keys(rowData).length > 0 && rowData[goalieHeaders[0]]) {
-        stats.goalies.push(rowData);
-      }
-    });
-
-    console.log(`[CHN Stats Scraper] Scraped ${stats.skaters.length} skaters and ${stats.goalies.length} goalies.`);
-
-    // Save to cache (24 hours default)
-    if (stats.skaters.length > 0 || stats.goalies.length > 0) {
-      await saveToCache(stats, STATS_CACHE_KEY);
-    }
-
-    return stats;
-  } catch (error) {
-    console.error('[CHN Stats Scraper] Error scraping stats:', error.message);
-    return { skaters: [], goalies: [] };
-  } finally {
-    const duration = Date.now() - startTime;
-    Sentry.metrics.distribution('scraper.stats.duration', duration, { unit: 'millisecond' });
+  // Request Coalescing
+  if (statsPromise) {
+    console.log('[CHN Stats Scraper] Stats scrape already in progress. Returning shared promise.');
+    return await statsPromise;
   }
+
+  statsPromise = (async () => {
+    const startTime = Date.now();
+    try {
+      const { data } = await requestWithRetry(url);
+      const $ = cheerio.load(data);
+      const stats = {
+        skaters: [],
+        goalies: [],
+      };
+
+      // Scrape Skaters
+      const skaterTable = $('#skaters');
+      const skaterHeaders = [];
+      skaterTable.find('thead tr:last-child th').each((i, el) => {
+        skaterHeaders.push($(el).text().trim());
+      });
+
+      skaterTable.find('tbody tr').each((i, row) => {
+        const rowData = {};
+        $(row).find('td').each((j, cell) => {
+          const header = skaterHeaders[j] || `col_${j}`;
+          rowData[header] = $(cell).text().trim();
+        });
+        stats.skaters.push(rowData);
+      });
+
+      // Scrape Goalies
+      const goalieTable = $('table:contains("Goaltending")');
+      const goalieHeaders = [];
+      goalieTable.find('thead tr:last-child th').each((i, el) => {
+        goalieHeaders.push($(el).text().trim());
+      });
+
+      goalieTable.find('tbody tr').each((i, row) => {
+        const rowData = {};
+        $(row).find('td').each((j, cell) => {
+          const header = goalieHeaders[j] || `col_${j}`;
+          rowData[header] = $(cell).text().trim();
+        });
+        if (Object.keys(rowData).length > 0 && rowData[goalieHeaders[0]]) {
+          stats.goalies.push(rowData);
+        }
+      });
+
+      console.log(`[CHN Stats Scraper] Scraped ${stats.skaters.length} skaters and ${stats.goalies.length} goalies.`);
+
+      // Save to cache (24 hours default)
+      if (stats.skaters.length > 0 || stats.goalies.length > 0) {
+        await saveToCache(stats, STATS_CACHE_KEY);
+      }
+
+      return stats;
+    } catch (error) {
+      console.error('[CHN Stats Scraper] Error scraping stats:', error.message);
+      return { skaters: [], goalies: [] };
+    } finally {
+      const duration = Date.now() - startTime;
+      Sentry.metrics.distribution('scraper.stats.duration', duration, { unit: 'millisecond' });
+      statsPromise = null;
+    }
+  })();
+
+  return await statsPromise;
 }
 
 async function scrapeCHNRoster() {
