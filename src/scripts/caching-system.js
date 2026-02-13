@@ -63,7 +63,7 @@ function getFromCache(filename, ignoreExpiration = false) {
       }
 
       console.log(`Cache expired for ${filename}`);
-      fs.unlinkSync(cacheFilePath); // Optionally delete expired cache
+      // Don't delete expired cache — let SWR serve stale data while refreshing
       Sentry.metrics.count('cache.miss', 1, { attributes: { key: filename, reason: 'expired' } });
       return null;
     }

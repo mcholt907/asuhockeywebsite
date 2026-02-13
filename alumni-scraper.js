@@ -12,6 +12,9 @@ const BASE_URL = 'https://www.eliteprospects.com/team/18066/arizona-state-univ/w
 const CACHE_KEY = 'asu_alumni';
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours in ms
 
+// Request coalescing
+let alumniPromise = null;
+
 /**
  * Extract player ID from Elite Prospects URL
  */
@@ -270,7 +273,7 @@ async function scrapeAlumniData() {
 
     // Check cache first - caching system handles TTL automatically
     try {
-        const cached = await getFromCache(CACHE_KEY);
+        const cached = getFromCache(CACHE_KEY);
         if (cached) {
             console.log('[Alumni Scraper] Returning cached alumni data');
             return cached;
@@ -279,50 +282,62 @@ async function scrapeAlumniData() {
         console.log('[Alumni Scraper] No valid cache found, scraping fresh data');
     }
 
-    try {
-        const [skaters, goalies] = await Promise.all([
-            scrapeAllPages('skaters'),
-            scrapeAllPages('goalies')
-        ]);
-
-        const result = {
-            skaters,
-            goalies,
-            lastUpdated: new Date().toISOString()
-        };
-
-        // Count unique players
-        const uniqueSkaters = new Set(skaters.map(s => s.playerId)).size;
-        const uniqueGoalies = new Set(goalies.map(g => g.playerId)).size;
-
-        console.log(`[Alumni Scraper] Complete - ${skaters.length} skater entries (${uniqueSkaters} unique), ${goalies.length} goalie entries (${uniqueGoalies} unique)`);
-
-        // Log NHL players
-        const nhlEntries = [...skaters, ...goalies].filter(p => p.league === 'NHL');
-        if (nhlEntries.length > 0) {
-            console.log('[Alumni Scraper] NHL entries:');
-            nhlEntries.forEach(p => console.log(`  - ${p.name} (${p.team})`));
-        }
-
-        // Cache results - pass result directly, caching system wraps with timestamp
-        await saveToCache(result, CACHE_KEY, CACHE_TTL);
-
-        return result;
-
-    } catch (error) {
-        console.error('[Alumni Scraper] Error:', error.message);
-
-        // Try to return stale cache on error
-        try {
-            const cached = await getFromCache(CACHE_KEY);
-            if (cached) {
-                console.log('[Alumni Scraper] Returning stale cached data');
-                return cached;
-            }
-        } catch (e) { }
-
-        return { skaters: [], goalies: [], lastUpdated: null };
+    // Request Coalescing: if a scrape is already in progress, return that promise
+    if (alumniPromise) {
+        console.log('[Alumni Scraper] Scrape already in progress. Returning shared promise.');
+        return await alumniPromise;
     }
+
+    alumniPromise = (async () => {
+        try {
+            const [skaters, goalies] = await Promise.all([
+                scrapeAllPages('skaters'),
+                scrapeAllPages('goalies')
+            ]);
+
+            const result = {
+                skaters,
+                goalies,
+                lastUpdated: new Date().toISOString()
+            };
+
+            // Count unique players
+            const uniqueSkaters = new Set(skaters.map(s => s.playerId)).size;
+            const uniqueGoalies = new Set(goalies.map(g => g.playerId)).size;
+
+            console.log(`[Alumni Scraper] Complete - ${skaters.length} skater entries (${uniqueSkaters} unique), ${goalies.length} goalie entries (${uniqueGoalies} unique)`);
+
+            // Log NHL players
+            const nhlEntries = [...skaters, ...goalies].filter(p => p.league === 'NHL');
+            if (nhlEntries.length > 0) {
+                console.log('[Alumni Scraper] NHL entries:');
+                nhlEntries.forEach(p => console.log(`  - ${p.name} (${p.team})`));
+            }
+
+            // Cache results - pass result directly, caching system wraps with timestamp
+            await saveToCache(result, CACHE_KEY, CACHE_TTL);
+
+            return result;
+
+        } catch (error) {
+            console.error('[Alumni Scraper] Error:', error.message);
+
+            // Try to return stale cache on error (ignoreExpiration=true)
+            try {
+                const stale = getFromCache(CACHE_KEY, true);
+                if (stale) {
+                    console.log('[Alumni Scraper] Returning stale cached data');
+                    return stale;
+                }
+            } catch (e) { }
+
+            return { skaters: [], goalies: [], lastUpdated: null };
+        } finally {
+            alumniPromise = null;
+        }
+    })();
+
+    return await alumniPromise;
 }
 
 /**

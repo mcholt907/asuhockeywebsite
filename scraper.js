@@ -6,6 +6,7 @@ const { saveToCache, getFromCache } = require('./src/scripts/caching-system');
 let newsPromise = null;
 let schedulePromise = null;
 let statsPromise = null;
+let rosterPromise = null;
 
 const config = require('./config/scraper-config');
 const { requestWithRetry, delayBetweenRequests } = require('./utils/request-helper');
@@ -527,7 +528,7 @@ async function scrapeCHNRoster() {
 
   // Check cache first
   try {
-    const cachedRoster = await getFromCache(ROSTER_CACHE_KEY);
+    const cachedRoster = getFromCache(ROSTER_CACHE_KEY);
     if (cachedRoster) {
       console.log('[CHN Roster Scraper] Returning cached roster data.');
       return cachedRoster;
@@ -536,77 +537,89 @@ async function scrapeCHNRoster() {
     console.log('[CHN Roster Scraper] No valid cache found.');
   }
 
-  const url = 'https://www.collegehockeynews.com/reports/roster/Arizona-State/61';
-  console.log(`[CHN Roster Scraper] Attempting to fetch roster from: ${url}`);
-  try {
-    const { data } = await requestWithRetry(url);
-    const $ = cheerio.load(data);
-    const players = [];
+  // Request Coalescing
+  if (rosterPromise) {
+    console.log('[CHN Roster Scraper] Roster scrape already in progress. Returning shared promise.');
+    return await rosterPromise;
+  }
 
-    $('table').each((i, table) => {
-      const headers = [];
-      $(table).find('thead th').each((j, th) => {
-        const text = $(th).text().trim();
-        headers.push(text);
+  rosterPromise = (async () => {
+    const url = 'https://www.collegehockeynews.com/reports/roster/Arizona-State/61';
+    console.log(`[CHN Roster Scraper] Attempting to fetch roster from: ${url}`);
+    try {
+      const { data } = await requestWithRetry(url);
+      const $ = cheerio.load(data);
+      const players = [];
+
+      $('table').each((i, table) => {
+        const headers = [];
+        $(table).find('thead th').each((j, th) => {
+          const text = $(th).text().trim();
+          headers.push(text);
+        });
+
+        // Heuristic: Check if headers contain "Name" or "Player"
+        const hasName = headers.some(h => h.includes('Name') || h.includes('Player'));
+
+        if (hasName) {
+          $(table).find('tbody tr').each((j, tr) => {
+            const cells = $(tr).find('td');
+            // Skip section headers (e.g. "Defensemen", "2026") which usually have 1-2 cells
+            if (cells.length < 5) return;
+
+            const row = {};
+            cells.each((k, td) => {
+              const header = headers[k] || `col_${k}`;
+              row[header] = $(td).text().trim();
+            });
+
+            // Normalize keys
+            let nameVal = row['Name'] || row['Player'];
+
+            // Handle "Last, First" format if present
+            if (nameVal && nameVal.includes(',')) {
+              const parts = nameVal.split(',').map(s => s.trim());
+              if (parts.length === 2) {
+                nameVal = `${parts[1]} ${parts[0]}`; // First Last
+              }
+            }
+
+            if (nameVal) {
+              // Clean trailing chars
+              nameVal = nameVal.replace(/\s*\(\w+\)$/, '').trim();
+
+              const playerObj = {
+                Player: nameVal,
+                '#': row['No.'] || row['#'] || '',
+                Pos: row['Pos'] || row['Pos.'] || row['Position'] || '',
+                Ht: row['Ht.'] || row['Height'] || row['Ht'] || '-',
+                Wt: row['Wt.'] || row['Weight'] || row['Wt'] || '-',
+                DOB: row['DOB'] || row['Born'] || '-',
+                Hometown: row['Hometown'] || row['Birthplace'] || '-'
+              };
+              players.push(playerObj);
+            }
+          });
+        }
       });
 
-      // Heuristic: Check if headers contain "Name" or "Player"
-      const hasName = headers.some(h => h.includes('Name') || h.includes('Player'));
+      console.log(`[CHN Roster Scraper] Scraped ${players.length} players.`);
 
-      if (hasName) {
-        $(table).find('tbody tr').each((j, tr) => {
-          const cells = $(tr).find('td');
-          // Skip section headers (e.g. "Defensemen", "2026") which usually have 1-2 cells
-          if (cells.length < 5) return;
-
-          const row = {};
-          cells.each((k, td) => {
-            const header = headers[k] || `col_${k}`;
-            row[header] = $(td).text().trim();
-          });
-
-          // Normalize keys
-          let nameVal = row['Name'] || row['Player'];
-
-          // Handle "Last, First" format if present
-          if (nameVal && nameVal.includes(',')) {
-            const parts = nameVal.split(',').map(s => s.trim());
-            if (parts.length === 2) {
-              nameVal = `${parts[1]} ${parts[0]}`; // First Last
-            }
-          }
-
-          if (nameVal) {
-            // Clean trailing chars
-            nameVal = nameVal.replace(/\s*\(\w+\)$/, '').trim();
-
-            const playerObj = {
-              Player: nameVal,
-              '#': row['No.'] || row['#'] || '',
-              Pos: row['Pos'] || row['Pos.'] || row['Position'] || '',
-              Ht: row['Ht.'] || row['Height'] || row['Ht'] || '-',
-              Wt: row['Wt.'] || row['Weight'] || row['Wt'] || '-',
-              DOB: row['DOB'] || row['Born'] || '-',
-              Hometown: row['Hometown'] || row['Birthplace'] || '-'
-            };
-            players.push(playerObj);
-          }
-        });
+      // Save to cache (24 hours default)
+      if (players.length > 0) {
+        await saveToCache(players, ROSTER_CACHE_KEY);
       }
-    });
 
-    console.log(`[CHN Roster Scraper] Scraped ${players.length} players.`);
-
-    // Save to cache (24 hours default)
-    if (players.length > 0) {
-      await saveToCache(players, ROSTER_CACHE_KEY);
+      return players;
+    } catch (error) {
+      console.error('[CHN Roster Scraper] Error scraping roster:', error.message);
+      return [];
+    } finally {
+      rosterPromise = null;
     }
+  })();
 
-    return players;
-  } catch (error) {
-    console.error('[CHN Roster Scraper] Error scraping roster:', error.message);
-    return [];
-  }
+  return await rosterPromise;
 }
 
 module.exports = { fetchNewsData, fetchScheduleData, scrapeCHNStats, scrapeCHNRoster };
