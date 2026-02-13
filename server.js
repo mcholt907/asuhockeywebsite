@@ -21,7 +21,6 @@ const compression = require('compression'); // Add compression for performance
 const { fetchNewsData, fetchScheduleData, scrapeCHNStats } = require('./scraper'); // Import the news fetching function and new stats fetching function
 const { scrapeTransferData } = require('./transfer-scraper'); // Import transfer scraper
 const { scrapeAlumniData } = require('./alumni-scraper'); // Import alumni scraper
-const { saveToCache, getFromCache } = require('./src/scripts/caching-system');
 const { startScheduler } = require('./src/scripts/scheduler'); // Import scheduler
 const fs = require('fs').promises; // For reading roster/recruit data later
 const path = require('path');
@@ -431,22 +430,10 @@ function determineNationality(hometown) {
 }
 
 app.get('/api/stats', async (req, res) => {
-  // Include season in cache key to avoid conflicts between seasons
-  const config = require('./config/scraper-config');
-  const statsSeason = config.seasons.stats;
-  const cacheKey = `chn_stats_${statsSeason}`;
-
   try {
-    const cachedData = await getFromCache(cacheKey);
-    if (cachedData) {
-      console.log(`[Cache System] Stats data found in cache for ${cacheKey}.`);
-      return res.json(cachedData);
-    }
-
-    console.log(`[Cache System] No cache found for ${cacheKey}. Scraping live data.`);
+    // scrapeCHNStats handles cache check, SWR, and coalescing internally
     const statsData = await scrapeCHNStats();
     if (statsData.skaters.length > 0 || statsData.goalies.length > 0) {
-      await saveToCache(statsData, cacheKey);
       res.json(statsData);
     } else {
       res.status(500).json({ error: 'Failed to fetch stats data.' });
