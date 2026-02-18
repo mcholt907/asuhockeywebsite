@@ -22,6 +22,7 @@ const { fetchNewsData, fetchScheduleData, scrapeCHNStats } = require('./scraper'
 const { scrapeTransferData } = require('./transfer-scraper'); // Import transfer scraper
 const { scrapeAlumniData } = require('./alumni-scraper'); // Import alumni scraper
 const { startScheduler } = require('./src/scripts/scheduler'); // Import scheduler
+const { fetchRecruitingData } = require('./recruiting-scraper');
 const fs = require('fs').promises; // For reading roster/recruit data later
 const path = require('path');
 
@@ -160,17 +161,12 @@ async function getHockeyData() {
 // API endpoint for recruiting data
 app.get('/api/recruits', async (req, res) => {
   try {
-    console.log('[API /recruits] Fetching recruiting data from static JSON file...');
-
-    // Read directly from the static JSON file since we've manually added player photos
-    const fileData = await fs.readFile(HOCKEY_DATA_PATH, 'utf-8');
-    const parsedData = JSON.parse(fileData);
-    const recruitingData = parsedData.recruiting || {};
-
-    console.log('[API /recruits] Successfully returning recruiting data from JSON file');
+    console.log('[API /recruits] Fetching recruiting data...');
+    const recruitingData = await fetchRecruitingData();
+    console.log('[API /recruits] Successfully returning recruiting data');
     res.json(recruitingData);
   } catch (error) {
-    console.error('[API /recruits] Error reading recruiting data:', error.message);
+    console.error('[API /recruits] Error fetching recruiting data:', error.message);
     res.status(500).json({
       error: 'Failed to fetch recruiting data',
       message: error.message
