@@ -185,8 +185,9 @@ async function scrapeAndCacheRecruiting(cacheKey, includePhotos = false) {
         await delayBetweenRequests();
     }
 
-    // Save to cache if we got any data
-    if (Object.keys(recruitingData).length > 0) {
+    // Save to cache only if at least one player was returned across all seasons
+    const hasAnyPlayers = Object.values(recruitingData).some(arr => arr.length > 0);
+    if (hasAnyPlayers) {
         console.log(`[Cache System] Successfully scraped recruiting data. Saving to cache.`);
         saveToCache(recruitingData, cacheKey);
     } else {
@@ -218,7 +219,8 @@ async function fetchRecruitingData(includePhotos = false) {
         if (staleData && !includePhotos) {
             console.log('[Recruiting Scraper] Stale data found. Returning immediately and refreshing in background.');
             if (!recruitingPromise) {
-                recruitingPromise = scrapeAndCacheRecruiting(RECRUITING_CACHE_KEY, includePhotos)
+                // Phase 2 background refresh — always false here because includePhotos=true bypasses cache entirely
+                recruitingPromise = scrapeAndCacheRecruiting(RECRUITING_CACHE_KEY, false)
                     .finally(() => { recruitingPromise = null; });
             }
             return staleData;
