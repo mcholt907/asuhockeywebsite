@@ -3,6 +3,8 @@ const { saveToCache, getFromCache } = require('./src/scripts/caching-system');
 const config = require('./config/scraper-config');
 const { requestWithRetry, delayBetweenRequests } = require('./utils/request-helper');
 
+let recruitingPromise = null;
+
 /**
  * Scrapes player photo URL from Elite Prospects player profile page
  * @param {string} playerLink - Full URL to player's Elite Prospects profile
@@ -165,55 +167,73 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
 }
 
 /**
+ * Scrapes recruiting data for all configured future seasons and saves to cache
+ * @param {string} cacheKey - Cache key to save data under
+ * @param {boolean} includePhotos - Whether to scrape player photos (much slower)
+ * @returns {Object} Object with season keys and player arrays as values
+ */
+async function scrapeAndCacheRecruiting(cacheKey, includePhotos = false) {
+    const recruitingData = {};
+
+    // Scrape data for each future season configured
+    for (const season of config.FUTURE_SEASONS || ['2026-2027', '2027-2028', '2028-2029']) {
+        console.log(`[Recruiting] Scraping season: ${season}${includePhotos ? ' with photos' : ''}`);
+        const players = await scrapeEliteProspectsRecruiting(season, includePhotos);
+        recruitingData[season] = players;
+
+        // Add delay between requests to be respectful
+        await delayBetweenRequests();
+    }
+
+    // Save to cache if we got any data
+    if (Object.keys(recruitingData).length > 0) {
+        console.log(`[Cache System] Successfully scraped recruiting data. Saving to cache.`);
+        saveToCache(recruitingData, cacheKey);
+    } else {
+        console.log('[Cache System] No recruiting data returned from scraper. Not caching.');
+    }
+
+    return recruitingData;
+}
+
+/**
  * Fetches recruiting data for all configured future seasons
- * Uses caching to avoid excessive scraping
+ * Uses stale-while-revalidate caching to avoid excessive scraping
  * @param {boolean} includePhotos - Whether to scrape player photos (much slower)
  * @returns {Object} Object with season keys and player arrays as values
  */
 async function fetchRecruitingData(includePhotos = false) {
     const RECRUITING_CACHE_KEY = 'asu_hockey_recruiting';
 
-    console.log(`[Cache System] Attempting to fetch recruiting data with cache key: ${RECRUITING_CACHE_KEY}`);
-
+    // 1. Fresh cache
     try {
-        const cachedData = await getFromCache(RECRUITING_CACHE_KEY);
+        const cachedData = getFromCache(RECRUITING_CACHE_KEY);
         if (cachedData && !includePhotos) {
-            console.log('[Cache System] Recruiting data found in cache. Returning cached data.');
+            console.log('[Recruiting Scraper] Returning cached recruiting data.');
             return cachedData;
         }
+
+        // 2. SWR: return stale immediately, refresh in background
+        const staleData = getFromCache(RECRUITING_CACHE_KEY, true);
+        if (staleData && !includePhotos) {
+            console.log('[Recruiting Scraper] Stale data found. Returning immediately and refreshing in background.');
+            if (!recruitingPromise) {
+                recruitingPromise = scrapeAndCacheRecruiting(RECRUITING_CACHE_KEY, includePhotos)
+                    .finally(() => { recruitingPromise = null; });
+            }
+            return staleData;
+        }
     } catch (error) {
-        console.error('[Cache System] Error reading recruiting data from cache:', error.message);
+        console.log('[Recruiting Scraper] No valid cache found.');
     }
 
-    console.log('[Cache System] No recruiting cache found or cache is stale. Scraping live data.');
-
-    try {
-        const recruitingData = {};
-
-        // Scrape data for each future season configured
-        for (const season of config.FUTURE_SEASONS || ['2026-2027', '2027-2028', '2028-2029']) {
-            console.log(`[Recruiting] Scraping season: ${season}${includePhotos ? ' with photos' : ''}`);
-            const players = await scrapeEliteProspectsRecruiting(season, includePhotos);
-            recruitingData[season] = players;
-
-            // Add delay between requests to be respectful
-            await delayBetweenRequests();
-        }
-
-        // Save to cache if we got any data
-        if (Object.keys(recruitingData).length > 0) {
-            console.log(`[Cache System] Successfully scraped recruiting data. Saving to cache.`);
-            await saveToCache(recruitingData, RECRUITING_CACHE_KEY);
-        } else {
-            console.log('[Cache System] No recruiting data returned from scraper. Not caching.');
-        }
-
-        return recruitingData;
-
-    } catch (error) {
-        console.error('[FetchRecruitingData] Error fetching recruiting data:', error.message);
-        return {};
+    // 3. No cache — must block on live scrape
+    if (recruitingPromise) {
+        return await recruitingPromise;
     }
+    recruitingPromise = scrapeAndCacheRecruiting(RECRUITING_CACHE_KEY, includePhotos)
+        .finally(() => { recruitingPromise = null; });
+    return await recruitingPromise;
 }
 
 module.exports = {
