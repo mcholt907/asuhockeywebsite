@@ -12,6 +12,9 @@
 # NOTE: We DO want to commit the build folder for Render deployment
 # Remove /build from gitignore
 
+# IDE settings (may contain API keys)
+.vscode/settings.json
+
 # environment variables
 .env
 .env.local

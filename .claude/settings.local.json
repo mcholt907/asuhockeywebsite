@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(claude plugin --help:*)",
+      "Bash(echo:*)",
+      "Bash(Select-String -Pattern \"plugin|superpow\" -Context 0,0)",
+      "Bash(Select-Object -First 30)",
+      "WebFetch(domain:docs.anthropic.com)"
+    ]
+  }
+}

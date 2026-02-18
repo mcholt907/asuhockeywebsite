@@ -374,22 +374,6 @@ app.get('/api/roster', async (req, res) => {
   }
 });
 
-// API endpoint for recruiting data
-app.get('/api/recruits', async (req, res) => {
-  try {
-    const hockeyData = await getHockeyData();
-    if (hockeyData && hockeyData.recruiting) {
-      res.json(hockeyData.recruiting);
-    } else {
-      res.status(404).json({ error: 'Recruiting data not found or file is invalid.' });
-    }
-  } catch (error) {
-    console.error('Error in /api/recruits:', error);
-    res.status(500).json({ error: 'Internal server error while fetching recruiting data.' });
-  }
-});
-
-
 function determineNationality(hometown) {
   if (!hometown || hometown === '-') return 'USA';
   const h = hometown.toUpperCase();
