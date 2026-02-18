@@ -9,21 +9,26 @@ import React, { useState } from 'react';
  *   defaultSortKey  - Column key to sort by on mount (must exist in headers)
  *   defaultSortDir  - 'asc' | 'desc' (default: 'desc')
  */
-function SortableTable({ data, headers, defaultSortKey, defaultSortDir = 'desc' }) {
+function SortableTable({ data = [], headers = [], defaultSortKey, defaultSortDir = 'desc' }) {
   const [sortKey, setSortKey] = useState(defaultSortKey || headers[0] || '');
   const [sortDir, setSortDir] = useState(defaultSortDir);
 
-  // Detect if a column should sort numerically
-  // Checks the first non-empty value in the column
+  // Detect if a column should sort numerically.
+  // Checks the first non-empty value in the column.
   const isNumericColumn = (key) => {
     for (const row of data) {
       const val = row[key];
       if (val !== undefined && val !== null && val !== '') {
-        return !isNaN(parseFloat(val)) && isFinite(val);
+        const parsed = parseFloat(val);
+        return !isNaN(parsed) && Number.isFinite(parsed);
       }
     }
     return false;
   };
+
+  // Compute once before sort — avoids O(n² log n) by not calling isNumericColumn
+  // inside every comparator invocation.
+  const isNumeric = isNumericColumn(sortKey);
 
   // Sort a copy of data — never mutate props
   const sortedData = [...data].sort((a, b) => {
@@ -35,7 +40,7 @@ function SortableTable({ data, headers, defaultSortKey, defaultSortDir = 'desc' 
     if (bVal === undefined || bVal === null || bVal === '') return -1;
 
     let comparison;
-    if (isNumericColumn(sortKey)) {
+    if (isNumeric) {
       comparison = parseFloat(aVal) - parseFloat(bVal);
     } else {
       comparison = String(aVal).localeCompare(String(bVal));
