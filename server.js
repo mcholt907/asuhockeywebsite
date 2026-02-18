@@ -23,6 +23,7 @@ const { scrapeTransferData } = require('./transfer-scraper'); // Import transfer
 const { scrapeAlumniData } = require('./alumni-scraper'); // Import alumni scraper
 const { startScheduler } = require('./src/scripts/scheduler'); // Import scheduler
 const { fetchRecruitingData } = require('./recruiting-scraper');
+const { getRoster } = require('./services/roster-service');
 const fs = require('fs').promises; // For reading roster/recruit data later
 const path = require('path');
 
@@ -206,159 +207,10 @@ app.get('/api/alumni', async (req, res) => {
   }
 });
 
-// API endpoint for roster data (from static JSON or future scraper)
+// API endpoint for roster data
 app.get('/api/roster', async (req, res) => {
   try {
-    const hockeyData = await getHockeyData();
-    let roster = hockeyData ? (hockeyData.roster || []) : [];
-
-    // Build a map of recruits for shoots data lookup
-    const recruitShootsMap = new Map();
-    if (hockeyData && hockeyData.recruiting) {
-      Object.values(hockeyData.recruiting).forEach(recruitList => {
-        recruitList.forEach(recruit => {
-          if (recruit.name && recruit.shoots) {
-            recruitShootsMap.set(recruit.name.toLowerCase().trim(), recruit.shoots);
-          }
-        });
-      });
-    }
-
-
-    // Merge live roster data (full details)
-    try {
-      // Import on demand or move top-level if preferred, but for now we need the new export
-      const { scrapeCHNRoster } = require('./scraper');
-      console.log('[Roster API] Fetching live CHN roster for sync...');
-      const liveRoster = await scrapeCHNRoster();
-      console.log(`[Roster API] Scraped ${liveRoster.length} players from CHN.`);
-
-      // Create a map of existing players for easier lookup by name
-      const existingMap = new Map();
-      const lastNameMap = new Map(); // Map by last name for fuzzy matching
-      roster.forEach(p => {
-        const cleanName = p.name.replace(/\s*\([A-Z/]+\)\s*/i, '').trim().toLowerCase();
-        existingMap.set(cleanName, p);
-        // Also create a map by last name for fuzzy matching
-        const nameParts = cleanName.split(' ');
-        if (nameParts.length >= 2) {
-          const lastName = nameParts[nameParts.length - 1];
-          if (!lastNameMap.has(lastName)) {
-            lastNameMap.set(lastName, []);
-          }
-          lastNameMap.get(lastName).push(p);
-        }
-      });
-
-      // Helper to find player by exact match or last name match
-      const findExistingPlayer = (chnName) => {
-        const lowerName = chnName.toLowerCase();
-        // Try exact match first
-        if (existingMap.has(lowerName)) {
-          return existingMap.get(lowerName);
-        }
-        // Try matching by last name (for "Sam" vs "Samuel" cases)
-        const nameParts = lowerName.split(' ');
-        if (nameParts.length >= 2) {
-          const lastName = nameParts[nameParts.length - 1];
-          const candidates = lastNameMap.get(lastName) || [];
-          if (candidates.length === 1) {
-            // Only one player with this last name - likely a match
-            return candidates[0];
-          }
-        }
-        return null;
-      };
-
-      liveRoster.forEach(p => {
-        // CHN keys: #, Player, Yr, Pos, S/C, Ht, Wt, DOB, Hometown, Last Team
-        let rawName = p.Player;
-        if (!rawName) return;
-
-        // Clean name (sometimes has trailing spaces or chars)
-        let name = rawName.trim();
-
-        // Calculate nationality from hometown
-        const hometown = p.Hometown || '';
-        const nationality = determineNationality(hometown);
-
-        // Check if existing (with fuzzy matching)
-        const existingPlayer = findExistingPlayer(name);
-        if (existingPlayer) {
-          // Update existing player if fields are missing
-
-          if (!existingPlayer.number || existingPlayer.number === '-' || existingPlayer.number === '') {
-            existingPlayer.number = p['#'] || existingPlayer.number;
-          }
-          if (!existingPlayer.height || existingPlayer.height === '-' || existingPlayer.height === '') {
-            existingPlayer.height = p.Ht || existingPlayer.height;
-          }
-          if (!existingPlayer.weight || existingPlayer.weight === '-' || existingPlayer.weight === '') {
-            existingPlayer.weight = p.Wt || existingPlayer.weight;
-          }
-          if (!existingPlayer.born || existingPlayer.born === '-' || existingPlayer.born === '') {
-            existingPlayer.born = p.DOB || existingPlayer.born;
-          }
-          if (!existingPlayer.birthplace || existingPlayer.birthplace === '-' || existingPlayer.birthplace === '') {
-            existingPlayer.birthplace = p.Hometown || existingPlayer.birthplace;
-          }
-          if (!existingPlayer.shoots || existingPlayer.shoots === '-' || existingPlayer.shoots === '' || !existingPlayer.shoots) {
-            existingPlayer.shoots = p['S/C'] || existingPlayer.shoots || '-';
-          }
-
-          // Always update/set nationality if we derived it and it's missing or default
-          if (!existingPlayer.nationality || existingPlayer.nationality === 'USA') {
-            existingPlayer.nationality = nationality;
-          }
-
-        } else {
-          console.log(`[Roster API] Adding missing player with details: ${name}`);
-
-          // Format Name (Pos)
-          let pos = p.Pos || '';
-          let displayName = pos ? `${name} (${pos})` : name;
-
-          // Try to get shoots from CHN, then from recruiting data
-          let shoots = p['S/C'] || '';
-          if (!shoots || shoots === '-') {
-            shoots = recruitShootsMap.get(name.toLowerCase().trim()) || '-';
-          }
-
-          const newPlayer = {
-            number: p['#'] || '',
-            name: displayName,
-            position: pos,
-            height: p.Ht || '-',
-            weight: p.Wt || '-',
-            shoots: shoots, // Shoots/Catches
-            born: p.DOB || '-',
-            birthplace: p.Hometown || '-',
-            nationality: nationality,
-            player_link: ''
-          };
-          roster.push(newPlayer);
-          // Add to map to prevent duplicates if CHN lists twice (unlikely)
-          existingMap.set(name.toLowerCase(), newPlayer);
-        }
-      });
-
-      // Final pass: Ensure everyone has a link
-      roster.forEach(p => {
-        if (!p.player_link) {
-          // Generate Elite Prospects search link
-          // Remove (G), (D), (F) from name for search
-          const cleanName = p.name.replace(/\s*\([A-Z]+\)\s*/i, '').trim();
-          p.player_link = `https://www.eliteprospects.com/search/player?q=${encodeURIComponent(cleanName)}`;
-        }
-      });
-
-    } catch (mergeError) {
-      console.error('[Roster API] Error merging live roster data:', mergeError);
-    }
-
-
-
-
+    const roster = await getRoster();
     if (roster.length > 0) {
       res.json(roster);
     } else {
@@ -370,44 +222,6 @@ app.get('/api/roster', async (req, res) => {
   }
 });
 
-function determineNationality(hometown) {
-  if (!hometown || hometown === '-') return 'USA';
-  const h = hometown.toUpperCase();
-
-  // European/International codes
-  const europeMap = {
-    'SVK': 'SVK', 'SLOVAKIA': 'SVK',
-    'CZE': 'CZE', 'CZECH': 'CZE',
-    'SWE': 'SWE', 'SWEDEN': 'SWE',
-    'FIN': 'FIN', 'FINLAND': 'FIN',
-    'RUS': 'RUS', 'RUSSIA': 'RUS',
-    'GER': 'GER', 'GERMANY': 'GER',
-    'LAT': 'LAT', 'LATVIA': 'LAT',
-    'BLR': 'BLR', 'BELARUS': 'BLR',
-    'SUI': 'SUI', 'SWITZERLAND': 'SUI',
-    'AUT': 'AUT', 'AUSTRIA': 'AUT',
-    'GBR': 'GBR', 'UK': 'GBR'
-  };
-
-  for (const [key, code] of Object.entries(europeMap)) {
-    if (h.includes(key)) return code;
-  }
-
-  // Canada detection
-  // Check for "CAN", "CANADA", or common province abbreviations/names found in hockey databases
-  // Note: " AB" (Alberta), " BC" (British Columbia), " ON" (Ontario), etc.
-  // Using spaces to avoid matching inside words (e.g. "CANT")
-  // Also matching "ONT.", "MAN.", "ALB.", "SASK." based on screenshot
-  if (h.includes('CAN') || h.includes('CANADA') ||
-    h.includes(' ON') || h.includes('QUE') || h.includes(' BC') || h.includes(' AB') || h.includes(' MB') ||
-    h.includes(' SK') || h.includes(' NS') || h.includes(' NB') || h.includes(' PE') || h.includes(' NL') ||
-    h.includes('ONT') || h.includes('MAN') || h.includes('ALB') || h.includes('SASK')) {
-    return 'CAN';
-  }
-
-  // Default to USA
-  return 'USA';
-}
 
 app.get('/api/stats', async (req, res) => {
   try {
