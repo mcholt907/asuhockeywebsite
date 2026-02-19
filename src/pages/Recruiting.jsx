@@ -38,7 +38,7 @@ function Recruiting() {
           setRecruitsBySeason(filteredData);
           const seasonsSorted = Object.keys(filteredData).sort().reverse();
           setSortedSeasons(seasonsSorted);
-          setActiveSeason(seasonsSorted[0]);
+          setActiveSeason(seasonsSorted[seasonsSorted.length - 1]);
         } else {
           setRecruitsBySeason({});
           setSortedSeasons([]);

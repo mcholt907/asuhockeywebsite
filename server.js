@@ -22,9 +22,9 @@ const { fetchNewsData, fetchScheduleData, scrapeCHNStats } = require('./scraper'
 const { scrapeTransferData } = require('./transfer-scraper'); // Import transfer scraper
 const { scrapeAlumniData } = require('./alumni-scraper'); // Import alumni scraper
 const { startScheduler } = require('./src/scripts/scheduler'); // Import scheduler
-const { fetchRecruitingData } = require('./recruiting-scraper');
 const { getRoster } = require('./services/roster-service');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -140,19 +140,15 @@ app.get('/api/schedule', async (req, res) => {
   }
 });
 
-// API endpoint for recruiting data
-app.get('/api/recruits', async (req, res) => {
+// API endpoint for recruiting data — reads directly from static JSON (source of truth)
+app.get('/api/recruits', (req, res) => {
   try {
-    console.log('[API /recruits] Fetching recruiting data...');
-    const recruitingData = await fetchRecruitingData();
-    console.log('[API /recruits] Successfully returning recruiting data');
-    res.json(recruitingData);
+    const raw = fs.readFileSync(path.join(__dirname, 'asu_hockey_data.json'), 'utf8');
+    const data = JSON.parse(raw);
+    res.json(data.recruiting || {});
   } catch (error) {
-    console.error('[API /recruits] Error fetching recruiting data:', error.message);
-    res.status(500).json({
-      error: 'Failed to fetch recruiting data',
-      message: error.message
-    });
+    console.error('[API /recruits] Error reading recruiting data:', error.message);
+    res.status(500).json({ error: 'Failed to fetch recruiting data' });
   }
 });
 

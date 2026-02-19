@@ -632,6 +632,7 @@ async function scrapeAndCacheRoster(cacheKey) {
               Player: nameVal,
               '#': row['No.'] || row['#'] || '',
               Pos: row['Pos'] || row['Pos.'] || row['Position'] || '',
+              'S/C': row['S/C'] || row['S'] || row['Shoots'] || '',
               Ht: row['Ht.'] || row['Height'] || row['Ht'] || '-',
               Wt: row['Wt.'] || row['Weight'] || row['Wt'] || '-',
               DOB: row['DOB'] || row['Born'] || '-',
