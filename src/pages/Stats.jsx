@@ -1,5 +1,6 @@
 // src/pages/Stats.jsx
 import React, { useEffect, useState } from 'react';
+import SortableTable from '../components/SortableTable';
 import './Stats.css';
 
 function Stats() {
@@ -87,25 +88,6 @@ function Stats() {
     </div>
   );
 
-  const renderTable = (data, headers) => (
-    <div className="stat-lab-table-container custom-scrollbar">
-      <table className="stat-lab-table">
-        <thead>
-          <tr>
-            {headers.map(h => <th key={h}>{h}</th>)}
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((row, idx) => (
-            <tr key={idx}>
-              {headers.map(h => <td key={`${h}-${idx}`}>{row[h]}</td>)}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-
   if (loading) return <div className="page-container"><p className="loading-message">Initializing Stat Lab...</p></div>;
   if (error) return <div className="page-container"><p className="error-message">{error}</p></div>;
 
@@ -151,8 +133,22 @@ function Stats() {
       </div>
 
       <div className="stats-data-view fade-in">
-        {activeTab === 'skaters' && renderTable(stats.skaters, skaterHeaders)}
-        {activeTab === 'goalies' && renderTable(stats.goalies, goalieHeaders)}
+        {activeTab === 'skaters' && (
+          <SortableTable
+            data={stats.skaters}
+            headers={skaterHeaders}
+            defaultSortKey="Pts."
+            defaultSortDir="desc"
+          />
+        )}
+        {activeTab === 'goalies' && (
+          <SortableTable
+            data={stats.goalies}
+            headers={goalieHeaders}
+            defaultSortKey="GP"
+            defaultSortDir="desc"
+          />
+        )}
       </div>
     </div>
   );
