@@ -1,28 +1,36 @@
-/* Home.css — redesigned split-panel layout */
+/* Home.css — split-panel redesign with floating dark card on maroon background */
+
+/* ============================================
+   Page & Card
+   ============================================ */
+
+/* Maroon page background; cancel main's top/bottom padding */
+.home-page {
+  margin-top: -40px;
+  margin-bottom: -60px;
+  background: var(--asu-maroon);
+  padding: 20px;
+  box-sizing: border-box;
+  min-height: calc(100vh - var(--header-height));
+}
+
+/* Single dark floating card containing the full hero + news */
+.home-card {
+  background: #0f0305;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 8px 48px rgba(0, 0, 0, 0.7);
+}
 
 /* ============================================
    Zone 1: Hero Grid
    ============================================ */
 
-/* Maroon page background; cancel main's top/bottom padding for full bleed */
-.home-page {
-  margin-top: -40px;
-  margin-bottom: -60px;
-  background: var(--asu-maroon);
-  padding: 20px 20px 40px;
-  box-sizing: border-box;
-  min-height: calc(100vh - var(--header-height));
-}
-
 .home-hero-grid {
   display: grid;
   grid-template-columns: 60fr 40fr;
-  /* subtract 20px top padding from available height */
-  height: calc(100vh - var(--header-height) - 20px);
-  max-height: 880px;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.65);
+  /* min-height fills the viewport; right panel content can grow taller */
+  min-height: calc(100vh - var(--header-height) - 40px);
 }
 
 /* --- Left Panel --- */
@@ -144,119 +152,88 @@
 }
 
 /* --- Right Panel --- */
-/* near-black dark card floating on the maroon page background */
 .hero-right {
-  background: #0f0305;
+  background: #150508;
   color: #e8e0e2;
-  overflow-y: auto;
-  padding: 28px 24px;
+  overflow: visible;
+  padding: 24px 20px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 18px;
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .right-matchup-header {
-  padding-bottom: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .right-matchup-title {
-  font-size: clamp(1.1rem, 2vw, 1.6rem);
+  font-size: clamp(1rem, 1.8vw, 1.5rem);
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: -0.01em;
   color: white;
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   line-height: 1.1;
 }
 
 .right-matchup-meta {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--asu-gold);
   margin: 0;
   font-weight: 600;
 }
 
 .right-section-title {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.14em;
   color: var(--asu-gold);
-  margin: 0 0 12px;
+  margin: 0 0 10px;
 }
 
-/* Right news cards */
+/* Right news cards — 3 across in a row to match mockup */
 .right-news-cards {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
 
 .right-news-card {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 12px;
-  background: rgba(0, 0, 0, 0.3);
+  gap: 5px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 5px;
   text-decoration: none;
-  border-left: 3px solid transparent;
-  transition: border-color 0.15s;
+  border-top: 2px solid transparent;
+  transition: border-color 0.15s, background 0.15s;
 }
 
 .right-news-card:hover {
-  border-left-color: var(--asu-gold);
+  border-top-color: var(--asu-gold);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .right-news-source {
-  font-size: 0.67rem;
+  font-size: 0.6rem;
   text-transform: uppercase;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.08em;
   color: var(--asu-gold);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .right-news-title {
-  font-size: 0.85rem;
-  color: #e8e0e2;
-  line-height: 1.4;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.35;
   font-weight: 500;
 }
 
-/* Right featured article */
-.right-featured-article {
-  padding: 16px;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 5px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.right-featured-title {
-  font-size: 0.95rem;
-  color: white;
-  line-height: 1.4;
-  font-weight: 600;
-  margin: 0;
-}
-
-.right-read-more {
-  font-size: 0.75rem;
-  color: var(--asu-gold);
-  text-decoration: none;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  align-self: flex-start;
-}
-
-.right-read-more:hover {
-  text-decoration: underline;
-}
-
-/* Right upcoming games — override UpcomingGames component for dark panel */
+/* Right upcoming games — override UpcomingGames for dark panel */
 .right-upcoming-games .upcoming-games-widget {
   background: transparent;
 }
@@ -267,17 +244,17 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .right-upcoming-games .upcoming-games-widget li {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: rgba(255, 255, 255, 0.9);
-  padding: 8px 10px;
-  background: rgba(0, 0, 0, 0.3);
+  padding: 7px 10px;
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 4px;
   border-bottom: none;
 }
@@ -294,13 +271,13 @@
 
 .right-upcoming-games .game-location-display {
   color: rgba(232, 224, 226, 0.5);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
 }
 
 .right-upcoming-games .loading-message,
 .right-upcoming-games .error-message,
 .right-upcoming-games .no-games {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: rgba(232, 224, 226, 0.5);
 }
 
@@ -308,28 +285,28 @@
 .right-spotlight {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  gap: 8px;
 }
 
 .right-stat {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 14px 8px;
-  background: rgba(0, 0, 0, 0.3);
+  padding: 12px 6px;
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 5px;
 }
 
 .right-stat-value {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: 800;
   color: white;
   line-height: 1;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
 }
 
 .right-stat-label {
-  font-size: 0.62rem;
+  font-size: 0.58rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: rgba(232, 224, 226, 0.45);
@@ -337,23 +314,20 @@
 }
 
 /* ============================================
-   Zone 2: Below-fold news card row
+   Zone 2: News card row — inside the dark card
    ============================================ */
 
 .home-news-row {
-  padding: 60px 40px;
-  max-width: 1400px;
-  margin: 0 auto;
-  width: 100%;
-  box-sizing: border-box;
+  padding: 32px 28px 36px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .news-row-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 28px;
-  padding-bottom: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
   position: relative;
 }
 
@@ -363,13 +337,13 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 3px;
+  height: 2px;
   background: var(--gradient-gold);
   border-radius: 10px;
 }
 
 .news-row-header h2 {
-  font-size: 1.8rem;
+  font-size: 1.3rem;
   font-weight: 800;
   color: white;
   margin: 0;
@@ -377,9 +351,9 @@
 }
 
 .view-all-link {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(255, 255, 255, 0.6);
   text-decoration: none;
   transition: color 0.15s;
 }
@@ -390,49 +364,48 @@
 
 .news-row-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
 }
 
+/* Dark cards inside the dark card */
 .news-row-card {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 20px;
-  background: var(--white);
-  border-radius: var(--border-radius-md);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-color);
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   text-decoration: none;
   transition: all 0.2s;
 }
 
 .news-row-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
+  background: rgba(255, 255, 255, 0.1);
   border-color: var(--asu-gold);
 }
 
 .news-row-source {
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.09em;
-  color: var(--asu-maroon);
+  color: var(--asu-gold);
 }
 
 .news-row-title {
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   font-weight: 600;
-  color: var(--text-primary);
-  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.4;
   margin: 0;
   flex-grow: 1;
 }
 
 .news-row-date {
-  font-size: 0.78rem;
-  color: var(--text-secondary);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.35);
   margin-top: auto;
 }
 
@@ -448,6 +421,8 @@
   font-size: 1.1rem;
   color: rgba(255, 255, 255, 0.6);
   font-style: italic;
+  background: var(--asu-maroon);
+  margin-top: -40px;
 }
 
 /* ============================================
@@ -456,14 +431,12 @@
 
 @media (max-width: 900px) {
   .home-page {
-    padding: 12px 12px 32px;
+    padding: 12px 12px 20px;
   }
 
   .home-hero-grid {
     grid-template-columns: 1fr;
-    height: auto;
-    max-height: none;
-    border-radius: 8px;
+    min-height: auto;
   }
 
   .hero-left {
@@ -474,12 +447,17 @@
   }
 
   .hero-right {
-    overflow-y: visible;
-    padding: 28px 20px;
+    padding: 24px 20px;
+    border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .right-news-cards {
+    grid-template-columns: 1fr;
   }
 
   .home-news-row {
-    padding: 40px 12px;
+    padding: 28px 20px 32px;
   }
 }
 
@@ -493,10 +471,10 @@
   }
 
   .right-spotlight {
-    gap: 8px;
+    gap: 6px;
   }
 
   .right-stat-value {
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
 }
