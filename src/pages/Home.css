@@ -29,11 +29,7 @@
 .home-hero-grid {
   display: grid;
   grid-template-columns: 60fr 40fr;
-  /* min-height fills the viewport; right panel content can grow taller */
-  min-height: calc(100vh - var(--header-height) - 40px);
-  /* inset from card edges so card background is visible around photo */
-  margin: 20px 20px 0;
-  border-radius: 8px;
+  min-height: calc(100vh - var(--header-height) - 20px);
   overflow: hidden;
 }
 
@@ -44,6 +40,7 @@
   align-items: flex-end;
   padding: 48px;
   overflow: hidden;
+  background: #0f0305;
 }
 
 /* Background image on ::before so the mask only affects the photo,
@@ -143,29 +140,30 @@
 
 .btn-hero-primary {
   padding: 10px 24px;
-  background: var(--asu-gold);
-  color: var(--asu-maroon);
+  background: transparent;
+  color: var(--asu-gold);
+  border: 2px solid var(--asu-gold);
   border-radius: 4px;
   font-weight: 800;
   text-decoration: none;
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: all 0.2s;
 }
 
 .btn-hero-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 14px rgba(255, 198, 39, 0.45);
+  background: rgba(232, 168, 51, 0.15);
+  box-shadow: 0 4px 14px rgba(232, 168, 51, 0.3);
 }
 
 .btn-hero-secondary {
   padding: 10px 24px;
   background: transparent;
-  color: white;
-  border: 2px solid rgba(255, 255, 255, 0.55);
+  color: var(--asu-gold);
+  border: 2px solid var(--asu-gold);
   border-radius: 4px;
-  font-weight: 700;
+  font-weight: 800;
   text-decoration: none;
   font-size: 0.85rem;
   text-transform: uppercase;
@@ -174,13 +172,13 @@
 }
 
 .btn-hero-secondary:hover {
-  border-color: white;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(232, 168, 51, 0.15);
+  box-shadow: 0 4px 14px rgba(232, 168, 51, 0.3);
 }
 
 /* --- Right Panel --- */
 .hero-right {
-  background: #150508;
+  background: #0f0305;
   color: #e8e0e2;
   overflow: visible;
   padding: 24px 20px;
@@ -213,7 +211,7 @@
 }
 
 .right-section-title {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -246,7 +244,7 @@
 }
 
 .right-news-source {
-  font-size: 0.6rem;
+  font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--asu-gold);
@@ -254,7 +252,7 @@
 }
 
 .right-news-title {
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   color: rgba(255, 255, 255, 0.85);
   line-height: 1.35;
   font-weight: 500;
@@ -299,7 +297,7 @@
 
 .right-upcoming-games .game-location-display {
   color: rgba(232, 224, 226, 0.5);
-  font-size: 0.72rem;
+  font-size: 0.76rem;
 }
 
 .right-upcoming-games .loading-message,
@@ -335,11 +333,57 @@
 }
 
 .right-stat-label {
-  font-size: 0.58rem;
+  font-size: 0.64rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: rgba(232, 224, 226, 0.45);
   text-align: center;
+}
+
+/* Right panel — Overall Record single card */
+.right-record-card {
+  display: inline-block;
+  padding: 14px 32px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.03) 100%);
+  border-radius: 5px;
+  border-top: 2px solid rgba(232, 168, 51, 0.5);
+  text-align: center;
+}
+
+.right-record-stats {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.right-record-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.right-record-value {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: white;
+  line-height: 1;
+}
+
+.right-record-label {
+  font-size: 0.64rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(232, 224, 226, 0.45);
+}
+
+.right-record-sep {
+  font-size: 1.2rem;
+  font-weight: 300;
+  color: rgba(232, 224, 226, 0.25);
+  margin-bottom: 20px;
 }
 
 /* ============================================

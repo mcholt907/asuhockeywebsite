@@ -6,6 +6,8 @@ import './Home.css';
 
 function Home() {
   const [nextGame, setNextGame] = useState(null);
+  const [today, setToday] = useState('');
+  const [record, setRecord] = useState({ wins: 0, losses: 0, ties: 0 });
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -18,13 +20,25 @@ function Home() {
         ]);
 
         const d = new Date();
-        const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        setToday(todayStr);
 
         const games = scheduleResponse.data || [];
         const next = games
-          .filter(g => g.date >= today)
+          .filter(g => g.date >= todayStr)
           .sort((a, b) => new Date(a.date) - new Date(b.date))[0] || null;
         setNextGame(next);
+
+        let wins = 0, losses = 0, ties = 0;
+        games.forEach(game => {
+          if (game.result) {
+            const r = game.result.toLowerCase();
+            if (r.includes('w') || r.match(/\d+-\d+.*w/i)) wins++;
+            else if (r.includes('l') || r.match(/\d+-\d+.*l/i)) losses++;
+            else if (r.includes('t') || r.includes('otl') || r.includes('sol')) ties++;
+          }
+        });
+        setRecord({ wins, losses, ties });
 
         setNews(newsResponse.data || []);
       } catch (err) {
@@ -53,19 +67,19 @@ function Home() {
           <div className="hero-left">
             <div className="hero-overlay" />
             <div className="hero-left-content">
-              <div className="hero-matchup">
-                <span className="hero-team">Arizona State</span>
-                <span className="hero-vs">vs.</span>
-                <span className="hero-opponent">
-                  {nextGame ? nextGame.opponent : 'Sun Devil Hockey'}
-                </span>
-              </div>
-              {nextGame && (
-                <div className="hero-game-meta">
-                  <span className="hero-time">{nextGame.time}</span>
-                  <span className="hero-separator">·</span>
-                  <span className="hero-venue">{nextGame.location}</span>
-                </div>
+              {nextGame && nextGame.date === today && (
+                <>
+                  <div className="hero-matchup">
+                    <span className="hero-team">Arizona State</span>
+                    <span className="hero-vs">vs.</span>
+                    <span className="hero-opponent">{nextGame.opponent}</span>
+                  </div>
+                  <div className="hero-game-meta">
+                    <span className="hero-time">{nextGame.time}</span>
+                    <span className="hero-separator">·</span>
+                    <span className="hero-venue">{nextGame.location}</span>
+                  </div>
+                </>
               )}
               <div className="hero-actions">
                 <a href="/schedule" className="btn-hero-primary">Game Center</a>
@@ -84,16 +98,28 @@ function Home() {
           {/* Right Panel — dark sidebar */}
           <div className="hero-right">
 
-            {nextGame && (
-              <div className="right-matchup-header">
-                <p className="right-matchup-title">
-                  Arizona State vs. {nextGame.opponent}
-                </p>
-                <p className="right-matchup-meta">
-                  {nextGame.time} · {nextGame.location}
-                </p>
+            {/* Overall Record */}
+            <div className="right-section">
+              <h3 className="right-section-title">Overall Record</h3>
+              <div className="right-record-card">
+                <div className="right-record-stats">
+                  <div className="right-record-stat">
+                    <span className="right-record-value">{record.wins}</span>
+                    <span className="right-record-label">Wins</span>
+                  </div>
+                  <span className="right-record-sep">—</span>
+                  <div className="right-record-stat">
+                    <span className="right-record-value">{record.losses}</span>
+                    <span className="right-record-label">Losses</span>
+                  </div>
+                  <span className="right-record-sep">—</span>
+                  <div className="right-record-stat">
+                    <span className="right-record-value">{record.ties}</span>
+                    <span className="right-record-label">Ties</span>
+                  </div>
+                </div>
               </div>
-            )}
+            </div>
 
             {/* Trending News — 3 cards in a horizontal row */}
             {news.length > 0 && (
@@ -148,32 +174,6 @@ function Home() {
           </div>
         </div>
 
-        {/* Zone 2: News card row — inside the dark card */}
-        {news.length > 3 && (
-          <section className="home-news-row">
-            <div className="news-row-header">
-              <h2>Latest News</h2>
-              <a href="/news" className="view-all-link">View All →</a>
-            </div>
-            <div className="news-row-cards">
-              {news.slice(3, 8).map((article, idx) => (
-                <a
-                  key={article.link || article.title || idx}
-                  href={article.link}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="news-row-card"
-                >
-                  <span className="news-row-source">{article.source}</span>
-                  <h4 className="news-row-title">{article.title}</h4>
-                  {article.date && article.date !== 'Date not found' && (
-                    <span className="news-row-date">{article.date}</span>
-                  )}
-                </a>
-              ))}
-            </div>
-          </section>
-        )}
 
       </div>
     </div>

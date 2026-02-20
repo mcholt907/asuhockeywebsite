@@ -8,7 +8,7 @@ const formatGameDisplay = (dateStr, timeStr) => {
     return 'Date TBD';
   }
 
-  const options = { month: 'short', day: 'numeric' };
+  const options = { month: 'short', day: 'numeric', timeZone: 'UTC' };
   const dateParts = dateStr.split('-');
   const date = new Date(Date.UTC(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2])));
   const displayDate = date.toLocaleDateString('en-US', options);
@@ -33,8 +33,9 @@ function UpcomingGames({ limit = 3 }) {
         const responseData = await response.json();
 
         if (responseData.data && Array.isArray(responseData.data)) {
-          // Get today's date in YYYY-MM-DD format for comparison
-          const today = new Date().toISOString().split('T')[0];
+          // Get today's date in YYYY-MM-DD format using local time (not UTC)
+          const d = new Date();
+          const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
           const upcomingGames = responseData.data
             .filter(game => game.date >= today) // Filter for today or future

@@ -42,7 +42,7 @@ function Schedule() {
 
   const formatDate = (dateString) => {
     if (!dateString || dateString === 'TBD') return 'Date TBD';
-    const options = { month: 'short', day: 'numeric' };
+    const options = { month: 'short', day: 'numeric', timeZone: 'UTC' };
     const dateParts = dateString.split('-');
     const date = new Date(Date.UTC(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2])));
     return date.toLocaleDateString('en-US', options);
