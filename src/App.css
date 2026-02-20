@@ -96,22 +96,18 @@ main {
 
 /* --- Header & Navigation --- */
 header {
-  /* Semi-transparent so backdrop-filter blur shows through */
-  background-color: rgba(43, 10, 18, 0.78);
+  background-color: var(--asu-maroon);
+  background-image: url('./assets/header-stripe.png');
+  background-size: auto 100%;
+  background-repeat: repeat-x;
+  background-position: center;
   color: var(--white);
   height: var(--header-height);
   position: sticky;
   top: 0;
   z-index: 1000;
-  /* Liquid glass effect */
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border-top: 2px solid rgba(255, 255, 255, 0.28);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.14),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.2),
-    0 4px 28px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-md);
+  border-top: 2px solid var(--white);
 }
 
 .header-container {
@@ -164,6 +160,16 @@ header {
 .main-nav {
   display: flex;
   align-items: center;
+  /* Liquid glass pill floating above the stripe */
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border-radius: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  padding: 4px 8px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 2px 14px rgba(0, 0, 0, 0.35);
 }
 
 .main-nav ul {
@@ -448,15 +454,21 @@ footer {
 
   .main-nav {
     display: block;
-    /* Ensure it is not hidden */
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100vh;
     pointer-events: none;
-    /* Click-through when closed */
     z-index: 900;
+    /* Reset desktop glass pill */
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-radius: 0;
+    border: none;
+    padding: 0;
+    box-shadow: none;
   }
 
   .main-nav.open {
