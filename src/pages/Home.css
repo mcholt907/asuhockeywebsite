@@ -4,10 +4,15 @@
    Zone 1: Hero Grid
    ============================================ */
 
+/* Cancel main's padding-top so the hero is flush under the header */
+.home-page {
+  margin-top: -40px;
+}
+
 .home-hero-grid {
   display: grid;
   grid-template-columns: 60fr 40fr;
-  height: calc(100vh - 64px);
+  height: calc(100vh - var(--header-height));
   max-height: 900px;
 }
 
@@ -244,7 +249,7 @@
   background: transparent;
 }
 
-.right-upcoming-games ul {
+.right-upcoming-games .upcoming-games-widget ul {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -253,7 +258,7 @@
   gap: 8px;
 }
 
-.right-upcoming-games li {
+.right-upcoming-games .upcoming-games-widget li {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
@@ -381,7 +386,7 @@
   flex-direction: column;
   gap: 8px;
   padding: 20px;
-  background: white;
+  background: var(--white);
   border-radius: var(--border-radius-md);
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--border-color);
@@ -426,7 +431,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: calc(100vh - 64px);
+  height: calc(100vh - var(--header-height));
   font-size: 1.1rem;
   color: var(--text-secondary);
   font-style: italic;
