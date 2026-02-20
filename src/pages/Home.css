@@ -47,6 +47,19 @@
   align-items: flex-end;
   padding: 48px;
   overflow: hidden;
+  /* Soft vignette so photo dissolves into the surrounding dark card */
+  mask-image:
+    linear-gradient(to right,  black 55%, transparent 95%),
+    linear-gradient(to bottom, black 80%, transparent 100%),
+    linear-gradient(to top,    black 88%, transparent 100%),
+    linear-gradient(to left,   black 88%, transparent 100%);
+  mask-composite: intersect;
+  -webkit-mask-image:
+    linear-gradient(to right,  black 55%, transparent 95%),
+    linear-gradient(to bottom, black 80%, transparent 100%),
+    linear-gradient(to top,    black 88%, transparent 100%),
+    linear-gradient(to left,   black 88%, transparent 100%);
+  -webkit-mask-composite: source-in;
 }
 
 .hero-overlay {
