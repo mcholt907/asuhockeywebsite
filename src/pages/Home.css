@@ -31,6 +31,10 @@
   grid-template-columns: 60fr 40fr;
   /* min-height fills the viewport; right panel content can grow taller */
   min-height: calc(100vh - var(--header-height) - 40px);
+  /* inset from card edges so card background is visible around photo */
+  margin: 12px 12px 0;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 /* --- Left Panel --- */
