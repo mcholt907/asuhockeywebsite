@@ -230,10 +230,9 @@ header {
 
 /* --- Footer --- */
 footer {
-  background-color: var(--asu-maroon);
+  background: var(--asu-maroon);
   color: var(--text-light);
   padding: 20px 0 15px;
-  /* Ultra-compact padding */
   border-top: 4px solid var(--asu-gold);
 }
 
