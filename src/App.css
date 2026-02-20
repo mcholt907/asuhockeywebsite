@@ -96,18 +96,31 @@ main {
 
 /* --- Header & Navigation --- */
 header {
-  background-color: var(--asu-maroon);
-  background-image: url('./assets/header-stripe.png');
-  background-size: auto 100%;
-  background-repeat: repeat-x;
-  background-position: center;
+  /* Transparent so backdrop-filter blurs scrolling content beneath */
+  background: transparent;
   color: var(--white);
   height: var(--header-height);
   position: sticky;
   top: 0;
   z-index: 1000;
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
   box-shadow: var(--shadow-md);
   border-top: 2px solid var(--white);
+}
+
+/* Stripe + maroon tint layered on top of the blur — semi-transparent
+   so blurred page content bleeds through as the user scrolls */
+header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: rgba(67, 20, 26, 0.82);
+  background-image: url('./assets/header-stripe.png');
+  background-size: auto 100%;
+  background-repeat: repeat-x;
+  background-position: center;
+  z-index: 0;
 }
 
 .header-container {
@@ -119,6 +132,7 @@ header {
   padding: 0 24px;
   height: 100%;
   position: relative;
+  z-index: 1;
 }
 
 .logo {
