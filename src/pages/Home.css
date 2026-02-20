@@ -49,21 +49,21 @@
   content: '';
   position: absolute;
   inset: 0;
-  background-image: url('../assets/hero-wide-final.png');
+  background-image: url('../assets/ASU-Hockey-at-Mullett-Arena.jpg');
   background-size: cover;
   background-position: center;
   /* Soft vignette — dissolves photo edges into surrounding dark card */
   mask-image:
-    linear-gradient(to right,  black 55%, transparent 95%),
-    linear-gradient(to bottom, black 80%, transparent 100%),
-    linear-gradient(to top,    black 88%, transparent 100%),
-    linear-gradient(to left,   black 88%, transparent 100%);
+    linear-gradient(to right,  black 70%, transparent 98%),
+    linear-gradient(to bottom, black 88%, transparent 100%),
+    linear-gradient(to top,    black 94%, transparent 100%),
+    linear-gradient(to left,   black 94%, transparent 100%);
   mask-composite: intersect;
   -webkit-mask-image:
-    linear-gradient(to right,  black 55%, transparent 95%),
-    linear-gradient(to bottom, black 80%, transparent 100%),
-    linear-gradient(to top,    black 88%, transparent 100%),
-    linear-gradient(to left,   black 88%, transparent 100%);
+    linear-gradient(to right,  black 70%, transparent 98%),
+    linear-gradient(to bottom, black 88%, transparent 100%),
+    linear-gradient(to top,    black 94%, transparent 100%),
+    linear-gradient(to left,   black 94%, transparent 100%);
   -webkit-mask-composite: source-in;
   z-index: 0;
 }
