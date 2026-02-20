@@ -96,8 +96,8 @@ main {
 
 /* --- Header & Navigation --- */
 header {
-  /* Transparent so backdrop-filter blurs scrolling content beneath */
-  background: transparent;
+  /* Semi-transparent maroon so backdrop-filter blur shows through */
+  background: rgba(67, 20, 26, 0.72);
   color: var(--white);
   height: var(--header-height);
   position: sticky;
@@ -109,18 +109,19 @@ header {
   border-top: 2px solid var(--white);
 }
 
-/* Stripe + maroon tint layered on top of the blur — semi-transparent
-   so blurred page content bleeds through as the user scrolls */
+/* Stripe texture only — low opacity so it shows as a subtle overlay
+   without blocking the frosted glass blur beneath */
 header::before {
   content: '';
   position: absolute;
   inset: 0;
-  background-color: rgba(67, 20, 26, 0.82);
   background-image: url('./assets/header-stripe.png');
   background-size: auto 100%;
   background-repeat: repeat-x;
   background-position: center;
+  opacity: 0.45;
   z-index: 0;
+  pointer-events: none;
 }
 
 .header-container {
