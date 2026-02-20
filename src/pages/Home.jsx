@@ -1,129 +1,192 @@
-// pages/Home.jsx
+// src/pages/Home.jsx
 import React, { useState, useEffect } from 'react';
-import NewsFeed from '../components/NewsFeed';
 import UpcomingGames from '../components/UpcomingGames';
-import { getSchedule } from '../services/api';
+import { getSchedule, getNews } from '../services/api';
 import './Home.css';
 
 function Home() {
-  const [gameDay, setGameDay] = useState(null);
+  const [nextGame, setNextGame] = useState(null);
+  const [news, setNews] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkGameDay = async () => {
+    async function fetchData() {
       try {
-        const scheduleResponse = await getSchedule();
+        const [scheduleResponse, newsResponse] = await Promise.all([
+          getSchedule(),
+          getNews()
+        ]);
+
+        const today = new Date().toISOString().split('T')[0];
         const games = scheduleResponse.data || [];
+        const next = games
+          .filter(g => g.date >= today)
+          .sort((a, b) => new Date(a.date) - new Date(b.date))[0] || null;
+        setNextGame(next);
 
-        // Get today's date in YYYY-MM-DD format (local time)
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
-        const todayStr = `${year}-${month}-${day}`;
-
-        // Find matching game
-        const todaysGame = games.find(g => {
-          // Handle potential date format variations if needed, assume ISO or YYYY-MM-DD
-          return g.date.includes(todayStr) || g.date === todayStr;
-        });
-
-        if (todaysGame) {
-          setGameDay(todaysGame);
-        }
+        setNews(newsResponse.data || []);
       } catch (err) {
-        console.error("Failed to check game day status:", err);
+        console.error('Home data fetch error:', err);
+      } finally {
+        setLoading(false);
       }
-    };
-
-    checkGameDay();
+    }
+    fetchData();
   }, []);
 
-  return (
-    <div className={`home-page ${gameDay ? 'game-day-mode' : ''}`}>
+  if (loading) {
+    return <div className="home-loading">Loading...</div>;
+  }
 
-      {/* Game Day Ticker */}
-      {gameDay && (
-        <div className="game-day-ticker">
-          <div className="ticker-content">
-            🚨 GAME DAY ALERT: Sun Devils vs {gameDay.opponent} @ {gameDay.time} • {gameDay.location} 🚨
+  return (
+    <div className="home-page">
+
+      {/* Zone 1: Hero Grid */}
+      <div className="home-hero-grid">
+
+        {/* Left Panel — action photo + matchup text */}
+        <div className="hero-left">
+          <div className="hero-overlay" />
+          <div className="hero-left-content">
+            <div className="hero-matchup">
+              <span className="hero-team">Arizona State</span>
+              <span className="hero-vs">vs.</span>
+              <span className="hero-opponent">
+                {nextGame ? nextGame.opponent : 'Sun Devil Hockey'}
+              </span>
+            </div>
+            {nextGame && (
+              <div className="hero-game-meta">
+                <span className="hero-time">{nextGame.time}</span>
+                <span className="hero-separator">·</span>
+                <span className="hero-venue">{nextGame.location}</span>
+              </div>
+            )}
+            <div className="hero-actions">
+              <a href="/schedule" className="btn-hero-primary">Game Center</a>
+              <a
+                href="https://nchchockey.com/tv/"
+                target="_blank"
+                rel="noreferrer"
+                className="btn-hero-secondary"
+              >
+                NCHC.TV
+              </a>
+            </div>
           </div>
         </div>
-      )}
 
-      {/* Hero Section */}
-      <section
-        className={`hero ${gameDay ? 'hero-game-day' : ''}`}
-      >
-        {gameDay && (
-          <div className="hero-content">
-            <div className="game-day-hero-content fade-in">
-              <span className="game-day-badge">TODAY'S MATCHUP</span>
-              <h1>Arizona State <span className="vs">VS</span> {gameDay.opponent}</h1>
-              <div className="game-info-hero">
-                <div className="info-block">
-                  <span className="label">Time</span>
-                  <span className="value">{gameDay.time}</span>
-                </div>
-                <div className="info-block">
-                  <span className="label">Venue</span>
-                  <span className="value">{gameDay.location}</span>
-                </div>
+        {/* Right Panel — dark sidebar */}
+        <div className="hero-right">
+
+          {nextGame && (
+            <div className="right-matchup-header">
+              <p className="right-matchup-title">
+                Arizona State vs. {nextGame.opponent}
+              </p>
+              <p className="right-matchup-meta">
+                {nextGame.time} · {nextGame.location}
+              </p>
+            </div>
+          )}
+
+          {/* Trending News — top 3 article cards */}
+          {news.length > 0 && (
+            <div className="right-section">
+              <h3 className="right-section-title">Trending News</h3>
+              <div className="right-news-cards">
+                {news.slice(0, 3).map((article, idx) => (
+                  <a
+                    key={idx}
+                    href={article.link}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="right-news-card"
+                  >
+                    <span className="right-news-source">{article.source}</span>
+                    <span className="right-news-title">{article.title}</span>
+                  </a>
+                ))}
               </div>
             </div>
-            <div className="hero-actions">
-              <a href="/schedule" className="btn-primary">Game Center</a>
-              <a href="https://foxsports910.iheart.com/" target="_blank" rel="noreferrer" className="btn-hero-logo btn-logo-fox">
-                <img src="/assets/fox-sports-910.jpg" alt="Listen on Fox Sports 910" />
-              </a>
-              <a href="https://nchchockey.com/tv/" target="_blank" rel="noreferrer" className="btn-hero-logo btn-logo-nchc">
-                <img src="/assets/nchc-tv.png" alt="Watch on NCHC.tv" />
-              </a>
+          )}
+
+          {/* Featured article — item 4 */}
+          {news[3] && (
+            <div className="right-section">
+              <div className="right-featured-article">
+                <span className="right-news-source">{news[3].source}</span>
+                <h4 className="right-featured-title">{news[3].title}</h4>
+                <a
+                  href={news[3].link}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="right-read-more"
+                >
+                  Read More →
+                </a>
+              </div>
+            </div>
+          )}
+
+          {/* Upcoming Schedule */}
+          <div className="right-section">
+            <h3 className="right-section-title">Schedule</h3>
+            <div className="right-upcoming-games">
+              <UpcomingGames limit={3} />
             </div>
           </div>
-        )}
-        {/* When no game day, hero shows just the jersey background image */}
-      </section >
 
-      <section className="latest-news">
-        <div className="section-header">
-          <h2>Latest News</h2>
+          {/* Team Spotlight — hardcoded roster averages */}
+          <div className="right-section">
+            <h3 className="right-section-title">Team Spotlight</h3>
+            <div className="right-spotlight">
+              <div className="right-stat">
+                <span className="right-stat-value">22.04</span>
+                <span className="right-stat-label">Avg Age</span>
+              </div>
+              <div className="right-stat">
+                <span className="right-stat-value">5'11"</span>
+                <span className="right-stat-label">Avg Height</span>
+              </div>
+              <div className="right-stat">
+                <span className="right-stat-value">181</span>
+                <span className="right-stat-label">Avg Weight</span>
+              </div>
+            </div>
+          </div>
+
         </div>
-        <NewsFeed limit={5} />
-        <div className="view-more">
-          <a href="/news">View All News →</a>
-        </div>
-      </section>
-
-      <div className="two-column">
-        <section className="upcoming-games">
-          <div className="section-header">
-            <h2>Upcoming Games</h2>
-          </div>
-          <UpcomingGames limit={3} />
-          <div className="view-more">
-            <a href="/schedule">View Full Schedule →</a>
-          </div>
-        </section>
-
-        <section className="team-stats">
-          <h2>Team Spotlight</h2>
-          <div className="spotlight-content">
-            <div className="stat-card">
-              <div className="stat-value">22.04</div>
-              <div className="stat-label">Average Age</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value">5'11"</div>
-              <div className="stat-label">Average Height</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value">181</div>
-              <div className="stat-label">Average Weight</div>
-            </div>
-          </div>
-        </section>
       </div>
-    </div >
+
+      {/* Zone 2: Below-fold news card row */}
+      {news.length > 4 && (
+        <section className="home-news-row">
+          <div className="news-row-header">
+            <h2>Latest News</h2>
+            <a href="/news" className="view-all-link">View All →</a>
+          </div>
+          <div className="news-row-cards">
+            {news.slice(4, 9).map((article, idx) => (
+              <a
+                key={idx}
+                href={article.link}
+                target="_blank"
+                rel="noreferrer"
+                className="news-row-card"
+              >
+                <span className="news-row-source">{article.source}</span>
+                <h4 className="news-row-title">{article.title}</h4>
+                {article.date && article.date !== 'Date not found' && (
+                  <span className="news-row-date">{article.date}</span>
+                )}
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
+    </div>
   );
 }
 
