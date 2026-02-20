@@ -267,6 +267,7 @@
   padding: 8px 10px;
   background: #1e0810;
   border-radius: 4px;
+  border-bottom: none;
 }
 
 .right-upcoming-games .game-date-time-display {
