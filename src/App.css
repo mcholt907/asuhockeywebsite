@@ -172,11 +172,12 @@ header {
 
 .main-nav ul li a {
   color: var(--white);
-  /* White text usually */
   text-decoration: none;
   padding: 12px 20px;
-  font-size: 1.1rem;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
   border-radius: var(--border-radius-sm);
   transition: all 0.2s ease;
   position: relative;
