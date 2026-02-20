@@ -17,7 +17,9 @@ function Home() {
           getNews()
         ]);
 
-        const today = new Date().toISOString().split('T')[0];
+        const d = new Date();
+        const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
         const games = scheduleResponse.data || [];
         const next = games
           .filter(g => g.date >= today)
@@ -97,7 +99,7 @@ function Home() {
               <div className="right-news-cards">
                 {news.slice(0, 3).map((article, idx) => (
                   <a
-                    key={idx}
+                    key={article.link || article.title || idx}
                     href={article.link}
                     target="_blank"
                     rel="noreferrer"
@@ -133,6 +135,8 @@ function Home() {
           <div className="right-section">
             <h3 className="right-section-title">Schedule</h3>
             <div className="right-upcoming-games">
+              {/* TODO: UpcomingGames independently fetches /api/schedule; could be optimized
+                  by passing scheduleData as a prop to avoid the double fetch */}
               <UpcomingGames limit={3} />
             </div>
           </div>
@@ -169,7 +173,7 @@ function Home() {
           <div className="news-row-cards">
             {news.slice(4, 9).map((article, idx) => (
               <a
-                key={idx}
+                key={article.link || article.title || idx}
                 href={article.link}
                 target="_blank"
                 rel="noreferrer"
