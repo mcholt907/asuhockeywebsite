@@ -34,15 +34,7 @@ function News() {
     fetchArticles();
   }, []);
 
-  // Filter logic
   const [filter, setFilter] = useState('All');
-
-  const uniqueSources = ['All', ...new Set(articles.map(a => {
-    if (a.source.includes('TheSunDevils')) return 'Official';
-    if (a.source.includes('CollegeHockeyNews')) return 'CHN';
-    if (a.source.includes('USCHO')) return 'USCHO';
-    return 'Other';
-  }))];
 
   const getSourceType = (source) => {
     if (source.includes('TheSunDevils')) return 'Official';
@@ -55,22 +47,20 @@ function News() {
     ? articles
     : articles.filter(a => getSourceType(a.source) === filter);
 
-  // Split into sections
   const heroArticle = filteredArticles[0];
-  const featuredArticles = filteredArticles.slice(1, 4);
-  const feedArticles = filteredArticles.slice(4);
+  const remainingArticles = filteredArticles.slice(1);
 
   if (loading) {
-    return <div className="page-container"><p className="loading-message">Loading news...</p></div>;
+    return <div className="news-page"><div className="news-content"><p className="loading-message">Loading news...</p></div></div>;
   }
 
   if (error) {
-    return <div className="page-container"><p className="error-message">{error}</p></div>;
+    return <div className="news-page"><div className="news-content"><p className="error-message">{error}</p></div></div>;
   }
 
   return (
-    <div className="page-container news-page">
-      <h1>Hockey News</h1>
+    <div className="news-page">
+    <div className="news-content">
 
       {/* Filters */}
       <div className="news-filters">
@@ -88,54 +78,45 @@ function News() {
       {filteredArticles.length === 0 ? (
         <p className="no-news-message">No news articles found for this category.</p>
       ) : (
-        <div className="news-magazine-layout">
+        <div className="news-layout">
 
-          {/* Hero Section */}
+          {/* Featured Story */}
           {heroArticle && (
             <section className="news-hero fade-in">
               <a href={heroArticle.link} target="_blank" rel="noopener noreferrer" className="hero-card">
-                <div className="hero-content">
-                  <div className="hero-meta">
-                    <span className="source-badge">{heroArticle.source}</span>
-                    <span className="date">{heroArticle.date}</span>
-                  </div>
-                  <h2>{heroArticle.title}</h2>
-                  <span className="read-more">Read Full Story →</span>
-                </div>
                 <div className="hero-bg-pattern"></div>
+                <div className="hero-content">
+                  <span className="hero-eyebrow">FEATURED STORY</span>
+                  <h2>{heroArticle.title}</h2>
+                  <div className="hero-footer">
+                    <span className="hero-source">{getSourceType(heroArticle.source)}</span>
+                    <span className="meta-sep">•</span>
+                    <span className="hero-date">{heroArticle.date}</span>
+                    <span className="read-more">READ FULL STORY →</span>
+                  </div>
+                </div>
               </a>
             </section>
           )}
 
-          {/* Featured Row */}
-          {featuredArticles.length > 0 && (
-            <section className="news-featured fade-in-delay-1">
-              {featuredArticles.map((article, idx) => (
-                <a key={idx} href={article.link} target="_blank" rel="noopener noreferrer" className="featured-card">
-                  <div className="featured-meta">
-                    <span className="source-text">{getSourceType(article.source)}</span>
-                    <span className="date-text">{article.date}</span>
-                  </div>
-                  <h3>{article.title}</h3>
-                </a>
-              ))}
-            </section>
-          )}
-
-          {/* Compact Feed */}
-          {feedArticles.length > 0 && (
-            <section className="news-feed fade-in-delay-2">
-              <h3 className="feed-header">More Updates</h3>
-              <div className="compact-grid">
-                {feedArticles.map((article, idx) => (
-                  <a key={idx} href={article.link} target="_blank" rel="noopener noreferrer" className="compact-item">
-                    <div className="compact-content">
-                      <h4>{article.title}</h4>
-                      <div className="compact-meta">
-                        <span className="source-sm">{getSourceType(article.source)}</span>
-                        <span className="date-sm">{article.date}</span>
-                      </div>
+          {/* Latest Headlines */}
+          {remainingArticles.length > 0 && (
+            <section className="articles-section fade-in-delay-1">
+              <div className="headlines-header">
+                <h2 className="headlines-title">
+                  LATEST <span className="headlines-gold">HEADLINES</span>
+                </h2>
+              </div>
+              <div className="articles-grid">
+                {remainingArticles.map((article, idx) => (
+                  <a key={idx} href={article.link} target="_blank" rel="noopener noreferrer" className="article-card">
+                    <div className="article-meta">
+                      <span className="article-source">{getSourceType(article.source)}</span>
+                      <span className="meta-sep">•</span>
+                      <span className="article-date">{article.date}</span>
                     </div>
+                    <h3 className="article-title">{article.title}</h3>
+                    <span className="article-read">READ STORY →</span>
                   </a>
                 ))}
               </div>
@@ -145,8 +126,8 @@ function News() {
         </div>
       )}
     </div>
+    </div>
   );
 }
 
 export default News;
-

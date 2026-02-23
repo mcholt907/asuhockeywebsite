@@ -1,19 +1,15 @@
-/* News.css - Magazine Layout */
+/* News.css */
 .news-page {
   animation: fadeIn 0.5s ease;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px;
+  background: var(--asu-maroon);
+  min-height: calc(100vh - var(--header-height));
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-.news-page h1 {
-  text-align: center;
-  margin-bottom: 30px;
-  color: var(--asu-maroon);
-  font-size: 2.5rem;
-  font-weight: 800;
-  position: relative;
-  letter-spacing: -0.02em;
+.news-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 24px;
 }
 
 /* --- Filters --- */
@@ -21,17 +17,18 @@
   display: flex;
   justify-content: center;
   gap: 12px;
-  margin-bottom: 40px;
+  margin-bottom: 36px;
   flex-wrap: wrap;
 }
 
 .filter-btn {
   background: transparent;
-  border: 1px solid var(--border-color);
-  color: var(--text-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.7);
   padding: 8px 20px;
   border-radius: 30px;
   cursor: pointer;
+  font-family: inherit;
   font-weight: 600;
   font-size: 0.9rem;
   transition: all 0.2s ease;
@@ -39,24 +36,24 @@
 
 .filter-btn:hover {
   border-color: var(--asu-gold);
-  color: var(--asu-maroon);
+  color: var(--asu-gold);
 }
 
 .filter-btn.active {
-  background-color: var(--asu-maroon);
-  border-color: var(--asu-maroon);
-  color: white;
+  background-color: var(--asu-gold);
+  border-color: var(--asu-gold);
+  color: var(--asu-maroon);
   box-shadow: var(--shadow-sm);
 }
 
-/* --- Magazine Layout --- */
-.news-magazine-layout {
+/* --- Layout --- */
+.news-layout {
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  gap: 36px;
 }
 
-/* Hero Section */
+/* --- Hero / Featured Story --- */
 .news-hero {
   width: 100%;
 }
@@ -65,220 +62,218 @@
   display: block;
   position: relative;
   width: 100%;
-  min-height: 400px;
+  min-height: 200px;
   border-radius: var(--border-radius-lg);
   overflow: hidden;
   text-decoration: none;
-  background-color: var(--dark-bg);
+  background-color: #1a0810;
+  border-top: 2px solid rgba(232, 168, 51, 0.5);
   box-shadow: var(--shadow-lg);
-  transition: transform 0.3s ease;
+  transition: border-top-color 0.2s ease;
   color: white;
 }
 
 .hero-card:hover {
-  transform: scale(1.01);
+  border-top-color: var(--asu-gold);
 }
 
-/* Abstract Hockey Pattern Background - Ice Texture */
 .hero-bg-pattern {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: var(--dark-bg);
-  background-image:
-    /* Maroon/Gold Glows */
-    radial-gradient(circle at 10% 20%, rgba(255, 198, 39, 0.3) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(140, 29, 64, 0.5) 0%, transparent 40%),
-    /* Ice Scratches Effect */
-    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.03) 0px, rgba(255, 255, 255, 0.03) 1px, transparent 1px, transparent 10px),
-    repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.02) 0px, rgba(255, 255, 255, 0.02) 1px, transparent 1px, transparent 15px);
-  opacity: 1;
+  background:
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.02) 0px, rgba(255, 255, 255, 0.02) 1px, transparent 1px, transparent 10px),
+    repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.015) 0px, rgba(255, 255, 255, 0.015) 1px, transparent 1px, transparent 15px),
+    linear-gradient(135deg, rgba(232, 168, 51, 0.22) 0%, rgba(0, 0, 0, 0.55) 65%);
   z-index: 1;
-  transition: transform 10s ease, opacity 0.3s;
-}
-
-.hero-card:hover .hero-bg-pattern {
-  transform: scale(1.05);
-  /* Subtle zoom of background */
-  opacity: 0.8;
 }
 
 .hero-content {
   position: relative;
   z-index: 2;
-  height: 100%;
-  min-height: 400px;
+  min-height: 200px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 40px;
-  /* Premium glass-morphism gradient */
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.6) 40%, transparent 100%);
-  backdrop-filter: blur(2px);
-  /* Slight blur to emphasis text */
+  padding: 24px 28px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.45) 55%, transparent 100%);
 }
 
-.hero-meta {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 15px;
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.source-badge {
-  background-color: var(--asu-gold);
-  color: var(--asu-maroon);
-  padding: 4px 10px;
-  border-radius: 4px;
+.hero-eyebrow {
+  font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
-  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  color: var(--asu-gold);
+  margin-bottom: 10px;
 }
 
 .hero-content h2 {
-  font-size: 2.5rem;
+  font-size: 1.6rem;
   font-weight: 800;
-  margin: 0 0 20px 0;
-  line-height: 1.1;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  margin: 0 0 14px 0;
+  line-height: 1.2;
   color: white;
-  max-width: 90%;
+  max-width: 85%;
+}
+
+.hero-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.hero-source {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.hero-date {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .read-more {
-  color: var(--asu-gold);
-  font-weight: 600;
+  margin-left: auto;
+  font-size: 0.72rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+  color: var(--asu-gold);
 }
 
-/* Featured Section */
-.news-featured {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 24px;
+.meta-sep {
+  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.25);
 }
 
-.featured-card {
-  background: white;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius-md);
-  padding: 24px;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  box-shadow: var(--shadow-sm);
+/* --- Latest Headlines --- */
+.articles-section {
   display: flex;
   flex-direction: column;
-}
-
-.featured-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--asu-gold);
-}
-
-.featured-meta {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  margin-bottom: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 600;
-}
-
-.source-text {
-  color: var(--asu-maroon);
-}
-
-.featured-card h3 {
-  color: var(--text-primary);
-  font-size: 1.2rem;
-  font-weight: 700;
-  margin: 0;
-  line-height: 1.4;
-}
-
-/* Compact Feed */
-.news-feed {
-  background: var(--white);
-  padding: 30px;
-  border-radius: var(--border-radius-lg);
-  border: 1px solid var(--border-color);
-}
-
-.feed-header {
-  font-size: 1.2rem;
-  color: var(--text-secondary);
-  margin-top: 0;
-  margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid var(--light-bg);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.compact-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
   gap: 20px;
+  background: #0f0305;
+  border-radius: var(--border-radius-lg);
+  padding: 28px 28px 24px;
+  box-shadow: var(--shadow-2xl);
 }
 
-.compact-item {
-  display: block;
-  text-decoration: none;
-  padding: 15px;
-  border-radius: var(--border-radius-sm);
-  transition: background-color 0.1s;
-  border-bottom: 1px solid var(--light-bg);
-}
-
-.compact-item:hover {
-  background-color: var(--light-bg);
-}
-
-.compact-content h4 {
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1.4;
-}
-
-.compact-item:hover h4 {
-  color: var(--asu-maroon);
-}
-
-.compact-meta {
-  font-size: 0.8rem;
-  color: var(--text-light);
+.headlines-header {
   display: flex;
-  gap: 10px;
+  align-items: center;
+  gap: 16px;
 }
 
-.source-sm {
-  font-weight: 500;
-  color: var(--text-secondary);
+.headlines-header::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.12);
 }
 
-/* Animations */
+.headlines-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: white;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.headlines-gold {
+  color: var(--asu-gold);
+}
+
+/* --- Article Cards Grid --- */
+.articles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 14px;
+}
+
+.article-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-decoration: none;
+  padding: 16px 18px;
+  border-radius: 6px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.03) 100%);
+  border-top: 2px solid rgba(232, 168, 51, 0.5);
+  transition: border-top-color 0.15s, background 0.15s;
+}
+
+.article-card:hover {
+  border-top-color: var(--asu-gold);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.article-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.article-source {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--asu-gold);
+}
+
+.article-date {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.article-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.88);
+  margin: 0;
+}
+
+.article-card:hover .article-title {
+  color: white;
+}
+
+.article-read {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 2px;
+  transition: color 0.15s;
+}
+
+.article-card:hover .article-read {
+  color: var(--asu-gold);
+}
+
+/* --- Animations --- */
 .fade-in {
   animation: fadeIn 0.6s ease forwards;
   opacity: 0;
 }
 
 .fade-in-delay-1 {
-  animation: fadeIn 0.6s ease 0.2s forwards;
-  opacity: 0;
-}
-
-.fade-in-delay-2 {
-  animation: fadeIn 0.6s ease 0.4s forwards;
+  animation: fadeIn 0.6s ease 0.15s forwards;
   opacity: 0;
 }
 
@@ -289,22 +284,14 @@
   }
 }
 
-/* Responsive */
+/* --- Responsive --- */
 @media (max-width: 768px) {
-  .hero-card {
-    min-height: 300px;
-  }
-
-  .hero-content {
-    min-height: 300px;
-    padding: 20px;
-  }
-
   .hero-content h2 {
-    font-size: 1.75rem;
+    font-size: 1.3rem;
+    max-width: 100%;
   }
 
-  .compact-grid {
+  .articles-grid {
     grid-template-columns: 1fr;
   }
 
