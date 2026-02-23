@@ -116,7 +116,12 @@ function Recruiting() {
 
   const RecruitCard = ({ recruit }) => (
     <div className="recruit-card-wrapper">
-      <div className="recruit-card">
+      <a
+        className="recruit-card"
+        href={recruit.player_link}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
         <div className="card-front">
           <div className="card-bg-gfx"></div>
           {recruit.player_photo && (
@@ -142,13 +147,13 @@ function Recruiting() {
               <span className="value">{recruit.birthplace}</span>
             </div>
             <div className="team-row">
-              <span className="label">Previous Team</span>
-              <span className="value">{recruit.last_team || 'N/A'}</span>
+              <span className="label">Current Team</span>
+              <span className="value">{recruit.current_team || recruit.last_team || 'N/A'}</span>
             </div>
           </div>
           <div className="card-shine"></div>
         </div>
-      </div>
+      </a>
       <a
         href={recruit.player_link}
         target="_blank"

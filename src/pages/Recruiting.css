@@ -76,6 +76,9 @@
 }
 
 .recruit-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
   position: relative;
   width: 100%;
   aspect-ratio: 3/4;

@@ -67,7 +67,7 @@ function Home() {
           <div className="hero-left">
             <div className="hero-overlay" />
             <div className="hero-left-content">
-              {nextGame && nextGame.date === today && (
+              {nextGame && nextGame.date === today ? (
                 <>
                   <div className="hero-matchup">
                     <span className="hero-team">Arizona State</span>
@@ -79,19 +79,24 @@ function Home() {
                     <span className="hero-separator">·</span>
                     <span className="hero-venue">{nextGame.location}</span>
                   </div>
+                  <div className="hero-actions">
+                    <a href="/schedule" className="btn-hero-primary">Game Center</a>
+                    <a
+                      href="https://nchchockey.com/tv/"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="btn-hero-secondary"
+                    >
+                      NCHC.TV
+                    </a>
+                  </div>
                 </>
+              ) : (
+                <div className="hero-tagline">
+                  <span className="hero-tagline-line1">Forks Up</span>
+                  <span className="hero-tagline-line2">Pucks</span>
+                </div>
               )}
-              <div className="hero-actions">
-                <a href="/schedule" className="btn-hero-primary">Game Center</a>
-                <a
-                  href="https://nchchockey.com/tv/"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn-hero-secondary"
-                >
-                  NCHC.TV
-                </a>
-              </div>
             </div>
           </div>
 

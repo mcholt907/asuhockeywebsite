@@ -6,39 +6,67 @@ const { requestWithRetry, delayBetweenRequests } = require('./utils/request-help
 let recruitingPromise = null;
 
 /**
- * Scrapes player photo URL from Elite Prospects player profile page
+ * Scrapes player photo and current team from a single Elite Prospects profile page visit
  * @param {string} playerLink - Full URL to player's Elite Prospects profile
- * @returns {string} URL of player photo, or empty string if not found
+ * @returns {{ player_photo: string, current_team: string }}
  */
-async function scrapePlayerPhoto(playerLink) {
-    if (!playerLink) return '';
+async function scrapePlayerProfile(playerLink) {
+    if (!playerLink) return { player_photo: '', current_team: '' };
 
     try {
-        console.log(`[Photo Scraper] Fetching photo from: ${playerLink}`);
+        console.log(`[Profile Scraper] Fetching profile from: ${playerLink}`);
         const { data } = await requestWithRetry(playerLink);
         const $ = cheerio.load(data);
 
-        // Look for player photo using the ProfileImage class (actual player headshot)
-        // This is the correct selector based on testing
-        let photoUrl = '';
-        const playerPhoto = $('.ProfileImage_profileImage__JLd31').attr('src') ||
+        // --- Photo ---
+        let player_photo = '';
+        const photoEl = $('.ProfileImage_profileImage__JLd31').attr('src') ||
             $('img.ProfileImage_profileImage__JLd31').attr('src') ||
             $('img[src*="files.eliteprospects.com/layout/players"]').first().attr('src') ||
             $('img[alt*="player"]').first().attr('src');
-
-        if (playerPhoto) {
-            // Make sure it's a full URL
-            photoUrl = playerPhoto.startsWith('http') ? playerPhoto : `https://www.eliteprospects.com${playerPhoto}`;
-            console.log(`[Photo Scraper] Found photo: ${photoUrl}`);
-        } else {
-            console.log(`[Photo Scraper] No photo found for ${playerLink}`);
+        if (photoEl) {
+            player_photo = photoEl.startsWith('http') ? photoEl : `https://www.eliteprospects.com${photoEl}`;
+            console.log(`[Profile Scraper] Found photo: ${player_photo}`);
         }
 
-        return photoUrl;
+        // --- Current Team ---
+        // EP shows current team as a link in the player info header
+        // e.g. "#31 Bismarck Bobcats / NAHL - 25/26"
+        let current_team = '';
+        // Primary: team link inside the PlayerInfo section
+        const infoTeamLink = $('[class*="PlayerInfo"] a[href*="/team/"]').first();
+        if (infoTeamLink.length) {
+            current_team = infoTeamLink.text().trim();
+        }
+        // Fallback: first team link anywhere on the page
+        if (!current_team) {
+            $('a[href*="/team/"]').each((_, el) => {
+                const text = $(el).text().trim();
+                if (text.length > 2) {
+                    current_team = text;
+                    return false; // break
+                }
+            });
+        }
+        if (current_team) {
+            console.log(`[Profile Scraper] Found current team: ${current_team}`);
+        }
+
+        return { player_photo, current_team };
     } catch (error) {
-        console.error(`[Photo Scraper] Error scraping photo from ${playerLink}:`, error.message);
-        return '';
+        console.error(`[Profile Scraper] Error scraping ${playerLink}:`, error.message);
+        return { player_photo: '', current_team: '' };
     }
+}
+
+/**
+ * Backwards-compatible wrapper — returns only the photo URL
+ * @param {string} playerLink
+ * @returns {string}
+ */
+async function scrapePlayerPhoto(playerLink) {
+    const { player_photo } = await scrapePlayerProfile(playerLink);
+    return player_photo;
 }
 
 /**
@@ -125,11 +153,14 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
 
                 const fullPlayerLink = playerLink ? `https://www.eliteprospects.com${playerLink}` : '';
 
-                // Scrape player photo if requested
+                // Scrape player photo and current team if requested (single request)
                 let player_photo = '';
+                let current_team = '';
                 if (includePhotos && fullPlayerLink) {
-                    player_photo = await scrapePlayerPhoto(fullPlayerLink);
-                    // Add delay after each photo request to be respectful
+                    const profile = await scrapePlayerProfile(fullPlayerLink);
+                    player_photo = profile.player_photo;
+                    current_team = profile.current_team;
+                    // Add delay after each profile request to be respectful
                     await delayBetweenRequests();
                 }
 
@@ -146,7 +177,8 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
                         weight: weight || '',
                         shoots: shoots || '',
                         player_link: fullPlayerLink,
-                        player_photo: player_photo
+                        player_photo: player_photo,
+                        current_team: current_team
                     };
 
                     players.push(player);
@@ -241,5 +273,6 @@ async function fetchRecruitingData(includePhotos = false) {
 module.exports = {
     fetchRecruitingData,
     scrapeEliteProspectsRecruiting,
+    scrapePlayerProfile,
     scrapePlayerPhoto
 };
