@@ -56,6 +56,7 @@ module.exports = {
     },
     chnNews: 'https://www.collegehockeynews.com/reports/team/Arizona-State/61',
     chnStats: (season) => `https://www.collegehockeynews.com/stats/team/Arizona-State/61/overall,${season}`,
+    chnSchedule: 'https://www.collegehockeynews.com/schedules/team/Arizona-State/61',
     uscho: 'https://www.uscho.com/team/arizona-state/mens-hockey/'
   }
 };
