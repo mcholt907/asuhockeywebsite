@@ -1,7 +1,7 @@
 .schedule-page {
   animation: fadeIn 0.6s ease;
   padding-bottom: 60px;
-  /* Prevent footer overlap */
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 .schedule-page h1 {

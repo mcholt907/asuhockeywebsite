@@ -88,7 +88,7 @@ function Stats() {
     </div>
   );
 
-  if (loading) return <div className="page-container"><p className="loading-message">Initializing Stat Lab...</p></div>;
+  if (loading) return <div className="page-container"><p className="loading-message">Loading Player Stats...</p></div>;
   if (error) return <div className="page-container"><p className="error-message">{error}</p></div>;
 
   // Derive leaders (assuming standard headers exist, adjust if needed)
@@ -103,7 +103,7 @@ function Stats() {
   return (
     <div className="page-container stats-page">
       <div className="stat-lab-header">
-        <h1>Stat Lab</h1>
+        <h1>Player Stats</h1>
         <p className="subtitle">Advanced Analytics & Team Leaders</p>
       </div>
 

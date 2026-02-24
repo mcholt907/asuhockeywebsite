@@ -135,7 +135,7 @@
 
 .stat-cell {
     text-align: center;
-    font-family: 'Inter', monospace;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     font-weight: 500;
     color: var(--text-secondary);
     font-size: 0.9rem;
