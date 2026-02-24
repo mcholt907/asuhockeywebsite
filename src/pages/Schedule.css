@@ -273,8 +273,42 @@
   min-width: fit-content;
 }
 
+
+/* Box & Metrics Links */
+.game-links {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+}
+
+.game-link-btn {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--asu-maroon);
+  text-decoration: none;
+  padding: 4px 10px;
+  background: rgba(232, 168, 51, 0.25);
+  border: 1px solid rgba(232, 168, 51, 0.4);
+  border-radius: 4px;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.game-link-btn:hover {
+  background: var(--asu-gold);
+  border-color: var(--asu-gold);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
+  .game-links {
+    justify-content: flex-start;
+  }
+
   .schedule-item {
     grid-template-columns: 1fr;
     gap: 16px;
