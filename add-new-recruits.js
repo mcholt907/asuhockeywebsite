@@ -4,11 +4,7 @@ const { requestWithRetry } = require('./utils/request-helper');
 
 // New players from CSV — not yet in asu_hockey_data.json
 const NEW_PLAYERS = [
-  { name: 'Carson McGinley',  season: '2026-2027', position: 'F',  player_link: 'https://www.eliteprospects.com/player/784826/carson-mcginley' },
-  { name: 'Casey Brown',      season: '2026-2027', position: 'RW', player_link: 'https://www.eliteprospects.com/player/715229/casey-brown' },
-  { name: 'Ryland Randle',    season: '2026-2027', position: 'D',  player_link: 'https://www.eliteprospects.com/player/693764/ryland-randle' },
-  { name: 'Luke Wilfley',     season: '2027-2028', position: 'C',  player_link: 'https://www.eliteprospects.com/player/911500/luke-wilfley' },
-  { name: 'Mathieu Lajoie',   season: '2027-2028', position: 'F',  player_link: 'https://www.eliteprospects.com/player/879017/mathieu-lajoie' },
+  { name: 'Henry Chmiel', season: '2027-2028', position: 'D', player_link: 'https://www.eliteprospects.com/player/863782/henry-chmiel' },
 ];
 
 async function scrapeEPProfile(url) {
