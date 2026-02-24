@@ -309,6 +309,18 @@ async function scrapeCHNScheduleLinks() {
   }
 }
 
+
+async function enrichScheduleWithCHNLinks(games) {
+  const chnLinks = await scrapeCHNScheduleLinks();
+  for (const game of games) {
+    if (game.date && chnLinks[game.date]) {
+      game.box_link = chnLinks[game.date].box_link;
+      game.metrics_link = chnLinks[game.date].metrics_link;
+    }
+  }
+  return games;
+}
+
 async function fetchScheduleData() {
   const cacheKey = 'asu_hockey_schedule';
   const targetSeasonStartYear = config.seasons.current;
@@ -340,6 +352,7 @@ async function fetchScheduleData() {
               const duration = Date.now() - startTime;
               Sentry.metrics.distribution('scraper.schedule.duration', duration, { unit: 'millisecond' });
               if (scheduleData && scheduleData.length > 0) {
+                await enrichScheduleWithCHNLinks(scheduleData);
                 await saveToCache(scheduleData, fullCacheKey);
               }
             } catch (error) {
@@ -374,6 +387,7 @@ async function fetchScheduleData() {
 
       if (scheduleData && scheduleData.length > 0) {
         console.log(`[Cache System] Successfully scraped ${scheduleData.length} games. Saving to cache for ${targetSeasonStartYear}.`);
+        await enrichScheduleWithCHNLinks(scheduleData);
         await saveToCache(scheduleData, fullCacheKey);
       } else {
         console.log(`[Cache System] No schedule data returned from scraper for ${targetSeasonStartYear}. Not caching.`);
