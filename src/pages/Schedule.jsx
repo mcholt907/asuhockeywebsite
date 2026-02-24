@@ -137,21 +137,23 @@ function Schedule() {
                 </div>
                 <div className="game-location">{game.location}</div>
                 {game.result && (
-                  <div className="game-result">
-                    Result: {game.result}
-                  </div>
-                )}
-                {game.result && (game.box_link || game.metrics_link) && (
-                  <div className="game-links">
-                    {game.box_link && (
-                      <a href={game.box_link} target="_blank" rel="noopener noreferrer" className="game-link-btn">
-                        Box
-                      </a>
-                    )}
-                    {game.metrics_link && (
-                      <a href={game.metrics_link} target="_blank" rel="noopener noreferrer" className="game-link-btn">
-                        Metrics
-                      </a>
+                  <div className="game-result-col">
+                    <div className="game-result">
+                      Result: {game.result}
+                    </div>
+                    {(game.box_link || game.metrics_link) && (
+                      <div className="game-links">
+                        {game.box_link && (
+                          <a href={game.box_link} target="_blank" rel="noopener noreferrer" className="game-link-btn">
+                            Box
+                          </a>
+                        )}
+                        {game.metrics_link && (
+                          <a href={game.metrics_link} target="_blank" rel="noopener noreferrer" className="game-link-btn">
+                            Metrics
+                          </a>
+                        )}
+                      </div>
                     )}
                   </div>
                 )}
