@@ -511,6 +511,48 @@
         "player_link": "https://www.eliteprospects.com/player/785511/lukas-sawchyn",
         "player_photo": "https://files.eliteprospects.com/layout/players/ee5e0-d383fa7d-40d6-4dc4-8cc4-72f169df1cac.jpg",
         "current_team": "Edmonton Oil Kings"
+      },
+      {
+        "number": "",
+        "name": "Carson McGinley",
+        "position": "F",
+        "age": "",
+        "birth_year": "2006",
+        "birthplace": "Phoenix, AZ, USA",
+        "height": "175 cm / 5'9\"",
+        "weight": "78 kg / 172 lbs",
+        "shoots": "R",
+        "player_link": "https://www.eliteprospects.com/player/784826/carson-mcginley",
+        "player_photo": "https://files.eliteprospects.com/layout/players/9-mcginley,-carson-(25)-ep.jpg",
+        "current_team": "Coquitlam Express"
+      },
+      {
+        "number": "",
+        "name": "Casey Brown",
+        "position": "RW",
+        "age": "",
+        "birth_year": "2006",
+        "birthplace": "Regina, SK, CAN",
+        "height": "180 cm / 5'11\"",
+        "weight": "83 kg / 183 lbs",
+        "shoots": "R",
+        "player_link": "https://www.eliteprospects.com/player/715229/casey-brown",
+        "player_photo": "https://files.eliteprospects.com/layout/players/91-brown,-casey-(38)-ep.jpg",
+        "current_team": "Moose Jaw Warriors"
+      },
+      {
+        "number": "",
+        "name": "Ryland Randle",
+        "position": "D",
+        "age": "",
+        "birth_year": "2006",
+        "birthplace": "Winnipeg, MB, CAN",
+        "height": "178 cm / 5'10\"",
+        "weight": "77 kg / 170 lbs",
+        "shoots": "L",
+        "player_link": "https://www.eliteprospects.com/player/693764/ryland-randle",
+        "player_photo": "https://files.eliteprospects.com/layout/players/n5-randle,-ryland-(57)-ep.jpg",
+        "current_team": "Des Moines Buccaneers"
       }
     ],
     "2027-2028": [
@@ -555,6 +597,34 @@
         "player_link": "https://www.eliteprospects.com/player/617647/booker-toninato",
         "player_photo": "https://files.eliteprospects.com/layout/players/10-toninato,-booker-(18)-ep.jpg",
         "current_team": "Salmon Arm Silverbacks"
+      },
+      {
+        "number": "",
+        "name": "Luke Wilfley",
+        "position": "C",
+        "age": "",
+        "birth_year": "2008",
+        "birthplace": "Denver, CO, USA",
+        "height": "185 cm / 6'1\"",
+        "weight": "81 kg / 179 lbs",
+        "shoots": "R",
+        "player_link": "https://www.eliteprospects.com/player/911500/luke-wilfley",
+        "player_photo": "https://files.eliteprospects.com/layout/players/96-wilfley,-luke-(82)-ep.jpg",
+        "current_team": "Portland Winterhawks"
+      },
+      {
+        "number": "",
+        "name": "Mathieu Lajoie",
+        "position": "F",
+        "age": "",
+        "birth_year": "2008",
+        "birthplace": "St. Albert, AB, CAN",
+        "height": "180 cm / 5'11\"",
+        "weight": "77 kg / 170 lbs",
+        "shoots": "R",
+        "player_link": "https://www.eliteprospects.com/player/879017/mathieu-lajoie",
+        "player_photo": "https://cdn.eliteprospects-assets.com/images/default-profile-image-player.webp",
+        "current_team": "Moose Jaw Warriors"
       }
     ],
     "2028-2029": [
