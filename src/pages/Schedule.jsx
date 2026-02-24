@@ -141,9 +141,20 @@ function Schedule() {
                     Result: {game.result}
                   </div>
                 )}
-                <div className="game-broadcast">
-                  {/* Future enhancement: add broadcast info if available in data */}
-                </div>
+                {game.result && (game.box_link || game.metrics_link) && (
+                  <div className="game-links">
+                    {game.box_link && (
+                      <a href={game.box_link} target="_blank" rel="noopener noreferrer" className="game-link-btn">
+                        Box
+                      </a>
+                    )}
+                    {game.metrics_link && (
+                      <a href={game.metrics_link} target="_blank" rel="noopener noreferrer" className="game-link-btn">
+                        Metrics
+                      </a>
+                    )}
+                  </div>
+                )}
               </li>
             );
           })}
