@@ -34,12 +34,13 @@ jest.mock('../config/scraper-config', () => ({
     sunDevilsNews: 'http://test/sd-news',
     sunDevilsSchedule: () => 'http://test/schedule',
     uscho: 'http://test/uscho',
+    chnSchedule: 'http://test/chn-schedule',
   },
 }));
 
 const { getFromCache, saveToCache } = require('../src/scripts/caching-system');
 const { requestWithRetry } = require('../utils/request-helper');
-const { scrapeCHNRoster } = require('../scraper');
+const { scrapeCHNRoster, scrapeCHNScheduleLinks } = require('../scraper');
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -73,5 +74,67 @@ describe('scrapeCHNRoster — SWR caching', () => {
 
     // Must return stale data, not wait for the background live scrape
     expect(result).toEqual(staleRoster);
+  });
+});
+
+
+describe('scrapeCHNScheduleLinks', () => {
+  test('returns date-keyed map of box and metrics links', async () => {
+    const html = [
+      '<html><body><table>',
+      '  <tr>',
+      '    <td><a href=\"/box/final/20251003/psu/asu/\">Box</a></td>',
+      '    <td><a href=\"/box/metrics.php?gd=110368\">Metrics</a></td>',
+      '  </tr>',
+      '  <tr>',
+      '    <td><a href=\"/box/final/20251010/ndm/asu/\">Box</a></td>',
+      '    <td><a href=\"/box/metrics.php?gd=110371\">Metrics</a></td>',
+      '  </tr>',
+      '</table></body></html>',
+    ].join('\n');
+
+    requestWithRetry.mockResolvedValueOnce({ data: html });
+
+    const result = await scrapeCHNScheduleLinks();
+
+    expect(result).toEqual({
+      '2025-10-03': {
+        box_link: 'https://www.collegehockeynews.com/box/final/20251003/psu/asu/',
+        metrics_link: 'https://www.collegehockeynews.com/box/metrics.php?gd=110368',
+      },
+      '2025-10-10': {
+        box_link: 'https://www.collegehockeynews.com/box/final/20251010/ndm/asu/',
+        metrics_link: 'https://www.collegehockeynews.com/box/metrics.php?gd=110371',
+      },
+    });
+  });
+
+  test('returns empty object when request fails', async () => {
+    requestWithRetry.mockRejectedValueOnce(new Error('network error'));
+
+    const result = await scrapeCHNScheduleLinks();
+
+    expect(result).toEqual({});
+  });
+
+  test('skips rows without a box link', async () => {
+    const html = [
+      '<html><body><table>',
+      '  <tr>',
+      '    <td>No links here</td>',
+      '  </tr>',
+      '  <tr>',
+      '    <td><a href=\"/box/final/20251003/psu/asu/\">Box</a></td>',
+      '    <td><a href=\"/box/metrics.php?gd=110368\">Metrics</a></td>',
+      '  </tr>',
+      '</table></body></html>',
+    ].join('\n');
+
+    requestWithRetry.mockResolvedValueOnce({ data: html });
+
+    const result = await scrapeCHNScheduleLinks();
+
+    expect(Object.keys(result)).toHaveLength(1);
+    expect(result['2025-10-03']).toBeDefined();
   });
 });

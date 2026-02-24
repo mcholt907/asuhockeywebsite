@@ -264,6 +264,51 @@ async function scrapeSunDevilsSchedule(year) {
   }
 }
 
+async function scrapeCHNScheduleLinks() {
+  const url = config.urls.chnSchedule;
+  console.log(`[CHN Schedule Links] Fetching from: ${url}`);
+  try {
+    const { data } = await requestWithRetry(url);
+    const $ = cheerio.load(data);
+    const linkMap = {};
+
+    $(`tr`).each((_, row) => {
+      let boxHref = null;
+      let metricsHref = null;
+
+      $(row).find(`a`).each((_, a) => {
+        const text = $(a).text().trim();
+        const href = $(a).attr(`href`);
+        if (text === `Box` && href) boxHref = href;
+        if (text === `Metrics` && href) metricsHref = href;
+      });
+
+      if (boxHref) {
+        if (!boxHref.startsWith('http')) {
+          boxHref = `https://www.collegehockeynews.com${boxHref}`;
+        }
+        if (metricsHref && !metricsHref.startsWith('http')) {
+          metricsHref = `https://www.collegehockeynews.com${metricsHref}`;
+        }
+        const match = boxHref.match(/\/box\/final\/(\d{4})(\d{2})(\d{2})\//);
+        if (match) {
+          const isoDate = `${match[1]}-${match[2]}-${match[3]}`;
+          linkMap[isoDate] = {
+            box_link: boxHref,
+            metrics_link: metricsHref || null,
+          };
+        }
+      }
+    });
+
+    console.log(`[CHN Schedule Links] Found links for ${Object.keys(linkMap).length} games.`);
+    return linkMap;
+  } catch (error) {
+    console.error(`[CHN Schedule Links] Error: ${error.message}`);
+    return {};
+  }
+}
+
 async function fetchScheduleData() {
   const cacheKey = 'asu_hockey_schedule';
   const targetSeasonStartYear = config.seasons.current;
@@ -692,4 +737,4 @@ async function scrapeCHNRoster() {
   return await rosterPromise;
 }
 
-module.exports = { fetchNewsData, fetchScheduleData, scrapeCHNStats, scrapeCHNRoster };
+module.exports = { fetchNewsData, fetchScheduleData, scrapeCHNStats, scrapeCHNRoster, scrapeCHNScheduleLinks };
