@@ -102,22 +102,22 @@ function Schedule() {
                 <span className="record-stat-value">{formatRecord(teamRecord.overall)}</span>
                 <span className="record-stat-label">Overall</span>
               </div>
-              <div className="record-stat">
+              <div className="record-stat sub">
                 <span className="record-stat-value">{formatRecord(teamRecord.conf)}</span>
                 <span className="record-stat-label">NCHC</span>
               </div>
-              <div className="record-stat">
+              <div className="record-stat sub">
                 <span className="record-stat-value">{formatRecord(teamRecord.home)}</span>
                 <span className="record-stat-label">Home</span>
               </div>
-              <div className="record-stat">
+              <div className="record-stat sub">
                 <span className="record-stat-value">{formatRecord(teamRecord.away)}</span>
                 <span className="record-stat-label">Away</span>
               </div>
             </div>
           ) : (
             <div className="record-grid">
-              <div className="record-stat featured solo">
+              <div className="record-stat featured">
                 <span className="record-stat-value">{formatRecord(calculateRecord())}</span>
                 <span className="record-stat-label">Overall</span>
               </div>

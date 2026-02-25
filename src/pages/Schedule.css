@@ -58,10 +58,10 @@
   margin-bottom: 16px;
 }
 
-/* Record Grid — 2×2 stat layout */
+/* Record Grid — overall full-width + 3 sub-stats */
 .record-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   margin: 0 -32px;
 }
 
@@ -69,29 +69,28 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px 24px 24px;
+  padding: 16px 16px 20px;
   gap: 5px;
-  transition: background var(--transition-base);
 }
 
-.record-stat:nth-child(even) {
-  border-left: 1px solid var(--border-color);
-}
-
-.record-stat:nth-child(n+3) {
-  border-top: 1px solid var(--border-color);
-}
-
+/* Overall spans the full width */
 .record-stat.featured {
+  grid-column: 1 / -1;
+  padding: 22px 24px 20px;
   background: linear-gradient(135deg, rgba(232, 168, 51, 0.13) 0%, rgba(232, 168, 51, 0.05) 100%);
 }
 
-.record-stat.solo {
-  grid-column: 1 / -1;
+/* Sub-stats row: top border + left borders between cells */
+.record-stat.sub {
+  border-top: 1px solid var(--border-color);
+}
+
+.record-stat.sub:nth-child(n+3) {
+  border-left: 1px solid var(--border-color);
 }
 
 .record-stat-value {
-  font-size: 1.75rem;
+  font-size: 1.4rem;
   font-weight: 900;
   color: var(--asu-maroon);
   letter-spacing: -0.03em;
@@ -99,15 +98,19 @@
 }
 
 .record-stat.featured .record-stat-value {
-  font-size: 2rem;
+  font-size: 2.2rem;
 }
 
 .record-stat-label {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--text-secondary);
+}
+
+.record-stat.featured .record-stat-label {
+  font-size: 0.72rem;
 }
 
 /* Schedule List - Modern Card Grid */
