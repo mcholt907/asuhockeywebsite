@@ -146,8 +146,8 @@ describe('Schedule Page', () => {
     await waitFor(() => {
       expect(screen.getByText('Overall')).toBeInTheDocument();
       expect(screen.getByText('NCHC')).toBeInTheDocument();
-      expect(screen.getByText('Home')).toBeInTheDocument();
-      expect(screen.getByText('Away')).toBeInTheDocument();
+      expect(screen.getAllByText('Home').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Away').length).toBeGreaterThan(0);
       expect(screen.getByText('14-19-1')).toBeInTheDocument();
       expect(screen.getByText('7-14-1')).toBeInTheDocument();
       expect(screen.getByText('9-10-1')).toBeInTheDocument();

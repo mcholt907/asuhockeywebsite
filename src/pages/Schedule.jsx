@@ -138,6 +138,9 @@ function Schedule() {
                   {game.time && game.time !== 'TBD' && (
                     <span className="game-time">{game.time}</span>
                   )}
+                  {game.status && (
+                    <span className={`game-venue-tag ${game.status.toLowerCase()}`}>{game.status}</span>
+                  )}
                 </div>
                 <div className="game-details">
                   <span className="game-opponent">
@@ -148,20 +151,26 @@ function Schedule() {
                 <div className="game-location">{game.location}</div>
                 {game.result && (
                   <div className="game-result-col">
-                    <div className="game-result">
-                      Result: {game.result}
+                    <div className="game-result-inline">
+                      <span className={`result-pill result-${game.result.charAt(0).toLowerCase()}`}>
+                        {game.result.charAt(0)}
+                      </span>
+                      <span className="result-score">{game.result.slice(2)}</span>
                     </div>
                     {(game.box_link || game.metrics_link) && (
                       <div className="game-links">
                         {game.box_link && (
-                          <a href={game.box_link} target="_blank" rel="noopener noreferrer" className="game-link-btn">
+                          <a href={game.box_link} target="_blank" rel="noopener noreferrer" className="game-link-text">
                             Box
                           </a>
                         )}
                         {game.metrics_link && (
-                          <a href={game.metrics_link} target="_blank" rel="noopener noreferrer" className="game-link-btn">
-                            Metrics
-                          </a>
+                          <>
+                            <span className="game-link-sep">·</span>
+                            <a href={game.metrics_link} target="_blank" rel="noopener noreferrer" className="game-link-text">
+                              Metrics
+                            </a>
+                          </>
                         )}
                       </div>
                     )}
