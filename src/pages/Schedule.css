@@ -23,7 +23,7 @@
 .record-card {
   background: linear-gradient(135deg, var(--white) 0%, #f8f9fb 100%);
   border-radius: var(--border-radius-xl);
-  padding: 24px 40px;
+  padding: 24px 32px;
   box-shadow: var(--shadow-lg);
   border: 2px solid var(--border-color);
   text-align: center;
@@ -57,41 +57,37 @@
   margin-bottom: 16px;
 }
 
-.record-stats {
-  display: flex;
-  gap: 24px;
-  justify-content: center;
-  align-items: flex-end;
-}
-
-.stat-item {
+/* Record Table */
+.record-table {
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
+}
+
+.record-row {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-color);
 }
 
-.stat-value {
-  font-size: 2.5rem;
-  font-weight: 900;
-  color: var(--asu-maroon);
-  line-height: 1;
+.record-row:last-child {
+  border-bottom: none;
 }
 
-.stat-label {
-  font-size: 0.75rem;
+.record-row-label {
+  font-size: 0.9rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
   color: var(--text-secondary);
 }
 
-.stat-separator {
-  font-size: 2rem;
-  font-weight: 300;
-  color: var(--text-light);
-  padding: 0 4px;
-  margin-bottom: 8px;
+.record-row-value {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--asu-maroon);
+  letter-spacing: -0.01em;
 }
 
 /* Schedule List - Modern Card Grid */
