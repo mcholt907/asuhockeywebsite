@@ -147,19 +147,34 @@
   top: 0;
   bottom: 0;
   width: 5px;
-  background: var(--gradient-gold);
-  opacity: 0;
-  transition: opacity var(--transition-base);
+  background: var(--border-color);
+  opacity: 1;
+  transition: all var(--transition-base);
+}
+
+.schedule-item.home::before {
+  background: var(--asu-maroon);
+}
+
+.schedule-item.away::before {
+  background: var(--asu-gold);
 }
 
 .schedule-item:hover {
-  transform: translateY(-4px);
+  transform: translateY(-3px);
   box-shadow: var(--shadow-xl);
+}
+
+.schedule-item.home:hover {
+  border-color: var(--asu-maroon);
+}
+
+.schedule-item.away:hover {
   border-color: var(--asu-gold);
 }
 
 .schedule-item:hover::before {
-  opacity: 1;
+  width: 6px;
 }
 
 /* Venue tag in date column */
@@ -226,25 +241,13 @@
   letter-spacing: -0.01em;
 }
 
-.status-indicator {
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 20px;
-  text-transform: lowercase;
-  letter-spacing: 0;
-  background: var(--light-bg);
+.game-venue-vs {
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-style: italic;
   color: var(--text-secondary);
-}
-
-.schedule-item.home .status-indicator {
-  background: rgba(140, 29, 64, 0.1);
-  color: var(--asu-maroon);
-}
-
-.schedule-item.away .status-indicator {
-  background: rgba(255, 198, 39, 0.15);
-  color: #8B6F00;
+  letter-spacing: 0;
+  flex-shrink: 0;
 }
 
 .game-notes {
@@ -267,77 +270,75 @@
   font-size: 1rem;
 }
 
-/* Result Column */
-.game-result-inline {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.result-pill {
+/* Result Badge — W/L/T + score unified */
+.result-badge {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  font-size: 0.8rem;
-  font-weight: 900;
-  flex-shrink: 0;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  line-height: 1;
 }
 
-.result-pill.result-w {
+.result-badge-w {
   background: var(--asu-maroon);
   color: var(--white);
 }
 
-.result-pill.result-l {
-  background: var(--light-bg);
-  color: var(--text-secondary);
+.result-badge-l {
+  background: #eef0f2;
+  color: var(--text-primary);
 }
 
-.result-pill.result-t {
-  background: rgba(232, 168, 51, 0.2);
+.result-badge-t {
+  background: rgba(232, 168, 51, 0.18);
   color: #8B6F00;
 }
 
-.result-score {
-  font-size: 1.2rem;
+.result-badge-letter {
+  font-size: 0.72rem;
   font-weight: 800;
-  color: var(--text-primary);
-  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.65;
 }
 
+.result-badge-score {
+  font-size: 1.35rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
 
 /* Result + Links Column */
 .game-result-col {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 6px;
+  gap: 8px;
 }
 
 .game-links {
   display: flex;
-  gap: 4px;
+  gap: 6px;
   align-items: center;
 }
 
-.game-link-text {
-  font-size: 0.75rem;
-  font-weight: 600;
+.game-link-pill {
+  font-size: 0.7rem;
+  font-weight: 700;
   color: var(--text-secondary);
   text-decoration: none;
-  transition: color 0.15s;
+  padding: 3px 9px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border-color);
+  letter-spacing: 0.03em;
+  transition: all 0.15s;
 }
 
-.game-link-text:hover {
+.game-link-pill:hover {
   color: var(--asu-maroon);
-}
-
-.game-link-sep {
-  font-size: 0.75rem;
-  color: var(--border-color);
+  border-color: var(--asu-maroon);
+  background: rgba(140, 29, 64, 0.05);
 }
 
 /* Responsive */

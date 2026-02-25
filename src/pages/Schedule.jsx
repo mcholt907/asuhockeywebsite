@@ -144,33 +144,28 @@ function Schedule() {
                 </div>
                 <div className="game-details">
                   <span className="game-opponent">
-                    <span className="status-indicator">{game.status === 'Home' ? 'vs' : '@'}</span> {game.opponent}
+                    <span className="game-venue-vs">{game.status === 'Home' ? 'vs' : '@'}</span> {game.opponent}
                   </span>
                   {game.notes && <span className="game-notes">({game.notes})</span>}
                 </div>
                 <div className="game-location">{game.location}</div>
                 {game.result && (
                   <div className="game-result-col">
-                    <div className="game-result-inline">
-                      <span className={`result-pill result-${game.result.charAt(0).toLowerCase()}`}>
-                        {game.result.charAt(0)}
-                      </span>
-                      <span className="result-score">{game.result.slice(2)}</span>
+                    <div className={`result-badge result-badge-${game.result.charAt(0).toLowerCase()}`}>
+                      <span className="result-badge-letter">{game.result.charAt(0)}</span>
+                      <span className="result-badge-score">{game.result.slice(2)}</span>
                     </div>
                     {(game.box_link || game.metrics_link) && (
                       <div className="game-links">
                         {game.box_link && (
-                          <a href={game.box_link} target="_blank" rel="noopener noreferrer" className="game-link-text">
+                          <a href={game.box_link} target="_blank" rel="noopener noreferrer" className="game-link-pill">
                             Box
                           </a>
                         )}
                         {game.metrics_link && (
-                          <>
-                            <span className="game-link-sep">·</span>
-                            <a href={game.metrics_link} target="_blank" rel="noopener noreferrer" className="game-link-text">
-                              Metrics
-                            </a>
-                          </>
+                          <a href={game.metrics_link} target="_blank" rel="noopener noreferrer" className="game-link-pill">
+                            Metrics
+                          </a>
                         )}
                       </div>
                     )}
