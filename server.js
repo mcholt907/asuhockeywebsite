@@ -122,12 +122,13 @@ app.get('/api/news', async (req, res) => {
 // API endpoint for schedule data
 app.get('/api/schedule', async (req, res) => {
   try {
-    const scheduleDataArray = await fetchScheduleData(); // fetchScheduleData now returns an array of games or an empty array on error
+    const { games, team_record } = await fetchScheduleData();
 
-    if (scheduleDataArray && scheduleDataArray.length > 0) {
+    if (games && games.length > 0) {
       res.json({
-        data: scheduleDataArray,
-        source: 'api', // Simplified source
+        data: games,
+        team_record: team_record || null,
+        source: 'api',
         timestamp: new Date().toISOString()
       });
     } else {
