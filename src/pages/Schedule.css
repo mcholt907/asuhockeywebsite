@@ -265,10 +265,6 @@
   font-weight: 500;
 }
 
-.game-location::before {
-  content: '📍';
-  font-size: 1rem;
-}
 
 /* Result Badge — W/L/T + score unified */
 .result-badge {
