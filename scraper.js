@@ -356,7 +356,8 @@ async function fetchScheduleData() {
     const cachedData = getFromCache(fullCacheKey);
     if (cachedData) {
       console.log(`[Cache System] Schedule data found in cache for ${targetSeasonStartYear}. Returning cached data.`);
-      return cachedData;
+      const normalised = Array.isArray(cachedData) ? { games: cachedData, team_record: null } : cachedData;
+      return normalised;
     }
 
     // 2. Cache expired or missing. Try stale data for immediate response (SWR)
@@ -376,7 +377,8 @@ async function fetchScheduleData() {
               Sentry.metrics.distribution('scraper.schedule.duration', duration, { unit: 'millisecond' });
               if (scheduleData && scheduleData.length > 0) {
                 await enrichScheduleWithCHNLinks(scheduleData);
-                await saveToCache(scheduleData, fullCacheKey);
+                const teamRecord = await scrapeUSCHORecord();
+                await saveToCache({ games: scheduleData, team_record: teamRecord }, fullCacheKey);
               }
             } catch (error) {
               console.error(`[Background Refresh] Schedule error: ${error.message}`);
@@ -386,7 +388,8 @@ async function fetchScheduleData() {
           })();
         }
       })();
-      return staleData;
+      const normalised = Array.isArray(staleData) ? { games: staleData, team_record: null } : staleData;
+      return normalised;
     }
   } catch (error) {
     console.error('[Cache System] Error reading from cache:', error.message);
@@ -408,17 +411,19 @@ async function fetchScheduleData() {
       const duration = Date.now() - startTime;
       Sentry.metrics.distribution('scraper.schedule.duration', duration, { unit: 'millisecond' });
 
+      let teamRecord = null;
       if (scheduleData && scheduleData.length > 0) {
         console.log(`[Cache System] Successfully scraped ${scheduleData.length} games. Saving to cache for ${targetSeasonStartYear}.`);
         await enrichScheduleWithCHNLinks(scheduleData);
-        await saveToCache(scheduleData, fullCacheKey);
+        teamRecord = await scrapeUSCHORecord();
+        await saveToCache({ games: scheduleData, team_record: teamRecord }, fullCacheKey);
       } else {
         console.log(`[Cache System] No schedule data returned from scraper for ${targetSeasonStartYear}. Not caching.`);
       }
-      return scheduleData;
+      return { games: scheduleData, team_record: teamRecord };
     } catch (error) {
       console.error(`[FetchScheduleData] Error fetching schedule: ${error.message}`);
-      return [];
+      return { games: [], team_record: null };
     } finally {
       schedulePromise = null;
     }
