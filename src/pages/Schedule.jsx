@@ -135,7 +135,7 @@ function Schedule() {
               <li key={`${game.date}-${game.opponent}-${index}`} className={`schedule-item ${game.status ? game.status.toLowerCase() : ''}`}>
                 <div className="game-date-time">
                   <span className="game-date">{formatDate(game.date)}</span>
-                  {game.time && game.time !== 'TBD' && (
+                  {game.time && game.time !== 'TBD' && !game.result && (
                     <span className="game-time">{game.time}</span>
                   )}
                   {game.status && (
