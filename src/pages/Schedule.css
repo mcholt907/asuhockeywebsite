@@ -343,26 +343,120 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .game-links {
-    justify-content: flex-start;
+  /* Record Widget — tighter on mobile */
+  .team-record {
+    margin-bottom: 24px;
   }
 
+  .record-card {
+    min-width: unset;
+    width: 100%;
+    padding: 14px 20px 0;
+  }
+
+  .record-label {
+    font-size: 0.72rem;
+    margin-bottom: 10px;
+  }
+
+  .record-grid {
+    margin: 0 -20px;
+  }
+
+  .record-stat {
+    padding: 12px 8px 14px;
+    gap: 4px;
+  }
+
+  .record-stat.featured {
+    padding: 14px 16px 12px;
+  }
+
+  .record-stat-value {
+    font-size: 1.2rem;
+  }
+
+  .record-stat.featured .record-stat-value {
+    font-size: 1.65rem;
+  }
+
+  .record-stat-label {
+    font-size: 0.6rem;
+  }
+
+  /* Schedule List */
+  .schedule-list {
+    gap: 10px;
+  }
+
+  /* Game Cards — 2-col: [date/opponent/location | result badge] */
   .schedule-item {
-    grid-template-columns: 1fr;
-    gap: 16px;
-    padding: 20px;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "date   result"
+      "details result"
+      "location result";
+    gap: 4px 12px;
+    padding: 14px 14px 14px 16px;
+    align-items: start;
   }
 
   .game-date-time {
+    grid-area: date;
     flex-direction: row;
-    justify-content: flex-start;
-    gap: 12px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--border-color);
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .game-details {
+    grid-area: details;
+    gap: 4px;
+  }
+
+  .game-location {
+    grid-area: location;
+    font-size: 0.82rem;
+    align-self: end;
+    padding-top: 4px;
+  }
+
+  .game-result-col {
+    grid-area: result;
+    align-self: center;
+    justify-content: center;
+  }
+
+  .game-links {
+    justify-content: flex-end;
   }
 
   .game-opponent {
-    font-size: 1.2rem;
+    font-size: 1.05rem;
+    gap: 6px;
+  }
+
+  .game-date {
+    font-size: 1rem;
+  }
+
+  .game-time {
+    font-size: 0.78rem;
+    padding: 2px 8px;
+  }
+
+  .game-venue-tag {
+    font-size: 0.6rem;
+    padding: 2px 6px;
+  }
+
+  .result-badge {
+    padding: 6px 12px;
+    gap: 6px;
+  }
+
+  .result-badge-score {
+    font-size: 1.1rem;
   }
 
   .schedule-item::before {
