@@ -124,4 +124,52 @@ describe('Schedule Page', () => {
       expect(screen.queryByRole('link', { name: /metrics/i })).not.toBeInTheDocument();
     });
   });
+
+  it('should render 4-row record widget when team_record is provided', async () => {
+    const mockScheduleData = {
+      data: [
+        { date: '2024-01-15', opponent: 'Denver', status: 'Home', time: '7:00 PM', location: 'Mullett Arena' }
+      ],
+      team_record: {
+        overall: { wins: 14, losses: 19, ties: 1 },
+        conf:    { wins: 7,  losses: 14, ties: 1 },
+        home:    { wins: 9,  losses: 10, ties: 1 },
+        away:    { wins: 5,  losses: 9,  ties: 0 },
+      },
+      source: 'api',
+      timestamp: '2024-01-15T00:00:00Z',
+    };
+
+    getSchedule.mockResolvedValue(mockScheduleData);
+    render(<Schedule />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Overall Record')).toBeInTheDocument();
+      expect(screen.getByText('NCHC Record')).toBeInTheDocument();
+      expect(screen.getByText('Home Record')).toBeInTheDocument();
+      expect(screen.getByText('Away Record')).toBeInTheDocument();
+      expect(screen.getByText('14-19-1')).toBeInTheDocument();
+      expect(screen.getByText('7-14-1')).toBeInTheDocument();
+      expect(screen.getByText('9-10-1')).toBeInTheDocument();
+      expect(screen.getByText('5-9')).toBeInTheDocument(); // ties=0 omitted
+    });
+  });
+
+  it('should render single-row overall record fallback when team_record is absent', async () => {
+    const mockScheduleData = {
+      data: [
+        { date: '2024-01-15', opponent: 'Denver', status: 'Home', time: '7:00 PM', location: 'Mullett Arena', result: 'W 3-1' }
+      ],
+      source: 'api',
+      timestamp: '2024-01-15T00:00:00Z',
+    };
+
+    getSchedule.mockResolvedValue(mockScheduleData);
+    render(<Schedule />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Overall Record')).toBeInTheDocument();
+      expect(screen.queryByText('NCHC Record')).not.toBeInTheDocument();
+    });
+  });
 });

@@ -6,6 +6,7 @@ function Schedule() {
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [teamRecord, setTeamRecord] = useState(null);
 
   useEffect(() => {
     const fetchSchedulePageData = async () => {
@@ -23,6 +24,7 @@ function Schedule() {
             new Date(a.date) - new Date(b.date)
           );
           setGames(sortedSchedule);
+          setTeamRecord(responseData.team_record || null);
         } else {
           console.error("Schedule page data is not in the expected format:", responseData);
           setGames([]);
@@ -47,6 +49,9 @@ function Schedule() {
     const date = new Date(Date.UTC(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2])));
     return date.toLocaleDateString('en-US', options);
   };
+
+  const formatRecord = (r) =>
+    r.ties > 0 ? `${r.wins}-${r.losses}-${r.ties}` : `${r.wins}-${r.losses}`;
 
   // Calculate overall record from game results
   const calculateRecord = () => {
@@ -75,8 +80,6 @@ function Schedule() {
     return { wins, losses, ties };
   };
 
-  const record = calculateRecord();
-
   if (loading) {
     return <div className="page-container"><p>Loading schedule...</p></div>;
   }
@@ -92,27 +95,34 @@ function Schedule() {
       {/* Team Record Display */}
       <div className="team-record">
         <div className="record-card">
-          <div className="record-label">Overall Record</div>
-          <div className="record-stats">
-            <div className="stat-item">
-              <span className="stat-value">{record.wins}</span>
-              <span className="stat-label">Wins</span>
+          <div className="record-label">Team Record</div>
+          {teamRecord ? (
+            <div className="record-table">
+              <div className="record-row">
+                <span className="record-row-label">Overall Record</span>
+                <span className="record-row-value">{formatRecord(teamRecord.overall)}</span>
+              </div>
+              <div className="record-row">
+                <span className="record-row-label">NCHC Record</span>
+                <span className="record-row-value">{formatRecord(teamRecord.conf)}</span>
+              </div>
+              <div className="record-row">
+                <span className="record-row-label">Home Record</span>
+                <span className="record-row-value">{formatRecord(teamRecord.home)}</span>
+              </div>
+              <div className="record-row">
+                <span className="record-row-label">Away Record</span>
+                <span className="record-row-value">{formatRecord(teamRecord.away)}</span>
+              </div>
             </div>
-            <div className="stat-separator">-</div>
-            <div className="stat-item">
-              <span className="stat-value">{record.losses}</span>
-              <span className="stat-label">Losses</span>
+          ) : (
+            <div className="record-table">
+              <div className="record-row">
+                <span className="record-row-label">Overall Record</span>
+                <span className="record-row-value">{formatRecord(calculateRecord())}</span>
+              </div>
             </div>
-            {record.ties > 0 && (
-              <>
-                <div className="stat-separator">-</div>
-                <div className="stat-item">
-                  <span className="stat-value">{record.ties}</span>
-                  <span className="stat-label">Ties</span>
-                </div>
-              </>
-            )}
-          </div>
+          )}
         </div>
       </div>
 
