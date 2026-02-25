@@ -310,6 +310,29 @@ async function scrapeCHNScheduleLinks() {
 }
 
 
+async function scrapeUSCHORecord() {
+  const url = config.urls.uscho;
+  console.log(`[USCHO Record] Fetching from: ${url}`);
+  try {
+    const { data } = await requestWithRetry(url);
+    const $ = cheerio.load(data);
+    const raw = $('#app').attr('data-page');
+    if (!raw) throw new Error('No data-page attribute found');
+    const page = JSON.parse(raw);
+    const r = page.props.content.record;
+    return {
+      overall: { wins: r.total.wins,       losses: r.total.losses,       ties: r.total.ties },
+      conf:    { wins: r.conf.total.wins,   losses: r.conf.total.losses,  ties: r.conf.total.ties },
+      home:    { wins: r.home.wins,         losses: r.home.losses,        ties: r.home.ties },
+      away:    { wins: r.road.wins,         losses: r.road.losses,        ties: r.road.ties },
+    };
+  } catch (error) {
+    console.error(`[USCHO Record] Error: ${error.message}`);
+    return null;
+  }
+}
+
+
 async function enrichScheduleWithCHNLinks(games) {
   const chnLinks = await scrapeCHNScheduleLinks();
   for (const game of games) {
@@ -751,4 +774,4 @@ async function scrapeCHNRoster() {
   return await rosterPromise;
 }
 
-module.exports = { fetchNewsData, fetchScheduleData, scrapeCHNStats, scrapeCHNRoster, scrapeCHNScheduleLinks };
+module.exports = { fetchNewsData, fetchScheduleData, scrapeCHNStats, scrapeCHNRoster, scrapeCHNScheduleLinks, scrapeUSCHORecord };

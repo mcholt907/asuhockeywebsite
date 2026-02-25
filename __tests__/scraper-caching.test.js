@@ -40,7 +40,7 @@ jest.mock('../config/scraper-config', () => ({
 
 const { getFromCache, saveToCache } = require('../src/scripts/caching-system');
 const { requestWithRetry } = require('../utils/request-helper');
-const { scrapeCHNRoster, scrapeCHNScheduleLinks } = require('../scraper');
+const { scrapeCHNRoster, scrapeCHNScheduleLinks, scrapeUSCHORecord } = require('../scraper');
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -136,5 +136,58 @@ describe('scrapeCHNScheduleLinks', () => {
 
     expect(Object.keys(result)).toHaveLength(1);
     expect(result['2025-10-03']).toBeDefined();
+  });
+});
+
+describe('scrapeUSCHORecord', () => {
+  const makeInertiaHtml = (record) => {
+    const page = { props: { content: { record } } };
+    return `<html><body><div id="app" data-page='${JSON.stringify(page)}'></div></body></html>`;
+  };
+
+  test('returns overall, conf, home, and away records from Inertia JSON', async () => {
+    const record = {
+      total: { wins: 14, losses: 19, ties: 1 },
+      conf:  { total: { wins: 7, losses: 14, ties: 1 } },
+      home:  { wins: 9,  losses: 10, ties: 1 },
+      road:  { wins: 5,  losses: 9,  ties: 0 },
+    };
+    requestWithRetry.mockResolvedValueOnce({ data: makeInertiaHtml(record) });
+
+    const result = await scrapeUSCHORecord();
+
+    expect(result).toEqual({
+      overall: { wins: 14, losses: 19, ties: 1 },
+      conf:    { wins: 7,  losses: 14, ties: 1 },
+      home:    { wins: 9,  losses: 10, ties: 1 },
+      away:    { wins: 5,  losses: 9,  ties: 0 },
+    });
+  });
+
+  test('returns null when the request fails', async () => {
+    requestWithRetry.mockRejectedValueOnce(new Error('network error'));
+
+    const result = await scrapeUSCHORecord();
+
+    expect(result).toBeNull();
+  });
+
+  test('returns null when the page has no Inertia JSON', async () => {
+    requestWithRetry.mockResolvedValueOnce({ data: '<html><body><div id="app"></div></body></html>' });
+
+    const result = await scrapeUSCHORecord();
+
+    expect(result).toBeNull();
+  });
+
+  test('returns null when Inertia JSON is missing expected record sub-fields', async () => {
+    const page = { props: { content: { record: { total: { wins: 5, losses: 3, ties: 0 } } } } }; // conf/home/road absent
+    requestWithRetry.mockResolvedValueOnce({
+      data: `<html><body><div id="app" data-page='${JSON.stringify(page)}'></div></body></html>`
+    });
+
+    const result = await scrapeUSCHORecord();
+
+    expect(result).toBeNull();
   });
 });
