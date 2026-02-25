@@ -23,13 +23,14 @@
 .record-card {
   background: linear-gradient(135deg, var(--white) 0%, #f8f9fb 100%);
   border-radius: var(--border-radius-xl);
-  padding: 24px 32px;
+  padding: 24px 32px 0;
   box-shadow: var(--shadow-lg);
   border: 2px solid var(--border-color);
   text-align: center;
   position: relative;
   overflow: hidden;
   transition: all var(--transition-base);
+  min-width: 360px;
 }
 
 .record-card::before {
@@ -57,37 +58,56 @@
   margin-bottom: 16px;
 }
 
-/* Record Table */
-.record-table {
-  width: 100%;
+/* Record Grid — 2×2 stat layout */
+.record-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: 0 -32px;
+}
+
+.record-stat {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-
-.record-row {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 6px 0;
-  border-bottom: 1px solid var(--border-color);
+  padding: 20px 24px 24px;
+  gap: 5px;
+  transition: background var(--transition-base);
 }
 
-.record-row:last-child {
-  border-bottom: none;
+.record-stat:nth-child(even) {
+  border-left: 1px solid var(--border-color);
 }
 
-.record-row-label {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-secondary);
+.record-stat:nth-child(n+3) {
+  border-top: 1px solid var(--border-color);
 }
 
-.record-row-value {
-  font-size: 1rem;
-  font-weight: 800;
+.record-stat.featured {
+  background: linear-gradient(135deg, rgba(232, 168, 51, 0.13) 0%, rgba(232, 168, 51, 0.05) 100%);
+}
+
+.record-stat.solo {
+  grid-column: 1 / -1;
+}
+
+.record-stat-value {
+  font-size: 1.75rem;
+  font-weight: 900;
   color: var(--asu-maroon);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.record-stat.featured .record-stat-value {
+  font-size: 2rem;
+}
+
+.record-stat-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-secondary);
 }
 
 /* Schedule List - Modern Card Grid */

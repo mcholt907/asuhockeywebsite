@@ -97,29 +97,29 @@ function Schedule() {
         <div className="record-card">
           <div className="record-label">Team Record</div>
           {teamRecord ? (
-            <div className="record-table">
-              <div className="record-row">
-                <span className="record-row-label">Overall Record</span>
-                <span className="record-row-value">{formatRecord(teamRecord.overall)}</span>
+            <div className="record-grid">
+              <div className="record-stat featured">
+                <span className="record-stat-value">{formatRecord(teamRecord.overall)}</span>
+                <span className="record-stat-label">Overall</span>
               </div>
-              <div className="record-row">
-                <span className="record-row-label">NCHC Record</span>
-                <span className="record-row-value">{formatRecord(teamRecord.conf)}</span>
+              <div className="record-stat">
+                <span className="record-stat-value">{formatRecord(teamRecord.conf)}</span>
+                <span className="record-stat-label">NCHC</span>
               </div>
-              <div className="record-row">
-                <span className="record-row-label">Home Record</span>
-                <span className="record-row-value">{formatRecord(teamRecord.home)}</span>
+              <div className="record-stat">
+                <span className="record-stat-value">{formatRecord(teamRecord.home)}</span>
+                <span className="record-stat-label">Home</span>
               </div>
-              <div className="record-row">
-                <span className="record-row-label">Away Record</span>
-                <span className="record-row-value">{formatRecord(teamRecord.away)}</span>
+              <div className="record-stat">
+                <span className="record-stat-value">{formatRecord(teamRecord.away)}</span>
+                <span className="record-stat-label">Away</span>
               </div>
             </div>
           ) : (
-            <div className="record-table">
-              <div className="record-row">
-                <span className="record-row-label">Overall Record</span>
-                <span className="record-row-value">{formatRecord(calculateRecord())}</span>
+            <div className="record-grid">
+              <div className="record-stat featured solo">
+                <span className="record-stat-value">{formatRecord(calculateRecord())}</span>
+                <span className="record-stat-label">Overall</span>
               </div>
             </div>
           )}

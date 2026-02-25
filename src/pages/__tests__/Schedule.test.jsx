@@ -144,10 +144,10 @@ describe('Schedule Page', () => {
     render(<Schedule />);
 
     await waitFor(() => {
-      expect(screen.getByText('Overall Record')).toBeInTheDocument();
-      expect(screen.getByText('NCHC Record')).toBeInTheDocument();
-      expect(screen.getByText('Home Record')).toBeInTheDocument();
-      expect(screen.getByText('Away Record')).toBeInTheDocument();
+      expect(screen.getByText('Overall')).toBeInTheDocument();
+      expect(screen.getByText('NCHC')).toBeInTheDocument();
+      expect(screen.getByText('Home')).toBeInTheDocument();
+      expect(screen.getByText('Away')).toBeInTheDocument();
       expect(screen.getByText('14-19-1')).toBeInTheDocument();
       expect(screen.getByText('7-14-1')).toBeInTheDocument();
       expect(screen.getByText('9-10-1')).toBeInTheDocument();
@@ -168,8 +168,8 @@ describe('Schedule Page', () => {
     render(<Schedule />);
 
     await waitFor(() => {
-      expect(screen.getByText('Overall Record')).toBeInTheDocument();
-      expect(screen.queryByText('NCHC Record')).not.toBeInTheDocument();
+      expect(screen.getByText('Overall')).toBeInTheDocument();
+      expect(screen.queryByText('NCHC')).not.toBeInTheDocument();
     });
   });
 });
