@@ -128,7 +128,7 @@
 .schedule-item {
   background: linear-gradient(135deg, var(--white) 0%, #fafbfc 100%);
   border-radius: var(--border-radius-lg);
-  padding: 24px 28px;
+  padding: 14px 24px;
   box-shadow: var(--shadow-md);
   border: 2px solid var(--border-color);
   transition: all var(--transition-base);
@@ -136,7 +136,7 @@
   overflow: hidden;
   display: grid;
   grid-template-columns: 120px 1fr 200px auto;
-  gap: 24px;
+  gap: 20px;
   align-items: center;
 }
 
