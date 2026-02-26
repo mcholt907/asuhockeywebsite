@@ -1,5 +1,14 @@
 // services/roster-service.js
 const { scrapeCHNRoster } = require('../scraper');
+const staticData = require('../asu_hockey_data.json');
+
+// Build a lookup of shoots by jersey number from static data (fallback for when CHN drops the column)
+const staticByNumber = {};
+const staticPlayers = Array.isArray(staticData) ? staticData : (staticData.roster || staticData.players || []);
+staticPlayers.forEach(p => {
+  const num = String(p.number || '').replace('#', '').trim();
+  if (num) staticByNumber[num] = p;
+});
 
 function determineNationality(hometown) {
   if (!hometown || hometown === '-') return 'USA';
@@ -52,7 +61,7 @@ async function getRoster() {
         position: pos,
         height: p.Ht || '-',
         weight: p.Wt || '-',
-        shoots: p['S/C'] || '-',
+        shoots: p['S/C'] || staticByNumber[String(p['#'] || '').trim()]?.shoots || '-',
         born: p.DOB || '-',
         birthplace: hometown || '-',
         nationality: determineNationality(hometown),
