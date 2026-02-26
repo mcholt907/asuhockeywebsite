@@ -26,11 +26,24 @@ function App() {
 
   return (
     <BrowserRouter>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "Forks Up Pucks",
+            "alternateName": "ASU Hockey Fan Site",
+            "url": "https://forksuppucks.com",
+            "description": "The ultimate fan site for ASU Sun Devils Men's Hockey. Live scores, schedule, roster, stats, recruiting news and more."
+          })
+        }}
+      />
       <div className={`app ${menuOpen ? 'menu-open' : ''}`}>
         <header>
           <div className="header-container">
             <div className="logo">
-              <img src="/assets/asu-hockey-logo.png" alt="ASU Hockey" />
+              <img src="/assets/asu-hockey-logo.png" alt="ASU Hockey" width="253" height="500" />
             </div>
 
             <button className="mobile-menu-btn" onClick={toggleMenu} aria-label="Toggle Menu">
@@ -77,7 +90,7 @@ function App() {
         <footer>
           <div className="footer-container">
             <div className="footer-logo">
-              <img src="/assets/asu-hockey-logo-small.png" alt="ASU Hockey" />
+              <img src="/assets/asu-hockey-logo-small.png" alt="ASU Hockey" width="108" height="108" />
             </div>
             <div className="footer-links">
               <h3>Quick Links</h3>

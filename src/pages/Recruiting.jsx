@@ -179,6 +179,20 @@ function Recruiting() {
       <meta property="og:url" content="https://forksuppucks.com/recruiting" />
       <meta name="twitter:title" content="Recruiting | Forks Up Pucks – ASU Sun Devils Hockey" />
       <meta name="twitter:description" content="ASU Sun Devils Hockey recruiting commitments and future players for upcoming seasons." />
+      <link rel="canonical" href="https://forksuppucks.com/recruiting" />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://forksuppucks.com" },
+              { "@type": "ListItem", "position": 2, "name": "Recruiting", "item": "https://forksuppucks.com/recruiting" }
+            ]
+          })
+        }}
+      />
       <div className="recruiting-header">
         <h1>Future Devils</h1>
         <p className="subtitle">The Next Generation of Sun Devil Hockey</p>

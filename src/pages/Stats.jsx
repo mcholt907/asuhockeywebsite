@@ -108,6 +108,20 @@ function Stats() {
       <meta property="og:url" content="https://forksuppucks.com/stats" />
       <meta name="twitter:title" content="Player Stats | Forks Up Pucks – ASU Sun Devils Hockey" />
       <meta name="twitter:description" content="ASU Sun Devils Men's Hockey player statistics and leaders for the 2025-26 season." />
+      <link rel="canonical" href="https://forksuppucks.com/stats" />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://forksuppucks.com" },
+              { "@type": "ListItem", "position": 2, "name": "Stats", "item": "https://forksuppucks.com/stats" }
+            ]
+          })
+        }}
+      />
       <div className="stat-lab-header">
         <h1>Player Stats</h1>
         <p className="subtitle">Advanced Analytics & Team Leaders</p>

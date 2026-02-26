@@ -97,6 +97,45 @@ function Schedule() {
       <meta property="og:url" content="https://forksuppucks.com/schedule" />
       <meta name="twitter:title" content="2025-26 Schedule & Results | Forks Up Pucks – ASU Hockey" />
       <meta name="twitter:description" content="Full 2025-26 ASU Sun Devils Men's Hockey schedule, scores, and results." />
+      <link rel="canonical" href="https://forksuppucks.com/schedule" />
+      {games.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                ...games.map(game => ({
+                  "@type": "SportsEvent",
+                  "name": `Arizona State ${game.status === 'Home' ? 'vs.' : 'at'} ${game.opponent}`,
+                  "startDate": game.date,
+                  "location": {
+                    "@type": "Place",
+                    "name": game.location || (game.status === 'Home' ? 'Mullett Arena' : `${game.opponent} Arena`)
+                  },
+                  "homeTeam": game.status === 'Home'
+                    ? { "@type": "SportsTeam", "name": "Arizona State Sun Devils" }
+                    : { "@type": "SportsTeam", "name": game.opponent },
+                  "awayTeam": game.status === 'Home'
+                    ? { "@type": "SportsTeam", "name": game.opponent }
+                    : { "@type": "SportsTeam", "name": "Arizona State Sun Devils" },
+                  "eventStatus": game.result
+                    ? "https://schema.org/EventCompleted"
+                    : "https://schema.org/EventScheduled",
+                  "sport": "Ice Hockey"
+                })),
+                {
+                  "@type": "BreadcrumbList",
+                  "itemListElement": [
+                    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://forksuppucks.com" },
+                    { "@type": "ListItem", "position": 2, "name": "Schedule", "item": "https://forksuppucks.com/schedule" }
+                  ]
+                }
+              ]
+            })
+          }}
+        />
+      )}
       <h1>Team Schedule (2025-2026)</h1>
 
       {/* Team Record Display */}

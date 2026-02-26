@@ -112,6 +112,36 @@ function Roster() {
       <meta property="og:url" content="https://forksuppucks.com/roster" />
       <meta name="twitter:title" content="Roster | Forks Up Pucks – ASU Sun Devils Hockey" />
       <meta name="twitter:description" content="2025-26 ASU Sun Devils Men's Hockey roster — players, positions, height, weight, and hometown." />
+      <link rel="canonical" href="https://forksuppucks.com/roster" />
+      {players.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                ...players.map(player => ({
+                  "@type": "Person",
+                  "name": getPlayerName(player),
+                  "sport": "Ice Hockey",
+                  "memberOf": {
+                    "@type": "SportsTeam",
+                    "name": "Arizona State Sun Devils Men's Hockey"
+                  },
+                  ...(getNationality(player) ? { "nationality": getNationality(player) } : {})
+                })),
+                {
+                  "@type": "BreadcrumbList",
+                  "itemListElement": [
+                    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://forksuppucks.com" },
+                    { "@type": "ListItem", "position": 2, "name": "Roster", "item": "https://forksuppucks.com/roster" }
+                  ]
+                }
+              ]
+            })
+          }}
+        />
+      )}
       <div className="page-header">
         <h1>Team Roster (2025-2026 Season)</h1>
 
@@ -172,6 +202,9 @@ function Roster() {
                           src={`/assets/flags/${getNationality(player).toLowerCase()}.png`}
                           alt={getNationality(player)}
                           className="flag-icon"
+                          loading="lazy"
+                          width="20"
+                          height="14"
                           onError={(e) => { e.target.style.display = 'none'; }}
                         />
                       </td>
@@ -227,6 +260,9 @@ function Roster() {
                           src={`/assets/flags/${getNationality(player).toLowerCase()}.png`}
                           alt={getNationality(player)}
                           className="flag-icon"
+                          loading="lazy"
+                          width="20"
+                          height="14"
                           onError={(e) => { e.target.style.display = 'none'; }}
                         />
                       </td>
@@ -282,6 +318,9 @@ function Roster() {
                           src={`/assets/flags/${getNationality(player).toLowerCase()}.png`}
                           alt={getNationality(player)}
                           className="flag-icon"
+                          loading="lazy"
+                          width="20"
+                          height="14"
                           onError={(e) => { e.target.style.display = 'none'; }}
                         />
                       </td>

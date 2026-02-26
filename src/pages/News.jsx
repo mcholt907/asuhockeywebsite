@@ -67,6 +67,20 @@ function News() {
       <meta property="og:url" content="https://forksuppucks.com/news" />
       <meta name="twitter:title" content="News | Forks Up Pucks – ASU Sun Devils Hockey" />
       <meta name="twitter:description" content="Latest news and headlines for ASU Sun Devils Men's Hockey." />
+      <link rel="canonical" href="https://forksuppucks.com/news" />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://forksuppucks.com" },
+              { "@type": "ListItem", "position": 2, "name": "News", "item": "https://forksuppucks.com/news" }
+            ]
+          })
+        }}
+      />
     <div className="news-content">
 
       {/* Filters */}
