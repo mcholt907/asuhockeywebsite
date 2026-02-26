@@ -8,6 +8,7 @@ function Home() {
   const [nextGame, setNextGame] = useState(null);
   const [today, setToday] = useState('');
   const [record, setRecord] = useState({ wins: 0, losses: 0, ties: 0 });
+  const [npi, setNpi] = useState(null);
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -39,6 +40,7 @@ function Home() {
           }
         });
         setRecord({ wins, losses, ties });
+        setNpi(scheduleResponse.team_record?.npi ?? null);
 
         setNews(newsResponse.data || []);
       } catch (err) {
@@ -170,6 +172,12 @@ function Home() {
                     <span className="right-record-label">Ties</span>
                   </div>
                 </div>
+                {npi !== null && (
+                  <div className="right-record-npi">
+                    <span className="right-record-npi-label">NPI</span>
+                    <span className="right-record-npi-value">#{npi}</span>
+                  </div>
+                )}
               </div>
             </div>
 

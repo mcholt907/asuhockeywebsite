@@ -408,6 +408,30 @@
   margin-bottom: 20px;
 }
 
+.right-record-npi {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.right-record-npi-label {
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(232, 224, 226, 0.5);
+}
+
+.right-record-npi-value {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--asu-gold);
+}
+
 /* ============================================
    Zone 2: News card row — inside the dark card
    ============================================ */

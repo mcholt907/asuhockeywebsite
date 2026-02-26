@@ -301,11 +301,19 @@ async function scrapeCHNScheduleLinks() {
       }
     });
 
-    console.log(`[CHN Schedule Links] Found links for ${Object.keys(linkMap).length} games.`);
-    return linkMap;
+    // Parse NPI and KRACH from the <small> tag inside h2.teamlabel
+    let npi = null;
+    let krach = null;
+    const smallText = $('h2.teamlabel small').text();
+    const npiMatch = smallText.match(/NPI:\s*(\d+)/);
+    const krachMatch = smallText.match(/KRACH:\s*(\d+)/);
+    if (npiMatch) npi = parseInt(npiMatch[1], 10);
+    if (krachMatch) krach = parseInt(krachMatch[1], 10);
+    console.log(`[CHN Schedule Links] Found links for ${Object.keys(linkMap).length} games. NPI: ${npi}, KRACH: ${krach}`);
+    return { linkMap, npi, krach };
   } catch (error) {
     console.error(`[CHN Schedule Links] Error: ${error.message}`);
-    return {};
+    return { linkMap: {}, npi: null, krach: null };
   }
 }
 
@@ -334,14 +342,14 @@ async function scrapeUSCHORecord() {
 
 
 async function enrichScheduleWithCHNLinks(games) {
-  const chnLinks = await scrapeCHNScheduleLinks();
+  const { linkMap, npi, krach } = await scrapeCHNScheduleLinks();
   for (const game of games) {
-    if (game.date && chnLinks[game.date]) {
-      game.box_link = chnLinks[game.date].box_link;
-      game.metrics_link = chnLinks[game.date].metrics_link;
+    if (game.date && linkMap[game.date]) {
+      game.box_link = linkMap[game.date].box_link;
+      game.metrics_link = linkMap[game.date].metrics_link;
     }
   }
-  return games;
+  return { games, npi, krach };
 }
 
 async function fetchScheduleData() {
@@ -376,9 +384,9 @@ async function fetchScheduleData() {
               const duration = Date.now() - startTime;
               Sentry.metrics.distribution('scraper.schedule.duration', duration, { unit: 'millisecond' });
               if (scheduleData && scheduleData.length > 0) {
-                await enrichScheduleWithCHNLinks(scheduleData);
+                const { games: enriched, npi, krach } = await enrichScheduleWithCHNLinks(scheduleData);
                 const teamRecord = await scrapeUSCHORecord();
-                await saveToCache({ games: scheduleData, team_record: teamRecord }, fullCacheKey);
+                await saveToCache({ games: enriched, team_record: { ...teamRecord, npi, krach } }, fullCacheKey);
               }
             } catch (error) {
               console.error(`[Background Refresh] Schedule error: ${error.message}`);
@@ -414,9 +422,10 @@ async function fetchScheduleData() {
       let teamRecord = null;
       if (scheduleData && scheduleData.length > 0) {
         console.log(`[Cache System] Successfully scraped ${scheduleData.length} games. Saving to cache for ${targetSeasonStartYear}.`);
-        await enrichScheduleWithCHNLinks(scheduleData);
+        const { games: enriched, npi, krach } = await enrichScheduleWithCHNLinks(scheduleData);
         teamRecord = await scrapeUSCHORecord();
-        await saveToCache({ games: scheduleData, team_record: teamRecord }, fullCacheKey);
+        teamRecord = { ...teamRecord, npi, krach };
+        await saveToCache({ games: enriched, team_record: teamRecord }, fullCacheKey);
       } else {
         console.log(`[Cache System] No schedule data returned from scraper for ${targetSeasonStartYear}. Not caching.`);
       }
