@@ -172,6 +172,13 @@ function Recruiting() {
 
   return (
     <div className="page-container recruiting-page">
+      <title>Recruiting | Forks Up Pucks – ASU Sun Devils Hockey</title>
+      <meta name="description" content="ASU Sun Devils Hockey recruiting commitments and future players for upcoming seasons." />
+      <meta property="og:title" content="Recruiting | Forks Up Pucks – ASU Sun Devils Hockey" />
+      <meta property="og:description" content="ASU Sun Devils Hockey recruiting commitments and future players for upcoming seasons." />
+      <meta property="og:url" content="https://forksuppucks.com/recruiting" />
+      <meta name="twitter:title" content="Recruiting | Forks Up Pucks – ASU Sun Devils Hockey" />
+      <meta name="twitter:description" content="ASU Sun Devils Hockey recruiting commitments and future players for upcoming seasons." />
       <div className="recruiting-header">
         <h1>Future Devils</h1>
         <p className="subtitle">The Next Generation of Sun Devil Hockey</p>

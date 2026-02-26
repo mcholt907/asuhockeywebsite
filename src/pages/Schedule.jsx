@@ -90,6 +90,13 @@ function Schedule() {
 
   return (
     <div className="page-container schedule-page">
+      <title>2025-26 Schedule &amp; Results | Forks Up Pucks – ASU Hockey</title>
+      <meta name="description" content="Full 2025-26 ASU Sun Devils Men's Hockey schedule, scores, and results." />
+      <meta property="og:title" content="2025-26 Schedule & Results | Forks Up Pucks – ASU Hockey" />
+      <meta property="og:description" content="Full 2025-26 ASU Sun Devils Men's Hockey schedule, scores, and results." />
+      <meta property="og:url" content="https://forksuppucks.com/schedule" />
+      <meta name="twitter:title" content="2025-26 Schedule & Results | Forks Up Pucks – ASU Hockey" />
+      <meta name="twitter:description" content="Full 2025-26 ASU Sun Devils Men's Hockey schedule, scores, and results." />
       <h1>Team Schedule (2025-2026)</h1>
 
       {/* Team Record Display */}

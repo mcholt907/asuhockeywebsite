@@ -216,6 +216,32 @@ app.get('/api/stats', async (req, res) => {
   }
 });
 
+// Sitemap
+app.get('/sitemap.xml', (req, res) => {
+  const baseUrl = 'https://forksuppucks.com';
+  const today = new Date().toISOString().split('T')[0];
+  const pages = [
+    { url: '/',          priority: '1.0', changefreq: 'daily'   },
+    { url: '/news',      priority: '0.9', changefreq: 'daily'   },
+    { url: '/schedule',  priority: '0.9', changefreq: 'daily'   },
+    { url: '/roster',    priority: '0.8', changefreq: 'weekly'  },
+    { url: '/stats',     priority: '0.8', changefreq: 'daily'   },
+    { url: '/recruiting',priority: '0.7', changefreq: 'weekly'  },
+    { url: '/alumni',    priority: '0.6', changefreq: 'monthly' },
+  ];
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${pages.map(p => `  <url>
+    <loc>${baseUrl}${p.url}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>${p.changefreq}</changefreq>
+    <priority>${p.priority}</priority>
+  </url>`).join('\n')}
+</urlset>`;
+  res.header('Content-Type', 'application/xml');
+  res.send(xml);
+});
+
 // Serve the React application's static files from the 'build' directory
 app.use(express.static(path.join(__dirname, 'build')));
 

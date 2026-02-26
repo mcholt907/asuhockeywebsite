@@ -54,6 +54,13 @@ function Alumni() {
 
     return (
         <div className="page-container alumni-page">
+            <title>Alumni | Forks Up Pucks – ASU Sun Devils Hockey</title>
+            <meta name="description" content="Where are they now? Follow former ASU Sun Devils Hockey players in their professional careers." />
+            <meta property="og:title" content="Alumni | Forks Up Pucks – ASU Sun Devils Hockey" />
+            <meta property="og:description" content="Where are they now? Follow former ASU Sun Devils Hockey players in their professional careers." />
+            <meta property="og:url" content="https://forksuppucks.com/alumni" />
+            <meta name="twitter:title" content="Alumni | Forks Up Pucks – ASU Sun Devils Hockey" />
+            <meta name="twitter:description" content="Where are they now? Follow former ASU Sun Devils Hockey players in their professional careers." />
             <div className="alumni-header">
                 <h1>Where Are They Now?</h1>
                 <p className="subtitle">Former Sun Devils Playing Professionally</p>

@@ -60,6 +60,13 @@ function News() {
 
   return (
     <div className="news-page">
+      <title>News | Forks Up Pucks – ASU Sun Devils Hockey</title>
+      <meta name="description" content="Latest news and headlines for ASU Sun Devils Men's Hockey." />
+      <meta property="og:title" content="News | Forks Up Pucks – ASU Sun Devils Hockey" />
+      <meta property="og:description" content="Latest news and headlines for ASU Sun Devils Men's Hockey." />
+      <meta property="og:url" content="https://forksuppucks.com/news" />
+      <meta name="twitter:title" content="News | Forks Up Pucks – ASU Sun Devils Hockey" />
+      <meta name="twitter:description" content="Latest news and headlines for ASU Sun Devils Men's Hockey." />
     <div className="news-content">
 
       {/* Filters */}
