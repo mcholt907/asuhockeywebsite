@@ -77,7 +77,6 @@ function Stats() {
               <span className="rank">{idx + 1}</span>
               <div className="player-info">
                 <span className="player-name">{name}</span>
-                <span className="player-team">{player.Team || 'ASU'}</span>
               </div>
               <span className="metric-value">{value}</span>
             </div>
