@@ -199,12 +199,12 @@ function Roster() {
                       <td>{getPlayerNumber(player)}</td>
                       <td>
                         <img
-                          src={`/assets/flags/${getNationality(player).toLowerCase()}.png`}
+                          src={`/assets/flags/${getNationality(player).toLowerCase()}.svg`}
                           alt={getNationality(player)}
                           className="flag-icon"
                           loading="lazy"
-                          width="20"
-                          height="14"
+                          width="24"
+                          height="16"
                           onError={(e) => { e.target.style.display = 'none'; }}
                         />
                       </td>
@@ -257,12 +257,12 @@ function Roster() {
                       <td>{getPlayerNumber(player)}</td>
                       <td>
                         <img
-                          src={`/assets/flags/${getNationality(player).toLowerCase()}.png`}
+                          src={`/assets/flags/${getNationality(player).toLowerCase()}.svg`}
                           alt={getNationality(player)}
                           className="flag-icon"
                           loading="lazy"
-                          width="20"
-                          height="14"
+                          width="24"
+                          height="16"
                           onError={(e) => { e.target.style.display = 'none'; }}
                         />
                       </td>
@@ -315,12 +315,12 @@ function Roster() {
                       <td>{getPlayerNumber(player)}</td>
                       <td>
                         <img
-                          src={`/assets/flags/${getNationality(player).toLowerCase()}.png`}
+                          src={`/assets/flags/${getNationality(player).toLowerCase()}.svg`}
                           alt={getNationality(player)}
                           className="flag-icon"
                           loading="lazy"
-                          width="20"
-                          height="14"
+                          width="24"
+                          height="16"
                           onError={(e) => { e.target.style.display = 'none'; }}
                         />
                       </td>
