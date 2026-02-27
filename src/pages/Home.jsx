@@ -1,7 +1,7 @@
 // src/pages/Home.jsx
 import React, { useState, useEffect } from 'react';
 import UpcomingGames from '../components/UpcomingGames';
-import { getSchedule, getNews } from '../services/api';
+import { getSchedule, getNews, getStandings } from '../services/api';
 import './Home.css';
 
 function Home() {
@@ -10,14 +10,16 @@ function Home() {
   const [record, setRecord] = useState({ wins: 0, losses: 0, ties: 0 });
   const [npi, setNpi] = useState(null);
   const [news, setNews] = useState([]);
+  const [standings, setStandings] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [scheduleResponse, newsResponse] = await Promise.all([
+        const [scheduleResponse, newsResponse, standingsResponse] = await Promise.all([
           getSchedule(),
-          getNews()
+          getNews(),
+          getStandings()
         ]);
 
         const d = new Date();
@@ -43,6 +45,7 @@ function Home() {
         setNpi(scheduleResponse.team_record?.npi ?? null);
 
         setNews(newsResponse.data || []);
+        setStandings(standingsResponse.data || []);
       } catch (err) {
         console.error('Home data fetch error:', err);
       } finally {
@@ -181,6 +184,37 @@ function Home() {
               </div>
             </div>
 
+            {/* NCHC Conference Standings */}
+            {standings.length > 0 && (
+              <div className="right-section">
+                <h3 className="right-section-title">NCHC Standings</h3>
+                <div className="right-standings">
+                  <table className="standings-widget-table">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Team</th>
+                        <th>PTS</th>
+                        <th>NCHC</th>
+                        <th>OVR</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {standings.map((team, i) => (
+                        <tr key={i} className={team.isASU ? 'standings-asu-row' : ''}>
+                          <td>{team.rank}</td>
+                          <td className="standings-team-name">{team.team}</td>
+                          <td>{team.pts}</td>
+                          <td>{team.confRecord}</td>
+                          <td>{team.overallRecord}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
             {/* Trending News — 3 cards in a horizontal row */}
             {news.length > 0 && (
               <div className="right-section">
@@ -209,25 +243,6 @@ function Home() {
                 {/* TODO: UpcomingGames independently fetches /api/schedule; could be optimized
                     by passing scheduleData as a prop to avoid the double fetch */}
                 <UpcomingGames limit={3} />
-              </div>
-            </div>
-
-            {/* Team Spotlight — hardcoded roster averages */}
-            <div className="right-section">
-              <h3 className="right-section-title">Team Spotlight</h3>
-              <div className="right-spotlight">
-                <div className="right-stat">
-                  <span className="right-stat-value">22.04</span>
-                  <span className="right-stat-label">Avg Age</span>
-                </div>
-                <div className="right-stat">
-                  <span className="right-stat-value">5'11"</span>
-                  <span className="right-stat-label">Avg Height</span>
-                </div>
-                <div className="right-stat">
-                  <span className="right-stat-value">181</span>
-                  <span className="right-stat-label">Avg Weight</span>
-                </div>
               </div>
             </div>
 

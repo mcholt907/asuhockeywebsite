@@ -18,7 +18,7 @@ const express = require('express');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const compression = require('compression'); // Add compression for performance
-const { fetchNewsData, fetchScheduleData, scrapeCHNStats } = require('./scraper'); // Import the news fetching function and new stats fetching function
+const { fetchNewsData, fetchScheduleData, scrapeCHNStats, scrapeNCHCStandings } = require('./scraper'); // Import the news fetching function and new stats fetching function
 const { scrapeTransferData } = require('./transfer-scraper'); // Import transfer scraper
 const { scrapeAlumniData } = require('./alumni-scraper'); // Import alumni scraper
 const { startScheduler } = require('./src/scripts/scheduler'); // Import scheduler
@@ -213,6 +213,21 @@ app.get('/api/stats', async (req, res) => {
   } catch (error) {
     console.error('Error in /api/stats endpoint:', error);
     res.status(500).json({ error: 'Internal server error while fetching stats.' });
+  }
+});
+
+// API endpoint for NCHC conference standings
+app.get('/api/standings', async (req, res) => {
+  try {
+    const standings = await scrapeNCHCStandings();
+    if (standings && standings.length > 0) {
+      res.json({ data: standings, timestamp: new Date().toISOString() });
+    } else {
+      res.status(500).json({ error: 'Failed to fetch standings data.' });
+    }
+  } catch (error) {
+    console.error('Error in /api/standings endpoint:', error);
+    res.status(500).json({ error: 'Internal server error while fetching standings.' });
   }
 });
 

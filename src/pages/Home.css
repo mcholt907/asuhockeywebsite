@@ -365,7 +365,7 @@
 /* Right panel — Overall Record single card */
 .right-record-card {
   display: inline-block;
-  padding: 14px 32px;
+  padding: 10px 24px;
   background: linear-gradient(to bottom, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.03) 100%);
   border-radius: 5px;
   border-top: 2px solid rgba(232, 168, 51, 0.5);
@@ -387,7 +387,7 @@
 }
 
 .right-record-value {
-  font-size: 1.6rem;
+  font-size: 1.25rem;
   font-weight: 900;
   color: white;
   line-height: 1;
@@ -402,10 +402,10 @@
 }
 
 .right-record-sep {
-  font-size: 1.2rem;
+  font-size: 0.9rem;
   font-weight: 300;
   color: rgba(232, 224, 226, 0.25);
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
 
 .right-record-npi {
@@ -427,9 +427,97 @@
 }
 
 .right-record-npi-value {
-  font-size: 0.9rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: var(--asu-gold);
+}
+
+/* NCHC Standings widget */
+.right-standings {
+  overflow-x: auto;
+}
+
+.standings-widget-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.standings-widget-table thead tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.standings-widget-table thead th {
+  padding: 3px 6px;
+  text-align: left;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(232, 224, 226, 0.4);
+  white-space: nowrap;
+}
+
+.standings-widget-table thead th:first-child {
+  width: 20px;
+  text-align: center;
+}
+
+.standings-widget-table thead th:nth-child(3),
+.standings-widget-table thead th:nth-child(4),
+.standings-widget-table thead th:nth-child(5) {
+  text-align: right;
+}
+
+.standings-widget-table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.12s;
+}
+
+.standings-widget-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.standings-widget-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.standings-widget-table tbody td {
+  padding: 3px 6px;
+  color: #e8e0e2;
+  white-space: nowrap;
+}
+
+.standings-widget-table tbody td:first-child {
+  text-align: center;
+  color: rgba(232, 224, 226, 0.4);
+  font-size: 0.7rem;
+}
+
+.standings-team-name {
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.standings-widget-table tbody td:nth-child(3),
+.standings-widget-table tbody td:nth-child(4),
+.standings-widget-table tbody td:nth-child(5) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: rgba(232, 224, 226, 0.65);
+}
+
+/* ASU row highlight */
+.standings-asu-row td {
+  color: var(--asu-gold) !important;
+  font-weight: 700;
+}
+
+.standings-asu-row .standings-team-name {
+  color: var(--asu-gold) !important;
 }
 
 /* ============================================

@@ -88,6 +88,20 @@ export const getAlumni = async () => {
 
 
 /**
+ * Fetches NCHC conference standings.
+ * @returns {Promise<Object>} A promise that resolves to { data: standings[] }.
+ */
+export const getStandings = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/standings`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching standings:', error);
+    return { data: [] };
+  }
+};
+
+/**
  * Fetches the game schedule.
  * @returns {Promise<Object>} A promise that resolves to an object containing the game schedule.
  *                                   The object should have { data, source, timestamp }

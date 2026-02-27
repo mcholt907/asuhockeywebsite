@@ -7,6 +7,7 @@ let newsPromise = null;
 let schedulePromise = null;
 let statsPromise = null;
 let rosterPromise = null;
+let standingsPromise = null;
 
 const config = require('./config/scraper-config');
 const { requestWithRetry, delayBetweenRequests } = require('./utils/request-helper');
@@ -788,4 +789,123 @@ async function scrapeCHNRoster() {
   return await rosterPromise;
 }
 
-module.exports = { fetchNewsData, fetchScheduleData, scrapeCHNStats, scrapeCHNRoster, scrapeCHNScheduleLinks, scrapeUSCHORecord };
+// NCHC teams for identifying the correct table section
+const NCHC_TEAM_NAMES = ['Arizona State', 'Denver', 'Minnesota Duluth', 'North Dakota', 'St. Cloud State', 'Western Michigan', 'Colorado College', 'Miami', 'Omaha'];
+
+async function fetchAndCacheNCHCStandings(cacheKey) {
+  const url = config.urls.nchcStandings;
+  console.log(`[NCHC Standings] Fetching from: ${url}`);
+  try {
+    const { data } = await requestWithRetry(url);
+    const $ = cheerio.load(data);
+
+    let nchcTable = null;
+
+    // Strategy 1: Find the table whose first <tr> text is exactly "NCHC"
+    // (CHN renders each conference block as a table with its name in row 0)
+    $('table').each((_, table) => {
+      if (nchcTable) return;
+      const firstRowText = $(table).find('tr').first().text().trim();
+      if (firstRowText === 'NCHC') {
+        nchcTable = $(table);
+      }
+    });
+
+    // Strategy 2: Find a table containing multiple NCHC team names
+    if (!nchcTable || !nchcTable.length) {
+      $('table').each((_, table) => {
+        if (nchcTable) return;
+        const text = $(table).text();
+        let matchCount = 0;
+        NCHC_TEAM_NAMES.forEach(t => { if (text.includes(t)) matchCount++; });
+        if (matchCount >= 3) nchcTable = $(table);
+      });
+    }
+
+    if (!nchcTable || !nchcTable.length) {
+      console.error('[NCHC Standings] Could not find NCHC standings table');
+      return [];
+    }
+
+    const teams = [];
+    nchcTable.find('tbody tr').each((i, tr) => {
+      const cells = $(tr).find('td');
+      if (cells.length < 10) return;
+
+      // CHN column layout (0-indexed):
+      // 0: rank, 1: team (anchor), 2: confGP, 3: pts, 4: pt%,
+      // 5: confRW, 6: confRL, 7: confOW, 8: confOL,
+      // 9: (empty separator), 10: overallGP, 11: W, 12: L, 13: T/OTL, ...
+      const rank = $(cells[0]).text().trim();
+      const teamAnchor = $(cells[1]).find('a');
+      const team = teamAnchor.length ? teamAnchor.text().trim() : $(cells[1]).text().trim();
+      if (!team) return;
+
+      const pts = $(cells[3]).text().trim();
+      const confRW = parseInt($(cells[5]).text().trim()) || 0;
+      const confRL = parseInt($(cells[6]).text().trim()) || 0;
+      const confOW = parseInt($(cells[7]).text().trim()) || 0;
+      const confOL = parseInt($(cells[8]).text().trim()) || 0;
+      const overallW = $(cells[11]).text().trim();
+      const overallL = $(cells[12]).text().trim();
+      const overallT = $(cells[13]).text().trim();
+
+      const confW = confRW + confOW;
+      const confRecord = `${confW}-${confRL}-${confOL}`;
+      const overallRecord = `${overallW}-${overallL}-${overallT}`;
+
+      teams.push({
+        rank: rank || String(i + 1),
+        team,
+        pts,
+        confRecord,
+        overallRecord,
+        isASU: team.toLowerCase().includes('arizona'),
+      });
+    });
+
+    console.log(`[NCHC Standings] Scraped ${teams.length} teams.`);
+    if (teams.length > 0) {
+      await saveToCache(teams, cacheKey);
+    }
+    return teams;
+  } catch (error) {
+    console.error(`[NCHC Standings] Error: ${error.message}`);
+    return [];
+  }
+}
+
+async function scrapeNCHCStandings() {
+  const STANDINGS_CACHE_KEY = 'nchc_standings';
+
+  try {
+    const cached = getFromCache(STANDINGS_CACHE_KEY);
+    if (cached) {
+      console.log('[NCHC Standings] Returning cached data.');
+      return cached;
+    }
+
+    const stale = getFromCache(STANDINGS_CACHE_KEY, true);
+    if (stale) {
+      console.log('[NCHC Standings] Stale data found. Returning immediately and refreshing in background.');
+      if (!standingsPromise) {
+        standingsPromise = fetchAndCacheNCHCStandings(STANDINGS_CACHE_KEY)
+          .finally(() => { standingsPromise = null; });
+      }
+      return stale;
+    }
+  } catch (error) {
+    console.log('[NCHC Standings] No valid cache found.');
+  }
+
+  if (standingsPromise) {
+    console.log('[NCHC Standings] Scrape already in progress. Returning shared promise.');
+    return await standingsPromise;
+  }
+
+  standingsPromise = fetchAndCacheNCHCStandings(STANDINGS_CACHE_KEY)
+    .finally(() => { standingsPromise = null; });
+  return await standingsPromise;
+}
+
+module.exports = { fetchNewsData, fetchScheduleData, scrapeCHNStats, scrapeCHNRoster, scrapeCHNScheduleLinks, scrapeUSCHORecord, scrapeNCHCStandings };
