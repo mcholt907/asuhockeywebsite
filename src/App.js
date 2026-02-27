@@ -1,6 +1,6 @@
 // App.jsx
 import { useState } from 'react';
-import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import './App.css';
 
 // Page Components
@@ -18,14 +18,17 @@ import Alumni from './pages/Alumni';
 import GlobalNotificationBanner from './components/GlobalNotificationBanner';
 import MobileBottomNav from './components/MobileBottomNav';
 
-function App() {
+function AppInner() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation();
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
   const closeMenu = () => setMenuOpen(false);
 
+  const isHome = location.pathname === '/';
+
   return (
-    <BrowserRouter>
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -87,7 +90,7 @@ function App() {
           </Routes>
         </main>
 
-        <footer>
+        {!isHome && <footer>
           <div className="footer-container">
             <div className="footer-logo">
               <img src="/assets/asu-hockey-logo-small.png" alt="ASU Hockey" width="108" height="108" />
@@ -118,11 +121,19 @@ function App() {
           <div className="copyright">
             <p>© {new Date().getFullYear()} ASU Hockey Fan Site.</p>
           </div>
-        </footer>
+        </footer>}
 
         <GlobalNotificationBanner />
         <MobileBottomNav />
       </div>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppInner />
     </BrowserRouter>
   );
 }
