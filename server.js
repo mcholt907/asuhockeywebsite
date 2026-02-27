@@ -98,22 +98,30 @@ app.use('/api/', apiLimiter);
 // API endpoint for news
 app.get('/api/news', async (req, res) => {
   try {
-    const articlesArray = await fetchNewsData(); // fetchNewsData now returns an array of articles or an empty array on error
+    const articlesArray = await fetchNewsData();
 
-    if (articlesArray && articlesArray.length > 0) {
-      // If articles are found, send them in the expected object structure
+    // Read manual news entries from static JSON (same pattern as /api/recruits)
+    let manualNews = [];
+    try {
+      const raw = fs.readFileSync(path.join(__dirname, 'asu_hockey_data.json'), 'utf8');
+      manualNews = JSON.parse(raw).manual_news || [];
+    } catch (e) {
+      console.error('[API /news] Failed to read manual_news:', e.message);
+    }
+
+    const combined = [...manualNews, ...articlesArray];
+
+    if (combined.length > 0) {
       res.json({
-        data: articlesArray,
-        source: 'api', // Simplified source, as fetchNewsData doesn't specify cache/live anymore
-        timestamp: new Date().toISOString() // Add a current timestamp
+        data: combined,
+        source: 'api',
+        timestamp: new Date().toISOString()
       });
     } else {
-      // If articlesArray is empty or null, it means no articles were found or an error occurred during scraping
       console.error('/api/news: No news data returned from fetchNewsData or an error occurred internally in scraper.');
       res.status(500).json({ error: 'Failed to fetch news data or no news available.' });
     }
   } catch (error) {
-    // This catch block handles unexpected errors in the endpoint logic itself
     console.error('Error in /api/news endpoint:', error);
     res.status(500).json({ error: 'Internal server error while fetching news.' });
   }
