@@ -658,5 +658,18 @@
       }
     ]
   },
-  "manual_news": []
+  "manual_news": [
+    {
+      "title": "Critical final series awaits Arizona State on the road in Denver",
+      "link": "https://devilsindetail.com/critical-final-series-awaits-arizona-state-on-the-road-in-denver",
+      "date": "February 26, 2026",
+      "source": "Devils in Detail"
+    },
+    {
+      "title": "ASU hockey looks to turn back clock in Denver",
+      "link": "https://247sports.com/college/arizona-state/article/asu-hockey-greg-powers-seniors-denver-nchc-tournament-standings--275527842/",
+      "date": "February 25, 2026",
+      "source": "247Sports"
+    }
+  ]
 }
