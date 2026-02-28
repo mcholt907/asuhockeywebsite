@@ -4,7 +4,7 @@ services:
   # Backend + Frontend Server
   - type: web
     name: asuhockey
-    env: node
+    runtime: node
     region: oregon
     plan: free
     buildCommand: npm install && npm run build
