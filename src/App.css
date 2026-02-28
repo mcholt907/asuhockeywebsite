@@ -97,7 +97,7 @@ main {
 /* --- Header & Navigation --- */
 header {
   background-color: var(--asu-maroon);
-  background-image: url('./assets/header-stripe.png');
+  background-image: url('./assets/header-stripe.webp');
   background-size: auto 100%;
   background-repeat: repeat-x;
   background-position: center;
