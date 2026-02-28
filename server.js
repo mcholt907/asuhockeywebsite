@@ -109,7 +109,8 @@ app.get('/api/news', async (req, res) => {
       console.error('[API /news] Failed to read manual_news:', e.message);
     }
 
-    const combined = [...manualNews, ...articlesArray];
+    const combined = [...manualNews, ...articlesArray]
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
 
     if (combined.length > 0) {
       res.json({
