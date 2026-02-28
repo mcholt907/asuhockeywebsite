@@ -24,6 +24,7 @@ async function refreshPostGameData() {
     console.log('[Scheduler] Starting post-game data refresh (Schedule & Stats)...');
     try {
         await Promise.all([
+            fetchNewsData(),
             fetchScheduleData(),
             scrapeCHNStats(),
             scrapeNCHCStandings()
