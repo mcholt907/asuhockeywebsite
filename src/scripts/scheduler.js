@@ -1,5 +1,5 @@
 const cron = require('node-cron');
-const { fetchNewsData, fetchScheduleData, scrapeCHNStats, scrapeCHNRoster } = require('../../scraper');
+const { fetchNewsData, fetchScheduleData, scrapeCHNStats, scrapeCHNRoster, scrapeNCHCStandings } = require('../../scraper');
 const { scrapeTransferData } = require('../../transfer-scraper');
 const { scrapeAlumniData } = require('../../alumni-scraper');
 
@@ -25,7 +25,8 @@ async function refreshPostGameData() {
     try {
         await Promise.all([
             fetchScheduleData(),
-            scrapeCHNStats()
+            scrapeCHNStats(),
+            scrapeNCHCStandings()
         ]);
         console.log('[Scheduler] Post-game data refresh complete.');
     } catch (error) {

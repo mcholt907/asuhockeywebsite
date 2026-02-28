@@ -866,7 +866,7 @@ async function fetchAndCacheNCHCStandings(cacheKey) {
 
     console.log(`[NCHC Standings] Scraped ${teams.length} teams.`);
     if (teams.length > 0) {
-      await saveToCache(teams, cacheKey);
+      await saveToCache(teams, cacheKey, config.cache.standings);
     }
     return teams;
   } catch (error) {
