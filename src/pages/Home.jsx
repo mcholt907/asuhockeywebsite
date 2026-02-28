@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import UpcomingGames from '../components/UpcomingGames';
 import { getSchedule, getNews, getStandings } from '../services/api';
+import heroArenaImage from '../assets/ASU-Hockey-at-Mullett-Arena.jpg';
 import './Home.css';
 
 function Home() {
@@ -117,6 +118,13 @@ function Home() {
 
           {/* Left Panel — action photo + matchup text */}
           <div className="hero-left">
+            <img
+              src={heroArenaImage}
+              alt=""
+              aria-hidden="true"
+              fetchpriority="high"
+              className="hero-left-bg"
+            />
             <div className="hero-overlay" />
             <div className="hero-left-content">
               {nextGame && nextGame.date === today ? (
