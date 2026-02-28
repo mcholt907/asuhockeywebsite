@@ -36,8 +36,8 @@ module.exports = {
   // Cache durations (in milliseconds)
   cache: {
     news: parseInt(process.env.CACHE_DURATION_NEWS_MS) || 3 * 60 * 1000, // 3 minutes
-    schedule: parseInt(process.env.CACHE_DURATION_SCHEDULE_MS) || 24 * 60 * 60 * 1000, // 24 hours
-    stats: parseInt(process.env.CACHE_DURATION_STATS_MS) || 6 * 60 * 60 * 1000 // 6 hours
+    schedule: parseInt(process.env.CACHE_DURATION_SCHEDULE_MS) || 2 * 60 * 60 * 1000, // 2 hours
+    stats: parseInt(process.env.CACHE_DURATION_STATS_MS) || 2 * 60 * 60 * 1000 // 2 hours
   },
 
   // Season boundary logic

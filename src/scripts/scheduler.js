@@ -19,6 +19,20 @@ async function refreshFrequentData() {
     }
 }
 
+// Function to refresh Schedule & Stats only (post-game)
+async function refreshPostGameData() {
+    console.log('[Scheduler] Starting post-game data refresh (Schedule & Stats)...');
+    try {
+        await Promise.all([
+            fetchScheduleData(),
+            scrapeCHNStats()
+        ]);
+        console.log('[Scheduler] Post-game data refresh complete.');
+    } catch (error) {
+        console.error('[Scheduler] Error refreshing post-game data:', error);
+    }
+}
+
 // Function to refresh Roster & Alumni (Once Daily)
 async function refreshDailyData() {
     console.log('[Scheduler] Starting daily data refresh (Roster, Alumni, Transfers)...');
@@ -44,7 +58,14 @@ function startScheduler() {
         refreshFrequentData();
     });
 
-    // 2. Roster, Alumni, Transfers: 3:00 AM every day
+    // 2. Post-game refresh: hourly 2–6 AM UTC on Sat & Sun (covers Fri/Sat night AZ games ending ~4:30 AM UTC)
+    // Cron expression: 0 2,3,4,5,6 * * 6,0
+    cron.schedule('0 2,3,4,5,6 * * 6,0', () => {
+        console.log('[Cron] Triggering weekend post-game refresh (Schedule & Stats)...');
+        refreshPostGameData();
+    });
+
+    // 4. Roster, Alumni, Transfers: 3:00 AM every day
     // Cron expression: 0 3 * * *
     cron.schedule('0 3 * * *', () => {
         console.log('[Cron] Triggering 3:00 AM daily refresh...');
