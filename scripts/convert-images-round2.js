@@ -7,14 +7,14 @@ const jobs = [
   {
     input:  path.join(root, 'src/assets/ASU-Hockey-at-Mullett-Arena.jpg'),
     output: path.join(root, 'public/assets/hero-arena.webp'),
-    transform: s => s.resize(1400, 933).webp({ quality: 20 }),
-    label: 'hero-arena.webp (1400×933 q20)',
+    transform: s => s.resize(1400, 933).webp({ quality: 85 }),
+    label: 'hero-arena.webp (1400×933 q85)',
   },
   {
     input:  path.join(root, 'src/assets/ASU-Hockey-at-Mullett-Arena.jpg'),
     output: path.join(root, 'public/assets/hero-arena-mobile.webp'),
-    transform: s => s.resize(600, 400).webp({ quality: 30 }),
-    label: 'hero-arena-mobile.webp (600×400 q30)',
+    transform: s => s.resize(600, 400).webp({ quality: 85 }),
+    label: 'hero-arena-mobile.webp (600×400 q85)',
   },
   {
     input:  path.join(root, 'public/assets/asu-hockey-logo.png'),
