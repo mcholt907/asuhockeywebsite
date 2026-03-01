@@ -353,20 +353,22 @@ async function enrichScheduleWithCHNLinks(games) {
   return { games, npi, krach };
 }
 
-async function fetchScheduleData() {
+async function fetchScheduleData(forceRefresh = false) {
   const cacheKey = 'asu_hockey_schedule';
   const targetSeasonStartYear = config.seasons.current;
   const fullCacheKey = cacheKey + '_' + targetSeasonStartYear;
 
-  console.log(`[Cache System] Attempting to fetch schedule for season starting: ${targetSeasonStartYear}`);
+  console.log(`[Cache System] Attempting to fetch schedule for season starting: ${targetSeasonStartYear}${forceRefresh ? ' (force refresh)' : ''}`);
 
   try {
-    // 1. Try to get valid cache
-    const cachedData = getFromCache(fullCacheKey);
-    if (cachedData) {
-      console.log(`[Cache System] Schedule data found in cache for ${targetSeasonStartYear}. Returning cached data.`);
-      const normalised = Array.isArray(cachedData) ? { games: cachedData, team_record: null } : cachedData;
-      return normalised;
+    // 1. Try to get valid cache (skip if forceRefresh)
+    if (!forceRefresh) {
+      const cachedData = getFromCache(fullCacheKey);
+      if (cachedData) {
+        console.log(`[Cache System] Schedule data found in cache for ${targetSeasonStartYear}. Returning cached data.`);
+        const normalised = Array.isArray(cachedData) ? { games: cachedData, team_record: null } : cachedData;
+        return normalised;
+      }
     }
 
     // 2. Cache expired or missing. Try stale data for immediate response (SWR)
@@ -600,15 +602,17 @@ function parseStatsHtml($) {
   return stats;
 }
 
-async function scrapeCHNStats() {
+async function scrapeCHNStats(forceRefresh = false) {
   const STATS_CACHE_KEY = 'asu_hockey_stats';
 
-  // 1. Check cache first
+  // 1. Check cache first (skip if forceRefresh)
   try {
-    const cachedStats = getFromCache(STATS_CACHE_KEY);
-    if (cachedStats) {
-      console.log('[CHN Stats Scraper] Returning cached stats data.');
-      return cachedStats;
+    if (!forceRefresh) {
+      const cachedStats = getFromCache(STATS_CACHE_KEY);
+      if (cachedStats) {
+        console.log('[CHN Stats Scraper] Returning cached stats data.');
+        return cachedStats;
+      }
     }
 
     // 2. Cache expired or missing. Try stale data for immediate response (SWR)
@@ -875,14 +879,16 @@ async function fetchAndCacheNCHCStandings(cacheKey) {
   }
 }
 
-async function scrapeNCHCStandings() {
+async function scrapeNCHCStandings(forceRefresh = false) {
   const STANDINGS_CACHE_KEY = 'nchc_standings';
 
   try {
-    const cached = getFromCache(STANDINGS_CACHE_KEY);
-    if (cached) {
-      console.log('[NCHC Standings] Returning cached data.');
-      return cached;
+    if (!forceRefresh) {
+      const cached = getFromCache(STANDINGS_CACHE_KEY);
+      if (cached) {
+        console.log('[NCHC Standings] Returning cached data.');
+        return cached;
+      }
     }
 
     const stale = getFromCache(STANDINGS_CACHE_KEY, true);

@@ -25,9 +25,9 @@ async function refreshPostGameData() {
     try {
         await Promise.all([
             fetchNewsData(),
-            fetchScheduleData(),
-            scrapeCHNStats(),
-            scrapeNCHCStandings()
+            fetchScheduleData(true),      // forceRefresh — bypass valid cache so post-game results are scraped immediately
+            scrapeCHNStats(true),          // forceRefresh
+            scrapeNCHCStandings(true)      // forceRefresh
         ]);
         console.log('[Scheduler] Post-game data refresh complete.');
     } catch (error) {
