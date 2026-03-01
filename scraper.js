@@ -815,10 +815,9 @@ async function fetchAndCacheNCHCStandings(cacheKey) {
     }
 
     const teams = nchcRows.map((row, i) => {
-      // Team name includes ranking prefix (e.g. "3 North Dakota") — split it off
-      const match = row.team.match(/^(\d+)\s+(.+)$/);
-      const rank = match ? match[1] : String(i + 1);
-      const team = match ? match[2] : row.team;
+      // Team name may include a national ranking prefix (e.g. "3 North Dakota") — strip it
+      const team = row.team.replace(/^\d+\s+/, '');
+      const rank = String(i + 1); // conference standing position, not national rank
 
       return {
         rank,
