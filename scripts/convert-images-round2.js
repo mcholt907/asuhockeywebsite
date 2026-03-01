@@ -35,6 +35,6 @@ jobs.forEach(({ input, output, transform, label }) => {
     } else {
       console.log(`OK     ${label} — ${(info.size / 1024).toFixed(1)} KiB`);
     }
-    if (--pending === 0 && failed) process.exit(1);
+    if (--pending === 0) process.exit(failed ? 1 : 0);
   });
 });
