@@ -803,69 +803,31 @@ async function fetchAndCacheNCHCStandings(cacheKey) {
     const { data } = await requestWithRetry(url);
     const $ = cheerio.load(data);
 
-    let nchcTable = null;
+    const raw = $('#app').attr('data-page');
+    if (!raw) throw new Error('No data-page attribute found on #app');
+    const page = JSON.parse(raw);
 
-    // Strategy 1: Find the table whose first <tr> text is exactly "NCHC"
-    // (CHN renders each conference block as a table with its name in row 0)
-    $('table').each((_, table) => {
-      if (nchcTable) return;
-      const firstRowText = $(table).find('tr').first().text().trim();
-      if (firstRowText === 'NCHC') {
-        nchcTable = $(table);
-      }
-    });
-
-    // Strategy 2: Find a table containing multiple NCHC team names
-    if (!nchcTable || !nchcTable.length) {
-      $('table').each((_, table) => {
-        if (nchcTable) return;
-        const text = $(table).text();
-        let matchCount = 0;
-        NCHC_TEAM_NAMES.forEach(t => { if (text.includes(t)) matchCount++; });
-        if (matchCount >= 3) nchcTable = $(table);
-      });
-    }
-
-    if (!nchcTable || !nchcTable.length) {
-      console.error('[NCHC Standings] Could not find NCHC standings table');
+    // NCHC conference code on USCHO is "nt"
+    const nchcRows = page.props.content.data['nt'];
+    if (!nchcRows || !nchcRows.length) {
+      console.error('[NCHC Standings] No NCHC data found in USCHO response');
       return [];
     }
 
-    const teams = [];
-    nchcTable.find('tbody tr').each((i, tr) => {
-      const cells = $(tr).find('td');
-      if (cells.length < 10) return;
+    const teams = nchcRows.map((row, i) => {
+      // Team name includes ranking prefix (e.g. "3 North Dakota") — split it off
+      const match = row.team.match(/^(\d+)\s+(.+)$/);
+      const rank = match ? match[1] : String(i + 1);
+      const team = match ? match[2] : row.team;
 
-      // CHN column layout (0-indexed):
-      // 0: rank, 1: team (anchor), 2: confGP, 3: pts, 4: pt%,
-      // 5: confRW, 6: confRL, 7: confOW, 8: confOL,
-      // 9: (empty separator), 10: overallGP, 11: W, 12: L, 13: T/OTL, ...
-      const rank = $(cells[0]).text().trim();
-      const teamAnchor = $(cells[1]).find('a');
-      const team = teamAnchor.length ? teamAnchor.text().trim() : $(cells[1]).text().trim();
-      if (!team) return;
-
-      const pts = $(cells[3]).text().trim();
-      const confRW = parseInt($(cells[5]).text().trim()) || 0;
-      const confRL = parseInt($(cells[6]).text().trim()) || 0;
-      const confOW = parseInt($(cells[7]).text().trim()) || 0;
-      const confOL = parseInt($(cells[8]).text().trim()) || 0;
-      const overallW = $(cells[11]).text().trim();
-      const overallL = $(cells[12]).text().trim();
-      const overallT = $(cells[13]).text().trim();
-
-      const confW = confRW + confOW;
-      const confRecord = `${confW}-${confRL}-${confOL}`;
-      const overallRecord = `${overallW}-${overallL}-${overallT}`;
-
-      teams.push({
-        rank: rank || String(i + 1),
+      return {
+        rank,
         team,
-        pts,
-        confRecord,
-        overallRecord,
+        pts: String(row.pts),
+        confRecord: row['conf-w-l-t'],
+        overallRecord: row['w-l-t'],
         isASU: team.toLowerCase().includes('arizona'),
-      });
+      };
     });
 
     console.log(`[NCHC Standings] Scraped ${teams.length} teams.`);
