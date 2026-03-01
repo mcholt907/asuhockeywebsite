@@ -11,7 +11,8 @@ async function refreshFrequentData() {
         await Promise.all([
             fetchNewsData(),
             fetchScheduleData(),
-            scrapeCHNStats() // Stats change frequently too
+            scrapeCHNStats(),
+            scrapeNCHCStandings()
         ]);
         console.log('[Scheduler] Frequent data refresh complete.');
     } catch (error) {
