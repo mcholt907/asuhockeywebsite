@@ -43,12 +43,14 @@
   background: #0f0305;
 }
 
-/* ::before now only applies the vignette mask — background image is handled
-   by the .hero-left-bg <img> element for fetchpriority=high LCP optimization */
-.hero-left::before {
-  content: '';
+.hero-left-bg {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
   /* Soft vignette — dissolves photo edges into surrounding dark card */
   mask-image:
     linear-gradient(to right,  black 70%, transparent 98%),
@@ -62,17 +64,6 @@
     linear-gradient(to top,    black 94%, transparent 100%),
     linear-gradient(to left,   black 94%, transparent 100%);
   -webkit-mask-composite: source-in;
-  z-index: 0;
-}
-
-.hero-left-bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  z-index: 0;
 }
 
 .hero-overlay {
