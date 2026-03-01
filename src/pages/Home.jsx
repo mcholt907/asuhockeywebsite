@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import UpcomingGames from '../components/UpcomingGames';
 import { getSchedule, getNews, getStandings } from '../services/api';
-import heroArenaImage from '../assets/ASU-Hockey-at-Mullett-Arena.jpg';
 import './Home.css';
 
 function Home() {
@@ -119,7 +118,9 @@ function Home() {
           {/* Left Panel — action photo + matchup text */}
           <div className="hero-left">
             <img
-              src={heroArenaImage}
+              src="/assets/hero-arena.webp"
+              srcSet="/assets/hero-arena-mobile.webp 600w, /assets/hero-arena.webp 1400w"
+              sizes="(max-width: 900px) 100vw, 60vw"
               alt=""
               aria-hidden="true"
               fetchpriority="high"

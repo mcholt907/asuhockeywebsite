@@ -46,7 +46,7 @@ function AppInner() {
         <header>
           <div className="header-container">
             <div className="logo">
-              <img src="/assets/asu-hockey-logo.png" alt="ASU Hockey" width="253" height="500" />
+              <img src="/assets/asu-hockey-logo.webp" alt="ASU Hockey" width="67" height="130" />
             </div>
 
             <button className="mobile-menu-btn" onClick={toggleMenu} aria-label="Toggle Menu">
