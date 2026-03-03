@@ -40,7 +40,7 @@ function News() {
     if (source.includes('TheSunDevils')) return 'Official';
     if (source.includes('CollegeHockeyNews')) return 'CHN';
     if (source.includes('USCHO')) return 'USCHO';
-    return 'Other';
+    return source; // show actual source name for manual/other articles
   };
 
   const filteredArticles = filter === 'All'
@@ -119,9 +119,7 @@ function News() {
                     <span className="hero-eyebrow">Featured Story</span>
                     <h2>{heroArticle.title}</h2>
                     <div className="hero-footer">
-                      {getSourceType(heroArticle.source) !== 'Other' && (
-                        <span className="hero-source">{getSourceType(heroArticle.source)}</span>
-                      )}
+                      <span className="hero-source">{getSourceType(heroArticle.source)}</span>
                       <span className="meta-sep">·</span>
                       <span className="hero-date">{heroArticle.date}</span>
                       <span className="read-more">Read Full Story →</span>
@@ -138,9 +136,7 @@ function News() {
                 {/* Asymmetric magazine row */}
                 <div className="magazine-row">
                   <a href={wideCard.link} target="_blank" rel="noopener noreferrer" className="news-card news-card-wide">
-                    {getSourceType(wideCard.source) !== 'Other' && (
-                      <span className="news-card-source">{getSourceType(wideCard.source)}</span>
-                    )}
+                    <span className="news-card-source">{getSourceType(wideCard.source)}</span>
                     <h3 className="news-card-title news-card-title-wide">{wideCard.title}</h3>
                     <span className="news-card-date">{wideCard.date}</span>
                   </a>
@@ -148,9 +144,7 @@ function News() {
                     <div className="stacked-cards">
                       {stackedCards.map((article) => (
                         <a key={article.link} href={article.link} target="_blank" rel="noopener noreferrer" className="news-card news-card-compact">
-                          {getSourceType(article.source) !== 'Other' && (
-                            <span className="news-card-source">{getSourceType(article.source)}</span>
-                          )}
+                          <span className="news-card-source">{getSourceType(article.source)}</span>
                           <h3 className="news-card-title">{article.title}</h3>
                           <span className="news-card-date">{article.date}</span>
                         </a>
@@ -164,9 +158,7 @@ function News() {
                   <div className="compact-grid">
                     {gridCards.map((article) => (
                       <a key={article.link} href={article.link} target="_blank" rel="noopener noreferrer" className="news-card news-card-compact">
-                        {getSourceType(article.source) !== 'Other' && (
-                          <span className="news-card-source">{getSourceType(article.source)}</span>
-                        )}
+                        <span className="news-card-source">{getSourceType(article.source)}</span>
                         <h3 className="news-card-title">{article.title}</h3>
                         <span className="news-card-date">{article.date}</span>
                       </a>
@@ -174,27 +166,25 @@ function News() {
                   </div>
                 )}
 
-                {/* Older stories list */}
-                {listArticles.length > 0 && (
-                  <>
-                    <div className="headlines-header">
-                      <h2 className="headlines-title">Older Stories</h2>
-                    </div>
-                    <div className="articles-feed">
-                      {listArticles.map((article) => (
-                        <a key={article.link} href={article.link} target="_blank" rel="noopener noreferrer" className="feed-item">
-                          <span className="feed-date">{article.date}</span>
-                          <span className="feed-divider" aria-hidden="true" />
-                          <span className="feed-title">{article.title}</span>
-                          {getSourceType(article.source) !== 'Other' && (
-                            <span className="feed-source">{getSourceType(article.source)}</span>
-                          )}
-                        </a>
-                      ))}
-                    </div>
-                  </>
-                )}
+              </section>
+            )}
 
+            {/* Older Stories — separate container so maroon background shows between sections */}
+            {listArticles.length > 0 && (
+              <section className="older-stories-section fade-in-delay-1">
+                <div className="headlines-header">
+                  <h2 className="headlines-title">Older Stories</h2>
+                </div>
+                <div className="articles-feed">
+                  {listArticles.map((article) => (
+                    <a key={article.link} href={article.link} target="_blank" rel="noopener noreferrer" className="feed-item">
+                      <span className="feed-date">{article.date}</span>
+                      <span className="feed-divider" aria-hidden="true" />
+                      <span className="feed-title">{article.title}</span>
+                      <span className="feed-source">{getSourceType(article.source)}</span>
+                    </a>
+                  ))}
+                </div>
               </section>
             )}
 

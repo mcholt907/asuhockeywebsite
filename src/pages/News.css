@@ -308,6 +308,17 @@
   }
 }
 
+/* --- Older Stories (separate dark container, gap shows maroon bg between sections) --- */
+.older-stories-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: #0f0105;
+  border-radius: var(--border-radius-lg);
+  padding: 28px 32px;
+  box-shadow: var(--shadow-2xl);
+}
+
 /* --- Magazine Row Layout --- */
 .magazine-row {
   display: grid;
@@ -353,7 +364,6 @@
 .news-card-wide {
   padding: 24px;
   gap: 12px;
-  justify-content: space-between;
 }
 
 /* Source label — matches home's .right-news-source */
@@ -367,18 +377,17 @@
 
 /* Title */
 .news-card-title {
-  font-size: 0.88rem;
+  font-size: 0.93rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.88);
   line-height: 1.4;
   margin: 0;
-  flex-grow: 1;
 }
 
 .news-card-title-wide {
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 700;
-  line-height: 1.3;
+  line-height: 1.35;
 }
 
 /* Date */
@@ -417,7 +426,8 @@
     font-size: 1.5rem;
   }
 
-  .articles-section {
+  .articles-section,
+  .older-stories-section {
     padding: 20px 16px;
   }
 
