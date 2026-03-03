@@ -360,10 +360,21 @@
   background: rgba(255, 255, 255, 0.08);
 }
 
-/* Wide card gets more padding and larger title treatment */
+/* Wide card — background image injected via inline style in JSX (avoids webpack url() resolution) */
 .news-card-wide {
   padding: 24px;
   gap: 12px;
+  background-size: cover;
+  background-position: center 40%;
+  border-top-color: var(--asu-gold);
+  transition: border-top-color 0.15s; /* override base: exclude background to prevent size transition zoom */
+}
+
+/* Restore bg props that the base .news-card:hover shorthand would reset */
+.news-card-wide:hover {
+  background-size: cover;
+  background-position: center 40%;
+  background-color: transparent;
 }
 
 /* Source label — matches home's .right-news-source */
@@ -388,6 +399,8 @@
   font-size: 1.1rem;
   font-weight: 700;
   line-height: 1.35;
+  color: white;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
 }
 
 /* Date */
