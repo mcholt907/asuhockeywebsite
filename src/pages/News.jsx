@@ -47,8 +47,11 @@ function News() {
     ? articles
     : articles.filter(a => getSourceType(a.source) === filter);
 
-  const heroArticle = filteredArticles[0];
-  const remainingArticles = filteredArticles.slice(1);
+  const heroArticle    = filteredArticles[0];
+  const wideCard       = filteredArticles[1];
+  const stackedCards   = filteredArticles.slice(2, 4);
+  const gridCards      = filteredArticles.slice(4, 7);
+  const listArticles   = filteredArticles.slice(7);
 
   if (loading) {
     return <div className="news-page"><div className="news-content"><p className="loading-message">Loading news...</p></div></div>;
@@ -81,72 +84,123 @@ function News() {
           })
         }}
       />
-    <div className="news-content">
+      <div className="news-content">
 
-      {/* Filters */}
-      <div className="news-filters">
-        {['All', 'Official', 'CHN'].map(f => (
-          <button
-            key={f}
-            className={`filter-btn ${filter === f ? 'active' : ''}`}
-            onClick={() => setFilter(f)}
-          >
-            {f === 'All' ? 'All News' : f}
-          </button>
-        ))}
-      </div>
-
-      {filteredArticles.length === 0 ? (
-        <p className="no-news-message">No news articles found for this category.</p>
-      ) : (
-        <div className="news-layout">
-
-          {/* Featured Story */}
-          {heroArticle && (
-            <section className="news-hero fade-in">
-              <a href={heroArticle.link} target="_blank" rel="noopener noreferrer" className="hero-card">
-                <div className="hero-bg-pattern"></div>
-                <div className="hero-content">
-                  <span className="hero-eyebrow">FEATURED STORY</span>
-                  <h2>{heroArticle.title}</h2>
-                  <div className="hero-footer">
-                    <span className="hero-source">{getSourceType(heroArticle.source)}</span>
-                    <span className="meta-sep">•</span>
-                    <span className="hero-date">{heroArticle.date}</span>
-                    <span className="read-more">READ FULL STORY →</span>
-                  </div>
-                </div>
-              </a>
-            </section>
-          )}
-
-          {/* Latest Headlines */}
-          {remainingArticles.length > 0 && (
-            <section className="articles-section fade-in-delay-1">
-              <div className="headlines-header">
-                <h2 className="headlines-title">
-                  LATEST <span className="headlines-gold">HEADLINES</span>
-                </h2>
-              </div>
-              <div className="articles-grid">
-                {remainingArticles.map((article, idx) => (
-                  <a key={idx} href={article.link} target="_blank" rel="noopener noreferrer" className="article-card">
-                    <div className="article-meta">
-                      <span className="article-source">{getSourceType(article.source)}</span>
-                      <span className="meta-sep">•</span>
-                      <span className="article-date">{article.date}</span>
-                    </div>
-                    <h3 className="article-title">{article.title}</h3>
-                    <span className="article-read">READ STORY →</span>
-                  </a>
-                ))}
-              </div>
-            </section>
-          )}
-
+        {/* Page Header */}
+        <div className="news-header">
+          <p className="news-header-eyebrow">ASU Hockey</p>
+          <h1 className="news-header-title">News</h1>
+          <div className="news-header-rule" />
         </div>
-      )}
-    </div>
+
+        {/* Filters */}
+        <div className="news-filters">
+          {['All', 'Official', 'CHN'].map(f => (
+            <button
+              key={f}
+              className={`filter-btn ${filter === f ? 'active' : ''}`}
+              onClick={() => setFilter(f)}
+            >
+              {f === 'All' ? 'All News' : f}
+            </button>
+          ))}
+        </div>
+
+        {filteredArticles.length === 0 ? (
+          <p className="no-news-message">No news articles found for this category.</p>
+        ) : (
+          <div className="news-layout">
+
+            {/* Featured Story */}
+            {heroArticle && (
+              <section className="news-hero fade-in">
+                <a href={heroArticle.link} target="_blank" rel="noopener noreferrer" className="hero-card">
+                  <div className="hero-content">
+                    <span className="hero-eyebrow">Featured Story</span>
+                    <h2>{heroArticle.title}</h2>
+                    <div className="hero-footer">
+                      {getSourceType(heroArticle.source) !== 'Other' && (
+                        <span className="hero-source">{getSourceType(heroArticle.source)}</span>
+                      )}
+                      <span className="meta-sep">·</span>
+                      <span className="hero-date">{heroArticle.date}</span>
+                      <span className="read-more">Read Full Story →</span>
+                    </div>
+                  </div>
+                </a>
+              </section>
+            )}
+
+            {/* Magazine Row — wide card + 2 stacked cards */}
+            {wideCard && (
+              <section className="articles-section fade-in-delay-1">
+
+                {/* Asymmetric magazine row */}
+                <div className="magazine-row">
+                  <a href={wideCard.link} target="_blank" rel="noopener noreferrer" className="news-card news-card-wide">
+                    {getSourceType(wideCard.source) !== 'Other' && (
+                      <span className="news-card-source">{getSourceType(wideCard.source)}</span>
+                    )}
+                    <h3 className="news-card-title news-card-title-wide">{wideCard.title}</h3>
+                    <span className="news-card-date">{wideCard.date}</span>
+                  </a>
+                  {stackedCards.length > 0 && (
+                    <div className="stacked-cards">
+                      {stackedCards.map((article) => (
+                        <a key={article.link} href={article.link} target="_blank" rel="noopener noreferrer" className="news-card news-card-compact">
+                          {getSourceType(article.source) !== 'Other' && (
+                            <span className="news-card-source">{getSourceType(article.source)}</span>
+                          )}
+                          <h3 className="news-card-title">{article.title}</h3>
+                          <span className="news-card-date">{article.date}</span>
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* 3-column compact grid */}
+                {gridCards.length > 0 && (
+                  <div className="compact-grid">
+                    {gridCards.map((article) => (
+                      <a key={article.link} href={article.link} target="_blank" rel="noopener noreferrer" className="news-card news-card-compact">
+                        {getSourceType(article.source) !== 'Other' && (
+                          <span className="news-card-source">{getSourceType(article.source)}</span>
+                        )}
+                        <h3 className="news-card-title">{article.title}</h3>
+                        <span className="news-card-date">{article.date}</span>
+                      </a>
+                    ))}
+                  </div>
+                )}
+
+                {/* Older stories list */}
+                {listArticles.length > 0 && (
+                  <>
+                    <div className="headlines-header">
+                      <h2 className="headlines-title">Older Stories</h2>
+                    </div>
+                    <div className="articles-feed">
+                      {listArticles.map((article) => (
+                        <a key={article.link} href={article.link} target="_blank" rel="noopener noreferrer" className="feed-item">
+                          <span className="feed-date">{article.date}</span>
+                          <span className="feed-divider" aria-hidden="true" />
+                          <span className="feed-title">{article.title}</span>
+                          {getSourceType(article.source) !== 'Other' && (
+                            <span className="feed-source">{getSourceType(article.source)}</span>
+                          )}
+                        </a>
+                      ))}
+                    </div>
+                  </>
+                )}
+
+              </section>
+            )}
+
+          </div>
+        )}
+      </div>
     </div>
   );
 }

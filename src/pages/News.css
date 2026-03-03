@@ -9,48 +9,74 @@
 .news-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 24px;
+  padding: 48px 24px 64px;
+}
+
+/* --- Page Header --- */
+.news-header {
+  padding: 0 0 40px 0;
+}
+
+.news-header-eyebrow {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--asu-gold);
+  text-transform: uppercase;
+  margin: 0 0 8px;
+}
+
+.news-header-title {
+  font-size: 3rem;
+  font-weight: 900;
+  color: white;
+  margin: 0 0 20px;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.news-header-rule {
+  height: 2px;
+  background: linear-gradient(to right, var(--asu-gold) 0%, rgba(232, 168, 51, 0.3) 40%, transparent 80%);
 }
 
 /* --- Filters --- */
 .news-filters {
   display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 36px;
+  gap: 10px;
+  margin-bottom: 40px;
   flex-wrap: wrap;
 }
 
 .filter-btn {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: rgba(255, 255, 255, 0.7);
-  padding: 8px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.55);
+  padding: 7px 18px;
   border-radius: 30px;
   cursor: pointer;
   font-family: inherit;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   transition: all 0.2s ease;
 }
 
 .filter-btn:hover {
-  border-color: var(--asu-gold);
-  color: var(--asu-gold);
+  border-color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .filter-btn.active {
   background-color: var(--asu-gold);
   border-color: var(--asu-gold);
   color: var(--asu-maroon);
-  box-shadow: var(--shadow-sm);
 }
 
 /* --- Layout --- */
 .news-layout {
   display: flex;
   flex-direction: column;
-  gap: 36px;
+  gap: 48px;
 }
 
 /* --- Hero / Featured Story --- */
@@ -58,67 +84,50 @@
   width: 100%;
 }
 
+/* Fix 1: Content-driven height, content flows from top */
 .hero-card {
   display: block;
   position: relative;
   width: 100%;
-  min-height: 200px;
   border-radius: var(--border-radius-lg);
   overflow: hidden;
   text-decoration: none;
-  background-color: #1a0810;
-  border-top: 2px solid rgba(232, 168, 51, 0.5);
+  background: #0f0105;
+  border-left: 4px solid var(--asu-gold);
   box-shadow: var(--shadow-lg);
-  transition: border-top-color 0.2s ease;
   color: white;
+  transition: box-shadow 0.2s ease;
 }
 
 .hero-card:hover {
-  border-top-color: var(--asu-gold);
-}
-
-.hero-bg-pattern {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background:
-    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.02) 0px, rgba(255, 255, 255, 0.02) 1px, transparent 1px, transparent 10px),
-    repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.015) 0px, rgba(255, 255, 255, 0.015) 1px, transparent 1px, transparent 15px),
-    linear-gradient(135deg, rgba(232, 168, 51, 0.22) 0%, rgba(0, 0, 0, 0.55) 65%);
-  z-index: 1;
+  box-shadow: var(--shadow-2xl), 0 0 0 1px rgba(232, 168, 51, 0.15);
 }
 
 .hero-content {
   position: relative;
-  z-index: 2;
-  min-height: 200px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  padding: 24px 28px;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.45) 55%, transparent 100%);
+  justify-content: flex-start;
+  padding: 36px 40px 32px;
 }
 
 .hero-eyebrow {
   font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   color: var(--asu-gold);
-  margin-bottom: 10px;
+  margin-bottom: 14px;
 }
 
 .hero-content h2 {
-  font-size: 1.6rem;
+  font-size: 2.2rem;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.01em;
-  margin: 0 0 14px 0;
-  line-height: 1.2;
+  text-transform: none;
+  letter-spacing: -0.01em;
+  margin: 0 0 24px 0;
+  line-height: 1.25;
   color: white;
-  max-width: 85%;
 }
 
 .hero-footer {
@@ -128,26 +137,31 @@
   flex-wrap: wrap;
 }
 
+/* Fix 3: Plain gold source text — matches home's .right-news-source */
 .hero-source {
-  font-size: 0.72rem;
+  font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--asu-gold);
 }
 
 .hero-date {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .read-more {
   margin-left: auto;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.6);
+  transition: color 0.15s;
+}
+
+.hero-card:hover .read-more {
   color: var(--asu-gold);
 }
 
@@ -157,13 +171,14 @@
 }
 
 /* --- Latest Headlines --- */
+/* Fix 5: Dark card container matching home's #0f0105 areas */
 .articles-section {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  background: #0f0305;
+  background: #0f0105;
   border-radius: var(--border-radius-lg);
-  padding: 28px 28px 24px;
+  padding: 28px 32px;
   box-shadow: var(--shadow-2xl);
 }
 
@@ -171,99 +186,104 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.headlines-header::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.12);
-}
-
+/* Fix 2: Match home's .right-section-title — small gold uppercase */
 .headlines-title {
-  font-size: 1.1rem;
-  font-weight: 800;
+  font-size: 0.7rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: white;
+  letter-spacing: 0.14em;
+  color: var(--asu-gold);
   margin: 0;
   white-space: nowrap;
 }
 
-.headlines-gold {
-  color: var(--asu-gold);
-}
-
-/* --- Article Cards Grid --- */
-.articles-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-  gap: 14px;
-}
-
-.article-card {
+/* --- Article Feed --- */
+.articles-feed {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  text-decoration: none;
-  padding: 16px 18px;
-  border-radius: 6px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.03) 100%);
-  border-top: 2px solid rgba(232, 168, 51, 0.5);
-  transition: border-top-color 0.15s, background 0.15s;
 }
 
-.article-card:hover {
-  border-top-color: var(--asu-gold);
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.article-meta {
-  display: flex;
+/* Fix 4: Wider date column (130px) to fit "February 27, 2026" */
+.feed-item {
+  display: grid;
+  grid-template-columns: 130px 1px 1fr auto;
   align-items: center;
-  gap: 8px;
+  gap: 0 20px;
+  padding: 18px 8px;
+  margin: 0 -8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background 0.15s;
 }
 
-.article-source {
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--asu-gold);
+.feed-item:last-child {
+  border-bottom: none;
 }
 
-.article-date {
+.feed-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.feed-date {
   font-size: 0.7rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.4);
-}
-
-.article-title {
-  font-size: 0.95rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.01em;
-  line-height: 1.35;
-  color: rgba(255, 255, 255, 0.88);
-  margin: 0;
-}
-
-.article-card:hover .article-title {
-  color: white;
-}
-
-.article-read {
-  font-size: 0.68rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.35);
-  margin-top: 2px;
+  color: rgba(255, 255, 255, 0.45);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
   transition: color 0.15s;
 }
 
-.article-card:hover .article-read {
+.feed-item:hover .feed-date {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.feed-divider {
+  display: block;
+  width: 1px;
+  align-self: stretch;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.feed-title {
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.45;
+  transition: color 0.15s;
+}
+
+.feed-item:hover .feed-title {
+  color: white;
+}
+
+/* Fix 3: Plain gold source text — matches home's .right-news-source */
+.feed-source {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   color: var(--asu-gold);
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+
+.feed-item:hover .feed-source {
+  opacity: 0.85;
+}
+
+/* --- State Messages --- */
+.loading-message,
+.error-message,
+.no-news-message {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.5);
 }
 
 /* --- Animations --- */
@@ -278,26 +298,168 @@
 }
 
 @keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
+/* --- Magazine Row Layout --- */
+.magazine-row {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.stacked-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* --- Compact Grid (3 columns) --- */
+.compact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+/* --- News Card Base (matches home's right-news-card / news-row-card) --- */
+.news-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.03) 100%);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 2px solid rgba(232, 168, 51, 0.5);
+  text-decoration: none;
+  color: white;
+  transition: border-top-color 0.15s, background 0.15s;
+}
+
+.news-card:hover {
+  border-top-color: var(--asu-gold);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Wide card gets more padding and larger title treatment */
+.news-card-wide {
+  padding: 24px;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+/* Source label — matches home's .right-news-source */
+.news-card-source {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--asu-gold);
+}
+
+/* Title */
+.news-card-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.4;
+  margin: 0;
+  flex-grow: 1;
+}
+
+.news-card-title-wide {
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+/* Date */
+.news-card-date {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.38);
+  margin-top: auto;
+}
+
+.news-card:hover .news-card-title {
+  color: white;
+}
+
 /* --- Responsive --- */
 @media (max-width: 768px) {
-  .hero-content h2 {
-    font-size: 1.3rem;
-    max-width: 100%;
+  .news-content {
+    padding: 32px 16px 48px;
   }
 
-  .articles-grid {
-    grid-template-columns: 1fr;
+  .news-header-title {
+    font-size: 2.2rem;
   }
 
   .news-filters {
     overflow-x: auto;
-    justify-content: flex-start;
-    padding-bottom: 10px;
+    padding-bottom: 4px;
+    margin-bottom: 32px;
+  }
+
+  .hero-content {
+    padding: 24px 20px;
+  }
+
+  .hero-content h2 {
+    font-size: 1.5rem;
+  }
+
+  .articles-section {
+    padding: 20px 16px;
+  }
+
+  .feed-item {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    gap: 6px 12px;
+    padding: 14px 8px;
+  }
+
+  .feed-date {
+    display: none;
+  }
+
+  .feed-divider {
+    display: none;
+  }
+
+  .feed-title {
+    grid-column: 1;
+    font-size: 0.95rem;
+  }
+
+  .feed-source {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: start;
+  }
+
+  .magazine-row {
+    grid-template-columns: 1fr;
+  }
+
+  .compact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .news-card-wide {
+    padding: 16px;
+  }
+
+  .news-card-title-wide {
+    font-size: 1rem;
   }
 }
