@@ -355,73 +355,8 @@ footer {
 }
 
 /* Media Queries */
-/* --- Mobile Menu ("The Locker Room") --- */
-.mobile-menu-btn {
-  display: none;
-  background: none;
-  border: none;
-  cursor: pointer;
-  z-index: 1000;
-  padding: 10px;
-}
-
-.hamburger-box {
-  width: 30px;
-  height: 24px;
-  display: inline-block;
-  position: relative;
-}
-
-.hamburger-inner {
-  display: block;
-  top: 50%;
-  margin-top: -2px;
-}
-
-.hamburger-inner,
-.hamburger-inner::before,
-.hamburger-inner::after {
-  width: 30px;
-  height: 2px;
-  background-color: var(--white);
-  border-radius: 4px;
-  position: absolute;
-  transition-property: transform;
-  transition-duration: 0.15s;
-  transition-timing-function: ease;
-}
-
-.hamburger-inner::before,
-.hamburger-inner::after {
-  content: "";
-  display: block;
-}
-
-.hamburger-inner::before {
-  top: -10px;
-}
-
-.hamburger-inner::after {
-  bottom: -10px;
-}
-
-/* Menu Open State (Hamburger Animation) */
-.menu-open .hamburger-inner {
-  background-color: transparent;
-}
-
-.menu-open .hamburger-inner::before {
-  top: 0;
-  transform: rotate(45deg);
-}
-
-.menu-open .hamburger-inner::after {
-  bottom: 0;
-  transform: rotate(-45deg);
-}
-
-/* Mobile Nav Overlay */
-@media (max-width: 900px) {
+/* --- Responsive Header (bottom nav handles navigation below 1100px) --- */
+@media (max-width: 1099px) {
   :root {
     --header-height: 60px;
   }
@@ -438,78 +373,9 @@ footer {
     font-size: 1rem;
   }
 
-  .mobile-menu-btn {
-    display: block;
-  }
-
   .main-nav {
     display: none;
   }
-
-  .main-nav.open {
-    display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    pointer-events: auto;
-    z-index: 900;
-  }
-
-  .nav-overlay-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, var(--asu-maroon) 0%, #4a0d20 100%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  .main-nav.open .nav-overlay-bg {
-    opacity: 0.98;
-  }
-
-  .main-nav ul {
-    position: relative;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    gap: 30px;
-    padding: 0;
-  }
-
-  .main-nav li {
-    opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.3s ease;
-  }
-
-  .main-nav.open li {
-    opacity: 1;
-    transform: translateY(0);
-    transition-delay: calc(0.05s * var(--i));
-  }
-
-  .main-nav a {
-    font-size: 2.5rem;
-    font-weight: 800;
-    color: var(--white);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 10px;
-  }
-
-  .main-nav a.active {
-    color: var(--asu-gold);
-    border-bottom: none;
-    background: none;
-  }
-
-  /* Disable body scroll when menu open if needed, handled by JS usually but basic overlay works */
 }
 
 /* --- Modern Utilities & Animations --- */

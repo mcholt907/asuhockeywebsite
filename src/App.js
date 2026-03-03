@@ -1,5 +1,4 @@
 // App.jsx
-import { useState } from 'react';
 import { BrowserRouter, Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import './App.css';
 
@@ -19,12 +18,7 @@ import GlobalNotificationBanner from './components/GlobalNotificationBanner';
 import MobileBottomNav from './components/MobileBottomNav';
 
 function AppInner() {
-  const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
-
-  const toggleMenu = () => setMenuOpen(!menuOpen);
-  const closeMenu = () => setMenuOpen(false);
-
   const isHome = location.pathname === '/';
 
   return (
@@ -42,33 +36,22 @@ function AppInner() {
           })
         }}
       />
-      <div className={`app ${menuOpen ? 'menu-open' : ''}`}>
+      <div className="app">
         <header>
           <div className="header-container">
             <div className="logo">
               <img src="/assets/asu-hockey-logo.webp" alt="ASU Hockey" width="67" height="130" />
             </div>
 
-            <button className="mobile-menu-btn" onClick={toggleMenu} aria-label="Toggle Menu">
-              <span className="hamburger-box">
-                <span className="hamburger-inner"></span>
-              </span>
-            </button>
-
-            <nav className={`main-nav ${menuOpen ? 'open' : ''}`}>
-              <div className="nav-overlay-bg"></div>
+            <nav className="main-nav">
               <ul>
-                <li style={{ '--i': 1 }}><NavLink to="/" onClick={closeMenu}>Home</NavLink></li>
-                <li style={{ '--i': 2 }}><NavLink to="/news" onClick={closeMenu}>News</NavLink></li>
-                <li style={{ '--i': 3 }}><NavLink to="/schedule" onClick={closeMenu}>Schedule</NavLink></li>
-                <li style={{ '--i': 4 }}><NavLink to="/roster" onClick={closeMenu}>Roster</NavLink></li>
-                <li style={{ '--i': 5 }}><NavLink to="/stats" onClick={closeMenu}>Stats</NavLink></li>
-                <li style={{ '--i': 6 }}><NavLink to="/recruiting" onClick={closeMenu}>Recruiting</NavLink></li>
-                <li style={{ '--i': 7 }}><NavLink to="/alumni" onClick={closeMenu}>Where Are They Now?</NavLink></li>
-                {/* Hidden for now
-                <li style={{ '--i': 8 }}><NavLink to="/about" onClick={closeMenu}>About</NavLink></li>
-                <li style={{ '--i': 9 }}><NavLink to="/contact" onClick={closeMenu}>Contact</NavLink></li>
-                */}
+                <li><NavLink to="/">Home</NavLink></li>
+                <li><NavLink to="/news">News</NavLink></li>
+                <li><NavLink to="/schedule">Schedule</NavLink></li>
+                <li><NavLink to="/roster">Roster</NavLink></li>
+                <li><NavLink to="/stats">Stats</NavLink></li>
+                <li><NavLink to="/recruiting">Recruiting</NavLink></li>
+                <li><NavLink to="/alumni">Where Are They Now?</NavLink></li>
               </ul>
             </nav>
           </div>
