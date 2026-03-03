@@ -118,8 +118,8 @@ function Home() {
           {/* Left Panel — action photo + matchup text */}
           <div className="hero-left">
             <img
-              src="/assets/hero-arena.webp"
-              srcSet="/assets/hero-arena-mobile.webp 600w, /assets/hero-arena.webp 1400w"
+              src="/assets/hero-arena-opt.webp"
+              srcSet="/assets/hero-arena-mobile-opt.webp 600w, /assets/hero-arena-opt.webp 1400w"
               sizes="(max-width: 900px) 100vw, 60vw"
               alt=""
               aria-hidden="true"
