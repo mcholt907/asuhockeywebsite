@@ -11,8 +11,8 @@
     background: transparent;
 }
 
-/* Show whenever desktop nav is hidden (< 1100px) */
-@media (max-width: 1099px) {
+/* Show whenever desktop nav is hidden (< 1000px) */
+@media (max-width: 999px) {
     .mobile-bottom-nav {
         display: block;
     }

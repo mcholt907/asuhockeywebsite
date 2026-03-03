@@ -355,8 +355,20 @@ footer {
 }
 
 /* Media Queries */
-/* --- Responsive Header (bottom nav handles navigation below 1100px) --- */
-@media (max-width: 1099px) {
+/* --- Compact nav at mid widths (keeps items on one line before breakpoint) --- */
+@media (max-width: 1150px) {
+  .main-nav ul {
+    gap: 2px;
+  }
+
+  .main-nav ul li a {
+    padding: 10px 13px;
+    font-size: 0.88rem;
+  }
+}
+
+/* --- Responsive Header (bottom nav handles navigation below 1000px) --- */
+@media (max-width: 999px) {
   :root {
     --header-height: 60px;
   }
