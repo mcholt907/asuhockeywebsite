@@ -367,8 +367,8 @@ footer {
   }
 }
 
-/* --- Responsive Header (bottom nav handles navigation below 1000px) --- */
-@media (max-width: 999px) {
+/* --- Responsive Header (bottom nav handles navigation below 880px) --- */
+@media (max-width: 879px) {
   :root {
     --header-height: 60px;
   }
