@@ -22,9 +22,15 @@
     }
 }
 
+/* Center items only when they fit without overflowing (~7 items × 52px + gaps + padding) */
+@media (min-width: 500px) {
+    .bottom-nav-scroll {
+        justify-content: center;
+    }
+}
+
 .bottom-nav-scroll {
     display: flex;
-    justify-content: center;
     overflow-x: auto;
     overflow-y: hidden;
     scroll-behavior: smooth;
