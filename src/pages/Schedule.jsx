@@ -108,10 +108,14 @@ function Schedule() {
                 ...games.map(game => ({
                   "@type": "SportsEvent",
                   "name": `Arizona State ${game.status === 'Home' ? 'vs.' : 'at'} ${game.opponent}`,
+                  "description": `Arizona State Sun Devils Men's Hockey game ${game.status === 'Home' ? 'vs.' : 'at'} ${game.opponent}.`,
+                  "image": "https://forksuppucks.com/logo512.png",
                   "startDate": game.date,
+                  "endDate": game.date,
                   "location": {
                     "@type": "Place",
-                    "name": game.location || (game.status === 'Home' ? 'Mullett Arena' : `${game.opponent} Arena`)
+                    "name": game.location || (game.status === 'Home' ? 'Mullett Arena' : `${game.opponent} Arena`),
+                    "address": game.location || (game.status === 'Home' ? 'Mullett Arena, Tempe, AZ' : 'TBD')
                   },
                   "homeTeam": game.status === 'Home'
                     ? { "@type": "SportsTeam", "name": "Arizona State Sun Devils" }
@@ -119,6 +123,22 @@ function Schedule() {
                   "awayTeam": game.status === 'Home'
                     ? { "@type": "SportsTeam", "name": game.opponent }
                     : { "@type": "SportsTeam", "name": "Arizona State Sun Devils" },
+                  "performer": [
+                    { "@type": "SportsTeam", "name": "Arizona State Sun Devils" },
+                    { "@type": "SportsTeam", "name": game.opponent }
+                  ],
+                  "organizer": {
+                    "@type": "Organization",
+                    "name": "Arizona State University Hockey",
+                    "url": "https://forksuppucks.com"
+                  },
+                  "offers": {
+                    "@type": "Offer",
+                    "url": "https://thesundevils.com/sports/mens-ice-hockey/schedule",
+                    "price": "0.00",
+                    "priceCurrency": "USD",
+                    "availability": game.result ? "https://schema.org/OutOfStock" : "https://schema.org/InStock"
+                  },
                   "eventStatus": game.result
                     ? "https://schema.org/EventCompleted"
                     : "https://schema.org/EventScheduled",
