@@ -33,6 +33,16 @@ const isProduction = process.env.NODE_ENV === 'production';
 // Start the background scheduler
 startScheduler();
 
+// Security: Force HTTPS in production (Render sets x-forwarded-proto)
+if (isProduction) {
+  app.use((req, res, next) => {
+    if (req.headers['x-forwarded-proto'] !== 'https') {
+      return res.redirect(301, `https://${req.headers.host}${req.url}`);
+    }
+    next();
+  });
+}
+
 // Sentry: The request handler must be the first middleware on the app
 // Sentry: The request handler and tracing handler are no longer needed in v8+
 // app.use(Sentry.Handlers.requestHandler());
