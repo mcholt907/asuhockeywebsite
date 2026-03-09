@@ -15,6 +15,9 @@
 # IDE settings (may contain API keys)
 .vscode/settings.json
 
+# MCP server config (may contain auth tokens)
+.mcp.json
+
 # environment variables
 .env
 .env.local

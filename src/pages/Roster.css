@@ -16,7 +16,7 @@
 
 .page-header {
   text-align: center;
-  margin-bottom: 48px;
+  margin-bottom: 28px;
 }
 
 .page-header h1 {
@@ -31,7 +31,7 @@
 .roster-controls {
   display: flex;
   justify-content: center;
-  margin: 32px 0;
+  margin: 16px 0;
   gap: 12px;
   flex-wrap: wrap;
 }
@@ -108,7 +108,7 @@
 }
 
 .position-group {
-  margin-bottom: 64px;
+  margin-bottom: 24px;
   animation: slideUp 0.6s var(--cubic-smooth);
 }
 
@@ -116,8 +116,8 @@
   font-size: 1.8rem;
   font-weight: 800;
   color: var(--asu-maroon);
-  margin-bottom: 28px;
-  padding-bottom: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
   border-bottom: 3px solid var(--asu-gold);
   display: inline-block;
 }
@@ -129,7 +129,7 @@
   box-shadow: var(--shadow-md);
   border: 2px solid var(--border-color);
   overflow: hidden;
-  margin-bottom: 40px;
+  margin-bottom: 0;
   transition: all var(--transition-base);
 }
 
@@ -147,7 +147,7 @@
 .roster-table thead th {
   background: var(--gradient-primary);
   color: var(--white);
-  padding: 18px 20px;
+  padding: 12px 20px;
   text-align: left;
   font-weight: 700;
   font-size: 0.85rem;
@@ -185,7 +185,7 @@
 }
 
 .roster-table td {
-  padding: 16px 20px;
+  padding: 10px 20px;
   color: var(--text-primary);
   vertical-align: middle;
 }

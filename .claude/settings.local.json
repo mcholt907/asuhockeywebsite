@@ -7,7 +7,30 @@
       "Bash(echo:*)",
       "Bash(Select-String -Pattern \"plugin|superpow\" -Context 0,0)",
       "Bash(Select-Object -First 30)",
-      "WebFetch(domain:docs.anthropic.com)"
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(npx jest:*)",
+      "Bash(node --version:*)",
+      "Bash(npx react-scripts test --watchAll=false --passWithNoTests)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(node -e:*)",
+      "Bash(ls:*)",
+      "Bash(exit:*)",
+      "Bash(node --eval:*)",
+      "Bash(node --check:*)",
+      "Bash(CI=true npm test -- --testPathPattern=\"App.test\")",
+      "Bash(git checkout:*)",
+      "Bash(CI=true npm test)",
+      "Bash(node:*)",
+      "Bash(python:*)",
+      "Bash(git -C \"c:/Users/farkh/asuhockeywebsite\" add scraper.js __tests__/scraper-caching.test.js)",
+      "Bash(git -C:*)",
+      "Bash(npm test:*)",
+      "Bash(del \"C:\\\\Users\\\\farkh\\\\asuhockeywebsite\\\\src\\\\scripts\\\\cache\\\\asu_hockey_schedule_2025\")",
+      "WebFetch(domain:neutralzone.com)",
+      "WebFetch(domain:www.uscho.com)",
+      "mcp__playwright"
     ]
   }
 }
