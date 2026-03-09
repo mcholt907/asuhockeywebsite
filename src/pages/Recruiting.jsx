@@ -61,6 +61,22 @@ function Recruiting() {
     fetchData();
   }, []);
 
+  // Group recruits by position category and sort alphabetically
+  const groupRecruits = (recruits) => {
+    const groups = { forwards: [], defense: [], goalies: [] };
+    (recruits || []).forEach(recruit => {
+      const pos = (recruit.position || '').toUpperCase();
+      if (pos === 'G') groups.goalies.push(recruit);
+      else if (pos === 'D') groups.defense.push(recruit);
+      else groups.forwards.push(recruit);
+    });
+    const lastName = (name) => (name || '').trim().split(' ').slice(-1)[0];
+    Object.keys(groups).forEach(key => {
+      groups[key].sort((a, b) => lastName(a.name).localeCompare(lastName(b.name)));
+    });
+    return groups;
+  };
+
   // Calculate days ago from date
   const getDaysAgo = (dateStr) => {
     if (!dateStr) return '';
@@ -141,6 +157,7 @@ function Recruiting() {
             <div className="stats-row">
               <span className="stat-badge">{recruit.position || 'F'}</span>
               <span className="stat-text">{recruit.height} / {recruit.weight}</span>
+              {recruit.birth_year && <span className="stat-text">{recruit.birth_year}</span>}
             </div>
             <div className="origin-row">
               <span className="label">From</span>
@@ -228,17 +245,38 @@ function Recruiting() {
           ))}
         </div>
 
-        <div className="recruits-grid fade-in">
-          {recruitsBySeason[activeSeason] && recruitsBySeason[activeSeason].length > 0 ? (
-            recruitsBySeason[activeSeason].map((recruit, idx) => (
-              <RecruitCard key={idx} recruit={recruit} />
-            ))
-          ) : (
-            <div className="no-recruits">
-              <p>No commitments announced for the {activeSeason} class yet.</p>
+        {(() => {
+          const season = recruitsBySeason[activeSeason];
+          if (!season || season.length === 0) {
+            return (
+              <div className="recruits-grid fade-in">
+                <div className="no-recruits">
+                  <p>No commitments announced for the {activeSeason} class yet.</p>
+                </div>
+              </div>
+            );
+          }
+          const groups = groupRecruits(season);
+          const sections = [
+            { key: 'forwards', label: 'Forwards' },
+            { key: 'defense', label: 'Defensemen' },
+            { key: 'goalies', label: 'Goalies' },
+          ];
+          return (
+            <div className="recruits-groups fade-in">
+              {sections.filter(s => groups[s.key].length > 0).map(s => (
+                <div key={s.key} className="recruit-position-group">
+                  <h3 className="recruit-group-title">{s.label}</h3>
+                  <div className="recruits-grid">
+                    {groups[s.key].map((recruit, idx) => (
+                      <RecruitCard key={idx} recruit={recruit} />
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
-        </div>
+          );
+        })()}
       </section>
     </div>
   );

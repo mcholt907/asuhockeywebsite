@@ -246,6 +246,26 @@
   background: var(--asu-maroon-dark);
 }
 
+/* --- Position Groups --- */
+.recruits-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.recruit-position-group {}
+
+.recruit-group-title {
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--asu-gold);
+  margin-bottom: 24px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(232, 168, 51, 0.3);
+}
+
 .no-recruits {
   text-align: center;
   grid-column: 1 / -1;
