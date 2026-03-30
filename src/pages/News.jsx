@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { getNews } from '../services/api';
 import './News.css';
 
@@ -63,27 +64,26 @@ function News() {
 
   return (
     <div className="news-page">
-      <title>News | Forks Up Pucks – ASU Sun Devils Hockey</title>
-      <meta name="description" content="Latest news and headlines for ASU Sun Devils Men's Hockey." />
-      <meta property="og:title" content="News | Forks Up Pucks – ASU Sun Devils Hockey" />
-      <meta property="og:description" content="Latest news and headlines for ASU Sun Devils Men's Hockey." />
-      <meta property="og:url" content="https://forksuppucks.com/news" />
-      <meta name="twitter:title" content="News | Forks Up Pucks – ASU Sun Devils Hockey" />
-      <meta name="twitter:description" content="Latest news and headlines for ASU Sun Devils Men's Hockey." />
-      <link rel="canonical" href="https://forksuppucks.com/news" />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+      <Helmet>
+        <title>News | Forks Up Pucks – ASU Sun Devils Hockey</title>
+        <meta name="description" content="Latest news and headlines for ASU Sun Devils Men's Hockey." />
+        <meta property="og:title" content="News | Forks Up Pucks – ASU Sun Devils Hockey" />
+        <meta property="og:description" content="Latest news and headlines for ASU Sun Devils Men's Hockey." />
+        <meta property="og:url" content="https://forksuppucks.com/news" />
+        <meta name="twitter:title" content="News | Forks Up Pucks – ASU Sun Devils Hockey" />
+        <meta name="twitter:description" content="Latest news and headlines for ASU Sun Devils Men's Hockey." />
+        <link rel="canonical" href="https://forksuppucks.com/news" />
+        <script type="application/ld+json">
+          {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             "itemListElement": [
               { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://forksuppucks.com" },
               { "@type": "ListItem", "position": 2, "name": "News", "item": "https://forksuppucks.com/news" }
             ]
-          })
-        }}
-      />
+          })}
+        </script>
+      </Helmet>
       <div className="news-content">
 
         {/* Page Header */}

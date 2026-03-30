@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { getSchedule } from '../services/api';
 import './Schedule.css';
 
@@ -90,19 +91,18 @@ function Schedule() {
 
   return (
     <div className="page-container schedule-page">
-      <title>2025-26 Schedule &amp; Results | Forks Up Pucks – ASU Hockey</title>
-      <meta name="description" content="Full 2025-26 ASU Sun Devils Men's Hockey schedule, scores, and results." />
-      <meta property="og:title" content="2025-26 Schedule & Results | Forks Up Pucks – ASU Hockey" />
-      <meta property="og:description" content="Full 2025-26 ASU Sun Devils Men's Hockey schedule, scores, and results." />
-      <meta property="og:url" content="https://forksuppucks.com/schedule" />
-      <meta name="twitter:title" content="2025-26 Schedule & Results | Forks Up Pucks – ASU Hockey" />
-      <meta name="twitter:description" content="Full 2025-26 ASU Sun Devils Men's Hockey schedule, scores, and results." />
-      <link rel="canonical" href="https://forksuppucks.com/schedule" />
-      {games.length > 0 && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
+      <Helmet>
+        <title>2025-26 Schedule &amp; Results | Forks Up Pucks – ASU Hockey</title>
+        <meta name="description" content="Full 2025-26 ASU Sun Devils Men's Hockey schedule, scores, and results." />
+        <meta property="og:title" content="2025-26 Schedule & Results | Forks Up Pucks – ASU Hockey" />
+        <meta property="og:description" content="Full 2025-26 ASU Sun Devils Men's Hockey schedule, scores, and results." />
+        <meta property="og:url" content="https://forksuppucks.com/schedule" />
+        <meta name="twitter:title" content="2025-26 Schedule & Results | Forks Up Pucks – ASU Hockey" />
+        <meta name="twitter:description" content="Full 2025-26 ASU Sun Devils Men's Hockey schedule, scores, and results." />
+        <link rel="canonical" href="https://forksuppucks.com/schedule" />
+        {games.length > 0 && (
+          <script type="application/ld+json">
+            {JSON.stringify({
               "@context": "https://schema.org",
               "@graph": [
                 ...games.map(game => ({
@@ -152,10 +152,10 @@ function Schedule() {
                   ]
                 }
               ]
-            })
-          }}
-        />
-      )}
+            })}
+          </script>
+        )}
+      </Helmet>
       <h1>Team Schedule (2025-2026)</h1>
 
       {/* Team Record Display */}

@@ -1,5 +1,6 @@
 // src/pages/Home.jsx
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import UpcomingGames from '../components/UpcomingGames';
 import { getSchedule, getNews, getStandings } from '../services/api';
 import './Home.css';
@@ -61,18 +62,17 @@ function Home() {
 
   return (
     <div className="home-page">
-      <title>Forks Up Pucks | ASU Sun Devils Hockey</title>
-      <meta name="description" content="The ultimate fan site for ASU Sun Devils Men's Hockey. Live scores, schedule, roster, stats, recruiting news and more." />
-      <meta property="og:title" content="Forks Up Pucks | ASU Sun Devils Hockey" />
-      <meta property="og:description" content="The ultimate fan site for ASU Sun Devils Men's Hockey. Live scores, schedule, roster, stats, recruiting news and more." />
-      <meta property="og:url" content="https://forksuppucks.com" />
-      <meta name="twitter:title" content="Forks Up Pucks | ASU Sun Devils Hockey" />
-      <meta name="twitter:description" content="The ultimate fan site for ASU Sun Devils Men's Hockey. Live scores, schedule, roster, stats, recruiting news and more." />
-      <link rel="canonical" href="https://forksuppucks.com" />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+      <Helmet>
+        <title>Forks Up Pucks | ASU Sun Devils Hockey</title>
+        <meta name="description" content="The ultimate fan site for ASU Sun Devils Men's Hockey. Live scores, schedule, roster, stats, recruiting news and more." />
+        <meta property="og:title" content="Forks Up Pucks | ASU Sun Devils Hockey" />
+        <meta property="og:description" content="The ultimate fan site for ASU Sun Devils Men's Hockey. Live scores, schedule, roster, stats, recruiting news and more." />
+        <meta property="og:url" content="https://forksuppucks.com" />
+        <meta name="twitter:title" content="Forks Up Pucks | ASU Sun Devils Hockey" />
+        <meta name="twitter:description" content="The ultimate fan site for ASU Sun Devils Men's Hockey. Live scores, schedule, roster, stats, recruiting news and more." />
+        <link rel="canonical" href="https://forksuppucks.com" />
+        <script type="application/ld+json">
+          {JSON.stringify({
             "@context": "https://schema.org",
             "@graph": [
               {
@@ -105,9 +105,9 @@ function Home() {
                 ]
               }
             ]
-          })
-        }}
-      />
+          })}
+        </script>
+      </Helmet>
 
       {/* Single dark floating card — hero + news combined */}
       <div className="home-card">

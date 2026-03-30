@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { getRoster } from '../services/api';
 import './Roster.css';
 
@@ -105,19 +106,18 @@ function Roster() {
 
   return (
     <div className="page-container roster-page">
-      <title>Roster | Forks Up Pucks – ASU Sun Devils Hockey</title>
-      <meta name="description" content="2025-26 ASU Sun Devils Men's Hockey roster — players, positions, height, weight, and hometown." />
-      <meta property="og:title" content="Roster | Forks Up Pucks – ASU Sun Devils Hockey" />
-      <meta property="og:description" content="2025-26 ASU Sun Devils Men's Hockey roster — players, positions, height, weight, and hometown." />
-      <meta property="og:url" content="https://forksuppucks.com/roster" />
-      <meta name="twitter:title" content="Roster | Forks Up Pucks – ASU Sun Devils Hockey" />
-      <meta name="twitter:description" content="2025-26 ASU Sun Devils Men's Hockey roster — players, positions, height, weight, and hometown." />
-      <link rel="canonical" href="https://forksuppucks.com/roster" />
-      {players.length > 0 && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
+      <Helmet>
+        <title>Roster | Forks Up Pucks – ASU Sun Devils Hockey</title>
+        <meta name="description" content="2025-26 ASU Sun Devils Men's Hockey roster — players, positions, height, weight, and hometown." />
+        <meta property="og:title" content="Roster | Forks Up Pucks – ASU Sun Devils Hockey" />
+        <meta property="og:description" content="2025-26 ASU Sun Devils Men's Hockey roster — players, positions, height, weight, and hometown." />
+        <meta property="og:url" content="https://forksuppucks.com/roster" />
+        <meta name="twitter:title" content="Roster | Forks Up Pucks – ASU Sun Devils Hockey" />
+        <meta name="twitter:description" content="2025-26 ASU Sun Devils Men's Hockey roster — players, positions, height, weight, and hometown." />
+        <link rel="canonical" href="https://forksuppucks.com/roster" />
+        {players.length > 0 && (
+          <script type="application/ld+json">
+            {JSON.stringify({
               "@context": "https://schema.org",
               "@graph": [
                 ...players.map(player => ({
@@ -138,10 +138,10 @@ function Roster() {
                   ]
                 }
               ]
-            })
-          }}
-        />
-      )}
+            })}
+          </script>
+        )}
+      </Helmet>
       <div className="page-header">
         <h1>Team Roster (2025-2026 Season)</h1>
 

@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"try { JSON.parse(require('fs').readFileSync('asu_hockey_data.json','utf8')); } catch(e) { console.error('INVALID JSON in asu_hockey_data.json:', e.message); process.exit(1); }\""
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -31,10 +31,12 @@ const port = process.env.PORT || 5000;
 const isProduction = process.env.NODE_ENV === 'production';
 
 // Start the background scheduler
-startScheduler();
+if (process.env.IS_PRERENDER !== 'true') {
+  startScheduler();
+}
 
 // Security: Force HTTPS in production (Render sets x-forwarded-proto)
-if (isProduction) {
+if (isProduction && process.env.IS_PRERENDER !== 'true') {
   app.use((req, res, next) => {
     if (req.headers['x-forwarded-proto'] !== 'https') {
       return res.redirect(301, `https://${req.headers.host}${req.url}`);

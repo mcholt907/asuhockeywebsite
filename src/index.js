@@ -1,5 +1,6 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import { createRoot, hydrateRoot } from 'react-dom/client';
+import { HelmetProvider } from 'react-helmet-async';
 import * as Sentry from "@sentry/react";
 import './index.css';
 import App from './App';
@@ -25,14 +26,22 @@ Sentry.init({
   environment: process.env.NODE_ENV,
 });
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
+const container = document.getElementById('root');
+const app = (
   <React.StrictMode>
-    <NotificationProvider>
-      <App />
-    </NotificationProvider>
+    <HelmetProvider>
+      <NotificationProvider>
+        <App />
+      </NotificationProvider>
+    </HelmetProvider>
   </React.StrictMode>
 );
+
+if (container.hasChildNodes()) {
+  hydrateRoot(container, app);
+} else {
+  createRoot(container).render(app);
+}
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
