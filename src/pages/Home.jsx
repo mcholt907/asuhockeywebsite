@@ -1,5 +1,6 @@
 // src/pages/Home.jsx
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import UpcomingGames from '../components/UpcomingGames';
 import { getSchedule, getNews, getStandings } from '../services/api';
@@ -241,6 +242,15 @@ function Home() {
                       <span className="right-news-title">{article.title}</span>
                     </a>
                   ))}
+                </div>
+                <div style={{ marginTop: '1.25rem', textAlign: 'center' }}>
+                  <Link 
+                    to="/news" 
+                    className="right-section-title" 
+                    style={{ fontSize: '0.85rem', textDecoration: 'none', borderBottom: '1px solid currentColor', paddingBottom: '2px', cursor: 'pointer' }}
+                  >
+                    View All ASU Hockey News →
+                  </Link>
                 </div>
               </div>
             )}

@@ -65,13 +65,13 @@ function News() {
   return (
     <div className="news-page">
       <Helmet>
-        <title>News | Forks Up Pucks – ASU Sun Devils Hockey</title>
-        <meta name="description" content="Latest news and headlines for ASU Sun Devils Men's Hockey." />
-        <meta property="og:title" content="News | Forks Up Pucks – ASU Sun Devils Hockey" />
-        <meta property="og:description" content="Latest news and headlines for ASU Sun Devils Men's Hockey." />
+        <title>ASU Hockey News & Updates | Forks Up Pucks</title>
+        <meta name="description" content="Get the latest ASU hockey news, insights, and recaps. All the headlines for ASU Sun Devils Men's Ice Hockey in one place." />
+        <meta property="og:title" content="ASU Hockey News & Updates | Forks Up Pucks" />
+        <meta property="og:description" content="Get the latest ASU hockey news, insights, and recaps. All the headlines for ASU Sun Devils Men's Ice Hockey in one place." />
         <meta property="og:url" content="https://forksuppucks.com/news" />
-        <meta name="twitter:title" content="News | Forks Up Pucks – ASU Sun Devils Hockey" />
-        <meta name="twitter:description" content="Latest news and headlines for ASU Sun Devils Men's Hockey." />
+        <meta name="twitter:title" content="ASU Hockey News & Updates | Forks Up Pucks" />
+        <meta name="twitter:description" content="Get the latest ASU hockey news, insights, and recaps. All the headlines for ASU Sun Devils Men's Ice Hockey in one place." />
         <link rel="canonical" href="https://forksuppucks.com/news" />
         <script type="application/ld+json">
           {JSON.stringify({
@@ -89,7 +89,7 @@ function News() {
         {/* Page Header */}
         <div className="news-header">
           <p className="news-header-eyebrow">ASU Hockey</p>
-          <h1 className="news-header-title">News</h1>
+          <h1 className="news-header-title">ASU Hockey News</h1>
           <div className="news-header-rule" />
         </div>
 
