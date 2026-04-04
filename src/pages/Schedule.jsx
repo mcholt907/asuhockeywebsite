@@ -92,13 +92,13 @@ function Schedule() {
   return (
     <div className="page-container schedule-page">
       <Helmet>
-        <title>2025-26 Schedule &amp; Results | Forks Up Pucks – ASU Hockey</title>
-        <meta name="description" content="Full 2025-26 ASU Sun Devils Men's Hockey schedule, scores, and results." />
-        <meta property="og:title" content="2025-26 Schedule & Results | Forks Up Pucks – ASU Hockey" />
-        <meta property="og:description" content="Full 2025-26 ASU Sun Devils Men's Hockey schedule, scores, and results." />
+        <title>ASU Hockey Schedule & Scores (2025-2026) | Forks Up Pucks</title>
+        <meta name="description" content="Full 2025-26 ASU Sun Devils Men's Hockey schedule, live scores, broadcast details, and game results." />
+        <meta property="og:title" content="ASU Hockey Schedule & Scores (2025-2026) | Forks Up Pucks" />
+        <meta property="og:description" content="Full 2025-26 ASU Sun Devils Men's Hockey schedule, live scores, broadcast details, and game results." />
         <meta property="og:url" content="https://forksuppucks.com/schedule" />
-        <meta name="twitter:title" content="2025-26 Schedule & Results | Forks Up Pucks – ASU Hockey" />
-        <meta name="twitter:description" content="Full 2025-26 ASU Sun Devils Men's Hockey schedule, scores, and results." />
+        <meta name="twitter:title" content="ASU Hockey Schedule & Scores (2025-2026) | Forks Up Pucks" />
+        <meta name="twitter:description" content="Full 2025-26 ASU Sun Devils Men's Hockey schedule, live scores, broadcast details, and game results." />
         <link rel="canonical" href="https://forksuppucks.com/schedule" />
         {games.length > 0 && (
           <script type="application/ld+json">
@@ -156,7 +156,7 @@ function Schedule() {
           </script>
         )}
       </Helmet>
-      <h1>Team Schedule (2025-2026)</h1>
+      <h1>ASU Hockey Schedule & Results</h1>
 
       {/* Team Record Display */}
       <div className="team-record">

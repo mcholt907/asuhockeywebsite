@@ -107,13 +107,13 @@ function Roster() {
   return (
     <div className="page-container roster-page">
       <Helmet>
-        <title>Roster | Forks Up Pucks – ASU Sun Devils Hockey</title>
-        <meta name="description" content="2025-26 ASU Sun Devils Men's Hockey roster — players, positions, height, weight, and hometown." />
-        <meta property="og:title" content="Roster | Forks Up Pucks – ASU Sun Devils Hockey" />
-        <meta property="og:description" content="2025-26 ASU Sun Devils Men's Hockey roster — players, positions, height, weight, and hometown." />
+        <title>ASU Hockey Team Roster 2025-2026 | Forks Up Pucks</title>
+        <meta name="description" content="2025-26 ASU Sun Devils Men's Hockey team roster. Find players, positions, jersey numbers, and hometowns." />
+        <meta property="og:title" content="ASU Hockey Team Roster 2025-2026 | Forks Up Pucks" />
+        <meta property="og:description" content="2025-26 ASU Sun Devils Men's Hockey team roster. Find players, positions, jersey numbers, and hometowns." />
         <meta property="og:url" content="https://forksuppucks.com/roster" />
-        <meta name="twitter:title" content="Roster | Forks Up Pucks – ASU Sun Devils Hockey" />
-        <meta name="twitter:description" content="2025-26 ASU Sun Devils Men's Hockey roster — players, positions, height, weight, and hometown." />
+        <meta name="twitter:title" content="ASU Hockey Team Roster 2025-2026 | Forks Up Pucks" />
+        <meta name="twitter:description" content="2025-26 ASU Sun Devils Men's Hockey team roster. Find players, positions, jersey numbers, and hometowns." />
         <link rel="canonical" href="https://forksuppucks.com/roster" />
         {players.length > 0 && (
           <script type="application/ld+json">
@@ -143,7 +143,7 @@ function Roster() {
         )}
       </Helmet>
       <div className="page-header">
-        <h1>Team Roster (2025-2026 Season)</h1>
+        <h1>ASU Hockey Roster (2025-2026 Season)</h1>
 
         <div className="roster-controls">
           <div className="position-filter">

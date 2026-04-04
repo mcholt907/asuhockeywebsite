@@ -1,10 +1,19 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import './About.css';
 
 function About() {
   return (
     <div className="about-page">
-      <h1>About ASU Men's Hockey</h1>
+      <Helmet>
+        <title>About Forks Up Pucks | Independent ASU Hockey Fan Site</title>
+        <meta name="description" content="Learn about Forks Up Pucks, the premier fan-run site dedicated to covering Arizona State University Men's Ice Hockey." />
+        <meta property="og:title" content="About Forks Up Pucks | Independent ASU Hockey Fan Site" />
+        <meta property="og:description" content="Learn about Forks Up Pucks, the premier fan-run site dedicated to covering Arizona State University Men's Ice Hockey." />
+        <meta property="og:url" content="https://forksuppucks.com/about" />
+        <link rel="canonical" href="https://forksuppucks.com/about" />
+      </Helmet>
+      <h1>About ASU Men's Hockey & Our Mission</h1>
       
       <section className="mission-section">
         <h2>Our Mission</h2>

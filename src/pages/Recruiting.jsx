@@ -191,13 +191,13 @@ function Recruiting() {
   return (
     <div className="page-container recruiting-page">
       <Helmet>
-        <title>Recruiting | Forks Up Pucks – ASU Sun Devils Hockey</title>
-        <meta name="description" content="ASU Sun Devils Hockey recruiting commitments and future players for upcoming seasons." />
-        <meta property="og:title" content="Recruiting | Forks Up Pucks – ASU Sun Devils Hockey" />
-        <meta property="og:description" content="ASU Sun Devils Hockey recruiting commitments and future players for upcoming seasons." />
+        <title>ASU Hockey Recruiting & Commits | Forks Up Pucks</title>
+        <meta name="description" content="ASU Sun Devils Hockey recruiting commitments, future players, and transfer portal updates for upcoming seasons." />
+        <meta property="og:title" content="ASU Hockey Recruiting & Commits | Forks Up Pucks" />
+        <meta property="og:description" content="ASU Sun Devils Hockey recruiting commitments, future players, and transfer portal updates for upcoming seasons." />
         <meta property="og:url" content="https://forksuppucks.com/recruiting" />
-        <meta name="twitter:title" content="Recruiting | Forks Up Pucks – ASU Sun Devils Hockey" />
-        <meta name="twitter:description" content="ASU Sun Devils Hockey recruiting commitments and future players for upcoming seasons." />
+        <meta name="twitter:title" content="ASU Hockey Recruiting & Commits | Forks Up Pucks" />
+        <meta name="twitter:description" content="ASU Sun Devils Hockey recruiting commitments, future players, and transfer portal updates for upcoming seasons." />
         <link rel="canonical" href="https://forksuppucks.com/recruiting" />
         <script type="application/ld+json">
           {JSON.stringify({
@@ -211,7 +211,7 @@ function Recruiting() {
         </script>
       </Helmet>
       <div className="recruiting-header">
-        <h1>Future Devils</h1>
+        <h1>ASU Hockey Recruiting & Future Commits</h1>
         <p className="subtitle">The Next Generation of Sun Devil Hockey</p>
       </div>
 

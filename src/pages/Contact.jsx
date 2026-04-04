@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import './Contact.css';
 
 function Contact() {
@@ -17,7 +18,15 @@ function Contact() {
 
   return (
     <div className="contact-page">
-      <h1>Contact Us</h1>
+      <Helmet>
+        <title>Contact Us | Forks Up Pucks</title>
+        <meta name="description" content="Get in touch with the team behind Forks Up Pucks for inquiries, feedback, or to contribute to our ASU Hockey coverage." />
+        <meta property="og:title" content="Contact Us | Forks Up Pucks" />
+        <meta property="og:description" content="Get in touch with the team behind Forks Up Pucks for inquiries, feedback, or to contribute to our ASU Hockey coverage." />
+        <meta property="og:url" content="https://forksuppucks.com/contact" />
+        <link rel="canonical" href="https://forksuppucks.com/contact" />
+      </Helmet>
+      <h1>Contact Forks Up Pucks</h1>
       
       <div className="contact-container">
         <div className="contact-info">

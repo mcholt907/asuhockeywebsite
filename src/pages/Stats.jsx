@@ -103,13 +103,13 @@ function Stats() {
   return (
     <div className="page-container stats-page">
       <Helmet>
-        <title>Player Stats | Forks Up Pucks – ASU Sun Devils Hockey</title>
-        <meta name="description" content="ASU Sun Devils Men's Hockey player statistics and leaders for the 2025-26 season." />
-        <meta property="og:title" content="Player Stats | Forks Up Pucks – ASU Sun Devils Hockey" />
-        <meta property="og:description" content="ASU Sun Devils Men's Hockey player statistics and leaders for the 2025-26 season." />
+        <title>ASU Hockey Player Stats & Leaders | Forks Up Pucks</title>
+        <meta name="description" content="ASU Sun Devils Men's Hockey player statistics, goal leaders, and analytics for the 2025-26 season." />
+        <meta property="og:title" content="ASU Hockey Player Stats & Leaders | Forks Up Pucks" />
+        <meta property="og:description" content="ASU Sun Devils Men's Hockey player statistics, goal leaders, and analytics for the 2025-26 season." />
         <meta property="og:url" content="https://forksuppucks.com/stats" />
-        <meta name="twitter:title" content="Player Stats | Forks Up Pucks – ASU Sun Devils Hockey" />
-        <meta name="twitter:description" content="ASU Sun Devils Men's Hockey player statistics and leaders for the 2025-26 season." />
+        <meta name="twitter:title" content="ASU Hockey Player Stats & Leaders | Forks Up Pucks" />
+        <meta name="twitter:description" content="ASU Sun Devils Men's Hockey player statistics, goal leaders, and analytics for the 2025-26 season." />
         <link rel="canonical" href="https://forksuppucks.com/stats" />
         <script type="application/ld+json">
           {JSON.stringify({
@@ -123,7 +123,7 @@ function Stats() {
         </script>
       </Helmet>
       <div className="stat-lab-header">
-        <h1>Player Stats</h1>
+        <h1>ASU Hockey Player Stats</h1>
         <p className="subtitle">Advanced Analytics & Team Leaders</p>
       </div>
 
