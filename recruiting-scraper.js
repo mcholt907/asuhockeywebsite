@@ -130,6 +130,12 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
                     continue;
                 }
 
+                // Skip Carson McGinley as requested
+                if (name && name === 'Carson McGinley') {
+                    console.log(`[EP Recruiting Scraper] Skipping removed recruit: Carson McGinley`);
+                    continue;
+                }
+
                 // Extract other fields
                 const age = $(cells[4]).text().trim();
 
