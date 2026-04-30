@@ -23,6 +23,7 @@ const { scrapeTransferData } = require('./transfer-scraper'); // Import transfer
 const { scrapeAlumniData } = require('./alumni-scraper'); // Import alumni scraper
 const { startScheduler } = require('./src/scripts/scheduler'); // Import scheduler
 const { getRoster } = require('./services/roster-service');
+const { getStaticData } = require('./services/static-data');
 const path = require('path');
 const fs = require('fs');
 
@@ -122,14 +123,8 @@ app.get('/api/news', async (req, res) => {
   try {
     const articlesArray = await fetchNewsData();
 
-    // Read manual news entries from static JSON (same pattern as /api/recruits)
-    let manualNews = [];
-    try {
-      const raw = fs.readFileSync(path.join(__dirname, 'asu_hockey_data.json'), 'utf8');
-      manualNews = JSON.parse(raw).manual_news || [];
-    } catch (e) {
-      console.error('[API /news] Failed to read manual_news:', e.message);
-    }
+    // Read manual news entries from in-memory static-data cache (mtime-invalidated)
+    const manualNews = getStaticData().manual_news || [];
 
     const combined = [...manualNews, ...articlesArray]
       .sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -174,14 +169,7 @@ app.get('/api/schedule', async (req, res) => {
 
 // API endpoint for recruiting data — reads directly from static JSON (source of truth)
 app.get('/api/recruits', (req, res) => {
-  try {
-    const raw = fs.readFileSync(path.join(__dirname, 'asu_hockey_data.json'), 'utf8');
-    const data = JSON.parse(raw);
-    res.json(data.recruiting || {});
-  } catch (error) {
-    console.error('[API /recruits] Error reading recruiting data:', error.message);
-    res.status(500).json({ error: 'Failed to fetch recruiting data' });
-  }
+  res.json(getStaticData().recruiting || {});
 });
 
 // API endpoint for transfer data (incoming/outgoing transfers)
