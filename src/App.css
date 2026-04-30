@@ -602,3 +602,28 @@ footer {
   border: 2px solid var(--asu-maroon);
   color: var(--asu-maroon);
 }
+
+/* Accessibility: visible keyboard focus indicator */
+:focus-visible {
+  outline: 2px solid var(--asu-gold);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Accessibility: skip-to-main link, hidden until focused */
+.skip-to-main {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 10000;
+}
+
+.skip-to-main:focus {
+  left: 1rem;
+  top: 1rem;
+  background: var(--asu-maroon);
+  color: var(--asu-gold);
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  border: 2px solid var(--asu-gold);
+}

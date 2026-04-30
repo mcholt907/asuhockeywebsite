@@ -35,7 +35,7 @@ function GlobalNotificationBanner() {
         <path d={iconPath} />
       </svg>
       <span className="banner-message">{displayMessage}</span>
-      <button onClick={hideNotification} className="close-banner-button">
+      <button onClick={hideNotification} className="close-banner-button" aria-label="Dismiss notification">
         &times;
       </button>
     </div>

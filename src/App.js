@@ -37,6 +37,8 @@ function AppInner() {
         }}
       />
       <div className="app">
+        <a href="#main-content" className="skip-to-main">Skip to main content</a>
+
         <header>
           <div className="header-container">
             <div className="logo">
@@ -57,7 +59,7 @@ function AppInner() {
           </div>
         </header>
 
-        <main>
+        <main id="main-content">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/news" element={<News />} />
