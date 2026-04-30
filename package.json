@@ -2,6 +2,9 @@
   "name": "asuhockeywebsite",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "@sentry/node": "^10.38.0",
     "@sentry/profiling-node": "^10.38.0",
@@ -35,6 +38,7 @@
     "svgo": "3.3.2"
   },
   "scripts": {
+    "postinstall": "npx puppeteer browsers install chrome",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "postbuild": "node scripts/prerender.js",
