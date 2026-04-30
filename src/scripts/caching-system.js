@@ -12,20 +12,25 @@ function saveToCache(data, filename, duration = DEFAULT_CACHE_DURATION) {
     console.error('Filename not provided to saveToCache');
     return;
   }
-  const cacheFilePath = path.join(CACHE_DIR, filename);
-  const cacheData = {
-    timestamp: new Date().toISOString(),
-    data: data,
-    cacheDuration: duration, // Store duration for potential future use
-  };
+  try {
+    const cacheFilePath = path.join(CACHE_DIR, filename);
+    const cacheData = {
+      timestamp: new Date().toISOString(),
+      data: data,
+      cacheDuration: duration, // Store duration for potential future use
+    };
 
-  // Ensure cache directory exists
-  if (!fs.existsSync(CACHE_DIR)) {
-    fs.mkdirSync(CACHE_DIR, { recursive: true });
+    // Ensure cache directory exists
+    if (!fs.existsSync(CACHE_DIR)) {
+      fs.mkdirSync(CACHE_DIR, { recursive: true });
+    }
+
+    fs.writeFileSync(cacheFilePath, JSON.stringify(cacheData, null, 2));
+    console.log(`Data saved to cache at ${cacheFilePath}`);
+  } catch (error) {
+    console.error(`[Cache System] Failed to save cache for ${filename}:`, error.message);
+    Sentry.captureException(error, { tags: { component: 'caching-system', filename } });
   }
-
-  fs.writeFileSync(cacheFilePath, JSON.stringify(cacheData, null, 2));
-  console.log(`Data saved to cache at ${cacheFilePath}`);
 }
 
 function getFromCache(filename, ignoreExpiration = false) {
