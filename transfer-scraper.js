@@ -5,15 +5,39 @@
  */
 
 const cheerio = require('cheerio');
+const fs = require('fs');
+const path = require('path');
 const { saveToCache, getFromCache } = require('./src/scripts/caching-system');
 const { requestWithRetry } = require('./utils/request-helper');
 
 const TRANSFERS_URL = 'https://www.eliteprospects.com/team/18066/arizona-state-univ/transfers';
 const CACHE_KEY = 'asu_transfers';
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours in ms
+const FALLBACK_FILE = path.join(__dirname, 'data', 'asu_transfers_fallback.json');
 
 // Request coalescing
 let transferPromise = null;
+
+function getFallbackTransferData() {
+    try {
+        const raw = fs.readFileSync(FALLBACK_FILE, 'utf8');
+        const fallback = JSON.parse(raw);
+        if (fallback && Array.isArray(fallback.incoming) && Array.isArray(fallback.outgoing)) {
+            return fallback;
+        }
+        console.warn('[Transfer Scraper] Fallback transfer data has an unexpected shape.');
+    } catch (error) {
+        console.warn(`[Transfer Scraper] Fallback transfer data unavailable: ${error.message}`);
+    }
+    return null;
+}
+
+function shouldUseFallbackOnly() {
+    if (process.env.TRANSFER_SCRAPE_LIVE === 'true') {
+        return false;
+    }
+    return process.env.NODE_ENV === 'production' || process.env.IS_PRERENDER === 'true';
+}
 
 /**
  * Extract player ID from Elite Prospects URL
@@ -51,6 +75,17 @@ async function scrapeTransferData() {
         }
     } catch (error) {
         console.log('[Transfer Scraper] No valid cache found, scraping fresh data');
+    }
+
+    // In production / prerender, skip live scraping and use bundled fallback.
+    // EliteProspects 403s cloud-host IPs; live scraping only succeeds from a
+    // residential IP (set TRANSFER_SCRAPE_LIVE=true to override).
+    if (shouldUseFallbackOnly()) {
+        const fallback = getFallbackTransferData();
+        if (fallback) {
+            console.log('[Transfer Scraper] Returning bundled fallback transfer data');
+            return fallback;
+        }
     }
 
     // Request Coalescing: if a scrape is already in progress, return that promise
@@ -229,6 +264,12 @@ async function scrapeTransferData() {
                 }
             } catch (e) {
                 // Ignore cache errors
+            }
+
+            const fallback = getFallbackTransferData();
+            if (fallback) {
+                console.log('[Transfer Scraper] Returning bundled fallback transfer data after scrape error');
+                return fallback;
             }
 
             return { incoming: [], outgoing: [], lastUpdated: null };
