@@ -5,15 +5,39 @@
  */
 
 const cheerio = require('cheerio');
+const fs = require('fs');
+const path = require('path');
 const { saveToCache, getFromCache } = require('./src/scripts/caching-system');
 const { requestWithRetry } = require('./utils/request-helper');
 
 const BASE_URL = 'https://www.eliteprospects.com/team/18066/arizona-state-univ/where-are-they-now';
 const CACHE_KEY = 'asu_alumni';
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours in ms
+const FALLBACK_FILE = path.join(__dirname, 'data', 'asu_alumni_fallback.json');
 
 // Request coalescing
 let alumniPromise = null;
+
+function getFallbackAlumniData() {
+    try {
+        const raw = fs.readFileSync(FALLBACK_FILE, 'utf8');
+        const fallback = JSON.parse(raw);
+        if (fallback && Array.isArray(fallback.skaters) && Array.isArray(fallback.goalies)) {
+            return fallback;
+        }
+        console.warn('[Alumni Scraper] Fallback alumni data has an unexpected shape.');
+    } catch (error) {
+        console.warn(`[Alumni Scraper] Fallback alumni data unavailable: ${error.message}`);
+    }
+    return null;
+}
+
+function shouldUseFallbackOnly() {
+    if (process.env.ALUMNI_SCRAPE_LIVE === 'true') {
+        return false;
+    }
+    return process.env.NODE_ENV === 'production' || process.env.IS_PRERENDER === 'true';
+}
 
 /**
  * Extract player ID from Elite Prospects URL
@@ -282,6 +306,14 @@ async function scrapeAlumniData() {
         console.log('[Alumni Scraper] No valid cache found, scraping fresh data');
     }
 
+    if (shouldUseFallbackOnly()) {
+        const fallback = getFallbackAlumniData();
+        if (fallback) {
+            console.log('[Alumni Scraper] Returning bundled fallback alumni data');
+            return fallback;
+        }
+    }
+
     // Request Coalescing: if a scrape is already in progress, return that promise
     if (alumniPromise) {
         console.log('[Alumni Scraper] Scrape already in progress. Returning shared promise.');
@@ -330,6 +362,12 @@ async function scrapeAlumniData() {
                     return stale;
                 }
             } catch (e) { }
+
+            const fallback = getFallbackAlumniData();
+            if (fallback) {
+                console.log('[Alumni Scraper] Returning bundled fallback alumni data after scrape error');
+                return fallback;
+            }
 
             return { skaters: [], goalies: [], lastUpdated: null };
         } finally {
