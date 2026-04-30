@@ -1,0 +1,277 @@
+{
+  "incoming": [
+    {
+      "playerName": "Jack Willson",
+      "position": "D",
+      "playerUrl": "https://www.eliteprospects.com/player/710109/jack-willson",
+      "playerId": "710109",
+      "team": "Youngstown Phantoms",
+      "teamUrl": "https://www.eliteprospects.com/team/2628/youngstown-phantoms",
+      "transferDate": "2026-04-22",
+      "direction": "incoming"
+    },
+    {
+      "playerName": "Olivier Houde",
+      "position": "F",
+      "playerUrl": "https://www.eliteprospects.com/player/658439/olivier-houde",
+      "playerId": "658439",
+      "team": "Lindenwood Univ.",
+      "teamUrl": "https://www.eliteprospects.com/team/35273/lindenwood-univ",
+      "transferDate": "2026-04-21",
+      "direction": "incoming"
+    },
+    {
+      "playerName": "Hunter Hady",
+      "position": "D",
+      "playerUrl": "https://www.eliteprospects.com/player/645475/hunter-hady",
+      "playerId": "645475",
+      "team": "Univ. of Michigan",
+      "teamUrl": "https://www.eliteprospects.com/team/803/univ-of-michigan",
+      "transferDate": "2026-04-19",
+      "direction": "incoming"
+    },
+    {
+      "playerName": "Cade Littler",
+      "position": "F",
+      "playerUrl": "https://www.eliteprospects.com/player/634828/cade-littler",
+      "playerId": "634828",
+      "team": "Univ. of North Dakota",
+      "teamUrl": "https://www.eliteprospects.com/team/1137/univ-of-north-dakota",
+      "transferDate": "2026-04-19",
+      "direction": "incoming"
+    },
+    {
+      "playerName": "Sam Hillebrandt",
+      "position": "G",
+      "playerUrl": "https://www.eliteprospects.com/player/701600/sam-hillebrandt",
+      "playerId": "701600",
+      "team": "Ohio State Univ.",
+      "teamUrl": "https://www.eliteprospects.com/team/1549/ohio-state-univ",
+      "transferDate": "2026-04-15",
+      "direction": "incoming"
+    },
+    {
+      "playerName": "Daniel Shlaine",
+      "position": "F",
+      "playerUrl": "https://www.eliteprospects.com/player/618481/daniel-shlaine",
+      "playerId": "618481",
+      "team": "Univ. of Minnesota-Duluth",
+      "teamUrl": "https://www.eliteprospects.com/team/1794/univ-of-minnesota-duluth",
+      "transferDate": "2026-04-14",
+      "direction": "incoming"
+    },
+    {
+      "playerName": "Ben Muthersbaugh",
+      "position": "F",
+      "playerUrl": "https://www.eliteprospects.com/player/639682/ben-muthersbaugh",
+      "playerId": "639682",
+      "team": "Union College",
+      "teamUrl": "https://www.eliteprospects.com/team/1366/union-college",
+      "transferDate": "2026-04-14",
+      "direction": "incoming"
+    },
+    {
+      "playerName": "Rylan Brown",
+      "position": "D",
+      "playerUrl": "https://www.eliteprospects.com/player/642746/rylan-brown",
+      "playerId": "642746",
+      "team": "Michigan Tech",
+      "teamUrl": "https://www.eliteprospects.com/team/548/michigan-tech",
+      "transferDate": "2026-04-14",
+      "direction": "incoming"
+    },
+    {
+      "playerName": "Nic Chin-Degraves",
+      "position": "F",
+      "playerUrl": "https://www.eliteprospects.com/player/475836/nic-chin-degraves",
+      "playerId": "475836",
+      "team": "Penn State Univ.",
+      "teamUrl": "https://www.eliteprospects.com/team/2118/penn-state-univ",
+      "transferDate": "2026-04-14",
+      "direction": "incoming"
+    },
+    {
+      "playerName": "Filip Nordberg",
+      "position": "D",
+      "playerUrl": "https://www.eliteprospects.com/player/643091/filip-nordberg",
+      "playerId": "643091",
+      "team": "Merrimack College",
+      "teamUrl": "https://www.eliteprospects.com/team/1871/merrimack-college",
+      "transferDate": "2026-04-14",
+      "direction": "incoming"
+    },
+    {
+      "playerName": "Matthew Mayich",
+      "position": "D",
+      "playerUrl": "https://www.eliteprospects.com/player/640785/matthew-mayich",
+      "playerId": "640785",
+      "team": "Clarkson Univ.",
+      "teamUrl": "https://www.eliteprospects.com/team/685/clarkson-univ",
+      "transferDate": "2026-04-14",
+      "direction": "incoming"
+    },
+    {
+      "playerName": "Jonas Woo",
+      "position": "D",
+      "playerUrl": "https://www.eliteprospects.com/player/597734/jonas-woo",
+      "playerId": "597734",
+      "team": "Medicine Hat Tigers",
+      "teamUrl": "https://www.eliteprospects.com/team/859/medicine-hat-tigers",
+      "transferDate": "2026-01-15",
+      "direction": "incoming"
+    },
+    {
+      "playerName": "Colton Lien",
+      "position": "F",
+      "playerUrl": "https://www.eliteprospects.com/player/934676/colton-lien",
+      "playerId": "934676",
+      "team": "Okanagan HA Colorado 16U AAA",
+      "teamUrl": "https://www.eliteprospects.com/team/41784/okanagan-ha-colorado-16u-aaa",
+      "transferDate": "2026-01-12",
+      "direction": "incoming"
+    }
+  ],
+  "outgoing": [
+    {
+      "playerName": "Sam Alfano",
+      "position": "F",
+      "playerUrl": "https://www.eliteprospects.com/player/600871/sam-alfano",
+      "playerId": "600871",
+      "team": "Univ. of Maine",
+      "teamUrl": "https://www.eliteprospects.com/team/606/univ-of-maine",
+      "transferDate": "2026-04-23",
+      "direction": "outgoing"
+    },
+    {
+      "playerName": "Anthony Dowd",
+      "position": "D",
+      "playerUrl": "https://www.eliteprospects.com/player/599134/anthony-dowd",
+      "playerId": "599134",
+      "team": "UMass-Lowell",
+      "teamUrl": "https://www.eliteprospects.com/team/1038/umass-lowell",
+      "transferDate": "2026-04-23",
+      "direction": "outgoing"
+    },
+    {
+      "playerName": "Sam Court",
+      "position": "D",
+      "playerUrl": "https://www.eliteprospects.com/player/572087/sam-court",
+      "playerId": "572087",
+      "team": "Minnesota State Univ. (Mankato)",
+      "teamUrl": "https://www.eliteprospects.com/team/1520/minnesota-state-univ-mankato",
+      "transferDate": "2026-04-15",
+      "direction": "outgoing"
+    },
+    {
+      "playerName": "Carmelo Crandell",
+      "position": "F",
+      "playerUrl": "https://www.eliteprospects.com/player/643476/carmelo-crandell",
+      "playerId": "643476",
+      "team": "Colorado College",
+      "teamUrl": "https://www.eliteprospects.com/team/706/colorado-college",
+      "transferDate": "2026-04-15",
+      "direction": "outgoing"
+    },
+    {
+      "playerName": "Joel Kjellberg",
+      "position": "D",
+      "playerUrl": "https://www.eliteprospects.com/player/566399/joel-kjellberg",
+      "playerId": "566399",
+      "team": "Northeastern Univ.",
+      "teamUrl": "https://www.eliteprospects.com/team/1465/northeastern-univ",
+      "transferDate": "2026-04-14",
+      "direction": "outgoing"
+    },
+    {
+      "playerName": "Brasen Boser",
+      "position": "D",
+      "playerUrl": "https://www.eliteprospects.com/player/623741/brasen-boser",
+      "playerId": "623741",
+      "team": "Univ. of North Dakota",
+      "teamUrl": "https://www.eliteprospects.com/team/1137/univ-of-north-dakota",
+      "transferDate": "2026-04-14",
+      "direction": "outgoing"
+    },
+    {
+      "playerName": "Justin Kipkie",
+      "position": "D",
+      "playerUrl": "https://www.eliteprospects.com/player/535603/justin-kipkie",
+      "playerId": "535603",
+      "team": "Univ. of St. Thomas",
+      "teamUrl": "https://www.eliteprospects.com/team/2745/univ-of-st-thomas",
+      "transferDate": "2026-04-14",
+      "direction": "outgoing"
+    },
+    {
+      "playerName": "Cullen Potter",
+      "position": "F",
+      "playerUrl": "https://www.eliteprospects.com/player/577155/cullen-potter",
+      "playerId": "577155",
+      "team": "Michigan State Univ.",
+      "teamUrl": "https://www.eliteprospects.com/team/1157/michigan-state-univ",
+      "transferDate": "2026-04-14",
+      "direction": "outgoing"
+    },
+    {
+      "playerName": "Connor Hasley",
+      "position": "G",
+      "playerUrl": "https://www.eliteprospects.com/player/415041/connor-hasley",
+      "playerId": "415041",
+      "team": "Wichita Thunder",
+      "teamUrl": "https://www.eliteprospects.com/team/836/wichita-thunder",
+      "transferDate": "2026-03-24",
+      "direction": "outgoing"
+    },
+    {
+      "playerName": "Bennett Schimek",
+      "position": "F",
+      "playerUrl": "https://www.eliteprospects.com/player/512109/bennett-schimek",
+      "playerId": "512109",
+      "team": "Abbotsford Canucks",
+      "teamUrl": "https://www.eliteprospects.com/team/3375/abbotsford-canucks",
+      "transferDate": "2026-03-11",
+      "direction": "outgoing"
+    },
+    {
+      "playerName": "Noah Powell",
+      "position": "F",
+      "playerUrl": "https://www.eliteprospects.com/player/674718/noah-powell",
+      "playerId": "674718",
+      "team": "Philadelphia Flyers",
+      "teamUrl": "https://www.eliteprospects.com/team/70/philadelphia-flyers",
+      "transferDate": "2026-03-11",
+      "direction": "outgoing"
+    },
+    {
+      "playerName": "Tucker Ness",
+      "position": "D",
+      "playerUrl": "https://www.eliteprospects.com/player/645494/tucker-ness",
+      "playerId": "645494",
+      "team": "Tahoe Knight Monsters",
+      "teamUrl": "https://www.eliteprospects.com/team/37602/tahoe-knight-monsters",
+      "transferDate": "2026-03-04",
+      "direction": "outgoing"
+    },
+    {
+      "playerName": "John Waldron",
+      "position": "F",
+      "playerUrl": "https://www.eliteprospects.com/player/481491/john-waldron",
+      "playerId": "481491",
+      "team": "Toledo Walleye",
+      "teamUrl": "https://www.eliteprospects.com/team/254/toledo-walleye",
+      "transferDate": "2026-02-02",
+      "direction": "outgoing"
+    },
+    {
+      "playerName": "Justin Cloutier",
+      "position": "F",
+      "playerUrl": "https://www.eliteprospects.com/player/649101/justin-cloutier",
+      "playerId": "649101",
+      "team": "Soo Greyhounds",
+      "teamUrl": "https://www.eliteprospects.com/team/620/soo-greyhounds",
+      "transferDate": "2026-01-05",
+      "direction": "outgoing"
+    }
+  ],
+  "lastUpdated": "2026-04-30T15:49:08.191Z"
+}
