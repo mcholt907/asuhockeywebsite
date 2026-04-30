@@ -3,15 +3,17 @@ require('dotenv').config(); // Load environment variables
 const Sentry = require('@sentry/node');
 const { nodeProfilingIntegration } = require('@sentry/profiling-node');
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 Sentry.init({
   dsn: process.env.REACT_APP_SENTRY_DSN,
   integrations: [
     nodeProfilingIntegration(),
   ],
-  // Performance Monitoring
-  tracesSampleRate: 1.0, //  Capture 100% of the transactions
-  // Set sampling rate for profiling - this is relative to tracesSampleRate
-  profilesSampleRate: 1.0,
+  // Sample 10% of traces & profiles in production, 100% in dev
+  tracesSampleRate: isProduction ? 0.1 : 1.0,
+  profilesSampleRate: isProduction ? 0.1 : 1.0,
+  environment: process.env.NODE_ENV,
 });
 
 const express = require('express');
@@ -29,7 +31,6 @@ const fs = require('fs');
 
 const app = express();
 const port = process.env.PORT || 5000;
-const isProduction = process.env.NODE_ENV === 'production';
 
 // Start the background scheduler
 if (process.env.IS_PRERENDER !== 'true') {

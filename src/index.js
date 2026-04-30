@@ -7,18 +7,20 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { NotificationProvider } from './context/NotificationContext';
 
+const isProd = process.env.NODE_ENV === 'production';
+
 Sentry.init({
   dsn: process.env.REACT_APP_SENTRY_DSN,
   integrations: [
     Sentry.browserTracingIntegration(),
     Sentry.replayIntegration(),
   ],
-  // Tracing
-  tracesSampleRate: 1.0,
+  // Sample 10% of traces in production, 100% in dev
+  tracesSampleRate: isProd ? 0.1 : 1.0,
   // Trace requests to localhost and relative /api paths
   tracePropagationTargets: ["localhost", /^\/api/],
 
-  // Session Replay
+  // Session Replay — error replays stay at 100% (highest signal/cost ratio)
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
 
