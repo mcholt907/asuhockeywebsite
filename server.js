@@ -107,6 +107,16 @@ const apiLimiter = rateLimit({
 // Apply rate limiting to all API routes
 app.use('/api/', apiLimiter);
 
+// Liveness probe — top-level, bypasses /api/ rate limiter and does no work.
+// Used by Render's healthCheckPath; must remain dependency-free.
+app.get('/healthz', (req, res) => {
+  res.json({
+    status: 'ok',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // API endpoint for news
 app.get('/api/news', async (req, res) => {
   try {
