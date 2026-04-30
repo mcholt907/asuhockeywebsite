@@ -27,8 +27,8 @@ test.describe('Home Page', () => {
     });
 
     test('should display news section', async ({ page }) => {
-        // Check for the Latest News section
-        const newsSection = page.locator('text=Latest News').first();
+        // Check for the Trending News section
+        const newsSection = page.locator('text=Trending News').first();
         await expect(newsSection).toBeVisible();
     });
 

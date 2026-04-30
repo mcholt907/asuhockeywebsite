@@ -9,8 +9,6 @@ import Roster from './pages/Roster';
 import Schedule from './pages/Schedule';
 import Recruiting from './pages/Recruiting';
 import Stats from './pages/Stats';
-import About from './pages/About';
-import Contact from './pages/Contact';
 import Alumni from './pages/Alumni';
 
 // Global Components
