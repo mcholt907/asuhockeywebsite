@@ -71,6 +71,30 @@ Root utility scripts for editing this file:
 - `clean-recruiting.js` — clean/validate recruiting data
 - `add-current-team.js` — manage current season roster entries
 
+## Data Refresh Workflow
+
+Alumni and transfer data are scraped from EliteProspects, which 403s
+cloud-hosted IPs (Render). Production reads bundled fallback JSON from
+`data/`; live scraping only runs locally with override flags.
+
+To refresh manually:
+
+```bash
+npm run refresh-data        # both
+npm run refresh-alumni      # alumni only
+npm run refresh-transfers   # transfers only
+```
+
+The refresh scripts validate result shape + non-emptiness; an empty or
+malformed scrape will exit non-zero and leave the existing JSON untouched.
+
+A Windows Scheduled Task (`scripts/RefreshDataTask.xml`) runs
+`scripts/refresh-and-push.cmd` weekly on Sunday 06:00. The task pulls main,
+runs the refresh, commits any changes, and pushes. Failures are logged to
+`.refresh-log.txt` (gitignored).
+
+To install the task (one-time): `schtasks /create /xml scripts\RefreshDataTask.xml /tn "ASU Hockey Data Refresh"`. The Task Scheduler XML hardcodes `C:\Users\farkh\asuhockeywebsite` as the working directory; edit those two lines if cloning the repo elsewhere.
+
 ## Pages & Routes
 
 - `/` — Home (next game, team record, news grid, standings)
