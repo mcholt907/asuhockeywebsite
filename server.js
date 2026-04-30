@@ -62,9 +62,10 @@ app.use(helmet({
     directives: {
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles for React
-      scriptSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "blob:"], // Allow React inline scripts and blob workers
+      workerSrc: ["'self'", "blob:"], // Allow blob workers
       imgSrc: ["'self'", "data:", "https:"], // Allow images from any HTTPS source
-      connectSrc: ["'self'"],
+      connectSrc: ["'self'", "https://*.sentry.io", "https://sentry.io"], // Allow Sentry ingest
     },
   },
   crossOriginEmbedderPolicy: false, // Disable for React compatibility
