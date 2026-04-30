@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import { HelmetProvider } from 'react-helmet-async';
 import Schedule from '../Schedule';
 
 // Mock the API service
@@ -9,6 +10,12 @@ jest.mock('../../services/api', () => ({
 
 import { getSchedule } from '../../services/api';
 
+const renderSchedule = () => render(
+  <HelmetProvider>
+    <Schedule />
+  </HelmetProvider>
+);
+
 describe('Schedule Page', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -17,7 +24,7 @@ describe('Schedule Page', () => {
   it('should render loading state initially', () => {
     getSchedule.mockImplementation(() => new Promise(() => {}));
     
-    render(<Schedule />);
+    renderSchedule();
     
     expect(screen.getByText(/loading schedule/i)).toBeInTheDocument();
   });
@@ -46,10 +53,10 @@ describe('Schedule Page', () => {
 
     getSchedule.mockResolvedValue(mockScheduleData);
 
-    render(<Schedule />);
+    renderSchedule();
 
     await waitFor(() => {
-      expect(screen.getByText('Team Schedule (2025-2026)')).toBeInTheDocument();
+      expect(screen.getByText('ASU Hockey Schedule & Results')).toBeInTheDocument();
       expect(screen.getByText(/University of Arizona/i)).toBeInTheDocument();
       expect(screen.getByText(/Boston University/i)).toBeInTheDocument();
     });
@@ -62,7 +69,7 @@ describe('Schedule Page', () => {
       error: 'Failed to fetch schedule'
     });
 
-    render(<Schedule />);
+    renderSchedule();
 
     await waitFor(() => {
       expect(screen.getByText(/failed to fetch schedule/i)).toBeInTheDocument();
@@ -88,7 +95,7 @@ describe('Schedule Page', () => {
     };
 
     getSchedule.mockResolvedValue(mockScheduleData);
-    render(<Schedule />);
+    renderSchedule();
 
     await waitFor(() => {
       const boxLink = screen.getByRole('link', { name: /box/i });
@@ -117,7 +124,7 @@ describe('Schedule Page', () => {
     };
 
     getSchedule.mockResolvedValue(mockScheduleData);
-    render(<Schedule />);
+    renderSchedule();
 
     await waitFor(() => {
       expect(screen.queryByRole('link', { name: /box/i })).not.toBeInTheDocument();
@@ -141,7 +148,7 @@ describe('Schedule Page', () => {
     };
 
     getSchedule.mockResolvedValue(mockScheduleData);
-    render(<Schedule />);
+    renderSchedule();
 
     await waitFor(() => {
       expect(screen.getByText('Overall')).toBeInTheDocument();
@@ -165,7 +172,7 @@ describe('Schedule Page', () => {
     };
 
     getSchedule.mockResolvedValue(mockScheduleData);
-    render(<Schedule />);
+    renderSchedule();
 
     await waitFor(() => {
       expect(screen.getByText('Overall')).toBeInTheDocument();

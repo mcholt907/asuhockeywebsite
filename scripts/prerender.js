@@ -16,14 +16,39 @@ const buildDir = path.join(__dirname, '..', 'build');
 
 async function prerender() {
   console.log(`[Prerender] Starting express server on port ${PORT}...`);
-  const server = spawn('node', ['server.js'], { stdio: 'pipe' });
+  const server = spawn(process.execPath, ['server.js'], {
+    stdio: ['ignore', 'pipe', 'pipe'],
+    env: {
+      ...process.env,
+      PORT: PORT.toString(),
+      NODE_ENV: 'production',
+      IS_PRERENDER: 'true',
+    },
+  });
   
   let started = false;
+  let serverOutput = '';
+
+  const captureServerOutput = (chunk, stream) => {
+    const text = chunk.toString();
+    serverOutput += text;
+    text
+      .split(/\r?\n/)
+      .filter(Boolean)
+      .forEach(line => console.log(`[Prerender server:${stream}] ${line}`));
+  };
+
+  server.stdout.on('data', chunk => captureServerOutput(chunk, 'stdout'));
+  server.stderr.on('data', chunk => captureServerOutput(chunk, 'stderr'));
   
   // Basic check to see if server threw an error or exited immediately
   server.on('exit', (code) => {
     if (!started) {
       console.error(`[Prerender] Server exited prematurely with code ${code}`);
+      if (serverOutput.trim()) {
+        console.error('[Prerender] Server output before exit:');
+        console.error(serverOutput.trim());
+      }
       process.exit(1);
     }
   });

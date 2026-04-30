@@ -1,6 +1,8 @@
 // Manual mock for react-router-dom to avoid module resolution issues in Jest
 import React from 'react';
 
+let mockPathname = '/';
+
 export const BrowserRouter = ({ children }) => <div data-testid="browser-router">{children}</div>;
 export const Routes = ({ children }) => <div data-testid="routes">{children}</div>;
 export const Route = ({ path, element }) => <div data-testid={`route-${path}`}>{element}</div>;
@@ -16,5 +18,7 @@ export const Link = ({ to, children, ...props }) => (
 );
 export const useNavigate = () => jest.fn();
 export const useParams = () => ({});
-export const useLocation = () => ({ pathname: '/' });
-
+export const useLocation = () => ({ pathname: mockPathname });
+export const __setMockPathname = (pathname) => {
+  mockPathname = pathname;
+};

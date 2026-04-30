@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { NotificationProvider } from './context/NotificationContext';
+import { __setMockPathname } from 'react-router-dom';
 
 // Use manual mock from __mocks__ directory
 jest.mock('react-router-dom');
@@ -18,6 +19,10 @@ const renderApp = () => {
 };
 
 describe('App Component', () => {
+  beforeEach(() => {
+    __setMockPathname('/');
+  });
+
   it('should render the header with logo', () => {
     renderApp();
     // There are multiple logos (header and footer), so get all and check first one
@@ -28,15 +33,14 @@ describe('App Component', () => {
 
   it('should render navigation links', () => {
     renderApp();
-    // Navigation appears in both header and footer, so use getAllByText
+
     const homeLinks = screen.getAllByText('Home');
     const newsLinks = screen.getAllByText('News');
     const rosterLinks = screen.getAllByText('Roster');
     const scheduleLinks = screen.getAllByText('Schedule');
     const recruitingLinks = screen.getAllByText('Recruiting');
     const statsLinks = screen.getAllByText('Stats');
-    const aboutLinks = screen.getAllByText('About');
-    const contactLinks = screen.getAllByText('Contact');
+    const alumniLinks = screen.getAllByText(/Where Are They Now\?|Alumni/);
     
     expect(homeLinks.length).toBeGreaterThan(0);
     expect(newsLinks.length).toBeGreaterThan(0);
@@ -44,17 +48,18 @@ describe('App Component', () => {
     expect(scheduleLinks.length).toBeGreaterThan(0);
     expect(recruitingLinks.length).toBeGreaterThan(0);
     expect(statsLinks.length).toBeGreaterThan(0);
-    expect(aboutLinks.length).toBeGreaterThan(0);
-    expect(contactLinks.length).toBeGreaterThan(0);
+    expect(alumniLinks.length).toBeGreaterThan(0);
   });
 
   it('should render footer with copyright', () => {
+    __setMockPathname('/news');
     renderApp();
     const currentYear = new Date().getFullYear();
     expect(screen.getByText(new RegExp(`© ${currentYear} ASU Hockey Fan Site`))).toBeInTheDocument();
   });
 
   it('should render social media links in footer', () => {
+    __setMockPathname('/news');
     renderApp();
     // Social media links don't have accessible text (just icons), so query by href
     const allLinks = screen.getAllByRole('link');

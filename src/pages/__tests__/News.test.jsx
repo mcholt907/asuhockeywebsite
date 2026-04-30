@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import { HelmetProvider } from 'react-helmet-async';
 import News from '../News';
 
 // Mock the API service
@@ -9,6 +10,12 @@ jest.mock('../../services/api', () => ({
 
 import { getNews } from '../../services/api';
 
+const renderNews = () => render(
+  <HelmetProvider>
+    <News />
+  </HelmetProvider>
+);
+
 describe('News Page', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -17,7 +24,7 @@ describe('News Page', () => {
   it('should render loading state initially', () => {
     getNews.mockImplementation(() => new Promise(() => {}));
     
-    render(<News />);
+    renderNews();
     
     expect(screen.getByText(/loading news/i)).toBeInTheDocument();
   });
@@ -38,10 +45,10 @@ describe('News Page', () => {
 
     getNews.mockResolvedValue(mockNewsData);
 
-    render(<News />);
+    renderNews();
 
     await waitFor(() => {
-      expect(screen.getByText('Hockey News')).toBeInTheDocument();
+      expect(screen.getByText('ASU Hockey News')).toBeInTheDocument();
       expect(screen.getByText('ASU Hockey Wins Championship')).toBeInTheDocument();
     });
   });
@@ -53,7 +60,7 @@ describe('News Page', () => {
       error: 'Failed to fetch news'
     });
 
-    render(<News />);
+    renderNews();
 
     await waitFor(() => {
       expect(screen.getByText(/failed to fetch news/i)).toBeInTheDocument();
@@ -66,10 +73,10 @@ describe('News Page', () => {
       source: 'api'
     });
 
-    render(<News />);
+    renderNews();
 
     await waitFor(() => {
-      expect(screen.getByText(/no news articles found/i)).toBeInTheDocument();
+      expect(screen.getByText(/no news articles found for this category/i)).toBeInTheDocument();
     });
   });
 });
