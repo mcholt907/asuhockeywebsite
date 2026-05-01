@@ -36,7 +36,8 @@ src/hooks/queries/
 ├── useSchedule.js
 ├── useStandings.js
 ├── useAlumni.js
-└── useTransfers.js
+├── useTransfers.js
+└── useStats.js
 
 src/services/api.js    ← refactored to throw on error
 src/test-utils/renderWithQueryClient.jsx  ← per-test isolated QueryClient
@@ -76,6 +77,7 @@ export const queryKeys = {
   standings: ['standings'],
   alumni:    ['alumni'],
   transfers: ['transfers'],
+  stats:     ['stats'],
 };
 ```
 
@@ -241,10 +243,10 @@ Per-test client prevents cross-test cache pollution. Disabling retry keeps error
 
 ### PR 2 — "TanStack Query: remaining pages"
 
-1. Refactor remaining six functions in `api.js` to throw
-2. Add `useNews.js`, `useRoster.js`, `useRecruits.js`, `useStandings.js`, `useAlumni.js`, `useTransfers.js`
+1. Refactor remaining six functions in `api.js` to throw; **add new `getStats` to `api.js`** (currently `Stats.jsx` uses raw `fetch('/api/stats')` — folding it into the same data layer is required to fully eliminate F7's boilerplate)
+2. Add `useNews.js`, `useRoster.js`, `useRecruits.js`, `useStandings.js`, `useAlumni.js`, `useTransfers.js`, `useStats.js`
 3. Convert `Home.jsx` remaining queries
-4. Convert `News.jsx`, `Roster.jsx`, `Recruiting.jsx`, `Stats.jsx`, `Alumni.jsx`
+4. Convert `News.jsx`, `Roster.jsx`, `Recruiting.jsx`, `Stats.jsx`, `Alumni.jsx`, `NewsFeed.jsx`
 5. Update `api.test.js`, `NewsFeed.test.jsx`, `News.test.jsx`
 
 **Verification:**
