@@ -1,5 +1,7 @@
 // App.jsx
 import { BrowserRouter, Routes, Route, NavLink, useLocation } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from './hooks/queries/queryClient';
 import './App.css';
 
 // Page Components
@@ -14,6 +16,12 @@ import Alumni from './pages/Alumni';
 // Global Components
 import GlobalNotificationBanner from './components/GlobalNotificationBanner';
 import MobileBottomNav from './components/MobileBottomNav';
+
+// eslint-disable-next-line
+const ReactQueryDevtools =
+  process.env.NODE_ENV !== 'production'
+    ? require('@tanstack/react-query-devtools').ReactQueryDevtools
+    : () => null;
 
 function AppInner() {
   const location = useLocation();
@@ -115,9 +123,12 @@ function AppInner() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <AppInner />
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AppInner />
+      </BrowserRouter>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 }
 
