@@ -63,16 +63,12 @@ describe('Schedule Page', () => {
   });
 
   it('should render error message when API call fails', async () => {
-    getSchedule.mockResolvedValue({
-      data: [],
-      source: 'error',
-      error: 'Failed to fetch schedule'
-    });
+    getSchedule.mockRejectedValue(new Error('Failed to fetch schedule'));
 
     renderSchedule();
 
     await waitFor(() => {
-      expect(screen.getByText(/failed to fetch schedule/i)).toBeInTheDocument();
+      expect(screen.getByText(/failed to load schedule/i)).toBeInTheDocument();
     });
   });
 
