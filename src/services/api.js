@@ -108,17 +108,9 @@ export const getStandings = async () => {
  *                                   Returns error object on error or if data is not in expected format.
  */
 export const getSchedule = async () => {
-  try {
-    const response = await axios.get(`${API_BASE_URL}/schedule`);
-    // The backend /api/schedule returns { data: schedule_array, source: 'live'/'cache', timestamp }
-    // We want to return this whole object so the component can access the source.
-    if (response.data && typeof response.data === 'object' && response.data.data !== undefined) {
-      return response.data; // Return the whole object
-    }
-    console.error('Schedule data received from API is not in the expected format:', response.data);
-    return { data: [], source: 'error', error: 'Invalid data format from API' }; // Return error state
-  } catch (error) {
-    console.error('Error fetching schedule:', error);
-    return { data: [], source: 'error', error: error.message || 'Failed to fetch schedule' }; // Return error state
+  const response = await axios.get(`${API_BASE_URL}/schedule`);
+  if (!response.data || typeof response.data !== 'object' || response.data.data === undefined) {
+    throw new Error('Invalid data format from /api/schedule');
   }
+  return response.data;
 }; 

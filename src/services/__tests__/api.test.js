@@ -134,16 +134,16 @@ describe('API Service', () => {
       expect(axios.get).toHaveBeenCalledWith(expect.stringContaining('/schedule'));
     });
 
-    it('should return error object when API call fails', async () => {
+    it('should throw when the network call fails', async () => {
       axios.get.mockRejectedValue(new Error('Network error'));
 
-      const result = await getSchedule();
+      await expect(getSchedule()).rejects.toThrow('Network error');
+    });
 
-      expect(result).toEqual({
-        data: [],
-        source: 'error',
-        error: 'Network error'
-      });
+    it('should throw when the response shape is invalid', async () => {
+      axios.get.mockResolvedValue({ data: { invalid: 'format' } });
+
+      await expect(getSchedule()).rejects.toThrow(/Invalid data format/i);
     });
   });
 });
