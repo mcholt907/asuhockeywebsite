@@ -20,17 +20,14 @@ describe('API Service', () => {
   });
 
   describe('getNews', () => {
-    it('should return news data when API call succeeds', async () => {
+    it('returns news data when API call succeeds', async () => {
       const mockData = {
         data: {
-          data: [
-            { title: 'Test Article', link: 'http://test.com', source: 'Test Source', date: '2024-01-01' }
-          ],
+          data: [{ title: 'Test', link: 'http://t.com', source: 'X', date: '2024-01-01' }],
           source: 'api',
           timestamp: '2024-01-01T00:00:00Z'
         }
       };
-
       axios.get.mockResolvedValue(mockData);
 
       const result = await getNews();
@@ -39,29 +36,14 @@ describe('API Service', () => {
       expect(axios.get).toHaveBeenCalledWith(expect.stringContaining('/news'));
     });
 
-    it('should return error object when API call fails', async () => {
+    it('throws when the network call fails', async () => {
       axios.get.mockRejectedValue(new Error('Network error'));
-
-      const result = await getNews();
-
-      expect(result).toEqual({
-        data: [],
-        source: 'error',
-        error: 'Network error'
-      });
+      await expect(getNews()).rejects.toThrow('Network error');
     });
 
-    it('should return error object when data format is invalid', async () => {
-      const mockData = { data: { invalid: 'format' } };
-      axios.get.mockResolvedValue(mockData);
-
-      const result = await getNews();
-
-      expect(result).toEqual({
-        data: [],
-        source: 'error',
-        error: 'Invalid data format from API'
-      });
+    it('throws when the response shape is invalid', async () => {
+      axios.get.mockResolvedValue({ data: { invalid: 'format' } });
+      await expect(getNews()).rejects.toThrow(/Invalid data format/i);
     });
   });
 

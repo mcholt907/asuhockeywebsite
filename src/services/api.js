@@ -10,19 +10,11 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
  *                                   Returns error object on error or if data is not in expected format.
  */
 export const getNews = async () => {
-  try {
-    const response = await axios.get(`${API_BASE_URL}/news`);
-    // The backend /api/news returns an object like { data: articles[], source: 'live'/'cache', timestamp }
-    // We want to return this whole object so the component can access the source.
-    if (response.data && typeof response.data === 'object' && response.data.data !== undefined) {
-      return response.data;
-    }
-    console.error('News data received from API is not in the expected format:', response.data);
-    return { data: [], source: 'error', error: 'Invalid data format from API' }; // Return error state
-  } catch (error) {
-    console.error('Error fetching news:', error);
-    return { data: [], source: 'error', error: error.message || 'Failed to fetch news' }; // Return error state
+  const response = await axios.get(`${API_BASE_URL}/news`);
+  if (!response.data || typeof response.data !== 'object' || response.data.data === undefined) {
+    throw new Error('Invalid data format from /api/news');
   }
+  return response.data;
 };
 
 /**

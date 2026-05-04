@@ -1,7 +1,8 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import NewsFeed from '../NewsFeed';
 import { NotificationProvider } from '../../context/NotificationContext';
+import { renderWithQueryClient } from '../../test-utils/renderWithQueryClient';
 
 // Mock the API service
 jest.mock('../../services/api', () => ({
@@ -11,7 +12,7 @@ jest.mock('../../services/api', () => ({
 import { getNews } from '../../services/api';
 
 const renderWithProvider = (component) => {
-  return render(
+  return renderWithQueryClient(
     <NotificationProvider>
       {component}
     </NotificationProvider>
@@ -52,11 +53,7 @@ describe('NewsFeed Component', () => {
   });
 
   it('should render error message when API call fails', async () => {
-    getNews.mockResolvedValue({
-      data: [],
-      source: 'error',
-      error: 'Failed to fetch news'
-    });
+    getNews.mockRejectedValue(new Error('Failed to fetch news'));
 
     renderWithProvider(<NewsFeed />);
 
