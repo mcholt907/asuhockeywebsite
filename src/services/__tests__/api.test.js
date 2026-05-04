@@ -12,7 +12,7 @@ afterAll(() => {
 });
 
 import axios from 'axios';
-import { getNews, getRoster, getRecruits, getSchedule, getStandings, getTransfers } from '../api';
+import { getNews, getRoster, getRecruits, getSchedule, getStandings, getTransfers, getAlumni } from '../api';
 
 describe('API Service', () => {
   beforeEach(() => {
@@ -142,6 +142,20 @@ describe('API Service', () => {
     it('throws when the network call fails', async () => {
       axios.get.mockRejectedValue(new Error('Network error'));
       await expect(getStandings()).rejects.toThrow('Network error');
+    });
+  });
+
+  describe('getAlumni', () => {
+    it('returns alumni data on success', async () => {
+      const mock = { skaters: [], goalies: [], lastUpdated: '2024-01-01' };
+      axios.get.mockResolvedValue({ data: mock });
+      const result = await getAlumni();
+      expect(result).toEqual(mock);
+    });
+
+    it('throws when the network call fails', async () => {
+      axios.get.mockRejectedValue(new Error('Network error'));
+      await expect(getAlumni()).rejects.toThrow('Network error');
     });
   });
 });

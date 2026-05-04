@@ -1,35 +1,19 @@
 // src/pages/Alumni.jsx
 // V3: Displays all team entries per player with individual stats
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { getAlumni } from '../services/api';
+import { useAlumni } from '../hooks/queries/useAlumni';
 import './Alumni.css';
 
 function Alumni() {
-    const [alumni, setAlumni] = useState({ skaters: [], goalies: [] });
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const { data, isLoading: loading, isError } = useAlumni();
     const [activeTab, setActiveTab] = useState('skaters');
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                setError(null);
-                const data = await getAlumni();
-                setAlumni(data);
-            } catch (err) {
-                console.error('Error fetching alumni:', err);
-                setError('Failed to load alumni data.');
-            } finally {
-                setLoading(false);
-            }
-        };
+    const skaters = data?.skaters || [];
+    const goalies = data?.goalies || [];
+    const error = isError ? 'Failed to load alumni data.' : null;
 
-        fetchData();
-    }, []);
-
-    const currentList = activeTab === 'skaters' ? alumni.skaters : alumni.goalies;
+    const currentList = activeTab === 'skaters' ? skaters : goalies;
 
     // Count unique players
     const uniqueCount = (list) => {
@@ -87,13 +71,13 @@ function Alumni() {
                         className={activeTab === 'skaters' ? 'active' : ''}
                         onClick={() => setActiveTab('skaters')}
                     >
-                        Skaters ({uniqueCount(alumni.skaters || [])})
+                        Skaters ({uniqueCount(skaters)})
                     </button>
                     <button
                         className={activeTab === 'goalies' ? 'active' : ''}
                         onClick={() => setActiveTab('goalies')}
                     >
-                        Goalies ({uniqueCount(alumni.goalies || [])})
+                        Goalies ({uniqueCount(goalies)})
                     </button>
                 </div>
             </div>
@@ -219,9 +203,9 @@ function Alumni() {
             </div>
 
             {/* Last Updated */}
-            {alumni.lastUpdated && (
+            {data?.lastUpdated && (
                 <div className="last-updated">
-                    <p>Data from Elite Prospects • Last updated: {new Date(alumni.lastUpdated).toLocaleDateString()}</p>
+                    <p>Data from Elite Prospects • Last updated: {new Date(data.lastUpdated).toLocaleDateString()}</p>
                 </div>
             )}
         </div>
