@@ -29,33 +29,20 @@ export const getRoster = async () => {
 
 /**
  * Fetches recruiting data.
- * @returns {Promise<Object>} A promise that resolves to an object with seasons as keys
- *                            and arrays of recruit objects as values (e.g., {"2026-2027": [...]}).
- *                            Returns empty object on error.
+ * @returns {Promise<Object>} Object keyed by season (e.g., {"2026-2027": [...]}). Throws on network error.
  */
 export const getRecruits = async () => {
-  try {
-    const response = await axios.get(`${API_BASE_URL}/recruits`);
-    return response.data; // Expects an object like { "YYYY-YYYY": [recruits] }
-  } catch (error) {
-    console.error('Error fetching recruits:', error);
-    return {};
-  }
+  const response = await axios.get(`${API_BASE_URL}/recruits`);
+  return response.data;
 };
 
 /**
  * Fetches transfer/transaction data.
- * @returns {Promise<Object>} A promise that resolves to an object with incoming and outgoing transfers.
- *                            Returns empty object on error.
+ * @returns {Promise<Object>} { incoming: [...], outgoing: [...], lastUpdated: ... }. Throws on network error.
  */
 export const getTransfers = async () => {
-  try {
-    const response = await axios.get(`${API_BASE_URL}/transfers`);
-    return response.data; // Expects { incoming: [...], outgoing: [...], lastUpdated: ... }
-  } catch (error) {
-    console.error('Error fetching transfers:', error);
-    return { incoming: [], outgoing: [], lastUpdated: null };
-  }
+  const response = await axios.get(`${API_BASE_URL}/transfers`);
+  return response.data;
 };
 
 /**

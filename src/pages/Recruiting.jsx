@@ -1,66 +1,41 @@
 // src/pages/Recruiting.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { getRecruits, getTransfers } from '../services/api';
+import { useRecruits } from '../hooks/queries/useRecruits';
+import { useTransfers } from '../hooks/queries/useTransfers';
 import './Recruiting.css';
 
 function Recruiting() {
-  const [recruitsBySeason, setRecruitsBySeason] = useState({});
-  const [transfers, setTransfers] = useState({ incoming: [], outgoing: [] });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [sortedSeasons, setSortedSeasons] = useState([]);
+  const { data: recruitsData, isLoading: recruitsLoading, isError: recruitsError } = useRecruits();
+  const { data: transfersData, isLoading: transfersLoading, isError: transfersError } = useTransfers();
   const [activeSeason, setActiveSeason] = useState(null);
 
+  const loading = recruitsLoading || transfersLoading;
+  const error = (recruitsError || transfersError) ? 'Failed to load recruiting data.' : null;
+
+  const recruitsBySeason = useMemo(() => {
+    if (!recruitsData || typeof recruitsData !== 'object') return {};
+    const filtered = {};
+    for (const season of Object.keys(recruitsData)) {
+      filtered[season] = Array.isArray(recruitsData[season]) ? recruitsData[season] : [];
+    }
+    return filtered;
+  }, [recruitsData]);
+
+  const sortedSeasons = useMemo(
+    () => Object.keys(recruitsBySeason).sort().reverse(),
+    [recruitsBySeason]
+  );
+
+  const transfers = transfersData && (transfersData.incoming || transfersData.outgoing)
+    ? transfersData
+    : { incoming: [], outgoing: [] };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        // Fetch both recruits and transfers in parallel
-        const [recruitData, transferData] = await Promise.all([
-          getRecruits(),
-          getTransfers()
-        ]);
-
-        // Process recruit data
-        if (typeof recruitData === 'object' && recruitData !== null) {
-          const filteredData = {};
-          let seasons = Object.keys(recruitData);
-
-          for (const season of seasons) {
-            if (Array.isArray(recruitData[season])) {
-              filteredData[season] = recruitData[season];
-            } else {
-              filteredData[season] = [];
-            }
-          }
-          setRecruitsBySeason(filteredData);
-          const seasonsSorted = Object.keys(filteredData).sort().reverse();
-          setSortedSeasons(seasonsSorted);
-          setActiveSeason(seasonsSorted[seasonsSorted.length - 1]);
-        } else {
-          setRecruitsBySeason({});
-          setSortedSeasons([]);
-          setError('Could not load recruiting data.');
-        }
-
-        // Process transfer data
-        if (transferData && (transferData.incoming || transferData.outgoing)) {
-          setTransfers(transferData);
-        }
-
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Failed to load recruiting data.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+    if (!activeSeason && sortedSeasons.length > 0) {
+      setActiveSeason(sortedSeasons[sortedSeasons.length - 1]);
+    }
+  }, [activeSeason, sortedSeasons]);
 
   // Group recruits by position category and sort alphabetically
   const groupRecruits = (recruits) => {

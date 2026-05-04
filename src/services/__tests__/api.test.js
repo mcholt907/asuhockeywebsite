@@ -12,7 +12,7 @@ afterAll(() => {
 });
 
 import axios from 'axios';
-import { getNews, getRoster, getRecruits, getSchedule, getStandings } from '../api';
+import { getNews, getRoster, getRecruits, getSchedule, getStandings, getTransfers } from '../api';
 
 describe('API Service', () => {
   beforeEach(() => {
@@ -67,27 +67,31 @@ describe('API Service', () => {
   });
 
   describe('getRecruits', () => {
-    it('should return recruits data when API call succeeds', async () => {
-      const mockRecruits = {
-        '2024-2025': [
-          { name: 'Recruit 1', position: 'F' }
-        ]
-      };
-
-      axios.get.mockResolvedValue({ data: mockRecruits });
-
+    it('returns recruits data on success', async () => {
+      const mock = { '2024-2025': [{ name: 'R1', position: 'F' }] };
+      axios.get.mockResolvedValue({ data: mock });
       const result = await getRecruits();
-
-      expect(result).toEqual(mockRecruits);
+      expect(result).toEqual(mock);
       expect(axios.get).toHaveBeenCalledWith(expect.stringContaining('/recruits'));
     });
 
-    it('should return empty object when API call fails', async () => {
+    it('throws when the network call fails', async () => {
       axios.get.mockRejectedValue(new Error('Network error'));
+      await expect(getRecruits()).rejects.toThrow('Network error');
+    });
+  });
 
-      const result = await getRecruits();
+  describe('getTransfers', () => {
+    it('returns transfer data on success', async () => {
+      const mock = { incoming: [], outgoing: [], lastUpdated: '2024-01-01' };
+      axios.get.mockResolvedValue({ data: mock });
+      const result = await getTransfers();
+      expect(result).toEqual(mock);
+    });
 
-      expect(result).toEqual({});
+    it('throws when the network call fails', async () => {
+      axios.get.mockRejectedValue(new Error('Network error'));
+      await expect(getTransfers()).rejects.toThrow('Network error');
     });
   });
 
