@@ -20,16 +20,11 @@ export const getNews = async () => {
 /**
  * Fetches the team roster.
  * @returns {Promise<Array<Object>>} A promise that resolves to an array of player objects.
- *                                   Returns empty array on error.
+ *                                   Throws on network error.
  */
 export const getRoster = async () => {
-  try {
-    const response = await axios.get(`${API_BASE_URL}/roster`);
-    return response.data; // Expects an array of player objects
-  } catch (error) {
-    console.error('Error fetching roster:', error);
-    return [];
-  }
+  const response = await axios.get(`${API_BASE_URL}/roster`);
+  return response.data;
 };
 
 /**

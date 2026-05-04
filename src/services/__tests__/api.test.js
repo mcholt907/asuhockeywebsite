@@ -48,12 +48,10 @@ describe('API Service', () => {
   });
 
   describe('getRoster', () => {
-    it('should return roster data when API call succeeds', async () => {
+    it('returns roster data on success', async () => {
       const mockRoster = [
         { name: 'Player 1', position: 'F', number: '1' },
-        { name: 'Player 2', position: 'D', number: '2' }
       ];
-
       axios.get.mockResolvedValue({ data: mockRoster });
 
       const result = await getRoster();
@@ -62,12 +60,9 @@ describe('API Service', () => {
       expect(axios.get).toHaveBeenCalledWith(expect.stringContaining('/roster'));
     });
 
-    it('should return empty array when API call fails', async () => {
+    it('throws when the network call fails', async () => {
       axios.get.mockRejectedValue(new Error('Network error'));
-
-      const result = await getRoster();
-
-      expect(result).toEqual([]);
+      await expect(getRoster()).rejects.toThrow('Network error');
     });
   });
 
