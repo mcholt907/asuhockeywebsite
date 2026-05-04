@@ -1,61 +1,64 @@
 // src/pages/Home.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import UpcomingGames from '../components/UpcomingGames';
-import { getSchedule, getNews, getStandings } from '../services/api';
+import { getNews, getStandings } from '../services/api';
+import { useSchedule } from '../hooks/queries/useSchedule';
 import './Home.css';
 
 function Home() {
-  const [nextGame, setNextGame] = useState(null);
-  const [today, setToday] = useState('');
-  const [record, setRecord] = useState({ wins: 0, losses: 0, ties: 0 });
-  const [npi, setNpi] = useState(null);
+  const { data: scheduleResponse, isLoading: scheduleLoading } = useSchedule();
   const [news, setNews] = useState([]);
   const [standings, setStandings] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [restLoading, setRestLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [scheduleResponse, newsResponse, standingsResponse] = await Promise.all([
-          getSchedule(),
+        const [newsResponse, standingsResponse] = await Promise.all([
           getNews(),
-          getStandings()
+          getStandings(),
         ]);
-
-        const d = new Date();
-        const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-        setToday(todayStr);
-
-        const games = scheduleResponse.data || [];
-        const next = games
-          .filter(g => g.date >= todayStr)
-          .sort((a, b) => new Date(a.date) - new Date(b.date))[0] || null;
-        setNextGame(next);
-
-        let wins = 0, losses = 0, ties = 0;
-        games.forEach(game => {
-          if (game.result) {
-            const r = game.result.toLowerCase();
-            if (r.includes('w') || r.match(/\d+-\d+.*w/i)) wins++;
-            else if (r.includes('l') || r.match(/\d+-\d+.*l/i)) losses++;
-            else if (r.includes('t') || r.includes('otl') || r.includes('sol')) ties++;
-          }
-        });
-        setRecord({ wins, losses, ties });
-        setNpi(scheduleResponse.team_record?.npi ?? null);
-
         setNews(newsResponse.data || []);
         setStandings(standingsResponse.data || []);
       } catch (err) {
         console.error('Home data fetch error:', err);
       } finally {
-        setLoading(false);
+        setRestLoading(false);
       }
     }
     fetchData();
   }, []);
+
+  const today = useMemo(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }, []);
+
+  const games = scheduleResponse?.data || [];
+
+  const nextGame = useMemo(() => {
+    return games
+      .filter(g => g.date >= today)
+      .sort((a, b) => new Date(a.date) - new Date(b.date))[0] || null;
+  }, [games, today]);
+
+  const record = useMemo(() => {
+    let wins = 0, losses = 0, ties = 0;
+    games.forEach(game => {
+      if (game.result) {
+        const r = game.result.toLowerCase();
+        if (r.includes('w') || r.match(/\d+-\d+.*w/i)) wins++;
+        else if (r.includes('l') || r.match(/\d+-\d+.*l/i)) losses++;
+        else if (r.includes('t') || r.includes('otl') || r.includes('sol')) ties++;
+      }
+    });
+    return { wins, losses, ties };
+  }, [games]);
+
+  const npi = scheduleResponse?.team_record?.npi ?? null;
+  const loading = scheduleLoading || restLoading;
 
   if (loading) {
     return <div className="home-loading">Loading...</div>;
@@ -259,8 +262,6 @@ function Home() {
             <div className="right-section">
               <h3 className="right-section-title">Schedule</h3>
               <div className="right-upcoming-games">
-                {/* TODO: UpcomingGames independently fetches /api/schedule; could be optimized
-                    by passing scheduleData as a prop to avoid the double fetch */}
                 <UpcomingGames limit={3} />
               </div>
             </div>
