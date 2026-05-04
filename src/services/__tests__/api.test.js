@@ -12,7 +12,7 @@ afterAll(() => {
 });
 
 import axios from 'axios';
-import { getNews, getRoster, getRecruits, getSchedule } from '../api';
+import { getNews, getRoster, getRecruits, getSchedule, getStandings } from '../api';
 
 describe('API Service', () => {
   beforeEach(() => {
@@ -126,6 +126,23 @@ describe('API Service', () => {
       axios.get.mockResolvedValue({ data: { invalid: 'format' } });
 
       await expect(getSchedule()).rejects.toThrow(/Invalid data format/i);
+    });
+  });
+
+  describe('getStandings', () => {
+    it('returns standings data on success', async () => {
+      const mock = { data: [{ team: 'ASU', rank: 1 }] };
+      axios.get.mockResolvedValue({ data: mock });
+
+      const result = await getStandings();
+
+      expect(result).toEqual(mock);
+      expect(axios.get).toHaveBeenCalledWith(expect.stringContaining('/standings'));
+    });
+
+    it('throws when the network call fails', async () => {
+      axios.get.mockRejectedValue(new Error('Network error'));
+      await expect(getStandings()).rejects.toThrow('Network error');
     });
   });
 });

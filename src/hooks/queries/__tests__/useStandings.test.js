@@ -1,0 +1,32 @@
+import React from 'react';
+import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+jest.mock('../../../services/api');
+
+import { getStandings } from '../../../services/api';
+import { useStandings } from '../useStandings';
+
+const wrapper = ({ children }) => {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false, gcTime: 0 } },
+  });
+  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+};
+
+describe('useStandings', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('returns standings on success', async () => {
+    getStandings.mockResolvedValue({ data: [{ team: 'ASU' }] });
+    const { result } = renderHook(() => useStandings(), { wrapper });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data.data[0].team).toBe('ASU');
+  });
+
+  it('surfaces isError on throw', async () => {
+    getStandings.mockRejectedValue(new Error('boom'));
+    const { result } = renderHook(() => useStandings(), { wrapper });
+    await waitFor(() => expect(result.current.isError).toBe(true));
+  });
+});

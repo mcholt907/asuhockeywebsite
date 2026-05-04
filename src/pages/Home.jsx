@@ -1,27 +1,20 @@
 // src/pages/Home.jsx
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import UpcomingGames from '../components/UpcomingGames';
-import { getStandings } from '../services/api';
 import { useSchedule } from '../hooks/queries/useSchedule';
 import { useNews } from '../hooks/queries/useNews';
+import { useStandings } from '../hooks/queries/useStandings';
 import './Home.css';
 
 function Home() {
   const { data: scheduleResponse, isLoading: scheduleLoading } = useSchedule();
   const { data: newsResponse, isLoading: newsLoading } = useNews();
-  const [standings, setStandings] = useState([]);
-  const [standingsLoading, setStandingsLoading] = useState(true);
-
-  useEffect(() => {
-    getStandings()
-      .then(r => setStandings(r.data || []))
-      .catch(err => console.error('Home standings fetch error:', err))
-      .finally(() => setStandingsLoading(false));
-  }, []);
+  const { data: standingsResponse, isLoading: standingsLoading } = useStandings();
 
   const news = newsResponse?.data || [];
+  const standings = standingsResponse?.data || [];
 
   const today = useMemo(() => {
     const d = new Date();
