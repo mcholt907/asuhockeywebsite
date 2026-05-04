@@ -66,6 +66,15 @@ export const getStandings = async () => {
 };
 
 /**
+ * Fetches player stats (skaters + goalies).
+ * @returns {Promise<Object>} { skaters: [...], goalies: [...] }. Throws on network error.
+ */
+export const getStats = async () => {
+  const response = await axios.get(`${API_BASE_URL}/stats`);
+  return response.data;
+};
+
+/**
  * Fetches the game schedule.
  * @returns {Promise<Object>} A promise that resolves to an object containing the game schedule.
  *                                   The object should have { data, source, timestamp }

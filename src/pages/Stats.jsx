@@ -1,37 +1,18 @@
 // src/pages/Stats.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import SortableTable from '../components/SortableTable';
+import { useStats } from '../hooks/queries/useStats';
 import './Stats.css';
 
 function Stats() {
-  const [stats, setStats] = useState({ skaters: [], goalies: [] });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { data, isLoading: loading, isError } = useStats();
+  const stats = {
+    skaters: data?.skaters || [],
+    goalies: data?.goalies || [],
+  };
+  const error = isError ? 'Failed to load stats data.' : '';
   const [activeTab, setActiveTab] = useState('skaters');
-
-  useEffect(() => {
-    async function fetchStatsData() {
-      setLoading(true);
-      setError('');
-      try {
-        const response = await fetch('/api/stats');
-        if (!response.ok) {
-          throw new Error(`Server error: ${response.status}`);
-        }
-        const result = await response.json();
-        setStats({
-          skaters: result.skaters || [],
-          goalies: result.goalies || [],
-        });
-      } catch (err) {
-        setError('Failed to load stats data.');
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchStatsData();
-  }, []);
 
   // Helper to find leaders safely
   const getLeaders = (data, key, count = 3) => {
