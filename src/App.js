@@ -1,5 +1,8 @@
 // App.jsx
 import { BrowserRouter, Routes, Route, NavLink, useLocation } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { queryClient } from './hooks/queries/queryClient';
 import './App.css';
 
 // Page Components
@@ -115,9 +118,12 @@ function AppInner() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <AppInner />
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AppInner />
+      </BrowserRouter>
+      {process.env.NODE_ENV !== 'production' && <ReactQueryDevtools initialIsOpen={false} />}
+    </QueryClientProvider>
   );
 }
 
