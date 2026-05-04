@@ -1,44 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { getRoster } from '../services/api';
+import { useRoster } from '../hooks/queries/useRoster';
 import './Roster.css';
 
 function Roster() {
-  const [players, setPlayers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { data, isLoading: loading, isError } = useRoster();
   const [selectedPosition, setSelectedPosition] = useState('all');
 
-  useEffect(() => {
-    const fetchRosterData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const rosterData = await getRoster();
-        if (Array.isArray(rosterData)) {
-          // Filter out invalid players (missing names or non-numeric jersey numbers)
-          // Numbers can be in format "30", "#30", or "#30" 
-          const filteredPlayers = rosterData.filter(
-            player => player &&
-              player.name &&
-              (player.number && /^#?[0-9]+$/.test(String(player.number).trim()))
-          );
-          setPlayers(filteredPlayers);
-        } else {
-          setPlayers([]);
-          setError('Could not load roster data in the expected format.');
-        }
-      } catch (err) {
-        console.error('Error fetching roster:', err);
-        setError('Failed to load roster data. Please try again later.');
-        setPlayers([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const players = useMemo(() => {
+    if (!Array.isArray(data)) return [];
+    return data.filter(
+      player => player &&
+        player.name &&
+        (player.number && /^#?[0-9]+$/.test(String(player.number).trim()))
+    );
+  }, [data]);
 
-    fetchRosterData();
-  }, []);
+  const error = isError ? 'Failed to load roster data. Please try again later.' : null;
 
   // Group players by position - check both 'position' field and name pattern for compatibility
   const isGoalie = (p) => {

@@ -1,35 +1,20 @@
 // src/pages/Home.jsx
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import UpcomingGames from '../components/UpcomingGames';
-import { getNews, getStandings } from '../services/api';
 import { useSchedule } from '../hooks/queries/useSchedule';
+import { useNews } from '../hooks/queries/useNews';
+import { useStandings } from '../hooks/queries/useStandings';
 import './Home.css';
 
 function Home() {
   const { data: scheduleResponse, isLoading: scheduleLoading } = useSchedule();
-  const [news, setNews] = useState([]);
-  const [standings, setStandings] = useState([]);
-  const [restLoading, setRestLoading] = useState(true);
+  const { data: newsResponse, isLoading: newsLoading } = useNews();
+  const { data: standingsResponse, isLoading: standingsLoading } = useStandings();
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const [newsResponse, standingsResponse] = await Promise.all([
-          getNews(),
-          getStandings(),
-        ]);
-        setNews(newsResponse.data || []);
-        setStandings(standingsResponse.data || []);
-      } catch (err) {
-        console.error('Home data fetch error:', err);
-      } finally {
-        setRestLoading(false);
-      }
-    }
-    fetchData();
-  }, []);
+  const news = newsResponse?.data || [];
+  const standings = standingsResponse?.data || [];
 
   const today = useMemo(() => {
     const d = new Date();
@@ -58,7 +43,7 @@ function Home() {
   }, [games]);
 
   const npi = scheduleResponse?.team_record?.npi ?? null;
-  const loading = scheduleLoading || restLoading;
+  const loading = scheduleLoading || newsLoading || standingsLoading;
 
   if (loading) {
     return <div className="home-loading">Loading...</div>;

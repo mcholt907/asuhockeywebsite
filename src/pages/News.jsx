@@ -1,39 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { getNews } from '../services/api';
+import { useNews } from '../hooks/queries/useNews';
 import './News.css';
 
 function News() {
-  const [articles, setArticles] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchArticles = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const responseData = await getNews();
-
-        if (responseData.source === 'error') {
-          setError(responseData.error || 'Failed to load news articles.');
-          setArticles([]);
-        } else if (responseData.data && Array.isArray(responseData.data)) {
-          setArticles(responseData.data);
-        } else {
-          setError('Could not load news articles in the expected format.');
-          setArticles([]);
-        }
-      } catch (err) {
-        setError('Failed to load news articles. Please try again later.');
-        setArticles([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchArticles();
-  }, []);
+  const { data, isLoading: loading, isError, error: queryError } = useNews();
+  const articles = data?.data && Array.isArray(data.data) ? data.data : [];
+  const error = isError ? (queryError?.message || 'Failed to load news articles. Please try again later.') : null;
 
   const [filter, setFilter] = useState('All');
 

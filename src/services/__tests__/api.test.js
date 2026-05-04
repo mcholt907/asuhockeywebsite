@@ -12,7 +12,7 @@ afterAll(() => {
 });
 
 import axios from 'axios';
-import { getNews, getRoster, getRecruits, getSchedule } from '../api';
+import { getNews, getRoster, getRecruits, getSchedule, getStandings, getTransfers, getAlumni, getStats } from '../api';
 
 describe('API Service', () => {
   beforeEach(() => {
@@ -20,17 +20,14 @@ describe('API Service', () => {
   });
 
   describe('getNews', () => {
-    it('should return news data when API call succeeds', async () => {
+    it('returns news data when API call succeeds', async () => {
       const mockData = {
         data: {
-          data: [
-            { title: 'Test Article', link: 'http://test.com', source: 'Test Source', date: '2024-01-01' }
-          ],
+          data: [{ title: 'Test', link: 'http://t.com', source: 'X', date: '2024-01-01' }],
           source: 'api',
           timestamp: '2024-01-01T00:00:00Z'
         }
       };
-
       axios.get.mockResolvedValue(mockData);
 
       const result = await getNews();
@@ -39,39 +36,22 @@ describe('API Service', () => {
       expect(axios.get).toHaveBeenCalledWith(expect.stringContaining('/news'));
     });
 
-    it('should return error object when API call fails', async () => {
+    it('throws when the network call fails', async () => {
       axios.get.mockRejectedValue(new Error('Network error'));
-
-      const result = await getNews();
-
-      expect(result).toEqual({
-        data: [],
-        source: 'error',
-        error: 'Network error'
-      });
+      await expect(getNews()).rejects.toThrow('Network error');
     });
 
-    it('should return error object when data format is invalid', async () => {
-      const mockData = { data: { invalid: 'format' } };
-      axios.get.mockResolvedValue(mockData);
-
-      const result = await getNews();
-
-      expect(result).toEqual({
-        data: [],
-        source: 'error',
-        error: 'Invalid data format from API'
-      });
+    it('throws when the response shape is invalid', async () => {
+      axios.get.mockResolvedValue({ data: { invalid: 'format' } });
+      await expect(getNews()).rejects.toThrow(/Invalid data format/i);
     });
   });
 
   describe('getRoster', () => {
-    it('should return roster data when API call succeeds', async () => {
+    it('returns roster data on success', async () => {
       const mockRoster = [
         { name: 'Player 1', position: 'F', number: '1' },
-        { name: 'Player 2', position: 'D', number: '2' }
       ];
-
       axios.get.mockResolvedValue({ data: mockRoster });
 
       const result = await getRoster();
@@ -80,37 +60,38 @@ describe('API Service', () => {
       expect(axios.get).toHaveBeenCalledWith(expect.stringContaining('/roster'));
     });
 
-    it('should return empty array when API call fails', async () => {
+    it('throws when the network call fails', async () => {
       axios.get.mockRejectedValue(new Error('Network error'));
-
-      const result = await getRoster();
-
-      expect(result).toEqual([]);
+      await expect(getRoster()).rejects.toThrow('Network error');
     });
   });
 
   describe('getRecruits', () => {
-    it('should return recruits data when API call succeeds', async () => {
-      const mockRecruits = {
-        '2024-2025': [
-          { name: 'Recruit 1', position: 'F' }
-        ]
-      };
-
-      axios.get.mockResolvedValue({ data: mockRecruits });
-
+    it('returns recruits data on success', async () => {
+      const mock = { '2024-2025': [{ name: 'R1', position: 'F' }] };
+      axios.get.mockResolvedValue({ data: mock });
       const result = await getRecruits();
-
-      expect(result).toEqual(mockRecruits);
+      expect(result).toEqual(mock);
       expect(axios.get).toHaveBeenCalledWith(expect.stringContaining('/recruits'));
     });
 
-    it('should return empty object when API call fails', async () => {
+    it('throws when the network call fails', async () => {
       axios.get.mockRejectedValue(new Error('Network error'));
+      await expect(getRecruits()).rejects.toThrow('Network error');
+    });
+  });
 
-      const result = await getRecruits();
+  describe('getTransfers', () => {
+    it('returns transfer data on success', async () => {
+      const mock = { incoming: [], outgoing: [], lastUpdated: '2024-01-01' };
+      axios.get.mockResolvedValue({ data: mock });
+      const result = await getTransfers();
+      expect(result).toEqual(mock);
+    });
 
-      expect(result).toEqual({});
+    it('throws when the network call fails', async () => {
+      axios.get.mockRejectedValue(new Error('Network error'));
+      await expect(getTransfers()).rejects.toThrow('Network error');
     });
   });
 
@@ -144,6 +125,52 @@ describe('API Service', () => {
       axios.get.mockResolvedValue({ data: { invalid: 'format' } });
 
       await expect(getSchedule()).rejects.toThrow(/Invalid data format/i);
+    });
+  });
+
+  describe('getStandings', () => {
+    it('returns standings data on success', async () => {
+      const mock = { data: [{ team: 'ASU', rank: 1 }] };
+      axios.get.mockResolvedValue({ data: mock });
+
+      const result = await getStandings();
+
+      expect(result).toEqual(mock);
+      expect(axios.get).toHaveBeenCalledWith(expect.stringContaining('/standings'));
+    });
+
+    it('throws when the network call fails', async () => {
+      axios.get.mockRejectedValue(new Error('Network error'));
+      await expect(getStandings()).rejects.toThrow('Network error');
+    });
+  });
+
+  describe('getAlumni', () => {
+    it('returns alumni data on success', async () => {
+      const mock = { skaters: [], goalies: [], lastUpdated: '2024-01-01' };
+      axios.get.mockResolvedValue({ data: mock });
+      const result = await getAlumni();
+      expect(result).toEqual(mock);
+    });
+
+    it('throws when the network call fails', async () => {
+      axios.get.mockRejectedValue(new Error('Network error'));
+      await expect(getAlumni()).rejects.toThrow('Network error');
+    });
+  });
+
+  describe('getStats', () => {
+    it('returns stats data on success', async () => {
+      const mock = { skaters: [], goalies: [] };
+      axios.get.mockResolvedValue({ data: mock });
+      const result = await getStats();
+      expect(result).toEqual(mock);
+      expect(axios.get).toHaveBeenCalledWith(expect.stringContaining('/stats'));
+    });
+
+    it('throws when the network call fails', async () => {
+      axios.get.mockRejectedValue(new Error('Network error'));
+      await expect(getStats()).rejects.toThrow('Network error');
     });
   });
 });

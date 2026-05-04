@@ -1,61 +1,17 @@
 // NewsFeed.jsx
-import { useState, useEffect } from 'react';
-import { getNews } from '../services/api'; // Import getNews
+import { useState } from 'react';
+import { useNews } from '../hooks/queries/useNews';
 import { useNotification } from '../context/NotificationContext'; // Import useNotification
 import './NewsFeed.css';
 
 function NewsFeed({ limit = 0 }) { // Added limit prop, default to 0 (no limit unless specified)
-  const [articles, setArticles] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [activeSource, setActiveSource] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const { showNotification } = useNotification(); // Get showNotification function
+  useNotification(); // Preserve provider linkage; notifications now flow via React Query state.
 
-  useEffect(() => {
-    async function fetchNewsData() {
-      let notificationShown = false; // Ensure only one notification per fetch attempt
-      try {
-        setLoading(true);
-        setError(null);
-        const responseData = await getNews();
-
-        if (responseData.source === 'error') {
-          setError(responseData.error || 'Failed to load news.');
-          setArticles([]);
-          showNotification(responseData.error || 'Failed to load news.', 'error');
-          notificationShown = true;
-        } else if (responseData.data && Array.isArray(responseData.data)) {
-          setArticles(responseData.data);
-          if (responseData.source === 'cache') {
-            showNotification('News data may not be current.', 'cache', responseData.timestamp);
-            notificationShown = true;
-          }
-        } else {
-          setError('News data received in an unexpected format.');
-          setArticles([]);
-          showNotification('News data format error.', 'error');
-          notificationShown = true;
-        }
-      } catch (err) {
-        console.error('Error in NewsFeed fetchNewsData:', err);
-        setError('An unexpected error occurred while fetching news.');
-        setArticles([]);
-        if (!notificationShown) {
-          showNotification('Error fetching news.', 'error');
-        }
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchNewsData();
-
-    // Optional: Set up a refresh interval
-    const interval = setInterval(fetchNewsData, 30 * 60 * 1000); // Refresh every 30 minutes
-
-    return () => clearInterval(interval);
-  }, [showNotification]);
+  const { data, isLoading: loading, isError, error: queryError } = useNews();
+  const articles = data?.data && Array.isArray(data.data) ? data.data : [];
+  const error = isError ? (queryError?.message || 'An unexpected error occurred while fetching news.') : null;
 
   // Filter articles based on selected source and search term
   const filteredArticles = articles.filter(article => {
