@@ -1,7 +1,8 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { HelmetProvider } from 'react-helmet-async';
 import Schedule from '../Schedule';
+import { renderWithQueryClient } from '../../test-utils/renderWithQueryClient';
 
 // Mock the API service
 jest.mock('../../services/api', () => ({
@@ -10,7 +11,7 @@ jest.mock('../../services/api', () => ({
 
 import { getSchedule } from '../../services/api';
 
-const renderSchedule = () => render(
+const renderSchedule = () => renderWithQueryClient(
   <HelmetProvider>
     <Schedule />
   </HelmetProvider>

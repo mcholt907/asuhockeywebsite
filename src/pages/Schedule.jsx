@@ -1,47 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { getSchedule } from '../services/api';
+import { useSchedule } from '../hooks/queries/useSchedule';
 import './Schedule.css';
 
 function Schedule() {
-  const [games, setGames] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [teamRecord, setTeamRecord] = useState(null);
+  const { data, isLoading: loading, isError } = useSchedule();
 
-  useEffect(() => {
-    const fetchSchedulePageData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const responseData = await getSchedule();
+  const games = useMemo(() => {
+    if (!data?.data || !Array.isArray(data.data)) return [];
+    return [...data.data].sort((a, b) => new Date(a.date) - new Date(b.date));
+  }, [data]);
 
-        if (responseData.source === 'error') {
-          setError(responseData.error || 'Failed to load schedule data.');
-          setGames([]);
-        } else if (responseData.data && Array.isArray(responseData.data)) {
-          // Sort games by date
-          const sortedSchedule = [...responseData.data].sort((a, b) =>
-            new Date(a.date) - new Date(b.date)
-          );
-          setGames(sortedSchedule);
-          setTeamRecord(responseData.team_record || null);
-        } else {
-          console.error("Schedule page data is not in the expected format:", responseData);
-          setGames([]);
-          setError('Could not load schedule data in the expected format.');
-        }
-      } catch (err) {
-        console.error('Error in Schedule component useEffect:', err);
-        setError('Failed to load schedule data. Please try again later.');
-        setGames([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSchedulePageData();
-  }, []);
+  const teamRecord = data?.team_record || null;
+  const error = isError ? 'Failed to load schedule data. Please try again later.' : null;
 
   const formatDate = (dateString) => {
     if (!dateString || dateString === 'TBD') return 'Date TBD';
