@@ -36,7 +36,7 @@ function Home() {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }, []);
 
-  const games = scheduleResponse?.data || [];
+  const games = useMemo(() => scheduleResponse?.data || [], [scheduleResponse]);
 
   const nextGame = useMemo(() => {
     return games
