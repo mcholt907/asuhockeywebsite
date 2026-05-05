@@ -82,11 +82,16 @@ function SortableTable({ data = [], headers = [], defaultSortKey, defaultSortDir
           </tr>
         </thead>
         <tbody>
-          {sortedData.map((row, idx) => (
-            <tr key={idx}>
-              {headers.map(h => <td key={`${h}-${idx}`}>{row[h]}</td>)}
-            </tr>
-          ))}
+          {sortedData.map((row, idx) => {
+            // First column is conventionally the player name — stable across sorts.
+            // Falls back to idx when missing so React still has a unique key.
+            const rowKey = headers[0] && row[headers[0]] != null ? row[headers[0]] : idx;
+            return (
+              <tr key={rowKey}>
+                {headers.map(h => <td key={`${h}-${rowKey}`}>{row[h]}</td>)}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
