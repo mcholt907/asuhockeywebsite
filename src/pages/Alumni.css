@@ -65,10 +65,10 @@
 .alumni-controls .position-filter button.active:hover,
 .alumni-controls .position-filter button.active:focus {
     background: var(--gradient-primary);
-    color: #FFFFFF !important;
+    color: #FFFFFF;
     box-shadow: var(--shadow-maroon);
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-    -webkit-text-fill-color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF;
 }
 
 /* Content Area */
@@ -110,10 +110,11 @@
     border-bottom: 4px solid var(--asu-gold);
 }
 
-/* Rank Column */
-.rank-col {
+/* Rank Column — selector is scoped to thead th to win specificity over
+   `.alumni-table thead th { text-align: left }` without !important. */
+.alumni-table thead th.rank-col {
     width: 40px;
-    text-align: center !important;
+    text-align: center;
 }
 
 .rank-cell {
@@ -127,9 +128,9 @@
     font-size: 0.9rem;
 }
 
-/* Stats Columns */
-.stat-col {
-    text-align: center !important;
+/* Stats Columns — same specificity strategy as .rank-col above. */
+.alumni-table thead th.stat-col {
+    text-align: center;
     width: 45px;
 }
 
@@ -165,8 +166,8 @@
     background: rgba(0, 0, 0, 0.02);
 }
 
-.continuation-row:hover {
-    background: linear-gradient(90deg, rgba(255, 198, 39, 0.12) 0%, rgba(255, 198, 39, 0.05) 100%) !important;
+.alumni-table tbody tr.continuation-row:hover {
+    background: linear-gradient(90deg, rgba(255, 198, 39, 0.12) 0%, rgba(255, 198, 39, 0.05) 100%);
 }
 
 /* Totals row */
@@ -175,8 +176,8 @@
     font-style: italic;
 }
 
-.totals-row:hover {
-    background: rgba(140, 29, 64, 0.08) !important;
+.alumni-table tbody tr.totals-row:hover {
+    background: rgba(140, 29, 64, 0.08);
 }
 
 .totals-label {

@@ -227,17 +227,6 @@
     padding: 15px;
   }
 
-  .news-controls {
-    padding: 15px;
-    flex-direction: column;
-    align-items: stretch;
-    position: static !important;
-    /* Force disable sticky on mobile/tablet to prevent overlap */
-    top: auto !important;
-    z-index: auto;
-    margin-bottom: 20px;
-  }
-
   .source-filter {
     justify-content: center;
   }
