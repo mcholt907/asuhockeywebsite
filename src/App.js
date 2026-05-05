@@ -1,22 +1,21 @@
 // App.jsx
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { queryClient } from './hooks/queries/queryClient';
-import './App.css';
-
-// Page Components
-import Home from './pages/Home';
-import News from './pages/News';
-import Roster from './pages/Roster';
-import Schedule from './pages/Schedule';
-import Recruiting from './pages/Recruiting';
-import Stats from './pages/Stats';
-import Alumni from './pages/Alumni';
-
-// Global Components
 import GlobalNotificationBanner from './components/GlobalNotificationBanner';
 import MobileBottomNav from './components/MobileBottomNav';
+import './App.css';
+
+// Page Components — code-split per route
+const Home = lazy(() => import('./pages/Home'));
+const News = lazy(() => import('./pages/News'));
+const Roster = lazy(() => import('./pages/Roster'));
+const Schedule = lazy(() => import('./pages/Schedule'));
+const Recruiting = lazy(() => import('./pages/Recruiting'));
+const Stats = lazy(() => import('./pages/Stats'));
+const Alumni = lazy(() => import('./pages/Alumni'));
 
 function AppInner() {
   const location = useLocation();
@@ -61,19 +60,21 @@ function AppInner() {
         </header>
 
         <main id="main-content">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/news" element={<News />} />
-            <Route path="/roster" element={<Roster />} />
-            <Route path="/schedule" element={<Schedule />} />
-            <Route path="/recruiting" element={<Recruiting />} />
-            <Route path="/alumni" element={<Alumni />} />
-            <Route path="/stats" element={<Stats />} />
-            {/* Hidden for now
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            */}
-          </Routes>
+          <Suspense fallback={<div className="page-container"><p className="loading-message">Loading...</p></div>}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/news" element={<News />} />
+              <Route path="/roster" element={<Roster />} />
+              <Route path="/schedule" element={<Schedule />} />
+              <Route path="/recruiting" element={<Recruiting />} />
+              <Route path="/alumni" element={<Alumni />} />
+              <Route path="/stats" element={<Stats />} />
+              {/* Hidden for now
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              */}
+            </Routes>
+          </Suspense>
         </main>
 
         {!isHome && <footer>
