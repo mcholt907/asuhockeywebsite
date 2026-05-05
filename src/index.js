@@ -1,5 +1,5 @@
 import React from 'react';
-import { createRoot, hydrateRoot } from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import { HelmetProvider } from 'react-helmet-async';
 import * as Sentry from "@sentry/react";
 import './index.css';
@@ -39,11 +39,8 @@ const app = (
   </React.StrictMode>
 );
 
-if (container.hasChildNodes()) {
-  hydrateRoot(container, app);
-} else {
-  createRoot(container).render(app);
-}
+// Prerendered HTML is for SEO; client always re-renders to avoid hydration mismatches.
+createRoot(container).render(app);
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
