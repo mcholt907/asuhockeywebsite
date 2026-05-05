@@ -12,11 +12,14 @@ staticPlayers.forEach(p => {
 
 function determineNationality(hometown) {
   if (!hometown || hometown === '-') return 'USA';
-  const h = hometown.toUpperCase();
 
-  const europeMap = {
+  // Token-based match avoids false positives like "Geraldton, ON" → GER
+  // or "Latrobe, PA" → LAT from a naive substring check.
+  const tokens = new Set(hometown.toUpperCase().split(/[\s,]+/).filter(Boolean));
+
+  const countryMap = {
     'SVK': 'SVK', 'SLOVAKIA': 'SVK',
-    'CZE': 'CZE', 'CZECH': 'CZE',
+    'CZE': 'CZE', 'CZECH': 'CZE', 'CZECHIA': 'CZE',
     'SWE': 'SWE', 'SWEDEN': 'SWE',
     'FIN': 'FIN', 'FINLAND': 'FIN',
     'RUS': 'RUS', 'RUSSIA': 'RUS',
@@ -28,18 +31,16 @@ function determineNationality(hometown) {
     'GBR': 'GBR', 'UK': 'GBR',
   };
 
-  for (const [key, code] of Object.entries(europeMap)) {
-    if (h.includes(key)) return code;
+  for (const [key, code] of Object.entries(countryMap)) {
+    if (tokens.has(key)) return code;
   }
 
-  if (
-    h.includes('CAN') || h.includes('CANADA') ||
-    h.includes(' ON') || h.includes('QUE') || h.includes(' BC') || h.includes(' AB') || h.includes(' MB') ||
-    h.includes(' SK') || h.includes(' NS') || h.includes(' NB') || h.includes(' PE') || h.includes(' NL') ||
-    h.includes('ONT') || h.includes('MAN') || h.includes('ALB') || h.includes('SASK')
-  ) {
-    return 'CAN';
-  }
+  const canadianMarkers = [
+    'CAN', 'CANADA',
+    'ON', 'QC', 'QUE', 'BC', 'AB', 'MB', 'SK', 'NS', 'NB', 'PE', 'NL',
+    'ONT', 'MAN', 'ALB', 'SASK',
+  ];
+  if (canadianMarkers.some(m => tokens.has(m))) return 'CAN';
 
   return 'USA';
 }

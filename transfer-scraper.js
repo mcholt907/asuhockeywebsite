@@ -8,6 +8,7 @@ const cheerio = require('cheerio');
 const fs = require('fs');
 const path = require('path');
 const { saveToCache, getFromCache } = require('./src/scripts/caching-system');
+const { reportScrapeHealth } = require('./src/scripts/scrape-health');
 const { requestWithRetry } = require('./utils/request-helper');
 
 const TRANSFERS_URL = 'https://www.eliteprospects.com/team/18066/arizona-state-univ/transfers';
@@ -246,6 +247,23 @@ async function scrapeTransferData() {
             // Log details for debugging
             incoming.forEach(t => console.log(`  [JOINING] ${t.playerName} (${t.position}) from ${t.team}`));
             outgoing.forEach(t => console.log(`  [LEAVING] ${t.playerName} (${t.position}) to ${t.team}`));
+
+            // Selector-health guard: only flag when BOTH directions are empty —
+            // one direction empty during a quiet period is normal.
+            const total = incoming.length + outgoing.length;
+            if (!reportScrapeHealth('transfers', { totalTransfers: total })) {
+                const stale = getFromCache(CACHE_KEY, true);
+                if (stale) {
+                    console.log('[Transfer Scraper] Empty result; returning stale cache');
+                    return stale;
+                }
+                const fallback = getFallbackTransferData();
+                if (fallback) {
+                    console.log('[Transfer Scraper] Empty result; returning bundled fallback');
+                    return fallback;
+                }
+                return result;
+            }
 
             // Cache the results (saveToCache wraps with timestamp automatically)
             await saveToCache(result, CACHE_KEY, CACHE_TTL);

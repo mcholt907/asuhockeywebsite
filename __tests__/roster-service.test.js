@@ -24,6 +24,20 @@ describe('determineNationality', () => {
     expect(determineNationality('')).toBe('USA');
     expect(determineNationality('-')).toBe('USA');
   });
+
+  // Regressions guarded by audit item #16 — token-based match should not be
+  // tricked by country codes that appear as substrings of unrelated city names.
+  test('Geraldton, ON resolves to CAN (not GER)', () => {
+    expect(determineNationality('Geraldton, ON')).toBe('CAN');
+  });
+
+  test('Latrobe, PA resolves to USA (not LAT)', () => {
+    expect(determineNationality('Latrobe, PA')).toBe('USA');
+  });
+
+  test('Mansfield, MA resolves to USA (not CAN via MAN substring)', () => {
+    expect(determineNationality('Mansfield, MA')).toBe('USA');
+  });
 });
 
 describe('getRoster', () => {

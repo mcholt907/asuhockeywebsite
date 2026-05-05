@@ -12,8 +12,10 @@ function saveToCache(data, filename, duration = DEFAULT_CACHE_DURATION) {
     console.error('Filename not provided to saveToCache');
     return;
   }
+  const cacheFilePath = path.join(CACHE_DIR, filename);
+  // Unique tmp path keeps concurrent writers from clobbering each other.
+  const tmpPath = `${cacheFilePath}.tmp.${process.pid}.${Date.now()}`;
   try {
-    const cacheFilePath = path.join(CACHE_DIR, filename);
     const cacheData = {
       timestamp: new Date().toISOString(),
       data: data,
@@ -25,11 +27,21 @@ function saveToCache(data, filename, duration = DEFAULT_CACHE_DURATION) {
       fs.mkdirSync(CACHE_DIR, { recursive: true });
     }
 
-    fs.writeFileSync(cacheFilePath, JSON.stringify(cacheData, null, 2));
+    // Write to a temp file then rename — rename is atomic when src and dst are
+    // on the same filesystem, so a crash mid-write can't leave a half-written
+    // cache file at the canonical path.
+    fs.writeFileSync(tmpPath, JSON.stringify(cacheData, null, 2));
+    fs.renameSync(tmpPath, cacheFilePath);
     console.log(`Data saved to cache at ${cacheFilePath}`);
   } catch (error) {
     console.error(`[Cache System] Failed to save cache for ${filename}:`, error.message);
     Sentry.captureException(error, { tags: { component: 'caching-system', filename } });
+    // Best-effort cleanup of the orphaned tmp file.
+    try {
+      if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath);
+    } catch (_) {
+      // Ignore — Sentry already has the original failure.
+    }
   }
 }
 

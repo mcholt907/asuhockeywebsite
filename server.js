@@ -65,7 +65,9 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles for React
       scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "blob:"], // Allow React inline scripts and blob workers
       workerSrc: ["'self'", "blob:"], // Allow blob workers
-      imgSrc: ["'self'", "data:", "https:"], // Allow images from any HTTPS source
+      // Explicit allowlist — only host currently embedding images is files.eliteprospects.com
+      // (player photos in /roster and /recruiting). Add new hosts here if/when needed.
+      imgSrc: ["'self'", "data:", "https://files.eliteprospects.com"],
       connectSrc: ["'self'", "https://*.sentry.io", "https://sentry.io"], // Allow Sentry ingest
     },
   },
