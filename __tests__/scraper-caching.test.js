@@ -79,7 +79,7 @@ describe('scrapeCHNRoster — SWR caching', () => {
 
 
 describe('scrapeCHNScheduleLinks', () => {
-  test('returns date-keyed map of box and metrics links', async () => {
+  test('returns date-keyed linkMap plus npi/krach metadata', async () => {
     const html = [
       '<html><body><table>',
       '  <tr>',
@@ -97,7 +97,7 @@ describe('scrapeCHNScheduleLinks', () => {
 
     const result = await scrapeCHNScheduleLinks();
 
-    expect(result).toEqual({
+    expect(result.linkMap).toEqual({
       '2025-10-03': {
         box_link: 'https://www.collegehockeynews.com/box/final/20251003/psu/asu/',
         metrics_link: 'https://www.collegehockeynews.com/box/metrics.php?gd=110368',
@@ -107,14 +107,16 @@ describe('scrapeCHNScheduleLinks', () => {
         metrics_link: 'https://www.collegehockeynews.com/box/metrics.php?gd=110371',
       },
     });
+    expect(result).toHaveProperty('npi');
+    expect(result).toHaveProperty('krach');
   });
 
-  test('returns empty object when request fails', async () => {
+  test('returns empty linkMap with null npi/krach when request fails', async () => {
     requestWithRetry.mockRejectedValueOnce(new Error('network error'));
 
     const result = await scrapeCHNScheduleLinks();
 
-    expect(result).toEqual({});
+    expect(result).toEqual({ linkMap: {}, npi: null, krach: null });
   });
 
   test('skips rows without a box link', async () => {
@@ -134,8 +136,8 @@ describe('scrapeCHNScheduleLinks', () => {
 
     const result = await scrapeCHNScheduleLinks();
 
-    expect(Object.keys(result)).toHaveLength(1);
-    expect(result['2025-10-03']).toBeDefined();
+    expect(Object.keys(result.linkMap)).toHaveLength(1);
+    expect(result.linkMap['2025-10-03']).toBeDefined();
   });
 });
 

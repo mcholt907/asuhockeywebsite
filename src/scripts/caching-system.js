@@ -5,7 +5,9 @@ const Sentry = require('@sentry/node');
 
 // Default cache duration, can be overridden if needed by specific scrapers
 const DEFAULT_CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-const CACHE_DIR = path.join(__dirname, 'cache');
+// CACHE_DIR env override exists so server-side tests can isolate to a tmp dir
+// without touching the real cache. Unset in production.
+const CACHE_DIR = process.env.CACHE_DIR || path.join(__dirname, 'cache');
 
 function saveToCache(data, filename, duration = DEFAULT_CACHE_DURATION) {
   if (!filename) {

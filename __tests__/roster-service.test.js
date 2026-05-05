@@ -74,4 +74,67 @@ describe('getRoster', () => {
     const result = await getRoster();
     expect(result).toEqual([]);
   });
+
+  test('filters out rows missing the Player field', async () => {
+    scrapeCHNRoster.mockResolvedValue([
+      { '#': '7',  Player: 'Real Player', Pos: 'F' },
+      { '#': '8',  Player: '',            Pos: 'F' },
+      { '#': '9',  /* no Player key */    Pos: 'D' },
+    ]);
+
+    const result = await getRoster();
+    expect(result).toHaveLength(1);
+    expect(result[0].number).toBe('7');
+  });
+
+  test('falls back to "-" placeholders when fields are missing', async () => {
+    scrapeCHNRoster.mockResolvedValue([
+      { Player: 'No Data Guy' }, // no #, Pos, Ht, Wt, DOB, S/C, Hometown
+    ]);
+
+    const result = await getRoster();
+    expect(result).toHaveLength(1);
+    const p = result[0];
+    expect(p.number).toBe('');
+    expect(p.name).toBe('No Data Guy'); // no "(pos)" suffix when pos is empty
+    expect(p.position).toBe('');
+    expect(p.height).toBe('-');
+    expect(p.weight).toBe('-');
+    expect(p.shoots).toBe('-');
+    expect(p.born).toBe('-');
+    expect(p.birthplace).toBe('-');
+    expect(p.nationality).toBe('USA'); // determineNationality default for empty hometown
+  });
+
+  test('falls back to static-data shoots when CHN drops the S/C column', async () => {
+    // #30 Chase Hamm has shoots: 'L' in asu_hockey_data.json static roster.
+    // CHN occasionally drops the S/C column entirely; static data covers the gap.
+    scrapeCHNRoster.mockResolvedValue([
+      { '#': '30', Player: 'Chase Hamm', Pos: 'G', Hometown: 'Saskatoon, SK CAN' },
+    ]);
+
+    const result = await getRoster();
+    expect(result[0].shoots).toBe('L');
+  });
+
+  test('uses CHN S/C value over the static fallback when both exist', async () => {
+    scrapeCHNRoster.mockResolvedValue([
+      { '#': '30', Player: 'Chase Hamm', Pos: 'G', 'S/C': 'R', Hometown: 'Saskatoon, SK CAN' },
+    ]);
+
+    const result = await getRoster();
+    expect(result[0].shoots).toBe('R'); // not the static 'L'
+  });
+
+  test('strips position parentheses from the player_link search query', async () => {
+    scrapeCHNRoster.mockResolvedValue([
+      { '#': '15', Player: 'Sam Smith (D)', Pos: 'D', Hometown: 'Phoenix, AZ' },
+    ]);
+
+    const result = await getRoster();
+    // Display name still has "(D)", but the EP search URL should not.
+    expect(result[0].name).toBe('Sam Smith (D) (D)');
+    expect(result[0].player_link).toContain('q=Sam%20Smith');
+    expect(result[0].player_link).not.toContain('%28D%29');
+  });
 });
