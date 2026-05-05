@@ -8,6 +8,7 @@ const cheerio = require('cheerio');
 const fs = require('fs');
 const path = require('path');
 const { saveToCache, getFromCache } = require('./src/scripts/caching-system');
+const { reportScrapeHealth } = require('./src/scripts/scrape-health');
 const { requestWithRetry } = require('./utils/request-helper');
 
 const BASE_URL = 'https://www.eliteprospects.com/team/18066/arizona-state-univ/where-are-they-now';
@@ -344,6 +345,22 @@ async function scrapeAlumniData() {
             if (nhlEntries.length > 0) {
                 console.log('[Alumni Scraper] NHL entries:');
                 nhlEntries.forEach(p => console.log(`  - ${p.name} (${p.team})`));
+            }
+
+            // Selector-health guard: don't overwrite last-known-good cache
+            // with an empty result if EP changed their markup.
+            if (!reportScrapeHealth('alumni', { skaters: skaters.length, goalies: goalies.length })) {
+                const stale = getFromCache(CACHE_KEY, true);
+                if (stale) {
+                    console.log('[Alumni Scraper] Empty result; returning stale cache');
+                    return stale;
+                }
+                const fallback = getFallbackAlumniData();
+                if (fallback) {
+                    console.log('[Alumni Scraper] Empty result; returning bundled fallback');
+                    return fallback;
+                }
+                return result;
             }
 
             // Cache results - pass result directly, caching system wraps with timestamp
