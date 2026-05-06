@@ -56,13 +56,22 @@ export default defineConfig({
         },
     ],
 
-    // Web server configuration - auto-start servers before tests
+    // Web server configuration - auto-start servers before tests.
+    // IS_PRERENDER=true tells the EP-backed scrapers (alumni, transfers) to
+    // serve bundled JSON from data/ instead of hitting Elite Prospects live.
+    // Without this, every Playwright run that exercises /api/alumni or
+    // /api/transfers eats into the 24h-cooldown budget on EP and can lock
+    // out the next legitimate `npm run refresh-*`. Note: this env only
+    // applies when Playwright spawns the server itself; if you're reusing
+    // an already-running `node server.js`, set IS_PRERENDER=true on that
+    // process too, or it'll still hit EP.
     webServer: [
         {
             command: 'node server.js',
             port: 5000,
             reuseExistingServer: !process.env.CI,
             timeout: 120 * 1000,
+            env: { IS_PRERENDER: 'true' },
         },
         {
             command: 'npm start',
