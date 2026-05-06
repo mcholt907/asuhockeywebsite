@@ -32,7 +32,8 @@ jobs:
       - name: Build
         run: CI=true npm run build
 
-      # Keep this at critical until the future Vite migration removes CRA's high-severity transitive findings.
+      # Held at critical: post-Vite the remaining high finding is
+      # path-to-regexp transitive via Express, tracked separately.
       - name: Audit critical vulnerabilities
         run: npm audit --audit-level=critical
 

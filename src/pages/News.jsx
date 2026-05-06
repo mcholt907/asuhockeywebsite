@@ -113,7 +113,7 @@ function News() {
 
                 {/* Asymmetric magazine row */}
                 <div className="magazine-row">
-                  <a href={wideCard.link} target="_blank" rel="noopener noreferrer" className="news-card news-card-wide" style={{ backgroundImage: `linear-gradient(to bottom, rgba(15,1,5,0.42) 0%, rgba(15,1,5,0.10) 25%, rgba(15,1,5,0.10) 65%, rgba(15,1,5,0.82) 100%), url(${process.env.PUBLIC_URL}/images/Ice-hockey-hero.webp)` }}>
+                  <a href={wideCard.link} target="_blank" rel="noopener noreferrer" className="news-card news-card-wide" style={{ backgroundImage: `linear-gradient(to bottom, rgba(15,1,5,0.42) 0%, rgba(15,1,5,0.10) 25%, rgba(15,1,5,0.10) 65%, rgba(15,1,5,0.82) 100%), url(/images/Ice-hockey-hero.webp)` }}>
                     <span className="news-card-source">{getSourceType(wideCard.source)}</span>
                     <h3 className="news-card-title news-card-title-wide">{wideCard.title}</h3>
                     <span className="news-card-date">{wideCard.date}</span>

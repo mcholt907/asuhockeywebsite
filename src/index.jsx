@@ -10,7 +10,7 @@ import { NotificationProvider } from './context/NotificationContext';
 const isProd = process.env.NODE_ENV === 'production';
 
 Sentry.init({
-  dsn: process.env.REACT_APP_SENTRY_DSN,
+  dsn: import.meta.env.VITE_SENTRY_DSN,
   integrations: [
     Sentry.browserTracingIntegration(),
     Sentry.replayIntegration(),
