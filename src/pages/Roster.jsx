@@ -1,7 +1,17 @@
 import React, { useState, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useRoster } from '../hooks/queries/useRoster';
+import PositionFilter from '../components/roster/PositionFilter';
+import RosterPositionGroup from '../components/roster/RosterPositionGroup';
+import {
+  getPlayerName,
+  getNationality,
+  isGoalie,
+  isDefenseman,
+} from '../utils/playerHelpers';
 import './Roster.css';
+
+const EMPTY_GROUPS = { goaltenders: [], defensemen: [], forwards: [] };
 
 function Roster() {
   const { data, isLoading: loading, isError } = useRoster();
@@ -10,76 +20,36 @@ function Roster() {
   const players = useMemo(() => {
     if (!Array.isArray(data)) return [];
     return data.filter(
-      player => player &&
-        player.name &&
-        (player.number && /^#?[0-9]+$/.test(String(player.number).trim()))
+      p => p &&
+        p.name &&
+        (p.number && /^#?[0-9]+$/.test(String(p.number).trim()))
     );
   }, [data]);
 
-  const error = isError ? 'Failed to load roster data. Please try again later.' : null;
+  const playersByPosition = useMemo(() => ({
+    goaltenders: players.filter(isGoalie),
+    defensemen:  players.filter(p => !isGoalie(p) && isDefenseman(p)),
+    forwards:    players.filter(p => !isGoalie(p) && !isDefenseman(p) && p.name),
+  }), [players]);
 
-  // Group players by position - check both 'position' field and name pattern for compatibility
-  const isGoalie = (p) => {
-    const pos = (p.position || '').toUpperCase();
-    const name = p.name || '';
-    return pos === 'G' || name.includes('(G)');
-  };
-
-  const isDefenseman = (p) => {
-    const pos = (p.position || '').toUpperCase();
-    const name = p.name || '';
-    return pos === 'D' || name.includes('(D)');
-  };
-
-  const playersByPosition = {
-    goaltenders: players.filter(p => isGoalie(p)),
-    defensemen: players.filter(p => isDefenseman(p)),
-    forwards: players.filter(p => !isGoalie(p) && !isDefenseman(p) && p.name)
-  };
-
-  // Filter based on selected position
-  const getFilteredPlayers = () => {
-    if (selectedPosition === 'all') {
-      return playersByPosition;
-    } else if (selectedPosition === 'g') {
-      return { goaltenders: playersByPosition.goaltenders, defensemen: [], forwards: [] };
-    } else if (selectedPosition === 'd') {
-      return { goaltenders: [], defensemen: playersByPosition.defensemen, forwards: [] };
-    } else if (selectedPosition === 'f') {
-      return { goaltenders: [], defensemen: [], forwards: playersByPosition.forwards };
-    }
+  const filteredPlayers = useMemo(() => {
+    if (selectedPosition === 'all') return playersByPosition;
+    if (selectedPosition === 'g') return { ...EMPTY_GROUPS, goaltenders: playersByPosition.goaltenders };
+    if (selectedPosition === 'd') return { ...EMPTY_GROUPS, defensemen:  playersByPosition.defensemen };
+    if (selectedPosition === 'f') return { ...EMPTY_GROUPS, forwards:    playersByPosition.forwards };
     return playersByPosition;
-  };
-
-  const filteredPlayers = getFilteredPlayers();
-
-  // Helper to get player display name
-  const getPlayerName = (player) => {
-    return player.name || player.Player || 'Unknown';
-  };
-
-  // Helper to get player number
-  const getPlayerNumber = (player) => {
-    return player.number || player['#'] || '-';
-  };
-
-  // Helper to get nationality
-  const getNationality = (player) => {
-    return player.nationality || player.Nationality || 'USA';
-  };
-
-  // Helper to get shoots - show blank instead of '-' for missing data
-  const getShoots = (player) => {
-    const val = player.S || player.shoots || '';
-    return val === '-' ? '' : val;
-  };
+  }, [selectedPosition, playersByPosition]);
 
   if (loading) {
     return <div className="page-container"><p>Loading roster...</p></div>;
   }
 
-  if (error) {
-    return <div className="page-container"><p className="error-message">{error}</p></div>;
+  if (isError) {
+    return (
+      <div className="page-container">
+        <p className="error-message">Failed to load roster data. Please try again later.</p>
+      </div>
+    );
   }
 
   return (
@@ -120,215 +90,18 @@ function Roster() {
           </script>
         )}
       </Helmet>
+
       <div className="page-header">
         <h1>ASU Hockey Roster (2025-2026 Season)</h1>
-
-        <div className="roster-controls">
-          <div className="position-filter">
-            <button
-              className={selectedPosition === 'all' ? 'active' : ''}
-              onClick={() => setSelectedPosition('all')}
-            >
-              All
-            </button>
-            <button
-              className={selectedPosition === 'g' ? 'active' : ''}
-              onClick={() => setSelectedPosition('g')}
-            >
-              Goaltenders
-            </button>
-            <button
-              className={selectedPosition === 'd' ? 'active' : ''}
-              onClick={() => setSelectedPosition('d')}
-            >
-              Defensemen
-            </button>
-            <button
-              className={selectedPosition === 'f' ? 'active' : ''}
-              onClick={() => setSelectedPosition('f')}
-            >
-              Forwards
-            </button>
-          </div>
-        </div>
+        <PositionFilter value={selectedPosition} onChange={setSelectedPosition} />
       </div>
 
       <div className="roster-content">
-        {filteredPlayers.goaltenders.length > 0 && (
-          <div className="position-group">
-            <h2>Goaltenders</h2>
-            <div className="roster-table-container">
-              <table className="roster-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>N</th>
-                    <th>Player</th>
-                    <th>Shoots</th>
-                    <th>Ht</th>
-                    <th>Wt</th>
-                    <th>Born</th>
-                    <th>Birthplace</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredPlayers.goaltenders.map((player, index) => (
-                    <tr key={`g-${getPlayerNumber(player)}-${index}`}>
-                      <td>{getPlayerNumber(player)}</td>
-                      <td>
-                        <img
-                          src={`/assets/flags/${getNationality(player).toLowerCase()}.svg`}
-                          alt={getNationality(player)}
-                          className="flag-icon"
-                          loading="lazy"
-                          width="24"
-                          height="16"
-                          onError={(e) => { e.target.style.display = 'none'; }}
-                        />
-                      </td>
-                      <td>
-                        {player['Player Link'] || player.player_link ? (
-                          <a
-                            href={player['Player Link'] || player.player_link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {getPlayerName(player)}
-                          </a>
-                        ) : (
-                          getPlayerName(player)
-                        )}
-                      </td>
-                      <td>{getShoots(player)}</td>
-                      <td>{player.Ht || player.height || '-'}</td>
-                      <td>{player.Wt || player.weight || '-'}</td>
-                      <td>{player.Born || player.born || player.birth_year || '-'}</td>
-                      <td>{player.Birthplace || player.birthplace || '-'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+        <RosterPositionGroup title="Goaltenders" players={filteredPlayers.goaltenders} keyPrefix="g" />
+        <RosterPositionGroup title="Defensemen"  players={filteredPlayers.defensemen}  keyPrefix="d" />
+        <RosterPositionGroup title="Forwards"    players={filteredPlayers.forwards}    keyPrefix="f" />
 
-        {filteredPlayers.defensemen.length > 0 && (
-          <div className="position-group">
-            <h2>Defensemen</h2>
-            <div className="roster-table-container">
-              <table className="roster-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>N</th>
-                    <th>Player</th>
-                    <th>Shoots</th>
-                    <th>Ht</th>
-                    <th>Wt</th>
-                    <th>Born</th>
-                    <th>Birthplace</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredPlayers.defensemen.map((player, index) => (
-                    <tr key={`d-${getPlayerNumber(player)}-${index}`}>
-                      <td>{getPlayerNumber(player)}</td>
-                      <td>
-                        <img
-                          src={`/assets/flags/${getNationality(player).toLowerCase()}.svg`}
-                          alt={getNationality(player)}
-                          className="flag-icon"
-                          loading="lazy"
-                          width="24"
-                          height="16"
-                          onError={(e) => { e.target.style.display = 'none'; }}
-                        />
-                      </td>
-                      <td>
-                        {player['Player Link'] || player.player_link ? (
-                          <a
-                            href={player['Player Link'] || player.player_link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {getPlayerName(player)}
-                          </a>
-                        ) : (
-                          getPlayerName(player)
-                        )}
-                      </td>
-                      <td>{getShoots(player)}</td>
-                      <td>{player.Ht || player.height || '-'}</td>
-                      <td>{player.Wt || player.weight || '-'}</td>
-                      <td>{player.Born || player.born || player.birth_year || '-'}</td>
-                      <td>{player.Birthplace || player.birthplace || '-'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {filteredPlayers.forwards.length > 0 && (
-          <div className="position-group">
-            <h2>Forwards</h2>
-            <div className="roster-table-container">
-              <table className="roster-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>N</th>
-                    <th>Player</th>
-                    <th>Shoots</th>
-                    <th>Ht</th>
-                    <th>Wt</th>
-                    <th>Born</th>
-                    <th>Birthplace</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredPlayers.forwards.map((player, index) => (
-                    <tr key={`f-${getPlayerNumber(player)}-${index}`}>
-                      <td>{getPlayerNumber(player)}</td>
-                      <td>
-                        <img
-                          src={`/assets/flags/${getNationality(player).toLowerCase()}.svg`}
-                          alt={getNationality(player)}
-                          className="flag-icon"
-                          loading="lazy"
-                          width="24"
-                          height="16"
-                          onError={(e) => { e.target.style.display = 'none'; }}
-                        />
-                      </td>
-                      <td>
-                        {player['Player Link'] || player.player_link ? (
-                          <a
-                            href={player['Player Link'] || player.player_link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {getPlayerName(player)}
-                          </a>
-                        ) : (
-                          getPlayerName(player)
-                        )}
-                      </td>
-                      <td>{getShoots(player)}</td>
-                      <td>{player.Ht || player.height || '-'}</td>
-                      <td>{player.Wt || player.weight || '-'}</td>
-                      <td>{player.Born || player.born || player.birth_year || '-'}</td>
-                      <td>{player.Birthplace || player.birthplace || '-'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {players.length === 0 && !loading && (
+        {players.length === 0 && (
           <p>No player data found for the current roster.</p>
         )}
       </div>
