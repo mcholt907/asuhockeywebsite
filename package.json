@@ -51,7 +51,8 @@
     "test:e2e:report": "npx playwright show-report",
     "refresh-alumni": "node scripts/refresh-alumni.js",
     "refresh-transfers": "node scripts/refresh-transfers.js",
-    "refresh-data": "npm run refresh-alumni && npm run refresh-transfers"
+    "refresh-data": "npm run refresh-alumni && npm run refresh-transfers",
+    "typecheck": "tsc --noEmit"
   },
   "browserslist": {
     "production": [
@@ -69,13 +70,17 @@
   "devDependencies": {
     "@babel/preset-env": "^7.25.0",
     "@babel/preset-react": "^7.25.0",
+    "@babel/preset-typescript": "^7.28.5",
     "@playwright/test": "^1.58.1",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.3.0",
     "babel-jest": "^29.7.0",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "sharp": "^0.34.5",
+    "typescript": "^5.9.3",
     "vite": "^5.4.0"
   }
 }
