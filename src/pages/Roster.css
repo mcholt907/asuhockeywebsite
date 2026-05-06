@@ -81,7 +81,7 @@
 
 .position-filter button.active {
   background: var(--gradient-primary);
-  color: var(--white) !important;
+  color: var(--white);
   box-shadow: var(--shadow-maroon);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }

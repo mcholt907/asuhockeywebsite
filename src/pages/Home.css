@@ -508,14 +508,16 @@
   color: rgba(232, 224, 226, 0.65);
 }
 
-/* ASU row highlight */
-.standings-asu-row td {
-  color: var(--asu-gold) !important;
+/* ASU row highlight — selector scoped to .standings-widget-table tbody to
+   match the specificity of the nth-child stat-column rules above and win
+   by source order without !important. */
+.standings-widget-table tbody .standings-asu-row td {
+  color: var(--asu-gold);
   font-weight: 700;
 }
 
 .standings-asu-row .standings-team-name {
-  color: var(--asu-gold) !important;
+  color: var(--asu-gold);
 }
 
 /* ============================================
