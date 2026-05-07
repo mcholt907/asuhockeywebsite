@@ -75,17 +75,17 @@ function Recruiting() {
         <meta name="description" content="ASU Sun Devils Hockey recruiting commitments, future players, and transfer portal updates for upcoming seasons." />
         <meta property="og:title" content="ASU Hockey Recruiting & Commits | Forks Up Pucks" />
         <meta property="og:description" content="ASU Sun Devils Hockey recruiting commitments, future players, and transfer portal updates for upcoming seasons." />
-        <meta property="og:url" content="https://forksuppucks.com/recruiting" />
+        <meta property="og:url" content="https://forksuppucks.com/recruiting/" />
         <meta name="twitter:title" content="ASU Hockey Recruiting & Commits | Forks Up Pucks" />
         <meta name="twitter:description" content="ASU Sun Devils Hockey recruiting commitments, future players, and transfer portal updates for upcoming seasons." />
-        <link rel="canonical" href="https://forksuppucks.com/recruiting" />
+        <link rel="canonical" href="https://forksuppucks.com/recruiting/" />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://forksuppucks.com" },
-              { "@type": "ListItem", "position": 2, "name": "Recruiting", "item": "https://forksuppucks.com/recruiting" }
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://forksuppucks.com/" },
+              { "@type": "ListItem", "position": 2, "name": "Recruiting", "item": "https://forksuppucks.com/recruiting/" }
             ]
           })}
         </script>

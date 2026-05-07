@@ -128,12 +128,12 @@ function getSitemapPages(options = {}) {
 
   const pageConfig = [
     { url: '/', priority: '1.0', changefreq: 'daily', lastmod: homeDate },
-    { url: '/news', priority: '0.9', changefreq: 'daily', lastmod: newsDate },
-    { url: '/schedule', priority: '0.9', changefreq: 'daily', lastmod: scheduleDate },
-    { url: '/roster', priority: '0.8', changefreq: 'weekly', lastmod: rosterDate },
-    { url: '/stats', priority: '0.8', changefreq: 'daily', lastmod: statsDate },
-    { url: '/recruiting', priority: '0.7', changefreq: 'weekly', lastmod: recruitingDate },
-    { url: '/alumni', priority: '0.6', changefreq: 'monthly', lastmod: alumniDate },
+    { url: '/news/', priority: '0.9', changefreq: 'daily', lastmod: newsDate },
+    { url: '/schedule/', priority: '0.9', changefreq: 'daily', lastmod: scheduleDate },
+    { url: '/roster/', priority: '0.8', changefreq: 'weekly', lastmod: rosterDate },
+    { url: '/stats/', priority: '0.8', changefreq: 'daily', lastmod: statsDate },
+    { url: '/recruiting/', priority: '0.7', changefreq: 'weekly', lastmod: recruitingDate },
+    { url: '/alumni/', priority: '0.6', changefreq: 'monthly', lastmod: alumniDate },
   ];
 
   return pageConfig.map(page => ({
