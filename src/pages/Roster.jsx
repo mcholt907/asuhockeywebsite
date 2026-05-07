@@ -59,10 +59,10 @@ function Roster() {
         <meta name="description" content="2025-26 ASU Sun Devils Men's Hockey team roster. Find players, positions, jersey numbers, and hometowns." />
         <meta property="og:title" content="ASU Hockey Team Roster 2025-2026 | Forks Up Pucks" />
         <meta property="og:description" content="2025-26 ASU Sun Devils Men's Hockey team roster. Find players, positions, jersey numbers, and hometowns." />
-        <meta property="og:url" content="https://forksuppucks.com/roster" />
+        <meta property="og:url" content="https://forksuppucks.com/roster/" />
         <meta name="twitter:title" content="ASU Hockey Team Roster 2025-2026 | Forks Up Pucks" />
         <meta name="twitter:description" content="2025-26 ASU Sun Devils Men's Hockey team roster. Find players, positions, jersey numbers, and hometowns." />
-        <link rel="canonical" href="https://forksuppucks.com/roster" />
+        <link rel="canonical" href="https://forksuppucks.com/roster/" />
         {players.length > 0 && (
           <script type="application/ld+json">
             {JSON.stringify({
@@ -81,8 +81,8 @@ function Roster() {
                 {
                   "@type": "BreadcrumbList",
                   "itemListElement": [
-                    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://forksuppucks.com" },
-                    { "@type": "ListItem", "position": 2, "name": "Roster", "item": "https://forksuppucks.com/roster" }
+                    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://forksuppucks.com/" },
+                    { "@type": "ListItem", "position": 2, "name": "Roster", "item": "https://forksuppucks.com/roster/" }
                   ]
                 }
               ]
@@ -105,6 +105,18 @@ function Roster() {
           <p>No player data found for the current roster.</p>
         )}
       </div>
+
+      <p className="roster-source">
+        Roster data sourced from{' '}
+        <a
+          href="https://www.collegehockeynews.com/reports/roster/Arizona-State/61"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          College Hockey News
+        </a>
+        .
+      </p>
     </div>
   );
 }

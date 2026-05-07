@@ -250,6 +250,28 @@
   color: var(--text-secondary);
 }
 
+/* Source attribution */
+.roster-source {
+  text-align: center;
+  margin: 32px auto 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.roster-source a {
+  color: var(--asu-maroon);
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--transition-base), color var(--transition-base);
+}
+
+.roster-source a:hover,
+.roster-source a:focus-visible {
+  color: var(--asu-gold);
+  border-bottom-color: var(--asu-gold);
+}
+
 /* Responsive Table */
 @media (max-width: 900px) {
   .roster-page {
