@@ -56,10 +56,10 @@ function Home() {
         <meta name="description" content="The ultimate fan site for ASU Sun Devils Men's Hockey. Live scores, schedule, roster, stats, recruiting news and more." />
         <meta property="og:title" content="Forks Up Pucks | ASU Sun Devils Hockey" />
         <meta property="og:description" content="The ultimate fan site for ASU Sun Devils Men's Hockey. Live scores, schedule, roster, stats, recruiting news and more." />
-        <meta property="og:url" content="https://forksuppucks.com" />
+        <meta property="og:url" content="https://forksuppucks.com/" />
         <meta name="twitter:title" content="Forks Up Pucks | ASU Sun Devils Hockey" />
         <meta name="twitter:description" content="The ultimate fan site for ASU Sun Devils Men's Hockey. Live scores, schedule, roster, stats, recruiting news and more." />
-        <link rel="canonical" href="https://forksuppucks.com" />
+        <link rel="canonical" href="https://forksuppucks.com/" />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
@@ -68,7 +68,7 @@ function Home() {
                 "@type": "SportsOrganization",
                 "name": "Arizona State Sun Devils Men's Hockey",
                 "alternateName": ["ASU Hockey", "ASU Sun Devils Hockey"],
-                "url": "https://forksuppucks.com",
+                "url": "https://forksuppucks.com/",
                 "logo": "https://forksuppucks.com/assets/asu-hockey-logo.png",
                 "sport": "Ice Hockey",
                 "memberOf": {
@@ -90,7 +90,7 @@ function Home() {
               {
                 "@type": "BreadcrumbList",
                 "itemListElement": [
-                  { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://forksuppucks.com" }
+                  { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://forksuppucks.com/" }
                 ]
               }
             ]

@@ -44,17 +44,17 @@ function Alumni() {
                 <meta name="description" content="Where are they now? Follow former ASU Sun Devils Hockey players in their professional careers in the NHL, AHL, and overseas." />
                 <meta property="og:title" content="ASU Hockey Alumni in the Pros & NHL | Forks Up Pucks" />
                 <meta property="og:description" content="Where are they now? Follow former ASU Sun Devils Hockey players in their professional careers in the NHL, AHL, and overseas." />
-                <meta property="og:url" content="https://forksuppucks.com/alumni" />
+                <meta property="og:url" content="https://forksuppucks.com/alumni/" />
                 <meta name="twitter:title" content="ASU Hockey Alumni in the Pros & NHL | Forks Up Pucks" />
                 <meta name="twitter:description" content="Where are they now? Follow former ASU Sun Devils Hockey players in their professional careers in the NHL, AHL, and overseas." />
-                <link rel="canonical" href="https://forksuppucks.com/alumni" />
+                <link rel="canonical" href="https://forksuppucks.com/alumni/" />
                 <script type="application/ld+json">
                   {JSON.stringify({
                     "@context": "https://schema.org",
                     "@type": "BreadcrumbList",
                     "itemListElement": [
-                      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://forksuppucks.com" },
-                      { "@type": "ListItem", "position": 2, "name": "Alumni", "item": "https://forksuppucks.com/alumni" }
+                      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://forksuppucks.com/" },
+                      { "@type": "ListItem", "position": 2, "name": "Alumni", "item": "https://forksuppucks.com/alumni/" }
                     ]
                   })}
                 </script>

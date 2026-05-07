@@ -68,22 +68,22 @@ describe('sitemap metadata', () => {
 
     expect(pages.map(page => page.url)).toEqual([
       '/',
-      '/news',
-      '/schedule',
-      '/roster',
-      '/stats',
-      '/recruiting',
-      '/alumni',
+      '/news/',
+      '/schedule/',
+      '/roster/',
+      '/stats/',
+      '/recruiting/',
+      '/alumni/',
     ]);
 
-    expect(pages.find(page => page.url === '/news').lastmod).toBe('2026-05-01');
-    expect(pages.find(page => page.url === '/schedule').lastmod).toBe('2026-05-02');
-    expect(pages.find(page => page.url === '/roster').lastmod).toBe('2026-03-01');
-    expect(pages.find(page => page.url === '/stats').lastmod).toBe('2026-04-15');
-    expect(pages.find(page => page.url === '/recruiting').lastmod).toBe('2026-04-30');
-    expect(pages.find(page => page.url === '/alumni').lastmod).toBe('2026-04-30');
+    expect(pages.find(page => page.url === '/news/').lastmod).toBe('2026-05-01');
+    expect(pages.find(page => page.url === '/schedule/').lastmod).toBe('2026-05-02');
+    expect(pages.find(page => page.url === '/roster/').lastmod).toBe('2026-03-01');
+    expect(pages.find(page => page.url === '/stats/').lastmod).toBe('2026-04-15');
+    expect(pages.find(page => page.url === '/recruiting/').lastmod).toBe('2026-04-30');
+    expect(pages.find(page => page.url === '/alumni/').lastmod).toBe('2026-04-30');
     expect(pages.find(page => page.url === '/').lastmod).toBe('2026-05-02');
-    expect(pages.some(page => page.url === '/about')).toBe(false);
-    expect(pages.some(page => page.url === '/contact')).toBe(false);
+    expect(pages.some(page => page.url === '/about/')).toBe(false);
+    expect(pages.some(page => page.url === '/contact/')).toBe(false);
   });
 });
