@@ -24,7 +24,7 @@
     "express-rate-limit": "^8.5.0",
     "helmet": "^7.2.0",
     "node-cron": "^4.2.1",
-    "puppeteer": "^24.42.0",
+    "puppeteer": "^24.43.1",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-helmet-async": "^3.0.0",
