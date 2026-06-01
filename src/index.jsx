@@ -26,6 +26,20 @@ Sentry.init({
 
   // Environment (Development vs Production)
   environment: process.env.NODE_ENV,
+
+  // Drop noise from browser extensions injected into the page (e.g. MetaMask's
+  // inpage.js throwing "Failed to connect to MetaMask"). These originate in
+  // extension code, not our site, so we never want them in Sentry.
+  denyUrls: [
+    /extensions\//i,
+    /^chrome-extension:\/\//i,
+    /^moz-extension:\/\//i,
+    /^safari-(web-)?extension:\/\//i,
+  ],
+  ignoreErrors: [
+    /MetaMask/i,
+    /Failed to connect to MetaMask/i,
+  ],
 });
 
 const container = document.getElementById('root');
