@@ -96,8 +96,8 @@ async function prerender() {
       // helmet handles this fine in hydrate mode.
       
       // Clean up the prerendering URL base and replace it with relative or absolute production domains if needed.
-      // E.g., replace `http://localhost:5055` with `https://forksuppucks.com`
-      html = html.replace(new RegExp(baseUrl, 'g'), 'https://forksuppucks.com');
+      // E.g., replace `http://localhost:5055` with the production origin
+      html = html.replace(new RegExp(baseUrl, 'g'), process.env.SITE_BASE_URL || 'https://forksuppucks.com');
 
       const filePath = route === '/' ? path.join(buildDir, 'index.html') : path.join(buildDir, route, 'index.html');
       const dirPath = path.dirname(filePath);

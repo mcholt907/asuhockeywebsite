@@ -258,7 +258,7 @@ app.get('/api/standings', async (req, res) => {
 
 // Sitemap
 app.get('/sitemap.xml', (req, res) => {
-  const baseUrl = 'https://forksuppucks.com';
+  const baseUrl = process.env.SITE_BASE_URL || 'https://forksuppucks.com';
   const pages = getSitemapPages();
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
