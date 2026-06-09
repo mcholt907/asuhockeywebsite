@@ -10,8 +10,8 @@ This is a **monorepo** combining a React frontend (Vite) and an Express backend 
 
 1. `scraper.js` / `transfer-scraper.js` / `alumni-scraper.js` / `recruiting-scraper.js` — scrape external sites (thesundevils.com, collegehockeynews.com, uscho.com) using cheerio + axios
 2. `src/scripts/caching-system.js` — file-based cache at `src/scripts/cache/`, implements stale-while-revalidate (expired cache is served while background refresh runs)
-3. `src/scripts/scheduler.js` — node-cron jobs that pre-warm the cache on startup and on schedule (news/stats/standings: 12 AM & 12 PM; roster/alumni/transfers: 3 AM daily; post-game force refresh: 2–6 AM UTC Sat/Sun)
-4. `server.js` — Express server on port 5000 that serves API routes and the React `build/` as static files
+3. `src/scripts/scheduler.js` — node-cron jobs that pre-warm the cache on startup and on schedule (news/stats/standings: 12 AM & 12 PM; roster/alumni/transfers: 3 AM daily; post-game force refresh: 2–6 AM UTC Sat/Sun; cache maintenance: 4:30 AM daily via `src/scripts/cache-maintenance.js` — prunes abandoned cache files and Sentry-warns on stale datasets)
+4. `server.js` — Express server on port 5000 that serves API routes and the React `build/` as static files. `/api/status` reports per-dataset freshness (age, source: cache/fallback/static, ok/stale/missing) and 403 cooldowns, built on `src/scripts/data-status.js`
 5. `src/services/api.ts` — frontend axios wrapper that calls the backend via `/api/*` (proxied via Vite `server.proxy` in dev)
 6. `src/pages/` — React pages, fetching via the React Query hooks in `src/hooks/queries/` (which call `src/services/api.ts`)
 

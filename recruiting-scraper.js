@@ -20,9 +20,14 @@ async function scrapePlayerProfile(playerLink) {
 
         // --- Photo ---
         let player_photo = '';
-        const photoEl = $('.ProfileImage_profileImage__JLd31').attr('src') ||
-            $('img.ProfileImage_profileImage__JLd31').attr('src') ||
+        // Structural selectors first — EP's hashed CSS-module classes
+        // (ProfileImage_*) rotate on redeploys and have broken before.
+        // Scope to the profile header region when possible so a "related
+        // players" widget can't supply the wrong player's image.
+        const photoEl = $('[class*="ProfileHeader"], [class*="PlayerHeader"], [class*="PlayerInfo"]')
+                .find('img[src*="files.eliteprospects.com/layout/players"]').first().attr('src') ||
             $('img[src*="files.eliteprospects.com/layout/players"]').first().attr('src') ||
+            $('.ProfileImage_profileImage__JLd31').attr('src') ||
             $('img[alt*="player"]').first().attr('src');
         if (photoEl) {
             player_photo = photoEl.startsWith('http') ? photoEl : `https://www.eliteprospects.com${photoEl}`;
@@ -85,15 +90,30 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
         const $ = cheerio.load(data);
         const players = [];
 
-        // Find all player rows in the stats table
-        const playerRows = $('table.SortTable_table__jnnJk tbody.SortTable_tbody__VrcrZ tr.SortTable_tr__L9yVC');
+        // Find all player rows in the roster table. Structural selection
+        // first — the hashed CSS-module class names (SortTable_*) rotate
+        // whenever EP redeploys. A roster table is one that contains player
+        // profile links AND has an Age column in its header; the header check
+        // keeps pure stats tables (GP/G/A columns at the same indexes) from
+        // being parsed as roster rows. Header/summary rows inside the table
+        // are filtered by the cell-count and name checks below.
+        const candidateTables = $('table').filter((_, t) => $(t).find('a[href*="/player/"]').length > 0);
+        let rosterTables = candidateTables.filter((_, t) =>
+            $(t).find('thead th').toArray().some(th => /^\s*age\s*$/i.test($(th).text())));
+        if (rosterTables.length === 0) rosterTables = candidateTables;
+        let playerRows = rosterTables.find('tbody tr');
+        if (playerRows.length === 0) {
+            playerRows = $('table.SortTable_table__jnnJk tbody.SortTable_tbody__VrcrZ tr.SortTable_tr__L9yVC');
+        }
 
         console.log(`[EP Recruiting Scraper] Found ${playerRows.length} potential player rows`);
 
         for (let index = 0; index < playerRows.length; index++) {
             const row = playerRows[index];
             const $row = $(row);
-            const cells = $row.find('td.SortTable_trow__T6wLH');
+            // children() not find(): a nested table inside a cell must not
+            // pollute the positional index space.
+            const cells = $row.children('td');
 
             // Skip if not enough cells (likely a header or section row)
             if (cells.length < 10) {
@@ -110,8 +130,11 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
                     continue;
                 }
 
-                // Get player name and link
-                const playerLinkElement = $(cells[3]).find('div.Roster_player__e6EbP a.TextLink_link__RhSiC');
+                // Get player name and link (structural first, hashed fallback)
+                let playerLinkElement = $(cells[3]).find('a[href*="/player/"]').first();
+                if (!playerLinkElement.length) {
+                    playerLinkElement = $(cells[3]).find('div.Roster_player__e6EbP a.TextLink_link__RhSiC');
+                }
                 let fullNameWithPos = playerLinkElement.text().trim();
                 const playerLink = playerLinkElement.attr('href');
 
@@ -152,12 +175,20 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
                     birthYear = $(cells[5]).text().trim();
                 }
 
-                const birthplace = $(cells[6]).find('a.TextLink_link__RhSiC').text().trim() || $(cells[6]).text().trim();
+                // .text() over all links concatenates city + country when EP
+                // splits birthplace across two anchors
+                const birthplace = $(cells[6]).find('a').text().trim() || $(cells[6]).text().trim();
                 const height = $(cells[7]).text().trim();
                 const weight = $(cells[8]).text().trim();
                 const shoots = $(cells[9]).text().trim();
 
                 const fullPlayerLink = playerLink ? `https://www.eliteprospects.com${playerLink}` : '';
+
+                // Skip players already captured from another matching table
+                // (structural table selection can match more than one)
+                if (fullPlayerLink && players.some(p => p.player_link === fullPlayerLink)) {
+                    continue;
+                }
 
                 // Scrape player photo and current team if requested (single request)
                 let player_photo = '';

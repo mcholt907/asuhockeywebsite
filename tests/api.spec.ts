@@ -16,6 +16,27 @@ test.describe('API Endpoints', () => {
         await apiContext.dispose();
     });
 
+    test('GET /api/status should report per-dataset freshness', async () => {
+        const response = await apiContext.get('/api/status');
+
+        expect(response.ok()).toBeTruthy();
+        expect(response.status()).toBe(200);
+
+        const data = await response.json();
+        expect(data).toHaveProperty('generatedAt');
+        expect(data).toHaveProperty('uptimeSeconds');
+        expect(Array.isArray(data.datasets)).toBeTruthy();
+        expect(Array.isArray(data.cooldowns)).toBeTruthy();
+
+        const names = data.datasets.map((d: { name: string }) => d.name);
+        for (const expected of ['news', 'schedule', 'stats', 'roster', 'transfers', 'alumni']) {
+            expect(names).toContain(expected);
+        }
+        for (const dataset of data.datasets) {
+            expect(['ok', 'stale', 'missing', 'unknown']).toContain(dataset.status);
+        }
+    });
+
     test('GET /api/roster should return player data', async () => {
         const response = await apiContext.get('/api/roster');
 
