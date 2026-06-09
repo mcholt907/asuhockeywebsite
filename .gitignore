@@ -9,8 +9,12 @@
 /coverage
 
 # production
-# NOTE: We DO want to commit the build folder for Render deployment
-# Remove /build from gitignore
+# Render rebuilds via render.yaml buildCommand; build/ is not committed
+/build
+
+# Playwright artifacts
+/playwright-report
+/test-results
 
 # IDE settings (may contain API keys)
 .vscode/settings.json
@@ -36,6 +40,7 @@ lerna-debug.log*
 
 # cache
 src/scripts/cache/
+/.cache
 
 # misc
 .DS_Store
