@@ -107,4 +107,28 @@ function getFromCache(filename, ignoreExpiration = false) {
   }
 }
 
-module.exports = { saveToCache, getFromCache };
+// Read cache entry metadata without touching hit/miss metrics — used by the
+// /api/status endpoint and cache maintenance, not by the request path.
+function getCacheMeta(filename) {
+  if (!filename) return null;
+  const cacheFilePath = path.join(CACHE_DIR, filename);
+  try {
+    if (!fs.existsSync(cacheFilePath)) return null;
+    const stat = fs.statSync(cacheFilePath);
+    const parsed = JSON.parse(fs.readFileSync(cacheFilePath, 'utf8'));
+    const cacheTime = new Date(parsed.timestamp).getTime();
+    const ageMs = Number.isFinite(cacheTime) ? Date.now() - cacheTime : null;
+    return {
+      key: filename,
+      timestamp: parsed.timestamp || null,
+      ageMs,
+      cacheDuration: parsed.cacheDuration || DEFAULT_CACHE_DURATION,
+      sizeBytes: stat.size,
+    };
+  } catch (error) {
+    console.error(`[Cache System] Failed to read cache meta for ${filename}:`, error.message);
+    return null;
+  }
+}
+
+module.exports = { saveToCache, getFromCache, getCacheMeta, CACHE_DIR, DEFAULT_CACHE_DURATION };

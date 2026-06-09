@@ -27,6 +27,7 @@ const { startScheduler } = require('./src/scripts/scheduler'); // Import schedul
 const { getRoster } = require('./services/roster-service');
 const { getStaticData } = require('./services/static-data');
 const { getSitemapPages } = require('./services/sitemap-metadata');
+const { getDataStatus, getCooldownStatus } = require('./src/scripts/data-status');
 const path = require('path');
 const fs = require('fs');
 
@@ -122,6 +123,22 @@ app.get('/healthz', (req, res) => {
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
   });
+});
+
+// Data freshness status — reports per-dataset age/source so silent
+// staleness (broken selectors, dead refresh jobs) is observable.
+app.get('/api/status', (req, res) => {
+  try {
+    res.json({
+      generatedAt: new Date().toISOString(),
+      uptimeSeconds: Math.round(process.uptime()),
+      datasets: getDataStatus(),
+      cooldowns: getCooldownStatus(),
+    });
+  } catch (error) {
+    console.error('[API /status] Error building status:', error);
+    res.status(500).json({ error: 'Internal server error while building status.' });
+  }
 });
 
 // API endpoint for news

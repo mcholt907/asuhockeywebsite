@@ -3,6 +3,7 @@ const Sentry = require('@sentry/node');
 const { fetchNewsData, fetchScheduleData, scrapeCHNStats, scrapeCHNRoster, scrapeNCHCStandings } = require('../../scraper');
 const { scrapeTransferData } = require('../../transfer-scraper');
 const { scrapeAlumniData } = require('../../alumni-scraper');
+const { runCacheMaintenance } = require('./cache-maintenance');
 
 const RETRY_DELAY_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -85,6 +86,13 @@ function startScheduler() {
     cron.schedule('0 3 * * *', () => {
         console.log('[Cron] Triggering 3:00 AM daily refresh...');
         withRetry('daily', refreshDailyData);
+    });
+
+    // 5. Cache maintenance: 4:30 AM daily (after the 3 AM refresh, so a
+    // healthy refresh clears staleness before the check runs)
+    cron.schedule('30 4 * * *', () => {
+        console.log('[Cron] Triggering daily cache maintenance...');
+        withRetry('maintenance', runCacheMaintenance);
     });
 
     console.log('[Scheduler] Cron jobs scheduled.');

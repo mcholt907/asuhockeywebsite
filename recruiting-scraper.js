@@ -20,10 +20,12 @@ async function scrapePlayerProfile(playerLink) {
 
         // --- Photo ---
         let player_photo = '';
-        const photoEl = $('.ProfileImage_profileImage__JLd31').attr('src') ||
-            $('img.ProfileImage_profileImage__JLd31').attr('src') ||
-            $('img[src*="files.eliteprospects.com/layout/players"]').first().attr('src') ||
-            $('img[alt*="player"]').first().attr('src');
+        // Structural selectors first — EP's hashed CSS-module classes
+        // (ProfileImage_*) rotate on redeploys and have broken before.
+        const photoEl = $('img[src*="files.eliteprospects.com/layout/players"]').first().attr('src') ||
+            $('img[alt*="player"]').first().attr('src') ||
+            $('.ProfileImage_profileImage__JLd31').attr('src') ||
+            $('img.ProfileImage_profileImage__JLd31').attr('src');
         if (photoEl) {
             player_photo = photoEl.startsWith('http') ? photoEl : `https://www.eliteprospects.com${photoEl}`;
             console.log(`[Profile Scraper] Found photo: ${player_photo}`);
@@ -85,15 +87,22 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
         const $ = cheerio.load(data);
         const players = [];
 
-        // Find all player rows in the stats table
-        const playerRows = $('table.SortTable_table__jnnJk tbody.SortTable_tbody__VrcrZ tr.SortTable_tr__L9yVC');
+        // Find all player rows in the stats table. Structural selector first:
+        // a player row is any table row containing a player profile link (the
+        // cell-count and name checks below filter header/summary rows). The
+        // hashed CSS-module selector is kept only as a fallback — those class
+        // names (SortTable_*) rotate whenever EP redeploys.
+        let playerRows = $('table tbody tr').filter((_, row) => $(row).find('a[href*="/player/"]').length > 0);
+        if (playerRows.length === 0) {
+            playerRows = $('table.SortTable_table__jnnJk tbody.SortTable_tbody__VrcrZ tr.SortTable_tr__L9yVC');
+        }
 
         console.log(`[EP Recruiting Scraper] Found ${playerRows.length} potential player rows`);
 
         for (let index = 0; index < playerRows.length; index++) {
             const row = playerRows[index];
             const $row = $(row);
-            const cells = $row.find('td.SortTable_trow__T6wLH');
+            const cells = $row.find('td');
 
             // Skip if not enough cells (likely a header or section row)
             if (cells.length < 10) {
@@ -110,8 +119,11 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
                     continue;
                 }
 
-                // Get player name and link
-                const playerLinkElement = $(cells[3]).find('div.Roster_player__e6EbP a.TextLink_link__RhSiC');
+                // Get player name and link (structural first, hashed fallback)
+                let playerLinkElement = $(cells[3]).find('a[href*="/player/"]').first();
+                if (!playerLinkElement.length) {
+                    playerLinkElement = $(cells[3]).find('div.Roster_player__e6EbP a.TextLink_link__RhSiC');
+                }
                 let fullNameWithPos = playerLinkElement.text().trim();
                 const playerLink = playerLinkElement.attr('href');
 
@@ -152,7 +164,7 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
                     birthYear = $(cells[5]).text().trim();
                 }
 
-                const birthplace = $(cells[6]).find('a.TextLink_link__RhSiC').text().trim() || $(cells[6]).text().trim();
+                const birthplace = $(cells[6]).find('a').first().text().trim() || $(cells[6]).text().trim();
                 const height = $(cells[7]).text().trim();
                 const weight = $(cells[8]).text().trim();
                 const shoots = $(cells[9]).text().trim();
