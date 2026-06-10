@@ -15,6 +15,7 @@
 # Playwright artifacts
 /playwright-report
 /test-results
+/.playwright-mcp
 
 # IDE settings (may contain API keys)
 .vscode/settings.json
