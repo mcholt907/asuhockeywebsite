@@ -5,7 +5,8 @@ REM
 REM Behavior:
 REM   - Pulls latest main
 REM   - Runs npm run refresh-data
-REM   - If fallback JSON files changed, commits and pushes
+REM   - If fallback JSON files changed, commits to a branch and opens an
+REM     auto-merging PR (main is protected; direct pushes are rejected)
 REM   - Logs to .refresh-log.txt (one line per run)
 REM   - Exits non-zero on any failure; existing JSON is preserved
 
@@ -38,14 +39,25 @@ if errorlevel 1 (
 
 git diff --quiet -- data\asu_alumni_fallback.json data\asu_transfers_fallback.json
 if errorlevel 1 (
+  git checkout -B auto/data-refresh >> %LOG% 2>&1
   git add data\asu_alumni_fallback.json data\asu_transfers_fallback.json
   git commit -m "data: refresh alumni and transfer fallbacks (automated)" >> %LOG% 2>&1
-  git push origin main >> %LOG% 2>&1
+  git push -f origin auto/data-refresh >> %LOG% 2>&1
   if errorlevel 1 (
     echo %DATE% %TIME% — git push failed >> %LOG%
+    git checkout main >> %LOG% 2>&1
     exit /b 1
   )
-  echo %DATE% %TIME% — refreshed and pushed >> %LOG%
+  REM Create the PR; if one already exists for this branch, reuse it
+  gh pr create --head auto/data-refresh --title "data: refresh alumni and transfer fallbacks (automated)" --body "Weekly automated data refresh from the Windows Scheduled Task." >> %LOG% 2>&1
+  gh pr merge auto/data-refresh --auto --merge >> %LOG% 2>&1
+  if errorlevel 1 (
+    echo %DATE% %TIME% — gh pr auto-merge failed (check PR manually) >> %LOG%
+    git checkout main >> %LOG% 2>&1
+    exit /b 1
+  )
+  git checkout main >> %LOG% 2>&1
+  echo %DATE% %TIME% — refreshed; PR opened with auto-merge >> %LOG%
 ) else (
   echo %DATE% %TIME% — no data changes >> %LOG%
 )

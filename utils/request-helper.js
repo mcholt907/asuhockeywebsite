@@ -49,6 +49,29 @@ class HostCooldownError extends Error {
   }
 }
 
+function isPuppeteerFallbackEnabled() {
+  return process.env.SCRAPER_PUPPETEER_FALLBACK === 'true';
+}
+
+async function fetchViaPuppeteer(url, timeout) {
+  const browser = await puppeteer.launch({
+    headless: 'new',
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+  });
+  try {
+    const page = await browser.newPage();
+    await page.setUserAgent(config.http.userAgent);
+    await page.setExtraHTTPHeaders({
+      'Accept-Language': 'en-US,en;q=0.9',
+    });
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: timeout });
+    const html = await page.content();
+    return { data: html };
+  } finally {
+    await browser.close();
+  }
+}
+
 /**
  * Makes an HTTP GET request with retry logic and exponential backoff
  * @param {string} url - The URL to request
@@ -57,10 +80,20 @@ class HostCooldownError extends Error {
  * @returns {Promise} Axios response-like object { data: string }
  */
 async function requestWithRetry(url, options = {}, retries = config.http.retry.maxRetries) {
+  const timeout = options.timeout || config.http.timeout;
   if (isHostInCooldown(url)) {
+    // Axios is known-blocked for this host; go straight to Puppeteer if enabled
+    if (isPuppeteerFallbackEnabled()) {
+      console.warn(`[Request Helper] Host in 403 cooldown, using Puppeteer directly for ${url}...`);
+      try {
+        return await fetchViaPuppeteer(url, timeout);
+      } catch (pupError) {
+        console.error('[Request Helper] Puppeteer fallback failed:', pupError.message);
+        throw new HostCooldownError(url);
+      }
+    }
     throw new HostCooldownError(url);
   }
-  const timeout = options.timeout || config.http.timeout;
   const defaultOptions = {
     timeout,
     headers: {
@@ -88,22 +121,10 @@ async function requestWithRetry(url, options = {}, retries = config.http.retry.m
       if (error.response && error.response.status === 403) {
         markHostCooldown(url);
 
-        if (process.env.SCRAPER_PUPPETEER_FALLBACK === 'true') {
+        if (isPuppeteerFallbackEnabled()) {
           console.warn(`[Request Helper] Attempt ${attempt + 1}/${retries + 1} got 403, trying Puppeteer fallback for ${url}...`);
           try {
-            const browser = await puppeteer.launch({
-              headless: 'new',
-              args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
-            });
-            const page = await browser.newPage();
-            await page.setUserAgent(config.http.userAgent);
-            await page.setExtraHTTPHeaders({
-              'Accept-Language': 'en-US,en;q=0.9',
-            });
-            await page.goto(url, { waitUntil: 'domcontentloaded', timeout: timeout });
-            const html = await page.content();
-            await browser.close();
-            return { data: html };
+            return await fetchViaPuppeteer(url, timeout);
           } catch (pupError) {
             console.error('[Request Helper] Puppeteer fallback failed:', pupError.message);
           }
