@@ -3,6 +3,8 @@
 // to data/asu_alumni_fallback.json. Must be run from a residential IP.
 
 process.env.ALUMNI_SCRAPE_LIVE = 'true';
+// EP 403s the axios TLS fingerprint even from residential IPs; headless Chrome gets through
+process.env.SCRAPER_PUPPETEER_FALLBACK = process.env.SCRAPER_PUPPETEER_FALLBACK || 'true';
 
 const fs = require('fs');
 const path = require('path');

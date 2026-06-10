@@ -107,10 +107,15 @@ npm run refresh-transfers   # transfers only
 The refresh scripts validate result shape + non-emptiness; an empty or
 malformed scrape will exit non-zero and leave the existing JSON untouched.
 
+EliteProspects 403s the plain-axios TLS fingerprint even from residential
+IPs; the refresh scripts enable `SCRAPER_PUPPETEER_FALLBACK` by default so
+blocked requests retry through headless Chrome.
+
 A Windows Scheduled Task (`scripts/RefreshDataTask.xml`) runs
 `scripts/refresh-and-push.cmd` weekly on Sunday 06:00. The task pulls main,
-runs the refresh, commits any changes, and pushes. Failures are logged to
-`.refresh-log.txt` (gitignored).
+runs the refresh, commits any changes to the `auto/data-refresh` branch, and
+opens an auto-merging PR (main is protected — direct pushes are rejected).
+Failures are logged to `.refresh-log.txt` (gitignored).
 
 To install the task (one-time): `schtasks /create /xml scripts\RefreshDataTask.xml /tn "ASU Hockey Data Refresh"`. The Task Scheduler XML hardcodes `C:\Users\farkh\asuhockeywebsite` as the working directory; edit those two lines if cloning the repo elsewhere.
 
