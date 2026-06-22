@@ -67,3 +67,6 @@ Thumbs.db
 
 # Local automation log (Windows Task Scheduler refresh runs)
 .refresh-log.txt
+
+# Superpowers brainstorming visual-companion mockups (local only)
+.superpowers/
