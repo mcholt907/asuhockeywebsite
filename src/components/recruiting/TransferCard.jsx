@@ -6,9 +6,6 @@ function TransferCard({ transfer, direction }) {
   return (
     <div className={`transfer-card ${direction}`}>
       <div className="transfer-player-info">
-        <div className="transfer-badge">
-          {isIncoming ? 'JOINING' : 'LEAVING'}
-        </div>
         <h3 className="transfer-player-name">
           <a
             href={transfer.playerUrl}
@@ -23,12 +20,9 @@ function TransferCard({ transfer, direction }) {
         )}
       </div>
       <div className="transfer-team-info">
-        <span className="team-from">
-          {isIncoming ? (transfer.team || 'Unknown Team') : 'Arizona State'}
-        </span>
-        <span className="transfer-arrow">→</span>
-        <span className="team-to">
-          {isIncoming ? 'Arizona State' : (transfer.team || 'Unknown Team')}
+        <span className="transfer-team-label">{isIncoming ? 'From' : 'To'}</span>
+        <span className="transfer-team-name">
+          {transfer.team || 'Unknown Team'}
         </span>
       </div>
       {transfer.transferDate && (
