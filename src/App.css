@@ -1,5 +1,7 @@
 /* App.css - Modernized */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* Self-hosted fonts (Inter + Barlow Condensed) — served from 'self' so the
+   site CSP doesn't block them. Regenerate with scripts/fetch-fonts.mjs. */
+@import './styles/fonts.css';
 
 :root {
   /* Brand Colors - matched to jersey stripe */
