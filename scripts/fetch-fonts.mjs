@@ -7,7 +7,7 @@ const CSS_OUT = process.argv[3]; // src/styles/fonts.css
 
 const families = [
   'Inter:wght@300;400;500;600;700;800',
-  'Barlow+Condensed:wght@600;700;800;900',
+  'Barlow+Condensed:wght@400;500;600;700;800;900',
 ];
 const url = `https://fonts.googleapis.com/css2?family=${families.join('&family=')}&display=swap`;
 const WANT_SUBSETS = new Set(['latin', 'latin-ext']);

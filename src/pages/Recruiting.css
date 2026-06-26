@@ -25,7 +25,7 @@
   min-height: 100vh;
   padding: 40px 20px 80px 20px;
   border-radius: var(--border-radius-lg);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.8) inset;
   position: relative;
   overflow: hidden;
@@ -93,7 +93,7 @@
 }
 
 .recruiting-header h1 {
-  font-family: 'Barlow Condensed', 'Inter', sans-serif;
+  font-family: var(--font-display);
   font-size: 3.2rem;
   font-weight: 900;
   letter-spacing: -0.02em;
@@ -150,7 +150,7 @@
 }
 
 .section-header h2 {
-  font-family: 'Barlow Condensed', 'Inter', sans-serif;
+  font-family: var(--font-display);
   font-size: 2.2rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -174,7 +174,7 @@
 }
 
 .transfer-sub-title {
-  font-family: 'Barlow Condensed', 'Inter', sans-serif;
+  font-family: var(--font-display);
   font-size: 1.25rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -243,7 +243,7 @@
 }
 
 .transfer-card-glass h3 {
-  font-family: 'Barlow Condensed', 'Inter', sans-serif;
+  font-family: var(--font-display);
   font-size: 1.25rem;
   font-weight: 700;
   margin: 0 0 4px 0;
@@ -329,7 +329,7 @@
 }
 
 .recruits-section h2 {
-  font-family: 'Barlow Condensed', 'Inter', sans-serif;
+  font-family: var(--font-display);
   font-size: 2.2rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -379,7 +379,7 @@
   background: transparent;
   border: none;
   color: var(--text-muted);
-  font-family: 'Barlow Condensed', 'Inter', sans-serif;
+  font-family: var(--font-display);
   font-size: 1.1rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -450,7 +450,7 @@
 }
 
 .position-group-title h3 {
-  font-family: 'Barlow Condensed', 'Inter', sans-serif;
+  font-family: var(--font-display);
   font-size: 1.8rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -518,7 +518,7 @@
   position: absolute;
   top: 8px;
   right: 12px;
-  font-family: 'Barlow Condensed', 'Inter', sans-serif;
+  font-family: var(--font-display);
   font-size: 3.6rem;
   font-weight: 900;
   color: var(--color-gold);
@@ -536,7 +536,7 @@
 }
 
 .card-scouting-header h4 {
-  font-family: 'Barlow Condensed', 'Inter', sans-serif;
+  font-family: var(--font-display);
   font-size: 1.4rem;
   font-weight: 800;
   margin: 0;
@@ -589,7 +589,7 @@
 }
 
 .detail-val.large-val {
-  font-family: 'Barlow Condensed', 'Inter', sans-serif;
+  font-family: var(--font-display);
   font-size: 1.2rem;
   font-weight: 700;
 }
@@ -612,7 +612,7 @@
   background: transparent;
   border: 1px solid var(--color-gold);
   color: var(--color-gold);
-  font-family: 'Barlow Condensed', 'Inter', sans-serif;
+  font-family: var(--font-display);
   font-size: 0.9rem;
   font-weight: 700;
   text-transform: uppercase;

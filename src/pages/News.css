@@ -3,7 +3,7 @@
   animation: fadeIn 0.5s ease;
   background: var(--asu-maroon);
   min-height: calc(100vh - var(--header-height));
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
 }
 
 .news-content {
