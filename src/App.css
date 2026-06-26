@@ -1,5 +1,7 @@
 /* App.css - Modernized */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* Self-hosted fonts (Inter + Barlow Condensed) — served from 'self' so the
+   site CSP doesn't block them. Regenerate with scripts/fetch-fonts.mjs. */
+@import './styles/fonts.css';
 
 :root {
   /* Brand Colors - matched to jersey stripe */
@@ -59,6 +61,12 @@
   --transition-slow: 350ms ease-in-out;
   --cubic-smooth: cubic-bezier(0.4, 0, 0.2, 1);
   --cubic-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* Typography — Barlow Condensed is the global default site-wide.
+     Inter remains the fallback (and the named @font-face still loads it).
+     To revert body copy to Inter, set --font-body back to the Inter stack. */
+  --font-body: 'Barlow Condensed', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Barlow Condensed', 'Inter', system-ui, sans-serif;
 }
 
 * {
@@ -66,13 +74,21 @@
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
   margin: 0;
   padding: 0;
   background-color: var(--light-bg);
   color: var(--text-primary);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Headings use the condensed display font site-wide.
+   Per-page rules that set their own font-family still win over this.
+   Body text, labels, and data (stat values, dates, records) stay on
+   var(--font-body) since they aren't headings. */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
 }
 
 .app {
@@ -174,10 +190,11 @@ header {
   color: var(--white);
   text-decoration: none;
   padding: 10px clamp(4px, 1.3vw, 20px);
-  font-size: clamp(0.8rem, 1.1vw, 1rem);
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: clamp(0.95rem, 1.35vw, 1.2rem);
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.03em;
   border-radius: var(--border-radius-sm);
   transition: all 0.2s ease;
   position: relative;

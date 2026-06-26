@@ -113,10 +113,11 @@
 }
 
 .nav-label {
-    font-size: 0.58rem;
+    font-family: var(--font-display);
+    font-size: 0.62rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.04em;
     white-space: nowrap;
     opacity: 0.85;
 }

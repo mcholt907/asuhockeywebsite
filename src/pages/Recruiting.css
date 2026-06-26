@@ -1,532 +1,693 @@
 /* src/pages/Recruiting.css */
+
+/* --- Desert Ice Cinematic Dark Theme Variables --- */
 .recruiting-page {
-  animation: fadeIn 0.5s ease;
-  padding-bottom: 60px;
-}
-
-.recruiting-header {
-  text-align: center;
-  margin-bottom: 50px;
-}
-
-.recruiting-header h1 {
-  font-size: 3rem;
-  font-weight: 800;
-  color: var(--asu-maroon);
-  margin-bottom: 10px;
-  text-transform: uppercase;
-  letter-spacing: -0.05em;
-}
-
-.recruiting-header .subtitle {
-  font-size: 1.2rem;
-  color: var(--text-secondary);
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-/* --- Season Selector --- */
-.season-selector {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 15px;
-  margin-bottom: 50px;
-}
-
-.season-btn {
-  background: white;
-  border: 1px solid var(--border-color);
-  padding: 12px 30px;
-  border-radius: 30px;
-  font-weight: 700;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  color: var(--text-secondary);
-  box-shadow: var(--shadow-sm);
-}
-
-.season-btn:hover {
-  transform: translateY(-2px);
-  color: var(--asu-gold);
-  border-color: var(--asu-gold);
-}
-
-.season-btn.active {
-  background: var(--asu-maroon);
-  color: white;
-  border-color: var(--asu-maroon);
-  box-shadow: var(--shadow-md);
-}
-
-/* --- Recruits Grid & Holocards --- */
-.recruits-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 40px;
-}
-
-.recruit-card-wrapper {
-  perspective: 1000px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.recruit-card {
-  display: block;
-  text-decoration: none;
-  color: inherit;
+  --bg-dark: var(--asu-maroon);
+  --surface-card: #0f0105;
+  --surface-container-high: #150207;
+  --surface-container-lowest: #0a0003;
+  
+  --color-maroon: #8c1d40;
+  --color-maroon-dark: #660028;
+  --color-maroon-glow: rgba(140, 29, 64, 0.4);
+  --color-gold: #ffc627;
+  --color-gold-glow: rgba(255, 198, 39, 0.3);
+  
+  --color-silver: #a1a1aa;
+  --color-silver-glow: rgba(161, 161, 170, 0.25);
+  
+  --text-primary: #e5e2e1;
+  --text-secondary: #ddbfc3;
+  --text-muted: #a48a8e;
+  
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+  min-height: 100vh;
+  padding: 40px 20px 80px 20px;
+  border-radius: var(--border-radius-lg);
+  font-family: var(--font-body);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.8) inset;
   position: relative;
-  width: 100%;
-  aspect-ratio: 3/4;
-  transform-style: preserve-3d;
-  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-  border-radius: 20px;
-  box-shadow: var(--shadow-lg);
-  cursor: pointer;
-}
-
-.recruit-card-wrapper:hover .recruit-card {
-  transform: rotateY(5deg) rotateX(5deg) scale(1.02);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-}
-
-.card-front {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, var(--dark-bg) 0%, var(--asu-maroon-dark) 100%);
-  border-radius: 20px;
-  border: 4px solid var(--asu-gold);
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
 }
 
-/* Background Graphics */
-.card-bg-gfx {
+/* Background Glow Effects */
+.recruiting-page::before {
+  content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image:
-    radial-gradient(circle at 10% 10%, rgba(255, 198, 39, 0.2) 0%, transparent 20%),
-    linear-gradient(45deg, transparent 48%, rgba(255, 255, 255, 0.05) 50%, transparent 52%);
-  background-size: 100% 100%, 20px 20px;
+  top: 10%;
+  left: 20%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, var(--color-maroon-glow) 0%, transparent 70%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.recruiting-page::after {
+  content: '';
+  position: absolute;
+  bottom: 20%;
+  right: 10%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, var(--color-gold-glow) 0%, transparent 70%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Ensure children reside above background glows */
+.recruiting-header,
+.transfers-section,
+.recruits-section {
+  position: relative;
   z-index: 1;
 }
 
-/* Player Photo */
-.recruit-photo-container {
-  position: absolute;
-  top: 15px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 240px;
-  height: 240px;
-  border-radius: 20px;
-  overflow: hidden;
-  border: 4px solid var(--asu-gold);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-  z-index: 2;
-  background: var(--dark-bg);
+/* --- Loading / Error status states --- */
+.recruiting-status {
+  min-height: 80vh;
 }
 
-.recruit-photo {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center top;
-}
-
-.recruit-info {
+.recruiting-status .loading-message,
+.recruiting-status .error-message {
+  text-align: center;
+  padding-top: 100px;
   position: relative;
-  z-index: 2;
-  margin-top: auto;
-  background: linear-gradient(to top, rgba(140, 29, 64, 0.95), transparent);
-  padding: 20px;
-  padding-top: 60px;
-  color: white;
+  z-index: 1;
 }
 
-.recruit-info h3 {
-  font-size: 1.8rem;
+.recruiting-status .loading-message {
+  color: var(--color-gold);
+}
+
+.recruiting-status .error-message {
+  color: #ef4444;
+}
+
+/* --- Simplified Header --- */
+.recruiting-header {
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 20px 0;
+}
+
+.recruiting-header h1 {
+  font-family: var(--font-display);
+  font-size: 3.2rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
   margin: 0 0 10px 0;
-  line-height: 1;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  background: linear-gradient(to bottom, #ffffff 0%, #d3d3d3 50%, #a9a9a9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
 }
 
-.stats-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.stat-badge {
-  background: var(--asu-gold);
-  color: var(--asu-maroon);
-  font-weight: 800;
-  padding: 4px 8px;
-  border-radius: 4px;
-}
-
-.stat-text {
-  font-weight: 600;
-  opacity: 0.9;
-}
-
-.origin-row,
-.team-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.85rem;
-  margin-bottom: 5px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  padding-bottom: 3px;
-}
-
-.origin-row:last-child {
-  border-bottom: none;
-}
-
-.label {
-  color: rgba(255, 255, 255, 0.6);
-  text-transform: uppercase;
-  font-size: 0.7rem;
-}
-
-.value {
-  font-weight: 600;
-  text-align: right;
-}
-
-.card-shine {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(125deg, transparent 40%, rgba(255, 255, 255, 0.3) 45%, transparent 50%);
-  z-index: 3;
-  pointer-events: none;
-  opacity: 0.5;
-}
-
-.recruit-card-wrapper:hover .card-shine {
-  animation: shine 1s;
-}
-
-@keyframes shine {
-  0% {
-    transform: translateX(-100%) translateY(-100%);
-  }
-
-  100% {
-    transform: translateX(100%) translateY(100%);
-  }
-}
-
-.profile-link {
-  text-align: center;
-  background: var(--asu-maroon);
-  color: white;
-  text-decoration: none;
-  padding: 12px;
-  border-radius: 10px;
-  font-weight: 600;
-  transition: background 0.2s;
-}
-
-.profile-link:hover {
-  background: var(--asu-maroon-dark);
-}
-
-/* --- Position Groups --- */
-.recruits-groups {
-  display: flex;
-  flex-direction: column;
-  gap: 48px;
-}
-
-.recruit-position-group {}
-
-.recruit-group-title {
-  font-size: 1rem;
+.recruiting-header .subtitle {
+  font-size: 0.95rem;
   font-weight: 700;
+  color: var(--color-gold);
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--asu-gold);
   margin-bottom: 24px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(232, 168, 51, 0.3);
 }
 
-.no-recruits {
-  text-align: center;
-  grid-column: 1 / -1;
-  padding: 60px;
-  font-size: 1.2rem;
-  color: var(--text-secondary);
-  background: var(--light-bg);
-  border-radius: var(--border-radius-lg);
-}
-
-@media (max-width: 600px) {
-  .recruits-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .recruit-card {
-    aspect-ratio: auto;
-    min-height: 300px;
-  }
-}
-
-/* --- Transfers Section --- */
-.transfers-section {
-  margin-bottom: 60px;
-  padding-bottom: 40px;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.section-title {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: var(--asu-maroon);
-  text-align: center;
-  margin-bottom: 10px;
-}
-
-.section-subtitle {
-  text-align: center;
-  color: var(--text-secondary);
-  font-size: 1rem;
-  margin-bottom: 30px;
-}
-
-.transfers-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 16px;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-.transfer-card {
-  background: white;
-  border-radius: var(--border-radius-lg);
-  padding: 10px 18px;
-  box-shadow: var(--shadow-lg);
-  border: 1px solid var(--border-color);
-  transition: all 0.3s ease;
+/* --- Section Dividers --- */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--color-gold), transparent);
+  margin: 40px auto;
+  width: 80%;
+  max-width: 600px;
   position: relative;
-  overflow: hidden;
 }
 
-.transfer-card::before {
+.section-divider::after {
   content: '';
   position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
+  top: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-gold);
+  box-shadow: 0 0 8px var(--color-gold);
 }
 
-.transfer-card.incoming::before {
-  background: linear-gradient(180deg, #22c55e, #16a34a);
+/* --- Live Transfer Portal Section --- */
+.transfers-section {
+  margin-bottom: 50px;
 }
 
-.transfer-card.outgoing::before {
-  background: linear-gradient(180deg, #ef4444, #dc2626);
-}
-
-.transfer-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
-}
-
-.transfer-player-info {
+.section-header {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 12px;
 }
 
-.transfer-player-name {
-  font-size: 1.1rem;
-  font-weight: 700;
+.section-header h2 {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 800;
+  text-transform: uppercase;
   color: var(--text-primary);
   margin: 0;
-  flex: 1;
+  letter-spacing: -0.01em;
 }
 
-.transfer-player-name a {
-  color: inherit;
-  text-decoration: none;
-  transition: color 0.2s ease;
+.transfers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
 }
 
-.transfer-player-name a:hover {
-  color: var(--asu-maroon);
+.transfer-sub-section {
+  margin-bottom: 35px;
 }
 
-.transfer-position {
-  font-size: 0.9rem;
+.transfer-sub-section:last-child {
+  margin-bottom: 0;
+}
+
+.transfer-sub-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
   font-weight: 700;
-  color: var(--asu-gold);
-  background: rgba(255, 198, 39, 0.15);
-  padding: 4px 12px;
-  border-radius: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 16px 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: block;
 }
 
-.transfer-team-info {
+.transfer-sub-title.incoming-title {
+  color: var(--color-gold);
+  border-bottom-color: rgba(255, 198, 39, 0.2);
+}
+
+.transfer-sub-title.outgoing-title {
+  color: var(--text-secondary);
+  border-bottom-color: rgba(161, 161, 170, 0.25);
+}
+
+/* --- Transfer Card Custom Glass Styling --- */
+.transfer-card-glass {
+  background: var(--surface-card);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 12px 16px;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.transfer-card-glass.incoming {
+  border-top: 3px solid var(--color-gold);
+}
+
+.transfer-card-glass.incoming:hover {
+  border-color: var(--color-gold);
+  box-shadow: 0 0 25px var(--color-gold-glow);
+}
+
+.transfer-card-glass.outgoing {
+  border-top: 3px solid var(--color-silver);
+}
+
+.transfer-card-glass.outgoing:hover {
+  border-color: var(--color-silver);
+  box-shadow: 0 0 25px var(--color-silver-glow);
+}
+
+.transfer-card-glass:hover {
+  transform: translateY(-4px);
+}
+
+.transfer-header {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
-  padding: 10px 12px;
-  background: var(--light-bg);
-  border-radius: var(--border-radius-md);
+  justify-content: flex-end;
+  align-items: center;
   margin-bottom: 8px;
 }
 
-.transfer-team-label {
-  font-size: 0.65rem;
+.transfer-time {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.transfer-card-glass h3 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  color: var(--text-primary);
+}
+
+.transfer-card-glass h3 a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.transfer-card-glass h3 a:hover {
+  color: var(--color-gold);
+}
+
+.transfer-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.transfer-pos-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(255, 198, 39, 0.15);
+  color: var(--color-gold);
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 198, 39, 0.3);
+}
+
+.transfer-specs {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.transfer-flow-simplified {
+  padding-top: 8px;
+  border-top: 1px solid rgba(164, 138, 142, 0.15);
+}
+
+.flow-team-val {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+/* Holoshine Sweep Effect definition for cards */
+.holo-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.holo-shine::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0) 100%);
+  transform: rotate(30deg);
+  transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+  opacity: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.holo-shine:hover::after {
+  opacity: 1;
+  transform: rotate(30deg) translate(50%, 50%);
+}
+
+/* --- Future Commits Section & Controls --- */
+.recruits-section {
+  margin-top: 30px;
+}
+
+.recruits-section h2 {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-secondary);
-  flex-shrink: 0;
-}
-
-.transfer-card.incoming .transfer-team-label {
-  color: #16a34a;
-}
-
-.transfer-card.outgoing .transfer-team-label {
-  color: #dc2626;
-}
-
-.transfer-team-name {
-  font-size: 0.95rem;
-  font-weight: 700;
   color: var(--text-primary);
-  line-height: 1.25;
+  margin-bottom: 24px;
+  letter-spacing: -0.01em;
 }
 
-.transfer-date {
-  text-align: right;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  font-style: italic;
+/* Controls Bar */
+.controls-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 30px;
+  background: var(--surface-card);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  padding: 15px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Mobile: Horizontal scrolling carousel with compact cards */
-@media (max-width: 600px) {
-  .transfers-section {
-    margin-bottom: 30px;
-    padding-bottom: 25px;
+@media (min-width: 992px) {
+  .controls-bar {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+/* Class Tabs */
+.class-tabs {
+  display: flex;
+  background: var(--surface-container-lowest);
+  padding: 4px;
+  border-radius: 30px;
+  border: 1px solid rgba(164, 138, 142, 0.15);
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+}
+
+.class-tabs::-webkit-scrollbar {
+  display: none; /* Safari/Chrome */
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 8px 24px;
+  border-radius: 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.25s ease;
+}
+
+.tab-btn:hover {
+  color: var(--text-primary);
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, var(--color-maroon) 0%, #660028 100%);
+  border: 1px solid rgba(255, 198, 39, 0.4);
+  color: var(--text-primary);
+  box-shadow: 0 4px 12px rgba(140, 29, 64, 0.4);
+}
+
+
+
+/* Position Filter Pills */
+.pos-filter-group {
+  display: flex;
+  background: var(--surface-container-lowest);
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid rgba(164, 138, 142, 0.15);
+}
+
+.filter-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+  color: var(--text-primary);
+}
+
+.filter-btn.active {
+  background: var(--surface-container-high);
+  color: var(--color-gold);
+}
+
+/* --- Position Groups & Grid --- */
+.recruits-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.position-group-title {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.position-group-title h3 {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  margin: 0;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 10px rgba(255, 198, 39, 0.15);
+}
+
+.position-group-line {
+  flex-grow: 1;
+  height: 1px;
+  background: linear-gradient(to right, rgba(255, 198, 39, 0.4), transparent);
+}
+
+.recruits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 24px;
+}
+
+.no-recruits-panel {
+  text-align: center;
+  padding: 50px 30px;
+  background: var(--surface-card);
+  border: 1px dashed rgba(164, 138, 142, 0.3);
+  border-radius: 12px;
+}
+
+.no-recruits-panel p {
+  color: var(--text-muted);
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* --- Premium Digital Recruit Card Styling --- */
+.recruit-card-glass {
+  background: var(--surface-card);
+  border: 1px solid rgba(255, 198, 39, 0.2);
+  border-top: 1px solid rgba(255, 198, 39, 0.4);
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.recruit-card-glass:hover {
+  transform: translateY(-5px);
+  border-color: var(--color-gold);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 198, 39, 0.15);
+}
+
+.card-scouting-body {
+  padding: 16px;
+  flex-grow: 1;
+  position: relative;
+}
+
+/* Watermark position character */
+.position-watermark {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-family: var(--font-display);
+  font-size: 3.6rem;
+  font-weight: 900;
+  color: var(--color-gold);
+  opacity: 0.06;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+.card-scouting-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.card-scouting-header h4 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.1;
+  color: var(--text-primary);
+  max-width: 70%;
+}
+
+.card-scouting-pos-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(255, 198, 39, 0.15);
+  color: var(--color-gold);
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 198, 39, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Detail Info Grid */
+.recruit-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px 6px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-item.col-span-2 {
+  grid-column: span 2;
+}
+
+.detail-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  margin-bottom: 1px;
+}
+
+.detail-val {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.detail-val.large-val {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+/* CTA Footer area */
+.card-scouting-cta {
+  padding: 10px 16px 12px 16px;
+  border-top: 1px solid rgba(164, 138, 142, 0.15);
+  background: rgba(14, 14, 14, 0.4);
+  border-bottom-left-radius: 14px;
+  border-bottom-right-radius: 14px;
+}
+
+.scouting-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--color-gold);
+  color: var(--color-gold);
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 6px 10px;
+  border-radius: 6px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.scouting-btn:hover {
+  background: var(--color-gold);
+  color: var(--bg-dark);
+  box-shadow: 0 0 10px rgba(255, 198, 39, 0.3);
+}
+
+.btn-icon {
+  font-size: 0.9rem;
+}
+
+/* Pulse animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Mobile responsive fixes */
+@media (max-width: 576px) {
+  .recruiting-header h1 {
+    font-size: 2.2rem;
   }
 
-  .section-title {
-    font-size: 1.4rem;
-    margin-bottom: 5px;
-  }
-
-  .section-subtitle {
-    font-size: 0.85rem;
-    margin-bottom: 15px;
-  }
-
-  /* Horizontal scrolling container */
+  /* --- Transfer cards become a horizontal swipe carousel --- */
   .transfers-grid {
     display: flex;
+    grid-template-columns: none; /* override desktop grid */
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    gap: 12px;
-    padding: 5px 15px 15px 15px;
-    margin: 0 -15px;
-    /* Extend to edges */
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    /* Firefox */
+    scrollbar-width: none; /* Firefox */
+    gap: 14px;
+    /* Bleed to the page edges (page has 20px side padding) */
+    margin: 0 -20px;
+    padding: 4px 20px 14px 20px;
   }
 
   .transfers-grid::-webkit-scrollbar {
-    display: none;
-    /* Chrome/Safari */
+    display: none; /* Safari/Chrome */
   }
 
-  /* Compact card design */
-  .transfer-card {
+  .transfers-grid .transfer-card-glass {
     flex: 0 0 auto;
-    width: 200px;
-    min-width: 200px;
-    padding: 12px 15px;
+    width: 240px;
     scroll-snap-align: start;
   }
 
-  .transfer-card:hover {
+  /* Disable the hover lift on touch — it sticks after a tap */
+  .transfers-grid .transfer-card-glass:hover {
     transform: none;
-    /* Disable hover lift on mobile */
   }
 
-  .transfer-player-info {
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 10px;
-  }
-
-  .transfer-player-name {
-    font-size: 1rem;
-    width: 100%;
-    text-align: center;
-  }
-
-  .transfer-position {
-    font-size: 0.75rem;
-    padding: 2px 8px;
-    position: absolute;
-    top: 12px;
-    right: 12px;
-  }
-
-  /* Compact team info - single line */
-  .transfer-team-info {
-    padding: 8px 10px;
-    gap: 6px;
-  }
-
-  .transfer-team-label {
-    font-size: 0.6rem;
-  }
-
-  .transfer-team-name {
-    font-size: 0.8rem;
-    line-height: 1.2;
-  }
-
-  .transfer-date {
-    font-size: 0.7rem;
-    text-align: center;
-    margin-top: 5px;
-  }
-}
-
-/* Scroll indicator hint for mobile */
-@media (max-width: 600px) {
-  .transfers-section::after {
+  /* Swipe affordance under each carousel */
+  .transfer-sub-section::after {
     content: '← swipe →';
     display: block;
     text-align: center;
     font-size: 0.7rem;
-    color: var(--text-secondary);
+    font-style: italic;
+    color: var(--text-muted);
     opacity: 0.6;
     margin-top: 8px;
-    font-style: italic;
   }
 }

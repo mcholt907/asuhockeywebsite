@@ -96,22 +96,15 @@
   line-height: 1;
 }
 
-.hero-tagline-line1 {
-  font-size: clamp(2rem, 4vw, 5rem);
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: -0.02em;
-  color: white;
-  line-height: 1;
-}
-
+.hero-tagline-line1,
 .hero-tagline-line2 {
-  font-size: clamp(2rem, 4vw, 5rem);
-  font-weight: 900;
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 5vw, 6rem);
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.01em;
   color: white;
-  line-height: 1;
+  line-height: 0.95;
 }
 
 .hero-team {
@@ -231,10 +224,10 @@
 }
 
 .right-section-title {
-  font-size: 0.7rem;
+  font-size: 0.92rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   color: var(--asu-gold);
   margin: 0 0 10px;
 }
@@ -264,7 +257,7 @@
 }
 
 .right-news-source {
-  font-size: 0.65rem;
+  font-size: 0.74rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--asu-gold);
@@ -272,9 +265,9 @@
 }
 
 .right-news-title {
-  font-size: 0.82rem;
+  font-size: 0.98rem;
   color: rgba(255, 255, 255, 0.85);
-  line-height: 1.35;
+  line-height: 1.3;
   font-weight: 500;
 }
 
@@ -385,14 +378,14 @@
 }
 
 .right-record-value {
-  font-size: 1.25rem;
-  font-weight: 900;
+  font-size: 1.65rem;
+  font-weight: 700;
   color: white;
   line-height: 1;
 }
 
 .right-record-label {
-  font-size: 0.64rem;
+  font-size: 0.74rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -446,9 +439,9 @@
 }
 
 .standings-widget-table thead th {
-  padding: 3px 6px;
+  padding: 4px 6px;
   text-align: left;
-  font-size: 0.62rem;
+  font-size: 0.74rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -481,15 +474,16 @@
 }
 
 .standings-widget-table tbody td {
-  padding: 3px 6px;
+  padding: 4px 6px;
   color: #e8e0e2;
   white-space: nowrap;
+  font-size: 0.95rem;
 }
 
 .standings-widget-table tbody td:first-child {
   text-align: center;
   color: rgba(232, 224, 226, 0.4);
-  font-size: 0.7rem;
+  font-size: 0.85rem;
 }
 
 .standings-team-name {

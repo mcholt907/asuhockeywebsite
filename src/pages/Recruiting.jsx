@@ -18,8 +18,8 @@ function groupRecruits(recruits) {
   const groups = { forwards: [], defense: [], goalies: [] };
   (recruits || []).forEach(recruit => {
     const pos = (recruit.position || '').toUpperCase();
-    if (pos === 'G') groups.goalies.push(recruit);
-    else if (pos === 'D') groups.defense.push(recruit);
+    if (pos === 'G' || pos.includes('GOAL')) groups.goalies.push(recruit);
+    else if (pos === 'D' || pos.includes('DEF') || pos.includes('BACK')) groups.defense.push(recruit);
     else groups.forwards.push(recruit);
   });
   const lastName = (name) => (name || '').trim().split(' ').slice(-1)[0];
@@ -32,7 +32,9 @@ function groupRecruits(recruits) {
 function Recruiting() {
   const { data: recruitsData, isLoading: recruitsLoading, isError: recruitsError } = useRecruits();
   const { data: transfersData, isLoading: transfersLoading, isError: transfersError } = useTransfers();
+  
   const [activeSeason, setActiveSeason] = useState(null);
+  const [positionFilter, setPositionFilter] = useState('all');
 
   const loading = recruitsLoading || transfersLoading;
   const error = (recruitsError || transfersError) ? 'Failed to load recruiting data.' : null;
@@ -61,15 +63,42 @@ function Recruiting() {
     }
   }, [activeSeason, sortedSeasons]);
 
-  if (loading) return <div className="page-container"><p className="loading-message">Scouting the future...</p></div>;
-  if (error) return <div className="page-container"><p className="error-message">{error}</p></div>;
+  const activeRecruits = recruitsBySeason[activeSeason] || [];
+
+  // Apply position filtering
+  const filteredRecruits = useMemo(() => {
+    return activeRecruits.filter(recruit => {
+      // Position filter
+      if (positionFilter === 'all') return true;
+      const pos = (recruit.position || '').toUpperCase();
+      const isGoalie = pos === 'G' || pos.includes('GOAL');
+      const isDefense = pos === 'D' || pos.includes('DEF') || pos.includes('BACK');
+      const isForward = !isGoalie && !isDefense;
+
+      if (positionFilter === 'forwards') return isForward;
+      if (positionFilter === 'defense') return isDefense;
+      if (positionFilter === 'goalies') return isGoalie;
+
+      return true;
+    });
+  }, [activeRecruits, positionFilter]);
+
+  const groups = useMemo(() => {
+    return filteredRecruits.length > 0 ? groupRecruits(filteredRecruits) : null;
+  }, [filteredRecruits]);
+
+  if (loading) return <div className="recruiting-page recruiting-status"><p className="loading-message">Scouting the future...</p></div>;
+  if (error) return <div className="recruiting-page recruiting-status"><p className="error-message">{error}</p></div>;
 
   const hasTransfers = (transfers.incoming?.length > 0 || transfers.outgoing?.length > 0);
-  const activeRecruits = recruitsBySeason[activeSeason];
-  const groups = activeRecruits && activeRecruits.length > 0 ? groupRecruits(activeRecruits) : null;
+  const isFiltered = positionFilter !== 'all';
+  const visibleSections = POSITION_SECTIONS.filter(s => {
+    if (positionFilter !== 'all' && s.key !== positionFilter) return false;
+    return groups && groups[s.key] && groups[s.key].length > 0;
+  });
 
   return (
-    <div className="page-container recruiting-page">
+    <div className="recruiting-page">
       <Helmet>
         <title>ASU Hockey Recruiting & Commits | Forks Up Pucks</title>
         <meta name="description" content="ASU Sun Devils Hockey recruiting commitments, future players, and transfer portal updates for upcoming seasons." />
@@ -91,52 +120,115 @@ function Recruiting() {
         </script>
       </Helmet>
 
+      {/* Simplified Clean Header Section */}
       <div className="recruiting-header">
-        <h1>ASU Hockey Recruiting & Future Commits</h1>
         <p className="subtitle">The Next Generation of Sun Devil Hockey</p>
+        <h1>ASU Hockey Recruiting & Future Commits</h1>
       </div>
 
       {hasTransfers && (
-        <section className="transfers-section">
-          <h2 className="section-title">Latest Player Movements</h2>
-          <div className="transfers-grid">
-            {transfers.incoming?.map((transfer, idx) => (
-              <TransferCard key={`in-${idx}`} transfer={transfer} direction="incoming" />
-            ))}
-            {transfers.outgoing?.map((transfer, idx) => (
-              <TransferCard key={`out-${idx}`} transfer={transfer} direction="outgoing" />
-            ))}
-          </div>
-        </section>
+        <>
+          <section className="transfers-section">
+            <div className="section-header">
+              <h2>Transfer Portal Activity</h2>
+            </div>
+
+            {transfers.incoming?.length > 0 && (
+              <div className="transfer-sub-section">
+                <h3 className="transfer-sub-title incoming-title">Incoming Commits</h3>
+                <div className="transfers-grid">
+                  {transfers.incoming.map((transfer, idx) => (
+                    <TransferCard key={`in-${idx}`} transfer={transfer} direction="incoming" />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {transfers.outgoing?.length > 0 && (
+              <div className="transfer-sub-section">
+                <h3 className="transfer-sub-title outgoing-title">Outgoing Departures</h3>
+                <div className="transfers-grid">
+                  {transfers.outgoing.map((transfer, idx) => (
+                    <TransferCard key={`out-${idx}`} transfer={transfer} direction="outgoing" />
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
+          <div className="section-divider" />
+        </>
       )}
 
       <section className="recruits-section">
-        <div className="season-selector">
-          {sortedSeasons.map(season => (
+        <h2>Future Commits</h2>
+
+        {/* Controls Bar: Class Tabs and Position Filters */}
+        <div className="controls-bar">
+          {/* Class selector tabs */}
+          <div className="class-tabs">
+            {sortedSeasons.map(season => (
+              <button
+                key={season}
+                className={`tab-btn ${activeSeason === season ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveSeason(season);
+                  setPositionFilter('all'); // Reset filter when switching classes
+                }}
+              >
+                {season} Class
+              </button>
+            ))}
+          </div>
+
+          {/* Position Filter Pills */}
+          <div className="pos-filter-group">
             <button
-              key={season}
-              className={`season-btn ${activeSeason === season ? 'active' : ''}`}
-              onClick={() => setActiveSeason(season)}
+              className={`filter-btn ${positionFilter === 'all' ? 'active' : ''}`}
+              onClick={() => setPositionFilter('all')}
             >
-              {season} Class
+              All
             </button>
-          ))}
+            <button
+              className={`filter-btn ${positionFilter === 'forwards' ? 'active' : ''}`}
+              onClick={() => setPositionFilter('forwards')}
+            >
+              Forwards
+            </button>
+            <button
+              className={`filter-btn ${positionFilter === 'defense' ? 'active' : ''}`}
+              onClick={() => setPositionFilter('defense')}
+            >
+              Defense
+            </button>
+            <button
+              className={`filter-btn ${positionFilter === 'goalies' ? 'active' : ''}`}
+              onClick={() => setPositionFilter('goalies')}
+            >
+              Goalies
+            </button>
+          </div>
         </div>
 
-        {!groups ? (
-          <div className="recruits-grid fade-in">
-            <div className="no-recruits">
-              <p>No commitments announced for the {activeSeason} class yet.</p>
-            </div>
+        {/* Recruits Grid grouped by Position */}
+        {!groups || visibleSections.length === 0 ? (
+          <div className="no-recruits-panel">
+            <p>
+              {isFiltered
+                ? 'No commitments match the selected position filter.'
+                : `No commitments announced for the ${activeSeason} class yet.`}
+            </p>
           </div>
         ) : (
-          <div className="recruits-groups fade-in">
-            {POSITION_SECTIONS.filter(s => groups[s.key].length > 0).map(s => (
+          <div className="recruits-groups">
+            {visibleSections.map(s => (
               <div key={s.key} className="recruit-position-group">
-                <h3 className="recruit-group-title">{s.label}</h3>
+                <div className="position-group-title">
+                  <h3>{s.label}</h3>
+                  <div className="position-group-line" />
+                </div>
                 <div className="recruits-grid">
                   {groups[s.key].map((recruit, idx) => (
-                    <RecruitCard key={idx} recruit={recruit} />
+                    <RecruitCard key={`${s.key}-${idx}`} recruit={recruit} />
                   ))}
                 </div>
               </div>

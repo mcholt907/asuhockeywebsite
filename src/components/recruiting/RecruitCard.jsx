@@ -1,53 +1,71 @@
 import React from 'react';
 
 function RecruitCard({ recruit }) {
+  // Determine watermark character
+  const getWatermark = (pos) => {
+    const p = (pos || '').toUpperCase();
+    if (p === 'G' || p.includes('GOAL')) return 'G';
+    if (p === 'D' || p.includes('DEF') || p.includes('BACK')) return 'D';
+    return 'F';
+  };
+
+  const watermark = getWatermark(recruit.position);
+
   return (
-    <div className="recruit-card-wrapper">
-      <a
-        className="recruit-card"
-        href={recruit.player_link}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <div className="card-front">
-          <div className="card-bg-gfx"></div>
-          {recruit.player_photo && (
-            <div className="recruit-photo-container">
-              <img
-                src={recruit.player_photo}
-                alt={recruit.name}
-                className="recruit-photo"
-                onError={(e) => { e.target.style.display = 'none'; }}
-              />
-            </div>
+    <div className="recruit-card-glass holo-shine">
+      <div className="card-scouting-body">
+        {/* Large watermark in background */}
+        <div className="position-watermark">{watermark}</div>
+
+        <div className="card-scouting-header">
+          <h4>{recruit.name}</h4>
+          {recruit.position && (
+            <span className="card-scouting-pos-badge">{recruit.position}</span>
           )}
-          <div className="recruit-info">
-            <h3>{recruit.name}</h3>
-            <div className="stats-row">
-              <span className="stat-badge">{recruit.position || 'F'}</span>
-              <span className="stat-text">{recruit.height} / {recruit.weight}</span>
-              {recruit.birth_year && <span className="stat-text">{recruit.birth_year}</span>}
-            </div>
-            <div className="origin-row">
-              <span className="label">From</span>
-              <span className="value">{recruit.birthplace}</span>
-            </div>
-            <div className="team-row">
-              <span className="label">Current Team</span>
-              <span className="value">{recruit.current_team || recruit.last_team || 'N/A'}</span>
-            </div>
-          </div>
-          <div className="card-shine"></div>
         </div>
-      </a>
-      <a
-        href={recruit.player_link}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="profile-link"
-      >
-        View Elite Prospects Profile
-      </a>
+
+        <div className="recruit-details-grid">
+          <div className="detail-item">
+            <span className="detail-label">Birth Year</span>
+            <span className="detail-val">{recruit.birth_year || 'N/A'}</span>
+          </div>
+
+          <div className="detail-item">
+            <span className="detail-label">Ht / Wt</span>
+            <span className="detail-val">
+              {recruit.height && recruit.weight
+                ? `${recruit.height} / ${recruit.weight}`
+                : recruit.height || recruit.weight || 'N/A'}
+            </span>
+          </div>
+
+          <div className="detail-item col-span-2">
+            <span className="detail-label">Hometown</span>
+            <span className="detail-val">{recruit.birthplace || 'N/A'}</span>
+          </div>
+
+          <div className="detail-item col-span-2">
+            <span className="detail-label">Current Team</span>
+            <span className="detail-val">
+              {recruit.current_team || recruit.last_team || 'N/A'}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {recruit.player_link && (
+        <div className="card-scouting-cta">
+          <a
+            href={recruit.player_link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="scouting-btn"
+          >
+            Elite Prospects Profile
+            <span className="btn-icon">↗</span>
+          </a>
+        </div>
+      )}
     </div>
   );
 }

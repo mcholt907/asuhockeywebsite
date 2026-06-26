@@ -1,7 +1,7 @@
 .schedule-page {
   animation: fadeIn 0.6s ease;
   padding-bottom: 60px;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
 }
 
 .schedule-page h1 {
@@ -92,7 +92,7 @@
 
 .record-stat-value {
   font-size: 1.55rem;
-  font-weight: 900;
+  font-weight: 500;
   color: var(--asu-maroon);
   letter-spacing: -0.03em;
   line-height: 1;

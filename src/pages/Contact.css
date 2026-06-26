@@ -109,7 +109,7 @@
   border: 2px solid var(--border-color);
   border-radius: var(--border-radius-md);
   font-size: 1rem;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   transition: all var(--transition-base);
   background: var(--white);
 }
