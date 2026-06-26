@@ -91,6 +91,13 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
 }
 
+/* Form controls don't inherit font-family by default (they use the UA font),
+   which left toggle/filter buttons on the old system font. Make them follow
+   the cascade so they pick up the site font like everything else. */
+button, input, select, textarea {
+  font-family: inherit;
+}
+
 .app {
   display: flex;
   flex-direction: column;
