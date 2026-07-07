@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Development is on Windows; account for path translation in bash commands
 - The `.claude` folder is hidden by default on Windows (dot-prefix)
 - After installing CLI tools (e.g., gh), a new shell may be needed for PATH refresh
+- This project runs on Windows/PowerShell. Batch and pre-approve routine PowerShell commands where possible to minimize permission prompts
 
 ## Permissions & Autonomy
 
@@ -36,6 +37,7 @@ This is a **monorepo** combining a React frontend (Vite) and an Express backend 
 - Group related changes into logical commits with clear messages
 - After implementation: build, commit, push, then open PR via gh CLI
 - Auto-merge PRs when CI passes (user preference)
+- Prefer clean cherry-picks and verify branch state before merging to avoid duplicate commits; confirm no fix is orphaned before auto-merging a PR
 - Update MEMORY.md / design docs after major architectural changes
 
 ## Development Commands
@@ -142,6 +144,14 @@ To install the task (one-time): `schtasks /create /xml scripts\RefreshDataTask.x
 - `public/assets/flags/` — SVG country flag files (`usa.svg`, `can.svg`, `swe.svg`, `svk.svg`) used for player nationality display
 - `public/assets/` — hero images as optimized WebP (`hero-arena-opt.webp`, `hero-arena-mobile-opt.webp`)
 - Reference public folder assets with root-absolute paths (e.g. `/assets/flags/usa.svg`) in JSX; Vite serves `public/` at the site root
+
+## Frontend / Visual Fixes
+
+This is a heavy CSS/frontend project. When fixing visual/layout issues, use Playwright to screenshot before and after, and diagnose the actual computed heights/dimensions before applying fixes rather than guessing at properties like align-items.
+
+## Styling / Typography
+
+Use Barlow Condensed as the project typography with the established weight/size scale; apply it consistently across new components.
 
 ## Test Structure
 
