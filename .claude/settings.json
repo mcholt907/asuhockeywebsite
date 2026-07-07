@@ -9,6 +9,16 @@
             "command": "node -e \"try { JSON.parse(require('fs').readFileSync('asu_hockey_data.json','utf8')); } catch(e) { console.error('INVALID JSON in asu_hockey_data.json:', e.message); process.exit(1); }\""
           }
         ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"try{const p=require('path');const i=JSON.parse(require('fs').readFileSync(0,'utf8'));const f=i.tool_input&&i.tool_input.file_path;if(f&&!p.relative(process.cwd(),p.resolve(f)).startsWith('..'))require('child_process').execFileSync(process.execPath,['node_modules/prettier/bin/prettier.cjs','--write','--ignore-unknown',f],{stdio:'ignore'})}catch(e){}\"",
+            "statusMessage": "Formatting with prettier..."
+          }
+        ]
       }
     ]
   }
