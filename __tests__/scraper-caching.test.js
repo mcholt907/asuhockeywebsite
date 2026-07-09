@@ -26,7 +26,7 @@ jest.mock("../config/scraper-config", () => ({
     retry: { maxRetries: 1, initialDelay: 0, maxDelay: 0 },
     rateLimiting: { delayBetweenRequests: 0 },
   },
-  cache: { news: 60000, schedule: 86400000, stats: 21600000 },
+  cache: { news: 60000, schedule: 86400000, stats: 21600000, roster: 86400000 },
   seasonBoundary: { boundaryMonth: 7 },
   urls: {
     chnStats: () => "http://test/stats",

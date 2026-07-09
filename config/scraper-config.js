@@ -33,12 +33,14 @@ module.exports = {
 
   // Cache durations (in milliseconds)
   cache: {
-    news: parseInt(process.env.CACHE_DURATION_NEWS_MS) || 3 * 60 * 1000, // 3 minutes
+    news: parseInt(process.env.CACHE_DURATION_NEWS_MS) || 60 * 60 * 1000, // 1 hour
     schedule:
       parseInt(process.env.CACHE_DURATION_SCHEDULE_MS) || 2 * 60 * 60 * 1000, // 2 hours
     stats: parseInt(process.env.CACHE_DURATION_STATS_MS) || 2 * 60 * 60 * 1000, // 2 hours
     standings:
       parseInt(process.env.CACHE_DURATION_STANDINGS_MS) || 2 * 60 * 60 * 1000, // 2 hours
+    roster:
+      parseInt(process.env.CACHE_DURATION_ROSTER_MS) || 24 * 60 * 60 * 1000, // 24 hours
   },
 
   // Season boundary logic

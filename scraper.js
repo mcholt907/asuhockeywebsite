@@ -502,6 +502,7 @@ async function fetchScheduleData(forceRefresh = false) {
                     team_record: { ...teamRecord, npi, krach },
                   },
                   fullCacheKey,
+                  config.cache.schedule,
                 );
               }
             } catch (error) {
@@ -560,6 +561,7 @@ async function fetchScheduleData(forceRefresh = false) {
         await saveToCache(
           { games: enriched, team_record: teamRecord },
           fullCacheKey,
+          config.cache.schedule,
         );
       } else {
         console.log(
@@ -582,7 +584,7 @@ async function fetchScheduleData(forceRefresh = false) {
 
 async function fetchNewsData() {
   const ASU_HOCKEY_NEWS_CACHE_KEY = "asu_hockey_news"; // Just the base key
-  const NEWS_CACHE_DURATION = 60 * 60 * 1000; // 1 hour in ms
+  const NEWS_CACHE_DURATION = config.cache.news;
 
   console.log(
     `[Cache System] Attempting to fetch news data with cache key: ${ASU_HOCKEY_NEWS_CACHE_KEY}`,
@@ -813,7 +815,7 @@ async function scrapeCHNStats(forceRefresh = false) {
               const $ = cheerio.load(data);
               const stats = parseStatsHtml($);
               if (stats.skaters.length > 0 || stats.goalies.length > 0) {
-                await saveToCache(stats, STATS_CACHE_KEY);
+                await saveToCache(stats, STATS_CACHE_KEY, config.cache.stats);
               }
             } catch (error) {
               console.error(
@@ -857,7 +859,7 @@ async function scrapeCHNStats(forceRefresh = false) {
       );
 
       if (stats.skaters.length > 0 || stats.goalies.length > 0) {
-        await saveToCache(stats, STATS_CACHE_KEY);
+        await saveToCache(stats, STATS_CACHE_KEY, config.cache.stats);
       }
 
       return stats;
@@ -947,7 +949,7 @@ async function scrapeAndCacheRoster(cacheKey) {
     console.log(`[CHN Roster Scraper] Scraped ${players.length} players.`);
 
     if (players.length > 0) {
-      await saveToCache(players, cacheKey);
+      await saveToCache(players, cacheKey, config.cache.roster);
     }
 
     return players;
