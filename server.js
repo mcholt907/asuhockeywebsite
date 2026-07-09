@@ -1,49 +1,55 @@
 // server.js
-require('dotenv').config(); // Load environment variables
-const Sentry = require('@sentry/node');
-const { nodeProfilingIntegration } = require('@sentry/profiling-node');
+require("dotenv").config(); // Load environment variables
+const Sentry = require("@sentry/node");
+const { nodeProfilingIntegration } = require("@sentry/profiling-node");
 
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === "production";
 
 Sentry.init({
   dsn: process.env.REACT_APP_SENTRY_DSN,
-  integrations: [
-    nodeProfilingIntegration(),
-  ],
+  integrations: [nodeProfilingIntegration()],
   // Sample 10% of traces & profiles in production, 100% in dev
   tracesSampleRate: isProduction ? 0.1 : 1.0,
   profilesSampleRate: isProduction ? 0.1 : 1.0,
   environment: process.env.NODE_ENV,
 });
 
-const express = require('express');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const compression = require('compression'); // Add compression for performance
-const { fetchNewsData, fetchScheduleData, scrapeCHNStats, scrapeNCHCStandings } = require('./scraper'); // Import the news fetching function and new stats fetching function
-const { scrapeTransferData } = require('./transfer-scraper'); // Import transfer scraper
-const { scrapeAlumniData } = require('./alumni-scraper'); // Import alumni scraper
-const { startScheduler } = require('./src/scripts/scheduler'); // Import scheduler
-const { getRoster } = require('./services/roster-service');
-const { getStaticData } = require('./services/static-data');
-const { getSitemapPages } = require('./services/sitemap-metadata');
-const { getDataStatus, getCooldownStatus } = require('./src/scripts/data-status');
-const path = require('path');
-const fs = require('fs');
+const express = require("express");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
+const compression = require("compression"); // Add compression for performance
+const {
+  fetchNewsData,
+  fetchScheduleData,
+  scrapeCHNStats,
+  scrapeNCHCStandings,
+} = require("./scraper"); // Import the news fetching function and new stats fetching function
+const { scrapeTransferData } = require("./transfer-scraper"); // Import transfer scraper
+const { scrapeAlumniData } = require("./alumni-scraper"); // Import alumni scraper
+const { startScheduler } = require("./src/scripts/scheduler"); // Import scheduler
+const { getRoster } = require("./services/roster-service");
+const { getStaticData } = require("./services/static-data");
+const { getSitemapPages } = require("./services/sitemap-metadata");
+const {
+  getDataStatus,
+  getCooldownStatus,
+} = require("./src/scripts/data-status");
+const path = require("path");
+const fs = require("fs");
 
 const app = express();
-app.set('trust proxy', 1);
+app.set("trust proxy", 1);
 const port = process.env.PORT || 5000;
 
 // Start the background scheduler
-if (process.env.IS_PRERENDER !== 'true') {
+if (process.env.IS_PRERENDER !== "true") {
   startScheduler();
 }
 
 // Security: Force HTTPS in production (Render sets x-forwarded-proto)
-if (isProduction && process.env.IS_PRERENDER !== 'true') {
+if (isProduction && process.env.IS_PRERENDER !== "true") {
   app.use((req, res, next) => {
-    if (req.headers['x-forwarded-proto'] !== 'https') {
+    if (req.headers["x-forwarded-proto"] !== "https") {
       return res.redirect(301, `https://${req.headers.host}${req.url}`);
     }
     next();
@@ -59,44 +65,49 @@ if (isProduction && process.env.IS_PRERENDER !== 'true') {
 app.use(compression());
 
 // Security: Add Helmet.js for security headers
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles for React
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "blob:"], // Allow React inline scripts and blob workers
-      workerSrc: ["'self'", "blob:"], // Allow blob workers
-      // Explicit allowlist — only host currently embedding images is files.eliteprospects.com
-      // (player photos in /roster and /recruiting). Add new hosts here if/when needed.
-      imgSrc: ["'self'", "data:", "https://files.eliteprospects.com"],
-      connectSrc: ["'self'", "https://*.sentry.io", "https://sentry.io"], // Allow Sentry ingest
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles for React
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "blob:"], // Allow React inline scripts and blob workers
+        workerSrc: ["'self'", "blob:"], // Allow blob workers
+        // Explicit allowlist — only host currently embedding images is files.eliteprospects.com
+        // (player photos in /roster and /recruiting). Add new hosts here if/when needed.
+        imgSrc: ["'self'", "data:", "https://files.eliteprospects.com"],
+        connectSrc: ["'self'", "https://*.sentry.io", "https://sentry.io"], // Allow Sentry ingest
+      },
     },
-  },
-  crossOriginEmbedderPolicy: false, // Disable for React compatibility
-}));
+    crossOriginEmbedderPolicy: false, // Disable for React compatibility
+  }),
+);
 
 // Security: Configure CORS with environment-based allowed origins
 const allowedOrigins = process.env.CORS_ORIGINS
-  ? process.env.CORS_ORIGINS.split(',').map(origin => origin.trim())
-  : (isProduction
+  ? process.env.CORS_ORIGINS.split(",").map((origin) => origin.trim())
+  : isProduction
     ? [] // In production, require explicit configuration
-    : ['http://localhost:3000', 'http://localhost:3001']); // Default to common dev ports
+    : ["http://localhost:3000", "http://localhost:3001"]; // Default to common dev ports
 
-console.log('Allowed CORS origins:', allowedOrigins);
+console.log("Allowed CORS origins:", allowedOrigins);
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
 
   // Check if origin is in allowed list
   if (origin && allowedOrigins.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
+    res.header("Access-Control-Allow-Origin", origin);
   }
 
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept",
+  );
+  res.header("Access-Control-Allow-Methods", "GET, OPTIONS");
 
   // Handle preflight requests
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return res.sendStatus(200);
   }
 
@@ -107,19 +118,19 @@ app.use((req, res, next) => {
 const apiLimiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes default
   max: parseInt(process.env.RATE_LIMIT_MAX) || 100, // Limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
+  message: "Too many requests from this IP, please try again later.",
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
 
 // Apply rate limiting to all API routes
-app.use('/api/', apiLimiter);
+app.use("/api/", apiLimiter);
 
 // Liveness probe — top-level, bypasses /api/ rate limiter and does no work.
 // Used by Render's healthCheckPath; must remain dependency-free.
-app.get('/healthz', (req, res) => {
+app.get("/healthz", (req, res) => {
   res.json({
-    status: 'ok',
+    status: "ok",
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
   });
@@ -127,7 +138,7 @@ app.get('/healthz', (req, res) => {
 
 // Data freshness status — reports per-dataset age/source so silent
 // staleness (broken selectors, dead refresh jobs) is observable.
-app.get('/api/status', (req, res) => {
+app.get("/api/status", (req, res) => {
   try {
     res.json({
       generatedAt: new Date().toISOString(),
@@ -136,40 +147,49 @@ app.get('/api/status', (req, res) => {
       cooldowns: getCooldownStatus(),
     });
   } catch (error) {
-    console.error('[API /status] Error building status:', error);
-    res.status(500).json({ error: 'Internal server error while building status.' });
+    console.error("[API /status] Error building status:", error);
+    res
+      .status(500)
+      .json({ error: "Internal server error while building status." });
   }
 });
 
 // API endpoint for news
-app.get('/api/news', async (req, res) => {
+app.get("/api/news", async (req, res) => {
   try {
     const articlesArray = await fetchNewsData();
 
     // Read manual news entries from in-memory static-data cache (mtime-invalidated)
     const manualNews = getStaticData().manual_news || [];
 
-    const combined = [...manualNews, ...articlesArray]
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
+    const combined = [...manualNews, ...articlesArray].sort(
+      (a, b) => new Date(b.date) - new Date(a.date),
+    );
 
     if (combined.length > 0) {
       res.json({
         data: combined,
-        source: 'api',
-        timestamp: new Date().toISOString()
+        source: "api",
+        timestamp: new Date().toISOString(),
       });
     } else {
-      console.error('/api/news: No news data returned from fetchNewsData or an error occurred internally in scraper.');
-      res.status(500).json({ error: 'Failed to fetch news data or no news available.' });
+      console.error(
+        "/api/news: No news data returned from fetchNewsData or an error occurred internally in scraper.",
+      );
+      res
+        .status(500)
+        .json({ error: "Failed to fetch news data or no news available." });
     }
   } catch (error) {
-    console.error('Error in /api/news endpoint:', error);
-    res.status(500).json({ error: 'Internal server error while fetching news.' });
+    console.error("Error in /api/news endpoint:", error);
+    res
+      .status(500)
+      .json({ error: "Internal server error while fetching news." });
   }
 });
 
 // API endpoint for schedule data
-app.get('/api/schedule', async (req, res) => {
+app.get("/api/schedule", async (req, res) => {
   try {
     const { games, team_record } = await fetchScheduleData();
 
@@ -177,147 +197,167 @@ app.get('/api/schedule', async (req, res) => {
       res.json({
         data: games,
         team_record: team_record || null,
-        source: 'api',
-        timestamp: new Date().toISOString()
+        source: "api",
+        timestamp: new Date().toISOString(),
       });
     } else {
-      console.error('/api/schedule: No schedule data returned from fetchScheduleData or an error occurred internally in scraper.');
-      res.status(500).json({ error: 'Failed to fetch schedule data or no schedule available.' });
+      console.error(
+        "/api/schedule: No schedule data returned from fetchScheduleData or an error occurred internally in scraper.",
+      );
+      res
+        .status(500)
+        .json({
+          error: "Failed to fetch schedule data or no schedule available.",
+        });
     }
   } catch (error) {
-    console.error('Error in /api/schedule endpoint:', error);
-    res.status(500).json({ error: 'Internal server error while fetching schedule data.' });
+    console.error("Error in /api/schedule endpoint:", error);
+    res
+      .status(500)
+      .json({ error: "Internal server error while fetching schedule data." });
   }
 });
 
 // API endpoint for recruiting data — reads directly from static JSON (source of truth)
-app.get('/api/recruits', (req, res) => {
+app.get("/api/recruits", (req, res) => {
   res.json(getStaticData().recruiting || {});
 });
 
 // API endpoint for transfer data (incoming/outgoing transfers)
-app.get('/api/transfers', async (req, res) => {
+app.get("/api/transfers", async (req, res) => {
   try {
-    console.log('[API /transfers] Fetching transfer data...');
+    console.log("[API /transfers] Fetching transfer data...");
     const transferData = await scrapeTransferData();
-    console.log(`[API /transfers] Returning ${transferData.incoming?.length || 0} incoming, ${transferData.outgoing?.length || 0} outgoing transfers`);
+    console.log(
+      `[API /transfers] Returning ${transferData.incoming?.length || 0} incoming, ${transferData.outgoing?.length || 0} outgoing transfers`,
+    );
     res.json(transferData);
   } catch (error) {
-    console.error('[API /transfers] Error:', error.message);
+    console.error("[API /transfers] Error:", error.message);
     res.status(500).json({
-      error: 'Failed to fetch transfer data',
-      message: error.message
+      error: "Failed to fetch transfer data",
+      message: error.message,
     });
   }
 });
 
 // API endpoint for alumni data (Where Are They Now?)
-app.get('/api/alumni', async (req, res) => {
+app.get("/api/alumni", async (req, res) => {
   try {
-    console.log('[API /alumni] Fetching alumni data...');
+    console.log("[API /alumni] Fetching alumni data...");
     const alumniData = await scrapeAlumniData();
-    console.log(`[API /alumni] Returning ${alumniData.skaters?.length || 0} skaters, ${alumniData.goalies?.length || 0} goalies`);
+    console.log(
+      `[API /alumni] Returning ${alumniData.skaters?.length || 0} skaters, ${alumniData.goalies?.length || 0} goalies`,
+    );
     res.json(alumniData);
   } catch (error) {
-    console.error('[API /alumni] Error:', error.message);
+    console.error("[API /alumni] Error:", error.message);
     res.status(500).json({
-      error: 'Failed to fetch alumni data',
-      message: error.message
+      error: "Failed to fetch alumni data",
+      message: error.message,
     });
   }
 });
 
 // API endpoint for roster data
-app.get('/api/roster', async (req, res) => {
+app.get("/api/roster", async (req, res) => {
   try {
     const roster = await getRoster();
     if (roster.length > 0) {
       res.json(roster);
     } else {
-      res.status(404).json({ error: 'Roster data not found.' });
+      res.status(404).json({ error: "Roster data not found." });
     }
   } catch (error) {
-    console.error('Error in /api/roster:', error);
-    res.status(500).json({ error: 'Internal server error while fetching roster data.' });
+    console.error("Error in /api/roster:", error);
+    res
+      .status(500)
+      .json({ error: "Internal server error while fetching roster data." });
   }
 });
 
-
-app.get('/api/stats', async (req, res) => {
+app.get("/api/stats", async (req, res) => {
   try {
     // scrapeCHNStats handles cache check, SWR, and coalescing internally
     const statsData = await scrapeCHNStats();
     if (statsData.skaters.length > 0 || statsData.goalies.length > 0) {
       res.json(statsData);
     } else {
-      res.status(500).json({ error: 'Failed to fetch stats data.' });
+      res.status(500).json({ error: "Failed to fetch stats data." });
     }
   } catch (error) {
-    console.error('Error in /api/stats endpoint:', error);
-    res.status(500).json({ error: 'Internal server error while fetching stats.' });
+    console.error("Error in /api/stats endpoint:", error);
+    res
+      .status(500)
+      .json({ error: "Internal server error while fetching stats." });
   }
 });
 
 // API endpoint for NCHC conference standings
-app.get('/api/standings', async (req, res) => {
+app.get("/api/standings", async (req, res) => {
   try {
     const standings = await scrapeNCHCStandings();
     if (standings && standings.length > 0) {
       res.json({ data: standings, timestamp: new Date().toISOString() });
     } else {
-      res.status(500).json({ error: 'Failed to fetch standings data.' });
+      res.status(500).json({ error: "Failed to fetch standings data." });
     }
   } catch (error) {
-    console.error('Error in /api/standings endpoint:', error);
-    res.status(500).json({ error: 'Internal server error while fetching standings.' });
+    console.error("Error in /api/standings endpoint:", error);
+    res
+      .status(500)
+      .json({ error: "Internal server error while fetching standings." });
   }
 });
 
 // Sitemap
-app.get('/sitemap.xml', (req, res) => {
-  const baseUrl = process.env.SITE_BASE_URL || 'https://forksuppucks.com';
+app.get("/sitemap.xml", (req, res) => {
+  const baseUrl = process.env.SITE_BASE_URL || "https://forksuppucks.com";
   const pages = getSitemapPages();
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${pages.map(p => `  <url>
+${pages
+  .map(
+    (p) => `  <url>
     <loc>${baseUrl}${p.url}</loc>
     <lastmod>${p.lastmod}</lastmod>
     <changefreq>${p.changefreq}</changefreq>
     <priority>${p.priority}</priority>
-  </url>`).join('\n')}
+  </url>`,
+  )
+  .join("\n")}
 </urlset>`;
-  res.header('Content-Type', 'application/xml');
+  res.header("Content-Type", "application/xml");
   res.send(xml);
 });
 
 // Serve the React application's static files from the 'build' directory
-app.use(express.static(path.join(__dirname, 'build')));
-
+app.use(express.static(path.join(__dirname, "build")));
 
 // Sentry Error Handler must be after all controllers and before other error middleware (if any)
 // Sentry Error Handler (v8+)
 Sentry.setupExpressErrorHandler(app);
 
 // For any other request, serve the React app's index.html file
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
 // Production: Serve React static files
 if (isProduction) {
   // Serve static files from the React build folder
-  app.use(express.static(path.join(__dirname, 'build')));
+  app.use(express.static(path.join(__dirname, "build")));
 
   // Catch-all handler for React Router (must be after API routes)
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "build", "index.html"));
   });
 }
 
 app.listen(port, () => {
   console.log(`\n🚀 ASU Hockey Website Server`);
   console.log(`================================`);
-  console.log(`Environment: ${isProduction ? 'PRODUCTION' : 'DEVELOPMENT'}`);
+  console.log(`Environment: ${isProduction ? "PRODUCTION" : "DEVELOPMENT"}`);
   console.log(`Server: http://localhost:${port}`);
   console.log(`\nAPI Endpoints:`);
   console.log(`  News:      http://localhost:${port}/api/news`);
