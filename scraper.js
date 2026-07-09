@@ -15,44 +15,57 @@ const {
   delayBetweenRequests,
 } = require("./utils/request-helper");
 
+// thesundevils.com runs on the WMT Digital / Nuxt platform, which serves all
+// page data from a public JSON API under /website-api/. News and schedule read
+// that API instead of scraping HTML selectors, which broke on template changes
+// (see docs/plans/2026-07-09-sundevils-website-api-migration.md).
+
+const JSON_REQUEST_OPTIONS = { headers: { Accept: "application/json" } };
+
+// Axios parses JSON responses automatically, but the Puppeteer 403-fallback
+// path returns raw text — normalize both.
+function asJson(data) {
+  return typeof data === "string" ? JSON.parse(data) : data;
+}
+
+// "2026-06-01T05:05:00.000000Z" → "June 01, 2026" — the display format the old
+// HTML scrape produced. News.jsx renders this string raw, and the news sort
+// does new Date(date), which parses it.
+function formatArticleDate(iso) {
+  const d = new Date(iso);
+  if (isNaN(d)) return "";
+  return d.toLocaleDateString("en-US", {
+    timeZone: "America/Phoenix",
+    month: "long",
+    day: "2-digit",
+    year: "numeric",
+  });
+}
+
 async function scrapeSunDevilsNewsList() {
-  const url = config.urls.sunDevilsNews;
-  console.log(`[Sun Devils News] Attempting to fetch news from: ${url}`);
+  const url = config.urls.sunDevilsArticles;
+  console.log(`[Sun Devils News] Fetching articles API: ${url}`);
   try {
-    const { data } = await requestWithRetry(url);
-    const $ = cheerio.load(data);
+    const { data } = await requestWithRetry(url, JSON_REQUEST_OPTIONS);
+    const items = asJson(data).data || [];
     const articles = [];
 
-    $("tr.news-table-item").each((i, element) => {
-      const row = $(element);
-      const titleElement = row.find("td:first-child a");
-      const title = titleElement.text().trim();
-      let link = titleElement.attr("href");
-      const date = row.find("td:last-child").text().trim();
-
-      if (link && !link.startsWith("http")) {
-        link = `https://thesundevils.com${link}`;
-      }
-
+    for (const item of items) {
+      const title = String(item.title || "").trim();
+      const link = item.permalink;
+      const date = formatArticleDate(item.published_at);
       if (title && link && date) {
-        articles.push({
-          title,
-          link,
-          date,
-          source: "TheSunDevils.com",
-        });
+        articles.push({ title, link, date, source: "TheSunDevils.com" });
       }
-    });
+    }
 
     console.log(`[Sun Devils News] Scraped ${articles.length} articles.`);
     return articles;
   } catch (error) {
-    console.error("[Sun Devils News] Error scraping news list:", error.message);
+    console.error("[Sun Devils News] Error fetching articles:", error.message);
     return [];
   }
 }
-
-// scrapeSunDevilsRSS removed (unused dead code)
 
 async function scrapeCHN() {
   const url = config.urls.chnNews;
@@ -125,242 +138,108 @@ async function scrapeCHN() {
 
 // USCHO scraper removed as per user request (latency/value trade-off)
 
+// "2025" → "2025-26", the season slug format the schedules API uses
+function seasonSlugFor(year) {
+  const startYear = parseInt(String(year), 10);
+  return `${startYear}-${String(startYear + 1).slice(-2)}`;
+}
+
+// schedule_event_result { result: "win"|"loss"|"tie", winning_score, losing_score }
+// → "W 5-3" / "L 3-6" / "T 3-3", ASU score first. Schedule.jsx splits this
+// with charAt(0) / slice(2), so the exact format is load-bearing.
+function formatGameResult(result) {
+  if (!result || !result.result) return null;
+  const letter = { win: "W", loss: "L", tie: "T" }[result.result];
+  if (!letter) return null;
+  const winScore = Math.round(parseFloat(result.winning_score));
+  const loseScore = Math.round(parseFloat(result.losing_score));
+  if (!Number.isFinite(winScore) || !Number.isFinite(loseScore)) return letter;
+  const scores =
+    letter === "L" ? `${loseScore}-${winScore}` : `${winScore}-${loseScore}`;
+  return `${letter} ${scores}`;
+}
+
+// Map one schedule-events API entry to the game shape the frontend consumes.
+// Returns null for entries missing an opponent or parseable datetime.
+function mapScheduleEvent(event) {
+  const opponent = String(
+    event.opponent_name || (event.opponent && event.opponent.long_name) || "",
+  ).trim();
+  const gameDate = new Date(event.datetime);
+  if (!opponent || !event.datetime || isNaN(gameDate)) return null;
+
+  const game = {
+    // en-CA formats as YYYY-MM-DD; game dates/times are Phoenix-local
+    date: gameDate.toLocaleDateString("en-CA", {
+      timeZone: "America/Phoenix",
+    }),
+    time:
+      event.tba || event.is_all_day
+        ? "TBA"
+        : gameDate.toLocaleTimeString("en-US", {
+            timeZone: "America/Phoenix",
+            hour: "numeric",
+            minute: "2-digit",
+          }),
+    opponent,
+    location: [event.venue, event.location].filter(Boolean).join(", ") || "TBD",
+    status:
+      event.venue_type === "home"
+        ? "Home"
+        : event.venue_type === "away"
+          ? "Away"
+          : event.neutral_event
+            ? "Neutral"
+            : "TBD",
+    notes: event.is_exhibition ? "Exhibition" : "",
+    tv: "",
+    radio: "",
+    links: (event.schedule_event_links || [])
+      .filter((l) => l && l.title && l.link)
+      .map((l) => ({ text: l.title, url: l.link })),
+  };
+
+  const result = formatGameResult(event.schedule_event_result);
+  if (result) game.result = result;
+  return game;
+}
+
 async function scrapeSunDevilsSchedule(year) {
-  const scheduleUrl = config.urls.sunDevilsSchedule(year);
-  console.log(
-    `[Schedule Scraper] Attempting to fetch schedule from: ${scheduleUrl}`,
-  );
+  const slug = seasonSlugFor(year);
+  console.log(`[Schedule Scraper] Resolving schedule id for season ${slug}`);
 
   try {
-    const { data } = await requestWithRetry(scheduleUrl);
-    console.log("[Schedule Scraper] Successfully fetched HTML data.");
-    const $ = cheerio.load(data);
-    console.log("[Schedule Scraper] Cheerio loaded HTML data.");
-
-    // The page shows only month/day per game; the season dropdown declares
-    // which season is displayed. Trust it over the configured year so the
-    // scraper keeps stamping correct dates after the site rolls over to a
-    // new season before config is updated.
-    let seasonStartYear = parseInt(String(year), 10);
-    const selectedSeason = $("select#games-season option[selected]")
-      .first()
-      .attr("value");
-    const seasonMatch = /^(\d{4})-\d{2}$/.exec(selectedSeason || "");
-    if (seasonMatch) {
-      const detectedYear = parseInt(seasonMatch[1], 10);
-      if (detectedYear !== seasonStartYear) {
-        const message = `[Schedule Scraper] Page shows season ${selectedSeason} but config says ${seasonStartYear}; using ${detectedYear}. Update CURRENT_SEASON in config/scraper-config.js.`;
-        console.warn(message);
-        Sentry.captureMessage(message, "warning");
-      }
-      seasonStartYear = detectedYear;
-    } else if ($("select#games-season").length) {
-      // The dropdown exists but no season-shaped option is marked selected —
-      // likely an SSR/markup change. Falling back to the configured year can
-      // silently back-date the whole schedule, so make it loud.
-      const message = `[Schedule Scraper] Season dropdown (select#games-season) found but no selected season option; falling back to configured year ${seasonStartYear}. Selector may need updating.`;
-      console.warn(message);
-      Sentry.captureMessage(message, "warning");
-    } else {
-      console.log(
-        `[Schedule Scraper] No season dropdown detected; using configured year ${seasonStartYear}.`,
-      );
+    const { data: schedulesRaw } = await requestWithRetry(
+      config.urls.sunDevilsSchedules,
+      JSON_REQUEST_OPTIONS,
+    );
+    const schedules = asJson(schedulesRaw).data || [];
+    const schedule = schedules.find((s) => s.season && s.season.slug === slug);
+    if (!schedule) {
+      const known = schedules
+        .map((s) => s.season && s.season.slug)
+        .filter(Boolean)
+        .join(", ");
+      throw new Error(`no schedule for season ${slug} (available: ${known})`);
     }
 
-    const games = [];
-    const scheduleItems = $("div.schedule-event-item");
     console.log(
-      `[Schedule Scraper] Found ${scheduleItems.length} items with selector 'div.schedule-event-item'.`,
+      `[Schedule Scraper] Fetching events for schedule ${schedule.id} (${slug})`,
     );
+    const { data: eventsRaw } = await requestWithRetry(
+      config.urls.sunDevilsScheduleEvents(schedule.id),
+      JSON_REQUEST_OPTIONS,
+    );
+    const events = asJson(eventsRaw).data || [];
 
-    const monthMap = {
-      jan: 0,
-      feb: 1,
-      mar: 2,
-      apr: 3,
-      may: 4,
-      jun: 5,
-      jul: 6,
-      aug: 7,
-      sep: 8,
-      oct: 9,
-      nov: 10,
-      dec: 11,
-    };
-
-    scheduleItems.each((index, element) => {
-      const item = $(element);
-      let game = {
-        date: "TBD",
-        time: "TBD",
-        opponent: "TBD",
-        location: "TBD",
-        status: "TBD", // Home/Away
-        notes: "", // For Exhibition, etc.
-        tv: "",
-        radio: "",
-        links: [],
-      };
-
-      try {
-        // Date and Time
-        let monthStr, dayStr, timeStr;
-
-        // Desktop date/time
-        const desktopDateBox = item.find(
-          "div.schedule-event-item__date-desktop strong.schedule-event-grid-date__box",
-        );
-        if (desktopDateBox.length) {
-          monthStr = desktopDateBox.find("time").eq(0).text().trim();
-          dayStr = desktopDateBox.find("time").eq(1).text().trim();
-        }
-
-        const desktopTimeFooter = item.find(
-          "div.schedule-event-grid-date__footer strong.schedule-event-grid-date__time",
-        );
-        if (desktopTimeFooter.length) {
-          timeStr = desktopTimeFooter.first().text().trim();
-        }
-
-        // Fallback to mobile if desktop is incomplete
-        if (!monthStr || !dayStr) {
-          const mobileDateBox = item.find(
-            "div.schedule-event-grid-date-mobile strong.schedule-event-grid-date-mobile__box",
-          );
-          if (mobileDateBox.length) {
-            monthStr = mobileDateBox.find("time").eq(0).text().trim();
-            dayStr = mobileDateBox
-              .find("time.schedule-event-grid-date-mobile__day")
-              .text()
-              .trim();
-          }
-        }
-
-        if (monthStr && dayStr) {
-          const monthIndex = monthMap[monthStr.toLowerCase().substring(0, 3)];
-          let gameYear = seasonStartYear;
-          // If month is Jan-Jul (indices 0-6), it's part of the *end* year of the "YYYY-YY" season
-          if (
-            typeof monthIndex === "number" &&
-            monthIndex < config.seasonBoundary.boundaryMonth
-          ) {
-            gameYear = seasonStartYear + 1;
-          }
-
-          const parsedDate = new Date(
-            gameYear,
-            monthIndex,
-            parseInt(dayStr, 10),
-          );
-          if (!isNaN(parsedDate)) {
-            game.date = parsedDate.toISOString().split("T")[0];
-          } else {
-            console.warn(
-              `[Schedule Scraper] Could not parse date for item ${index + 1}. Month: ${monthStr}, Day: ${dayStr}, Year: ${gameYear}`,
-            );
-          }
-        } else {
-          console.warn(
-            `[Schedule Scraper] Missing month or day for item ${index + 1}. Month: '${monthStr}', Day: '${dayStr}'`,
-          );
-        }
-
-        if (timeStr) game.time = timeStr;
-
-        // Result (Win/Loss/Tie and Score)
-        const resultLabel = item.find(".schedule-event-grid-result__label");
-        if (resultLabel.length > 0) {
-          const clone = resultLabel.clone();
-          clone.find(".sr-only").remove();
-          const textWithoutSr = clone.text().trim(); // E.g., "W 4-1" or "L 3-6" or "T 2-2"
-
-          if (textWithoutSr) {
-            game.result = textWithoutSr.replace(/\s+/g, " ").trim(); // Normalize spaces
-          }
-        }
-
-        // Location
-        game.location =
-          item.find(".schedule-event-item__location").text().trim() || "TBD";
-
-        // Opponent and Home/Away Status
-        const opponentNameElement = item.find(
-          "strong.schedule-default-event__name",
-        );
-        let fullOpponentText = opponentNameElement.text().trim();
-        const statusDivider = item
-          .find("strong.schedule-default-event__divider")
-          .text()
-          .trim()
-          .toLowerCase();
-
-        if (statusDivider === "vs.") {
-          game.status = "Home";
-          game.opponent = fullOpponentText.replace(/^vs\.\s*/i, "").trim();
-        } else if (statusDivider === "at") {
-          game.status = "Away";
-          game.opponent = fullOpponentText.replace(/^at\s*/i, "").trim();
-        } else {
-          // No 'vs.' or 'at' divider, assume it's part of the name or a non-game event description
-          game.opponent = fullOpponentText;
-        }
-
-        if (item.text().toLowerCase().includes("exhibition")) {
-          game.notes = "Exhibition";
-          // Clean opponent name if "Exhibition" was part of it (e.g. "vs. Opponent (Exhibition)")
-          game.opponent = game.opponent
-            .replace(/\s*\(exhibition\)/i, "")
-            .trim();
-        }
-
-        // Links (e.g., Event Details, Tickets)
-        const foundLinks = new Set();
-        item.find("a.schedule-event-item__link").each((_, linkEl) => {
-          const linkTitle = $(linkEl).text().trim();
-          let linkUrl = $(linkEl).attr("href");
-
-          if (linkUrl && !linkUrl.startsWith("http")) {
-            linkUrl = `https://thesundevils.com${linkUrl}`;
-          }
-
-          if (linkTitle && linkUrl && !foundLinks.has(linkUrl)) {
-            game.links.push({ text: linkTitle, url: linkUrl });
-            foundLinks.add(linkUrl);
-          }
-        });
-
-        if (game.opponent && game.opponent !== "TBD" && game.date !== "TBD") {
-          games.push(game);
-        } else {
-          console.warn(
-            `[Schedule Scraper] Skipping item ${index + 1} due to missing critical info (opponent/date). Opponent: ${game.opponent}, Date: ${game.date}`,
-          );
-        }
-      } catch (e) {
-        console.error(
-          `[Schedule Scraper] Error parsing game item ${index + 1}: `,
-          e.message,
-        );
-        console.log("[Schedule Scraper] Problematic item HTML:", item.html());
-      }
-    });
-
+    const games = events.map(mapScheduleEvent).filter(Boolean);
     console.log(
-      `[Schedule Scraper] Scraped ${games.length} games successfully.`,
+      `[Schedule Scraper] Mapped ${games.length}/${events.length} events for ${slug}.`,
     );
-    if (games.length === 0 && scheduleItems.length > 0) {
-      console.warn(
-        "[Schedule Scraper] Selector found items, but no games parsed. Check parsing logic/HTML.",
-      );
-    } else if (games.length === 0 && scheduleItems.length === 0) {
-      console.warn(
-        "[Schedule Scraper] Main selector 'div.schedule-event-item' found no items.",
-      );
-    }
     return games;
   } catch (error) {
     console.error(
-      "[Schedule Scraper] Error fetching or parsing schedule page:",
+      "[Schedule Scraper] Error fetching schedule API:",
       error.message,
     );
     if (error.response) {
@@ -368,7 +247,9 @@ async function scrapeSunDevilsSchedule(year) {
         `[Schedule Scraper] Response Status: ${error.response.status}`,
       );
     }
-    throw new Error("Failed to scrape schedule data or no data found.");
+    throw new Error(
+      `Failed to fetch Sun Devils schedule for season ${slug}: ${error.message}`,
+    );
   }
 }
 
@@ -1141,6 +1022,7 @@ async function scrapeNCHCStandings(forceRefresh = false) {
 module.exports = {
   fetchNewsData,
   fetchScheduleData,
+  scrapeSunDevilsNewsList,
   scrapeSunDevilsSchedule,
   scrapeCHNStats,
   scrapeCHNRoster,
