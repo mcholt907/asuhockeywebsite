@@ -119,6 +119,12 @@ runs the refresh, commits any changes to the `auto/data-refresh` branch, and
 opens an auto-merging PR (main is protected — direct pushes are rejected).
 Failures are logged to `.refresh-log.txt` (gitignored).
 
+The task reports a dead-man's-switch check-in to a Sentry Cron Monitor via
+`scripts/ping-refresh-monitor.js` (`ok` on success, `error` on failure), so
+a run that never happens or dies part-way alerts within the monitor's grace
+period. Requires `SENTRY_CRON_MONITOR_URL` in `.env` (see `.env.example`
+for the one-time Sentry monitor setup); unset means check-ins are skipped.
+
 To install the task (one-time): `schtasks /create /xml scripts\RefreshDataTask.xml /tn "ASU Hockey Data Refresh"`. The Task Scheduler XML hardcodes `C:\Users\farkh\asuhockeywebsite` as the working directory; edit those two lines if cloning the repo elsewhere.
 
 ## Pages & Routes
