@@ -311,8 +311,8 @@
       "playerId": "273990",
       "team": "Utah Grizzlies",
       "teamUrl": "https://www.eliteprospects.com/team/105/utah-grizzlies",
-      "league": "ECHL",
-      "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
+      "league": "",
+      "leagueUrl": "",
       "isTotals": false,
       "gp": "53",
       "g": "16",
@@ -353,9 +353,9 @@
       "pim": "57"
     },
     {
-      "name": "Tim Lovell",
+      "name": "Timothy Lovell",
       "position": "D",
-      "playerUrl": "https://www.eliteprospects.com/player/483774/tim-lovell",
+      "playerUrl": "https://www.eliteprospects.com/player/483774/timothy-lovell",
       "playerId": "483774",
       "team": "Greenville Swamp Rabbits",
       "teamUrl": "https://www.eliteprospects.com/team/7301/greenville-swamp-rabbits",
@@ -1285,5 +1285,5 @@
       "svPct": ".833"
     }
   ],
-  "lastUpdated": "2026-06-26T14:23:59.065Z"
+  "lastUpdated": "2026-07-09T14:41:04.717Z"
 }
