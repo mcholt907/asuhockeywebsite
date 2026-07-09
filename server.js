@@ -343,17 +343,6 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
-// Production: Serve React static files
-if (isProduction) {
-  // Serve static files from the React build folder
-  app.use(express.static(path.join(__dirname, "build")));
-
-  // Catch-all handler for React Router (must be after API routes)
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "build", "index.html"));
-  });
-}
-
 app.listen(port, () => {
   console.log(`\n🚀 ASU Hockey Website Server`);
   console.log(`================================`);
