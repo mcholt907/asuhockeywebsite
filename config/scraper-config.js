@@ -1,8 +1,8 @@
 // Scraper Configuration
 // Centralized configuration for all scraper functions
 
-const CURRENT_SEASON = process.env.CURRENT_SEASON || "2025-2026";
-const FUTURE_SEASONS = ["2026-2027", "2027-2028", "2028-2029"];
+const CURRENT_SEASON = process.env.CURRENT_SEASON || "2026-2027";
+const FUTURE_SEASONS = ["2027-2028", "2028-2029", "2029-2030"];
 
 module.exports = {
   // Season constants
@@ -11,8 +11,8 @@ module.exports = {
 
   // Legacy season configuration for backward compatibility
   seasons: {
-    current: parseInt(process.env.CURRENT_SEASON_YEAR) || 2025,
-    stats: process.env.STATS_SEASON || "20252026",
+    current: parseInt(process.env.CURRENT_SEASON_YEAR) || 2026,
+    stats: process.env.STATS_SEASON || "20262027",
   },
 
   // HTTP Configuration

@@ -137,6 +137,29 @@ async function scrapeSunDevilsSchedule(year) {
     const $ = cheerio.load(data);
     console.log("[Schedule Scraper] Cheerio loaded HTML data.");
 
+    // The page shows only month/day per game; the season dropdown declares
+    // which season is displayed. Trust it over the configured year so the
+    // scraper keeps stamping correct dates after the site rolls over to a
+    // new season before config is updated.
+    let seasonStartYear = parseInt(String(year), 10);
+    const selectedSeason = $("select#games-season option[selected]")
+      .first()
+      .attr("value");
+    const seasonMatch = /^(\d{4})-\d{2}$/.exec(selectedSeason || "");
+    if (seasonMatch) {
+      const detectedYear = parseInt(seasonMatch[1], 10);
+      if (detectedYear !== seasonStartYear) {
+        console.warn(
+          `[Schedule Scraper] Page shows season ${selectedSeason} but config says ${seasonStartYear}; using ${detectedYear}. Update CURRENT_SEASON in config/scraper-config.js.`,
+        );
+      }
+      seasonStartYear = detectedYear;
+    } else {
+      console.log(
+        `[Schedule Scraper] No season dropdown detected; using configured year ${seasonStartYear}.`,
+      );
+    }
+
     const games = [];
     const scheduleItems = $("div.schedule-event-item");
     console.log(
@@ -208,13 +231,13 @@ async function scrapeSunDevilsSchedule(year) {
 
         if (monthStr && dayStr) {
           const monthIndex = monthMap[monthStr.toLowerCase().substring(0, 3)];
-          let gameYear = parseInt(String(year), 10); // Explicitly use radix 10
+          let gameYear = seasonStartYear;
           // If month is Jan-Jul (indices 0-6), it's part of the *end* year of the "YYYY-YY" season
           if (
             typeof monthIndex === "number" &&
             monthIndex < config.seasonBoundary.boundaryMonth
           ) {
-            gameYear = parseInt(String(year), 10) + 1;
+            gameYear = seasonStartYear + 1;
           }
 
           const parsedDate = new Date(
@@ -1109,6 +1132,7 @@ async function scrapeNCHCStandings(forceRefresh = false) {
 module.exports = {
   fetchNewsData,
   fetchScheduleData,
+  scrapeSunDevilsSchedule,
   scrapeCHNStats,
   scrapeCHNRoster,
   scrapeCHNScheduleLinks,
