@@ -19,6 +19,7 @@ jest.mock("../utils/request-helper", () => ({
 
 jest.mock("@sentry/node", () => ({
   init: jest.fn(),
+  captureMessage: jest.fn(),
   metrics: { distribution: jest.fn(), count: jest.fn() },
 }));
 
@@ -44,6 +45,7 @@ jest.mock("../config/scraper-config", () => ({
   },
 }));
 
+const Sentry = require("@sentry/node");
 const { requestWithRetry } = require("../utils/request-helper");
 const { scrapeSunDevilsSchedule } = require("../scraper");
 
@@ -113,9 +115,53 @@ describe("scrapeSunDevilsSchedule — season auto-detection", () => {
     expect(games[0].date).toBe("2025-10-02");
   });
 
+  test("reports a Sentry warning when the page season disagrees with the configured year", async () => {
+    requestWithRetry.mockResolvedValueOnce({
+      data: page(seasonSelect("2026-27") + gameItem("Oct", "2")),
+    });
+
+    await scrapeSunDevilsSchedule(2025);
+
+    expect(Sentry.captureMessage).toHaveBeenCalledWith(
+      expect.stringContaining("2026-27"),
+      "warning",
+    );
+  });
+
+  test("does not report to Sentry when the page season matches the configured year", async () => {
+    requestWithRetry.mockResolvedValueOnce({
+      data: page(seasonSelect("2025-26") + gameItem("Oct", "2")),
+    });
+
+    await scrapeSunDevilsSchedule(2025);
+
+    expect(Sentry.captureMessage).not.toHaveBeenCalled();
+  });
+
+  test("reports a Sentry warning when the season dropdown exists but has no selected option", async () => {
+    const body =
+      `
+      <select id="games-season" class="dropdown__select">
+        <option value="2026-27">2026-27</option>
+        <option value="2025-26">2025-26</option>
+      </select>` + gameItem("Oct", "2");
+    requestWithRetry.mockResolvedValueOnce({ data: page(body) });
+
+    const games = await scrapeSunDevilsSchedule(2025);
+
+    // Falls back to configured year, but loudly — this silent-degradation
+    // path is exactly what caused the 2026 "No upcoming games" outage.
+    expect(games[0].date).toBe("2025-10-02");
+    expect(Sentry.captureMessage).toHaveBeenCalledWith(
+      expect.stringContaining("games-season"),
+      "warning",
+    );
+  });
+
   test("ignores selected options that are not season-shaped (e.g. 'All Games')", async () => {
     // Only the games-dropdown has a selected option; season select has none.
-    const body = `
+    const body =
+      `
       <select id="games-dropdown" class="dropdown__select">
         <option selected>All Games</option>
       </select>` + gameItem("Oct", "2");

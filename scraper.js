@@ -149,11 +149,18 @@ async function scrapeSunDevilsSchedule(year) {
     if (seasonMatch) {
       const detectedYear = parseInt(seasonMatch[1], 10);
       if (detectedYear !== seasonStartYear) {
-        console.warn(
-          `[Schedule Scraper] Page shows season ${selectedSeason} but config says ${seasonStartYear}; using ${detectedYear}. Update CURRENT_SEASON in config/scraper-config.js.`,
-        );
+        const message = `[Schedule Scraper] Page shows season ${selectedSeason} but config says ${seasonStartYear}; using ${detectedYear}. Update CURRENT_SEASON in config/scraper-config.js.`;
+        console.warn(message);
+        Sentry.captureMessage(message, "warning");
       }
       seasonStartYear = detectedYear;
+    } else if ($("select#games-season").length) {
+      // The dropdown exists but no season-shaped option is marked selected —
+      // likely an SSR/markup change. Falling back to the configured year can
+      // silently back-date the whole schedule, so make it loud.
+      const message = `[Schedule Scraper] Season dropdown (select#games-season) found but no selected season option; falling back to configured year ${seasonStartYear}. Selector may need updating.`;
+      console.warn(message);
+      Sentry.captureMessage(message, "warning");
     } else {
       console.log(
         `[Schedule Scraper] No season dropdown detected; using configured year ${seasonStartYear}.`,
