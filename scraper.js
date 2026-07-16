@@ -137,6 +137,36 @@ async function scrapeSunDevilsSchedule(year) {
     const $ = cheerio.load(data);
     console.log("[Schedule Scraper] Cheerio loaded HTML data.");
 
+    // The page shows only month/day per game; the season dropdown declares
+    // which season is displayed. Trust it over the configured year so the
+    // scraper keeps stamping correct dates after the site rolls over to a
+    // new season before config is updated.
+    let seasonStartYear = parseInt(String(year), 10);
+    const selectedSeason = $("select#games-season option[selected]")
+      .first()
+      .attr("value");
+    const seasonMatch = /^(\d{4})-\d{2}$/.exec(selectedSeason || "");
+    if (seasonMatch) {
+      const detectedYear = parseInt(seasonMatch[1], 10);
+      if (detectedYear !== seasonStartYear) {
+        const message = `[Schedule Scraper] Page shows season ${selectedSeason} but config says ${seasonStartYear}; using ${detectedYear}. Update CURRENT_SEASON in config/scraper-config.js.`;
+        console.warn(message);
+        Sentry.captureMessage(message, "warning");
+      }
+      seasonStartYear = detectedYear;
+    } else if ($("select#games-season").length) {
+      // The dropdown exists but no season-shaped option is marked selected —
+      // likely an SSR/markup change. Falling back to the configured year can
+      // silently back-date the whole schedule, so make it loud.
+      const message = `[Schedule Scraper] Season dropdown (select#games-season) found but no selected season option; falling back to configured year ${seasonStartYear}. Selector may need updating.`;
+      console.warn(message);
+      Sentry.captureMessage(message, "warning");
+    } else {
+      console.log(
+        `[Schedule Scraper] No season dropdown detected; using configured year ${seasonStartYear}.`,
+      );
+    }
+
     const games = [];
     const scheduleItems = $("div.schedule-event-item");
     console.log(
@@ -208,13 +238,13 @@ async function scrapeSunDevilsSchedule(year) {
 
         if (monthStr && dayStr) {
           const monthIndex = monthMap[monthStr.toLowerCase().substring(0, 3)];
-          let gameYear = parseInt(String(year), 10); // Explicitly use radix 10
+          let gameYear = seasonStartYear;
           // If month is Jan-Jul (indices 0-6), it's part of the *end* year of the "YYYY-YY" season
           if (
             typeof monthIndex === "number" &&
             monthIndex < config.seasonBoundary.boundaryMonth
           ) {
-            gameYear = parseInt(String(year), 10) + 1;
+            gameYear = seasonStartYear + 1;
           }
 
           const parsedDate = new Date(
@@ -865,7 +895,9 @@ async function scrapeCHNStats(forceRefresh = false) {
       return stats;
     } catch (error) {
       console.error("[CHN Stats Scraper] Error scraping stats:", error.message);
-      return { skaters: [], goalies: [] };
+      // No cache to fall back on — propagate so callers can distinguish a
+      // failed scrape from a legitimately empty stats page (e.g. offseason).
+      throw error;
     } finally {
       const duration = Date.now() - startTime;
       Sentry.metrics.distribution("scraper.stats.duration", duration, {
@@ -1109,6 +1141,7 @@ async function scrapeNCHCStandings(forceRefresh = false) {
 module.exports = {
   fetchNewsData,
   fetchScheduleData,
+  scrapeSunDevilsSchedule,
   scrapeCHNStats,
   scrapeCHNRoster,
   scrapeCHNScheduleLinks,

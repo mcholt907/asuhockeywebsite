@@ -204,11 +204,9 @@ app.get("/api/schedule", async (req, res) => {
       console.error(
         "/api/schedule: No schedule data returned from fetchScheduleData or an error occurred internally in scraper.",
       );
-      res
-        .status(500)
-        .json({
-          error: "Failed to fetch schedule data or no schedule available.",
-        });
+      res.status(500).json({
+        error: "Failed to fetch schedule data or no schedule available.",
+      });
     }
   } catch (error) {
     console.error("Error in /api/schedule endpoint:", error);
@@ -278,9 +276,15 @@ app.get("/api/roster", async (req, res) => {
 
 app.get("/api/stats", async (req, res) => {
   try {
-    // scrapeCHNStats handles cache check, SWR, and coalescing internally
+    // scrapeCHNStats handles cache check, SWR, and coalescing internally.
+    // Empty skaters/goalies is a valid state (offseason / season not started);
+    // a failed scrape throws and is handled below.
     const statsData = await scrapeCHNStats();
-    if (statsData.skaters.length > 0 || statsData.goalies.length > 0) {
+    if (
+      statsData &&
+      Array.isArray(statsData.skaters) &&
+      Array.isArray(statsData.goalies)
+    ) {
       res.json(statsData);
     } else {
       res.status(500).json({ error: "Failed to fetch stats data." });
