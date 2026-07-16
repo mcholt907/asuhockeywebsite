@@ -1,42 +1,47 @@
 // src/pages/Home.jsx
-import React, { useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
-import UpcomingGames from '../components/UpcomingGames';
-import { useSchedule } from '../hooks/queries/useSchedule';
-import { useNews } from '../hooks/queries/useNews';
-import { useStandings } from '../hooks/queries/useStandings';
-import './Home.css';
+import React, { useMemo } from "react";
+import { Helmet } from "react-helmet-async";
+import UpcomingGames from "../components/UpcomingGames";
+import { useSchedule } from "../hooks/queries/useSchedule";
+import { useNews } from "../hooks/queries/useNews";
+import { useStandings } from "../hooks/queries/useStandings";
+import "./Home.css";
 
 function Home() {
   const { data: scheduleResponse, isLoading: scheduleLoading } = useSchedule();
   const { data: newsResponse, isLoading: newsLoading } = useNews();
-  const { data: standingsResponse, isLoading: standingsLoading } = useStandings();
+  const { data: standingsResponse, isLoading: standingsLoading } =
+    useStandings();
 
   const news = newsResponse?.data || [];
   const standings = standingsResponse?.data || [];
 
   const today = useMemo(() => {
     const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   }, []);
 
   const games = useMemo(() => scheduleResponse?.data || [], [scheduleResponse]);
 
   const nextGame = useMemo(() => {
-    return games
-      .filter(g => g.date >= today)
-      .sort((a, b) => new Date(a.date) - new Date(b.date))[0] || null;
+    return (
+      games
+        .filter((g) => g.date >= today)
+        .sort((a, b) => new Date(a.date) - new Date(b.date))[0] || null
+    );
   }, [games, today]);
 
   const record = useMemo(() => {
-    let wins = 0, losses = 0, ties = 0;
-    games.forEach(game => {
+    let wins = 0,
+      losses = 0,
+      ties = 0;
+    games.forEach((game) => {
       if (game.result) {
         const r = game.result.toLowerCase();
-        if (r.includes('w') || r.match(/\d+-\d+.*w/i)) wins++;
-        else if (r.includes('l') || r.match(/\d+-\d+.*l/i)) losses++;
-        else if (r.includes('t') || r.includes('otl') || r.includes('sol')) ties++;
+        if (r.includes("w") || r.match(/\d+-\d+.*w/i)) wins++;
+        else if (r.includes("l") || r.match(/\d+-\d+.*l/i)) losses++;
+        else if (r.includes("t") || r.includes("otl") || r.includes("sol"))
+          ties++;
       }
     });
     return { wins, losses, ties };
@@ -53,12 +58,27 @@ function Home() {
     <div className="home-page">
       <Helmet>
         <title>Forks Up Pucks | ASU Sun Devils Hockey</title>
-        <meta name="description" content="The ultimate fan site for ASU Sun Devils Men's Hockey. Live scores, schedule, roster, stats, recruiting news and more." />
-        <meta property="og:title" content="Forks Up Pucks | ASU Sun Devils Hockey" />
-        <meta property="og:description" content="The ultimate fan site for ASU Sun Devils Men's Hockey. Live scores, schedule, roster, stats, recruiting news and more." />
+        <meta
+          name="description"
+          content="The ultimate fan site for ASU Sun Devils Men's Hockey. Live scores, schedule, roster, stats, recruiting news and more."
+        />
+        <meta
+          property="og:title"
+          content="Forks Up Pucks | ASU Sun Devils Hockey"
+        />
+        <meta
+          property="og:description"
+          content="The ultimate fan site for ASU Sun Devils Men's Hockey. Live scores, schedule, roster, stats, recruiting news and more."
+        />
         <meta property="og:url" content="https://forksuppucks.com/" />
-        <meta name="twitter:title" content="Forks Up Pucks | ASU Sun Devils Hockey" />
-        <meta name="twitter:description" content="The ultimate fan site for ASU Sun Devils Men's Hockey. Live scores, schedule, roster, stats, recruiting news and more." />
+        <meta
+          name="twitter:title"
+          content="Forks Up Pucks | ASU Sun Devils Hockey"
+        />
+        <meta
+          name="twitter:description"
+          content="The ultimate fan site for ASU Sun Devils Men's Hockey. Live scores, schedule, roster, stats, recruiting news and more."
+        />
         <link rel="canonical" href="https://forksuppucks.com/" />
         <script type="application/ld+json">
           {JSON.stringify({
@@ -66,44 +86,47 @@ function Home() {
             "@graph": [
               {
                 "@type": "SportsOrganization",
-                "name": "Arizona State Sun Devils Men's Hockey",
-                "alternateName": ["ASU Hockey", "ASU Sun Devils Hockey"],
-                "url": "https://forksuppucks.com/",
-                "logo": "https://forksuppucks.com/assets/asu-hockey-logo.png",
-                "sport": "Ice Hockey",
-                "memberOf": {
+                name: "Arizona State Sun Devils Men's Hockey",
+                alternateName: ["ASU Hockey", "ASU Sun Devils Hockey"],
+                url: "https://forksuppucks.com/",
+                logo: "https://forksuppucks.com/assets/asu-hockey-logo.png",
+                sport: "Ice Hockey",
+                memberOf: {
                   "@type": "SportsOrganization",
-                  "name": "National Collegiate Hockey Conference",
-                  "alternateName": "NCHC"
+                  name: "National Collegiate Hockey Conference",
+                  alternateName: "NCHC",
                 },
-                "location": {
+                location: {
                   "@type": "Place",
-                  "name": "Mullett Arena",
-                  "address": {
+                  name: "Mullett Arena",
+                  address: {
                     "@type": "PostalAddress",
-                    "addressLocality": "Tempe",
-                    "addressRegion": "AZ",
-                    "addressCountry": "US"
-                  }
-                }
+                    addressLocality: "Tempe",
+                    addressRegion: "AZ",
+                    addressCountry: "US",
+                  },
+                },
               },
               {
                 "@type": "BreadcrumbList",
-                "itemListElement": [
-                  { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://forksuppucks.com/" }
-                ]
-              }
-            ]
+                itemListElement: [
+                  {
+                    "@type": "ListItem",
+                    position: 1,
+                    name: "Home",
+                    item: "https://forksuppucks.com/",
+                  },
+                ],
+              },
+            ],
           })}
         </script>
       </Helmet>
 
       {/* Single dark floating card — hero + news combined */}
       <div className="home-card">
-
         {/* Zone 1: Hero Grid */}
         <div className="home-hero-grid">
-
           {/* Left Panel — action photo + matchup text */}
           <div className="hero-left">
             <img
@@ -130,7 +153,9 @@ function Home() {
                     <span className="hero-venue">{nextGame.location}</span>
                   </div>
                   <div className="hero-actions">
-                    <a href="/schedule" className="btn-hero-primary">Game Center</a>
+                    <a href="/schedule" className="btn-hero-primary">
+                      Game Center
+                    </a>
                     <a
                       href="https://nchchockey.com/tv/"
                       target="_blank"
@@ -152,7 +177,6 @@ function Home() {
 
           {/* Right Panel — dark sidebar */}
           <div className="hero-right">
-
             {/* Overall Record */}
             <div className="right-section">
               <h3 className="right-section-title">Overall Record</h3>
@@ -199,7 +223,10 @@ function Home() {
                     </thead>
                     <tbody>
                       {standings.map((team, i) => (
-                        <tr key={i} className={team.isASU ? 'standings-asu-row' : ''}>
+                        <tr
+                          key={i}
+                          className={team.isASU ? "standings-asu-row" : ""}
+                        >
                           <td>{team.rank}</td>
                           <td className="standings-team-name">{team.team}</td>
                           <td>{team.pts}</td>
@@ -226,19 +253,12 @@ function Home() {
                       rel="noreferrer"
                       className="right-news-card"
                     >
-                      <span className="right-news-source">{article.source}</span>
+                      <span className="right-news-source">
+                        {article.source}
+                      </span>
                       <span className="right-news-title">{article.title}</span>
                     </a>
                   ))}
-                </div>
-                <div style={{ marginTop: '1.25rem', textAlign: 'center' }}>
-                  <Link 
-                    to="/news" 
-                    className="right-section-title" 
-                    style={{ fontSize: '0.85rem', textDecoration: 'none', borderBottom: '1px solid currentColor', paddingBottom: '2px', cursor: 'pointer' }}
-                  >
-                    View All ASU Hockey News →
-                  </Link>
                 </div>
               </div>
             )}
@@ -250,11 +270,8 @@ function Home() {
                 <UpcomingGames limit={3} />
               </div>
             </div>
-
           </div>
         </div>
-
-
       </div>
     </div>
   );
