@@ -43,6 +43,7 @@ const { requestWithRetry } = require("../utils/request-helper");
 const {
   scrapeCHNRoster,
   scrapeCHNScheduleLinks,
+  scrapeCHNStats,
   scrapeUSCHORecord,
 } = require("../scraper");
 
@@ -159,6 +160,29 @@ describe("scrapeCHNScheduleLinks", () => {
 
     expect(Object.keys(result.linkMap)).toHaveLength(1);
     expect(result.linkMap["2025-10-03"]).toBeDefined();
+  });
+});
+
+describe("scrapeCHNStats — empty season vs scrape failure", () => {
+  test("resolves with empty skaters/goalies when the page has no stat rows (new season)", async () => {
+    // fresh miss, then stale miss — forces a blocking live scrape
+    getFromCache.mockReturnValueOnce(null).mockReturnValueOnce(null);
+    requestWithRetry.mockResolvedValueOnce({
+      data: "<html><body><table></table></body></html>",
+    });
+
+    const result = await scrapeCHNStats();
+
+    expect(result).toEqual({ skaters: [], goalies: [] });
+    // An empty scrape must not clobber cache (scrape-health guard)
+    expect(saveToCache).not.toHaveBeenCalled();
+  });
+
+  test("throws when the scrape fails and no cache exists", async () => {
+    getFromCache.mockReturnValueOnce(null).mockReturnValueOnce(null);
+    requestWithRetry.mockRejectedValueOnce(new Error("network error"));
+
+    await expect(scrapeCHNStats()).rejects.toThrow("network error");
   });
 });
 

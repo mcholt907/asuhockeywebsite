@@ -895,7 +895,9 @@ async function scrapeCHNStats(forceRefresh = false) {
       return stats;
     } catch (error) {
       console.error("[CHN Stats Scraper] Error scraping stats:", error.message);
-      return { skaters: [], goalies: [] };
+      // No cache to fall back on — propagate so callers can distinguish a
+      // failed scrape from a legitimately empty stats page (e.g. offseason).
+      throw error;
     } finally {
       const duration = Date.now() - startTime;
       Sentry.metrics.distribution("scraper.stats.duration", duration, {
