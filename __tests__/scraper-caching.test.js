@@ -28,7 +28,7 @@ jest.mock("../config/scraper-config", () => ({
   },
   cache: { news: 60000, schedule: 86400000, stats: 21600000, roster: 86400000 },
   urls: {
-    chnStats: () => "http://test/stats",
+    chnStats: (season) => `http://test/stats/${season}`,
     chnNews: "http://test/chn-news",
     sunDevilsArticles: "http://test/sd-articles",
     sunDevilsSchedules: "http://test/sd-schedules",
@@ -164,17 +164,90 @@ describe("scrapeCHNScheduleLinks", () => {
 });
 
 describe("scrapeCHNStats — empty season vs scrape failure", () => {
-  test("resolves with empty skaters/goalies when the page has no stat rows (new season)", async () => {
+  const emptyPage = "<html><body><table></table></body></html>";
+  const skaterPage = [
+    "<html><body>",
+    '<table id="skaters">',
+    "  <thead><tr><th>Player</th><th>G</th><th>A</th><th>Pts.</th></tr></thead>",
+    "  <tbody><tr><td>Jane Doe</td><td>10</td><td>20</td><td>30</td></tr></tbody>",
+    "</table>",
+    "</body></html>",
+  ].join("\n");
+
+  test("resolves with empty skaters/goalies when current AND previous season pages have no stat rows", async () => {
     // fresh miss, then stale miss — forces a blocking live scrape
     getFromCache.mockReturnValueOnce(null).mockReturnValueOnce(null);
-    requestWithRetry.mockResolvedValueOnce({
-      data: "<html><body><table></table></body></html>",
-    });
+    requestWithRetry
+      .mockResolvedValueOnce({ data: emptyPage }) // current season (20252026)
+      .mockResolvedValueOnce({ data: emptyPage }); // previous season (20242025)
 
     const result = await scrapeCHNStats();
 
-    expect(result).toEqual({ skaters: [], goalies: [] });
+    expect(result).toEqual({
+      skaters: [],
+      goalies: [],
+      season: "2025-26",
+      isPriorSeason: false,
+    });
     // An empty scrape must not clobber cache (scrape-health guard)
+    expect(saveToCache).not.toHaveBeenCalled();
+    expect(requestWithRetry).toHaveBeenNthCalledWith(
+      1,
+      "http://test/stats/20252026",
+    );
+    expect(requestWithRetry).toHaveBeenNthCalledWith(
+      2,
+      "http://test/stats/20242025",
+    );
+  });
+
+  test("falls back to the previous season's stats when the current season has no rows (offseason)", async () => {
+    getFromCache.mockReturnValueOnce(null).mockReturnValueOnce(null);
+    requestWithRetry
+      .mockResolvedValueOnce({ data: emptyPage }) // current season is empty
+      .mockResolvedValueOnce({ data: skaterPage }); // previous season has data
+
+    const result = await scrapeCHNStats();
+
+    expect(result.skaters).toEqual([
+      { Player: "Jane Doe", G: "10", A: "20", "Pts.": "30" },
+    ]);
+    expect(result.season).toBe("2024-25");
+    expect(result.isPriorSeason).toBe(true);
+    // Prior-season data is real data — it should be cached
+    expect(saveToCache).toHaveBeenCalledWith(
+      expect.objectContaining({ isPriorSeason: true, season: "2024-25" }),
+      "asu_hockey_stats",
+      expect.any(Number),
+    );
+  });
+
+  test("serves current-season stats directly (no fallback fetch) when rows exist", async () => {
+    getFromCache.mockReturnValueOnce(null).mockReturnValueOnce(null);
+    requestWithRetry.mockResolvedValueOnce({ data: skaterPage });
+
+    const result = await scrapeCHNStats();
+
+    expect(result.skaters).toHaveLength(1);
+    expect(result.season).toBe("2025-26");
+    expect(result.isPriorSeason).toBe(false);
+    expect(requestWithRetry).toHaveBeenCalledTimes(1);
+  });
+
+  test("returns the empty current-season result when the fallback fetch fails", async () => {
+    getFromCache.mockReturnValueOnce(null).mockReturnValueOnce(null);
+    requestWithRetry
+      .mockResolvedValueOnce({ data: emptyPage })
+      .mockRejectedValueOnce(new Error("network error"));
+
+    const result = await scrapeCHNStats();
+
+    expect(result).toEqual({
+      skaters: [],
+      goalies: [],
+      season: "2025-26",
+      isPriorSeason: false,
+    });
     expect(saveToCache).not.toHaveBeenCalled();
   });
 

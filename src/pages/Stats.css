@@ -26,6 +26,38 @@
   letter-spacing: 0.02em;
 }
 
+/* Prior-season fallback note */
+.season-note {
+  max-width: 720px;
+  margin: -30px auto 40px;
+  padding: 12px 24px;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--asu-maroon);
+  background: rgba(255, 198, 39, 0.12);
+  border: 1px solid var(--asu-gold);
+  border-radius: var(--border-radius-md);
+}
+
+/* Empty state (no stats scraped yet, e.g. early offseason) */
+.stats-empty-state {
+  max-width: 720px;
+  margin: 0 auto 60px;
+  padding: 60px 24px;
+  text-align: center;
+  background: var(--white);
+  border: 2px dashed var(--border-color);
+  border-radius: var(--border-radius-lg);
+}
+
+.stats-empty-state p {
+  font-size: 1.15rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin: 0;
+}
+
 /* Leaders Section - Premium Cards */
 .leaders-section {
   display: grid;
@@ -327,6 +359,17 @@
 
   .stat-lab-header .subtitle {
     font-size: 0.95rem;
+  }
+
+  .season-note {
+    margin: 0 12px 24px;
+    padding: 10px 16px;
+    font-size: 0.9rem;
+  }
+
+  .stats-empty-state {
+    margin: 0 12px 32px;
+    padding: 40px 16px;
   }
 
   /* Leaders section */

@@ -81,6 +81,10 @@ function Stats() {
   const skaterHeaders = stats.skaters.length > 0 ? Object.keys(stats.skaters[0]) : [];
   const goalieHeaders = stats.goalies.length > 0 ? Object.keys(stats.goalies[0]) : [];
 
+  const hasStats = stats.skaters.length > 0 || stats.goalies.length > 0;
+  const seasonLabel = data?.season;
+  const isPriorSeason = Boolean(data?.isPriorSeason);
+
   return (
     <div className="page-container stats-page">
       <Helmet>
@@ -108,6 +112,13 @@ function Stats() {
         <p className="subtitle">Advanced Analytics & Team Leaders</p>
       </div>
 
+      {isPriorSeason && seasonLabel && (
+        <p className="season-note">
+          Showing final stats from the {seasonLabel} season — current-season
+          stats will appear once the puck drops.
+        </p>
+      )}
+
       {/* Top Performers Section */}
       {stats.skaters.length > 0 && (
         <section className="leaders-section">
@@ -117,40 +128,51 @@ function Stats() {
         </section>
       )}
 
-      {/* Data Tables */}
-      <div className="stats-control-panel">
-        <button
-          className={`control-btn ${activeTab === 'skaters' ? 'active' : ''}`}
-          onClick={() => setActiveTab('skaters')}
-        >
-          <span>Skaters</span>
-        </button>
-        <button
-          className={`control-btn ${activeTab === 'goalies' ? 'active' : ''}`}
-          onClick={() => setActiveTab('goalies')}
-        >
-          <span>Goalies</span>
-        </button>
-      </div>
+      {!hasStats ? (
+        <div className="stats-empty-state">
+          <p>
+            No player stats are available yet. Stats will appear here once the
+            new season gets underway — Forks Up!
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* Data Tables */}
+          <div className="stats-control-panel">
+            <button
+              className={`control-btn ${activeTab === 'skaters' ? 'active' : ''}`}
+              onClick={() => setActiveTab('skaters')}
+            >
+              <span>Skaters</span>
+            </button>
+            <button
+              className={`control-btn ${activeTab === 'goalies' ? 'active' : ''}`}
+              onClick={() => setActiveTab('goalies')}
+            >
+              <span>Goalies</span>
+            </button>
+          </div>
 
-      <div className="stats-data-view fade-in">
-        {activeTab === 'skaters' && (
-          <SortableTable
-            data={stats.skaters}
-            headers={skaterHeaders}
-            defaultSortKey="Pts."
-            defaultSortDir="desc"
-          />
-        )}
-        {activeTab === 'goalies' && (
-          <SortableTable
-            data={stats.goalies}
-            headers={goalieHeaders}
-            defaultSortKey="GP"
-            defaultSortDir="desc"
-          />
-        )}
-      </div>
+          <div className="stats-data-view fade-in">
+            {activeTab === 'skaters' && (
+              <SortableTable
+                data={stats.skaters}
+                headers={skaterHeaders}
+                defaultSortKey="Pts."
+                defaultSortDir="desc"
+              />
+            )}
+            {activeTab === 'goalies' && (
+              <SortableTable
+                data={stats.goalies}
+                headers={goalieHeaders}
+                defaultSortKey="GP"
+                defaultSortDir="desc"
+              />
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
