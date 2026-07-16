@@ -1,0 +1,73 @@
+{
+  "data": [
+    {
+      "id": 223,
+      "name": "2025-26 Ice Hockey Schedule",
+      "sport_id": 7,
+      "season_id": 139,
+      "season": {
+        "id": 139,
+        "name": "2025-26",
+        "slug": "2025-26"
+      }
+    },
+    {
+      "id": 224,
+      "name": "2024-25 Ice Hockey Schedule",
+      "sport_id": 7,
+      "season_id": 18,
+      "season": {
+        "id": 18,
+        "name": "2024-25",
+        "slug": "2024-25"
+      }
+    },
+    {
+      "id": 225,
+      "name": "2023-24 Ice Hockey Schedule",
+      "sport_id": 7,
+      "season_id": 37,
+      "season": {
+        "id": 37,
+        "name": "2023-24",
+        "slug": "2023-24"
+      }
+    },
+    {
+      "id": 226,
+      "name": "2022-23 Men's Ice Hockey Schedule",
+      "sport_id": 7,
+      "season_id": 38,
+      "season": {
+        "id": 38,
+        "name": "2022-23",
+        "slug": "2022-23"
+      }
+    },
+    {
+      "id": 227,
+      "name": "2021-22 Men's Ice Hockey Schedule",
+      "sport_id": 7,
+      "season_id": 39,
+      "season": {
+        "id": 39,
+        "name": "2021-22",
+        "slug": "2021-22"
+      }
+    },
+    {
+      "id": 228,
+      "name": "2020-21 Men's Ice Hockey Schedule",
+      "sport_id": 7,
+      "season_id": 40,
+      "season": {
+        "id": 40,
+        "name": "2020-21",
+        "slug": "2020-21"
+      }
+    }
+  ],
+  "meta": {
+    "total": 12
+  }
+}

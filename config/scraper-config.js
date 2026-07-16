@@ -43,20 +43,16 @@ module.exports = {
       parseInt(process.env.CACHE_DURATION_ROSTER_MS) || 24 * 60 * 60 * 1000, // 24 hours
   },
 
-  // Season boundary logic
-  seasonBoundary: {
-    // Months 0-6 (Jan-Jul) are part of the end year of the season
-    boundaryMonth: 7, // July (0-indexed)
-  },
-
   // URLs
   urls: {
-    sunDevilsNews: "https://thesundevils.com/sports/ice-hockey/news?view=list",
-    sunDevilsRSS: "http://thesundevils.com/rss.aspx?path=mhockey",
-    sunDevilsSchedule: (year) => {
-      // User requested static URL for schedule
-      return "https://thesundevils.com/sports/ice-hockey/schedule";
-    },
+    // thesundevils.com website-api (WMT/Nuxt platform JSON API).
+    // filter[sport.id]=7 / filter[sports.id]=7 — 7 is men's ice hockey.
+    sunDevilsArticles:
+      "https://thesundevils.com/website-api/articles?filter%5Bsports.id%5D=7&sort=-published_at&per_page=25",
+    sunDevilsSchedules:
+      "https://thesundevils.com/website-api/schedules?filter%5Bsport.id%5D=7&include=season&per_page=50",
+    sunDevilsScheduleEvents: (scheduleId) =>
+      `https://thesundevils.com/website-api/schedule-events?filter%5Bschedule_id%5D=${scheduleId}&include=opponent,scheduleEventResult,scheduleEventLinks,tournament&per_page=100&sort=datetime`,
     chnNews: "https://www.collegehockeynews.com/reports/team/Arizona-State/61",
     chnStats: (season) =>
       `https://www.collegehockeynews.com/stats/team/Arizona-State/61/overall,${season}`,

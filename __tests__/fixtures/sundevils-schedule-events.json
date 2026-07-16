@@ -1,0 +1,213 @@
+{
+  "data": [
+    {
+      "id": 18353,
+      "opponent_name": "Notre Dame",
+      "opponent": null,
+      "location": "Tempe, AZ",
+      "venue": "Mullett Arena",
+      "venue_type": "home",
+      "neutral_event": false,
+      "datetime": "2025-10-11T02:00:00.000000Z",
+      "tba": null,
+      "is_all_day": false,
+      "is_exhibition": false,
+      "is_conference": false,
+      "status": "completed",
+      "schedule_event_result": {
+        "id": 17063,
+        "schedule_event_id": 18353,
+        "result": "win",
+        "text": null,
+        "winning_score": "5.0000",
+        "losing_score": "3.0000"
+      },
+      "schedule_event_links": [
+        {
+          "id": 108226,
+          "title": "Live stats",
+          "link": "http://statb.us/b/608987",
+          "icon_id": null,
+          "target": "_self",
+          "show_on": "always",
+          "is_tv_translation": false,
+          "placement_slot": "supplemental",
+          "order": 0,
+          "color": "default"
+        },
+        {
+          "id": 108227,
+          "title": "Game notes",
+          "link": "https://thesundevils.com/documents/884ef0ad-939e-4b0a-adb1-bdc723f267de.pdf",
+          "icon_id": null,
+          "target": "_self",
+          "show_on": "always",
+          "is_tv_translation": false,
+          "placement_slot": "supplemental",
+          "order": 1,
+          "color": "default"
+        }
+      ],
+      "tournament": null,
+      "box_score_url": "https://thesundevils.com/boxscore/18353"
+    },
+    {
+      "id": 4826,
+      "opponent_name": "#6 Penn State",
+      "opponent": {
+        "id": 190,
+        "name": "Penn State",
+        "long_name": "Penn State",
+        "abbreviation": null,
+        "website_url": "http://www.gopsusports.com/",
+        "location": "University Park, PA",
+        "official_logo_id": 58131,
+        "custom_logo_id": null
+      },
+      "location": "Tempe, AZ",
+      "venue": "Mullett Arena",
+      "venue_type": "home",
+      "neutral_event": false,
+      "datetime": "2025-10-04T02:00:00.000000Z",
+      "tba": null,
+      "is_all_day": false,
+      "is_exhibition": false,
+      "is_conference": false,
+      "status": "completed",
+      "schedule_event_result": {
+        "id": 16647,
+        "schedule_event_id": 4826,
+        "result": "loss",
+        "text": "(EN)",
+        "winning_score": "6.0000",
+        "losing_score": "3.0000"
+      },
+      "schedule_event_links": [
+        {
+          "id": 109804,
+          "title": "Buy tickets",
+          "link": "https://www.ticketmaster.com/arizona-state-sun-devils-hockey-tickets/artist/844652?brand=sundevils&_gl=?=CFC_SUNDEVILS_WEB_SUNDEVILS_GENERAL&brand=sundevils",
+          "icon_id": null,
+          "target": "_blank",
+          "show_on": "hide",
+          "is_tv_translation": false,
+          "placement_slot": "default",
+          "order": 0,
+          "color": "default"
+        },
+        {
+          "id": 109805,
+          "title": "Live stats",
+          "link": "http://statb.us/b/608983",
+          "icon_id": null,
+          "target": "_blank",
+          "show_on": "hide",
+          "is_tv_translation": false,
+          "placement_slot": "supplemental",
+          "order": 1,
+          "color": "default"
+        }
+      ],
+      "tournament": null,
+      "box_score_url": "https://thesundevils.com/boxscore/4826"
+    },
+    {
+      "id": 4834,
+      "opponent_name": "#20 Colorado College",
+      "opponent": {
+        "id": 333,
+        "name": "Colorado Col.",
+        "long_name": "Colorado College",
+        "abbreviation": null,
+        "website_url": "http://www.cctigers.com/",
+        "location": "Colorado Springs, CO",
+        "official_logo_id": 57862,
+        "custom_logo_id": null
+      },
+      "location": "Tempe, AZ",
+      "venue": "Mullett Arena",
+      "venue_type": "home",
+      "neutral_event": false,
+      "datetime": "2025-11-08T02:00:00.000000Z",
+      "tba": null,
+      "is_all_day": false,
+      "is_exhibition": false,
+      "is_conference": true,
+      "status": "completed",
+      "schedule_event_result": {
+        "id": 16655,
+        "schedule_event_id": 4834,
+        "result": "tie",
+        "text": "SO Win (2-0)",
+        "winning_score": "3.0000",
+        "losing_score": "3.0000"
+      },
+      "schedule_event_links": [
+        {
+          "id": 109219,
+          "title": "Buy tickets",
+          "link": "https://www.ticketmaster.com/arizona-state-sun-devils-hockey-tickets/artist/844652?brand=sundevils&_gl=?=CFC_SUNDEVILS_WEB_SUNDEVILS_GENERAL&brand=sundevils",
+          "icon_id": null,
+          "target": "_self",
+          "show_on": "before_the_game",
+          "is_tv_translation": false,
+          "placement_slot": "default",
+          "order": 0,
+          "color": "default"
+        },
+        {
+          "id": 109220,
+          "title": "Event details",
+          "link": "https://sundevils.com/event/sun-devil-hockey-arizona-state-vs-colorado-college",
+          "icon_id": null,
+          "target": "_self",
+          "show_on": "before_the_game",
+          "is_tv_translation": false,
+          "placement_slot": "default",
+          "order": 1,
+          "color": "default"
+        }
+      ],
+      "tournament": null,
+      "box_score_url": "https://thesundevils.com/boxscore/4834"
+    },
+    {
+      "id": 19190,
+      "opponent_name": "Lindenwood",
+      "opponent": {
+        "id": 353,
+        "name": "Lindenwood",
+        "long_name": "Lindenwood",
+        "abbreviation": null,
+        "website_url": "http://www.lindenwoodlions.com/",
+        "location": "St. Charles, MO",
+        "official_logo_id": 58175,
+        "custom_logo_id": null
+      },
+      "location": "Maryland Heights, Mo",
+      "venue": "Centene Community Ice Center",
+      "venue_type": "away",
+      "neutral_event": false,
+      "datetime": "2026-10-02T19:00:00.000000Z",
+      "tba": "time_tba",
+      "is_all_day": false,
+      "is_exhibition": false,
+      "is_conference": false,
+      "status": "as_scheduled",
+      "schedule_event_result": {
+        "id": 17884,
+        "schedule_event_id": 19190,
+        "result": null,
+        "text": null,
+        "winning_score": null,
+        "losing_score": null
+      },
+      "schedule_event_links": [],
+      "tournament": null,
+      "box_score_url": "https://thesundevils.com/boxscore/19190"
+    }
+  ],
+  "meta": {
+    "total": 4
+  }
+}
