@@ -1,5 +1,5 @@
 // services/roster-service.js
-const { scrapeCHNRoster } = require("../../scraper");
+const { scrapeCHNRoster } = require("../scrapers/roster");
 const staticData = require("../../asu_hockey_data.json");
 
 // Build a lookup of shoots by jersey number from static data (fallback for when CHN drops the column)

@@ -35,6 +35,7 @@ jest.mock("../config/scraper-config", () => ({
     sunDevilsScheduleEvents: (id) => `http://test/sd-schedule-events/${id}`,
     uscho: "http://test/uscho",
     chnSchedule: "http://test/chn-schedule",
+    chnRoster: "http://test/chn-roster",
   },
 }));
 
@@ -44,7 +45,8 @@ const {
   scrapeCHNScheduleLinks,
   scrapeUSCHORecord,
 } = require("../server/scrapers/schedule");
-const { scrapeCHNRoster, scrapeCHNStats } = require("../scraper");
+const { scrapeCHNRoster } = require("../server/scrapers/roster");
+const { scrapeCHNStats } = require("../server/scrapers/stats");
 
 beforeEach(() => {
   jest.clearAllMocks();
