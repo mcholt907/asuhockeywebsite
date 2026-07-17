@@ -1,4 +1,4 @@
-// Tests for src/scripts/caching-system.js (server-side Jest)
+// Tests for server/cache/caching-system.js (server-side Jest)
 // Run: npx jest --config jest.server.config.js
 //
 // Strategy: point CACHE_DIR at an os.tmpdir() mkdtemp before requiring the
@@ -27,7 +27,7 @@ beforeEach(() => {
   jest.resetModules();
   jest.clearAllMocks();
   Sentry = require('@sentry/node');
-  cachingSystem = require('../src/scripts/caching-system');
+  cachingSystem = require('../server/cache/caching-system');
 });
 
 afterEach(() => {
@@ -122,12 +122,12 @@ describe('getFromCache', () => {
     const expired = {
       timestamp: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
       data: { stale: true },
-      cacheDuration: 60 * 1000, // 1 min — already past
+      cacheDuration: 60 * 1000, // 1 min Ã¢â‚¬â€ already past
     };
     fs.writeFileSync(path.join(tmpDir, 'expired.json'), JSON.stringify(expired));
 
     expect(cachingSystem.getFromCache('expired.json')).toBeNull();
-    // Crucially: we DO NOT delete the expired file — SWR needs to serve it later.
+    // Crucially: we DO NOT delete the expired file Ã¢â‚¬â€ SWR needs to serve it later.
     expect(fs.existsSync(path.join(tmpDir, 'expired.json'))).toBe(true);
   });
 
@@ -143,7 +143,7 @@ describe('getFromCache', () => {
   });
 
   test('honors stored cacheDuration over the default', () => {
-    // Wrote 23 hours ago with a 22-hour duration → expired.
+    // Wrote 23 hours ago with a 22-hour duration Ã¢â€ â€™ expired.
     const aging = {
       timestamp: new Date(Date.now() - 23 * 60 * 60 * 1000).toISOString(),
       data: { x: 1 },

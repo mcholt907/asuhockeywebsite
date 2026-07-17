@@ -1,4 +1,4 @@
-// Tests for src/scripts/data-status.js (server-side Jest)
+// Tests for server/cache/data-status.js (server-side Jest)
 // Run: npx jest --config jest.server.config.js
 //
 // Same strategy as caching-system.test.js: point CACHE_DIR at a temp dir
@@ -38,7 +38,7 @@ beforeEach(() => {
   process.env.CACHE_DIR = tmpDir;
   jest.resetModules();
   jest.clearAllMocks();
-  dataStatus = require('../src/scripts/data-status');
+  dataStatus = require('../server/cache/data-status');
 });
 
 afterEach(() => {
@@ -79,7 +79,7 @@ describe('getDataStatus', () => {
   });
 
   test('falls back to bundled fallback JSON when no cache exists', () => {
-    // No asu_transfers cache written — the committed fallback file is used.
+    // No asu_transfers cache written Ã¢â‚¬â€ the committed fallback file is used.
     const transfers = datasetByName('transfers');
     expect(transfers.source).toBe('fallback');
     expect(transfers.file).toBe('data/asu_transfers_fallback.json');

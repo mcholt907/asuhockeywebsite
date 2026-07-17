@@ -1,9 +1,9 @@
-jest.mock('../src/scripts/caching-system', () => ({
+jest.mock('../server/cache/caching-system', () => ({
   getFromCache: jest.fn(),
   saveToCache: jest.fn(),
 }));
 
-jest.mock('../utils/request-helper', () => ({
+jest.mock('../server/lib/request-helper', () => ({
   requestWithRetry: jest.fn(),
   delayBetweenRequests: jest.fn().mockResolvedValue(undefined),
 }));
@@ -33,8 +33,8 @@ jest.mock('../config/scraper-config', () => ({
   },
 }));
 
-const { getFromCache, saveToCache } = require('../src/scripts/caching-system');
-const { requestWithRetry } = require('../utils/request-helper');
+const { getFromCache, saveToCache } = require('../server/cache/caching-system');
+const { requestWithRetry } = require('../server/lib/request-helper');
 const { fetchRecruitingData, scrapeEliteProspectsRecruiting } = require('../recruiting-scraper');
 
 beforeEach(() => {
@@ -43,7 +43,7 @@ beforeEach(() => {
   requestWithRetry.mockResolvedValue({ data: '<html></html>' });
 });
 
-describe('fetchRecruitingData — SWR caching', () => {
+describe('fetchRecruitingData â€” SWR caching', () => {
   test('returns fresh cached data without hitting the network', async () => {
     const freshData = { '2026-2027': [{ name: 'Jane Smith' }] };
     getFromCache.mockReturnValueOnce(freshData);
@@ -66,7 +66,7 @@ describe('fetchRecruitingData — SWR caching', () => {
   });
 });
 
-describe('scrapeEliteProspectsRecruiting — HTML parsing', () => {
+describe('scrapeEliteProspectsRecruiting â€” HTML parsing', () => {
   // Pins the positional cell contract the parser relies on:
   // td[1]=number, td[3]=player link, td[4]=age, td[5]=birth year,
   // td[6]=birthplace, td[7]=height, td[8]=weight, td[9]=shoots.

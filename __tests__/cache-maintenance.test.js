@@ -1,4 +1,4 @@
-// Tests for src/scripts/cache-maintenance.js (server-side Jest)
+// Tests for server/cache/cache-maintenance.js (server-side Jest)
 // Run: npx jest --config jest.server.config.js
 
 const fs = require('fs');
@@ -38,7 +38,7 @@ beforeEach(() => {
   jest.resetModules();
   jest.clearAllMocks();
   Sentry = require('@sentry/node');
-  maintenance = require('../src/scripts/cache-maintenance');
+  maintenance = require('../server/cache/cache-maintenance');
 });
 
 afterEach(() => {

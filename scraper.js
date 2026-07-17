@@ -1,7 +1,7 @@
 // Imports
 const Sentry = require("@sentry/node");
 const cheerio = require("cheerio");
-const { saveToCache, getFromCache } = require("./src/scripts/caching-system");
+const { saveToCache, getFromCache } = require("./server/cache/caching-system");
 // In-memory cache variables (Request Coalescing)
 let newsPromise = null;
 let schedulePromise = null;
@@ -13,7 +13,7 @@ const config = require("./config/scraper-config");
 const {
   requestWithRetry,
   delayBetweenRequests,
-} = require("./utils/request-helper");
+} = require("./server/lib/request-helper");
 
 // thesundevils.com runs on the WMT Digital / Nuxt platform, which serves all
 // page data from a public JSON API under /website-api/. News and schedule read

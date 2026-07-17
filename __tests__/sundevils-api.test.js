@@ -1,14 +1,14 @@
 // Tests for the thesundevils.com website-api scrapers (server-side Jest)
 // Fixtures in __tests__/fixtures/ are trimmed real API responses captured
-// 2026-07-09 — see docs/plans/2026-07-09-sundevils-website-api-migration.md.
+// 2026-07-09 â€” see docs/plans/2026-07-09-sundevils-website-api-migration.md.
 // Run: npx jest --config jest.server.config.js
 
-jest.mock("../src/scripts/caching-system", () => ({
+jest.mock("../server/cache/caching-system", () => ({
   getFromCache: jest.fn(),
   saveToCache: jest.fn().mockResolvedValue(undefined),
 }));
 
-jest.mock("../utils/request-helper", () => ({
+jest.mock("../server/lib/request-helper", () => ({
   requestWithRetry: jest.fn(),
   delayBetweenRequests: jest.fn().mockResolvedValue(undefined),
 }));
@@ -22,7 +22,7 @@ const articlesFixture = require("./fixtures/sundevils-articles.json");
 const schedulesFixture = require("./fixtures/sundevils-schedules.json");
 const eventsFixture = require("./fixtures/sundevils-schedule-events.json");
 
-const { requestWithRetry } = require("../utils/request-helper");
+const { requestWithRetry } = require("../server/lib/request-helper");
 const {
   scrapeSunDevilsNewsList,
   scrapeSunDevilsSchedule,
@@ -32,7 +32,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe("scrapeSunDevilsNewsList — articles API", () => {
+describe("scrapeSunDevilsNewsList â€” articles API", () => {
   test("maps articles to the news shape with Phoenix-local display dates", async () => {
     requestWithRetry.mockResolvedValueOnce({ data: articlesFixture });
 
@@ -98,10 +98,10 @@ describe("scrapeSunDevilsNewsList — articles API", () => {
   });
 });
 
-describe("scrapeSunDevilsSchedule — schedules + schedule-events API", () => {
+describe("scrapeSunDevilsSchedule â€” schedules + schedule-events API", () => {
   function mockScheduleRequests(events = eventsFixture) {
     requestWithRetry
-      .mockResolvedValueOnce({ data: schedulesFixture }) // season → schedule id
+      .mockResolvedValueOnce({ data: schedulesFixture }) // season â†’ schedule id
       .mockResolvedValueOnce({ data: events }); // events for that schedule
   }
 
@@ -110,7 +110,7 @@ describe("scrapeSunDevilsSchedule — schedules + schedule-events API", () => {
 
     const games = await scrapeSunDevilsSchedule(2025);
 
-    // 2025 → slug "2025-26" → schedule id 223 in the fixture
+    // 2025 â†’ slug "2025-26" â†’ schedule id 223 in the fixture
     expect(requestWithRetry.mock.calls[1][0]).toContain("223");
     expect(games).toHaveLength(4);
   });
@@ -121,7 +121,7 @@ describe("scrapeSunDevilsSchedule — schedules + schedule-events API", () => {
     const games = await scrapeSunDevilsSchedule(2025);
     const notreDame = games.find((g) => g.opponent === "Notre Dame");
 
-    // 2025-10-11T02:00Z is 2025-10-10 7:00 PM in Phoenix — the UTC date
+    // 2025-10-11T02:00Z is 2025-10-10 7:00 PM in Phoenix â€” the UTC date
     // would be off by one, which is exactly the box-score matching bug
     // the old year-guessing scraper had.
     expect(notreDame.date).toBe("2025-10-10");
@@ -138,7 +138,7 @@ describe("scrapeSunDevilsSchedule — schedules + schedule-events API", () => {
     // Penn State won 6-3, so ASU's score (3) comes first
     expect(byOpponent["#6 Penn State"].result).toBe("L 3-6");
     expect(byOpponent["#20 Colorado College"].result).toBe("T 3-3");
-    // Upcoming game: result object exists but result is null → no key at all
+    // Upcoming game: result object exists but result is null â†’ no key at all
     expect(byOpponent["Lindenwood"]).not.toHaveProperty("result");
   });
 

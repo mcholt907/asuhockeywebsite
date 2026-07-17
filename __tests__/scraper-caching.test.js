@@ -1,12 +1,12 @@
 // Tests for scraper caching behaviour (server-side Jest)
 // Run: npx jest --config jest.server.config.js
 
-jest.mock("../src/scripts/caching-system", () => ({
+jest.mock("../server/cache/caching-system", () => ({
   getFromCache: jest.fn(),
   saveToCache: jest.fn().mockResolvedValue(undefined),
 }));
 
-jest.mock("../utils/request-helper", () => ({
+jest.mock("../server/lib/request-helper", () => ({
   requestWithRetry: jest.fn(),
   delayBetweenRequests: jest.fn().mockResolvedValue(undefined),
 }));
@@ -38,8 +38,8 @@ jest.mock("../config/scraper-config", () => ({
   },
 }));
 
-const { getFromCache, saveToCache } = require("../src/scripts/caching-system");
-const { requestWithRetry } = require("../utils/request-helper");
+const { getFromCache, saveToCache } = require("../server/cache/caching-system");
+const { requestWithRetry } = require("../server/lib/request-helper");
 const {
   scrapeCHNRoster,
   scrapeCHNScheduleLinks,
@@ -53,7 +53,7 @@ beforeEach(() => {
   requestWithRetry.mockResolvedValue({ data: "<html></html>" });
 });
 
-describe("scrapeCHNRoster — SWR caching", () => {
+describe("scrapeCHNRoster â€” SWR caching", () => {
   test("returns fresh cached roster without hitting the network", async () => {
     const freshRoster = [
       {
@@ -163,9 +163,9 @@ describe("scrapeCHNScheduleLinks", () => {
   });
 });
 
-describe("scrapeCHNStats — empty season vs scrape failure", () => {
+describe("scrapeCHNStats â€” empty season vs scrape failure", () => {
   test("resolves with empty skaters/goalies when the page has no stat rows (new season)", async () => {
-    // fresh miss, then stale miss — forces a blocking live scrape
+    // fresh miss, then stale miss â€” forces a blocking live scrape
     getFromCache.mockReturnValueOnce(null).mockReturnValueOnce(null);
     requestWithRetry.mockResolvedValueOnce({
       data: "<html><body><table></table></body></html>",

@@ -26,14 +26,14 @@ const {
 } = require("./scraper"); // Import the news fetching function and new stats fetching function
 const { scrapeTransferData } = require("./transfer-scraper"); // Import transfer scraper
 const { scrapeAlumniData } = require("./alumni-scraper"); // Import alumni scraper
-const { startScheduler } = require("./src/scripts/scheduler"); // Import scheduler
+const { startScheduler } = require("./server/scheduler"); // Import scheduler
 const { getRoster } = require("./services/roster-service");
 const { getStaticData } = require("./services/static-data");
 const { getSitemapPages } = require("./services/sitemap-metadata");
 const {
   getDataStatus,
   getCooldownStatus,
-} = require("./src/scripts/data-status");
+} = require("./server/cache/data-status");
 const path = require("path");
 const fs = require("fs");
 
