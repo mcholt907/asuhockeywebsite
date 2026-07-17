@@ -18,12 +18,9 @@ const express = require("express");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const compression = require("compression"); // Add compression for performance
-const {
-  fetchNewsData,
-  fetchScheduleData,
-  scrapeCHNStats,
-  scrapeNCHCStandings,
-} = require("./scraper"); // Import the news fetching function and new stats fetching function
+const { fetchNewsData } = require("./server/scrapers/news");
+const { fetchScheduleData } = require("./server/scrapers/schedule");
+const { scrapeCHNStats, scrapeNCHCStandings } = require("./scraper");
 const { scrapeTransferData } = require("./transfer-scraper"); // Import transfer scraper
 const { scrapeAlumniData } = require("./alumni-scraper"); // Import alumni scraper
 const { startScheduler } = require("./server/scheduler"); // Import scheduler

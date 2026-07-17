@@ -23,10 +23,8 @@ const schedulesFixture = require("./fixtures/sundevils-schedules.json");
 const eventsFixture = require("./fixtures/sundevils-schedule-events.json");
 
 const { requestWithRetry } = require("../server/lib/request-helper");
-const {
-  scrapeSunDevilsNewsList,
-  scrapeSunDevilsSchedule,
-} = require("../scraper");
+const { scrapeSunDevilsNewsList } = require("../server/scrapers/news");
+const { scrapeSunDevilsSchedule } = require("../server/scrapers/schedule");
 
 beforeEach(() => {
   jest.clearAllMocks();

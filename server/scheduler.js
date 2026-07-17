@@ -1,8 +1,8 @@
 const cron = require("node-cron");
 const Sentry = require("@sentry/node");
+const { fetchNewsData } = require("./scrapers/news");
+const { fetchScheduleData } = require("./scrapers/schedule");
 const {
-  fetchNewsData,
-  fetchScheduleData,
   scrapeCHNStats,
   scrapeCHNRoster,
   scrapeNCHCStandings,

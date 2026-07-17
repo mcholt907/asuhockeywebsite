@@ -41,11 +41,10 @@ jest.mock("../config/scraper-config", () => ({
 const { getFromCache, saveToCache } = require("../server/cache/caching-system");
 const { requestWithRetry } = require("../server/lib/request-helper");
 const {
-  scrapeCHNRoster,
   scrapeCHNScheduleLinks,
-  scrapeCHNStats,
   scrapeUSCHORecord,
-} = require("../scraper");
+} = require("../server/scrapers/schedule");
+const { scrapeCHNRoster, scrapeCHNStats } = require("../scraper");
 
 beforeEach(() => {
   jest.clearAllMocks();
