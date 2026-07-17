@@ -3,7 +3,7 @@ jest.mock('../scraper', () => ({
 }));
 
 const { scrapeCHNRoster } = require('../scraper');
-const { determineNationality, getRoster } = require('../services/roster-service');
+const { determineNationality, getRoster } = require('../server/services/roster-service');
 
 beforeEach(() => jest.clearAllMocks());
 
@@ -25,7 +25,7 @@ describe('determineNationality', () => {
     expect(determineNationality('-')).toBe('USA');
   });
 
-  // Regressions guarded by audit item #16 — token-based match should not be
+  // Regressions guarded by audit item #16 â€” token-based match should not be
   // tricked by country codes that appear as substrings of unrelated city names.
   test('Geraldton, ON resolves to CAN (not GER)', () => {
     expect(determineNationality('Geraldton, ON')).toBe('CAN');

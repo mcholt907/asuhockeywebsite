@@ -27,9 +27,9 @@ const {
 const { scrapeTransferData } = require("./transfer-scraper"); // Import transfer scraper
 const { scrapeAlumniData } = require("./alumni-scraper"); // Import alumni scraper
 const { startScheduler } = require("./server/scheduler"); // Import scheduler
-const { getRoster } = require("./services/roster-service");
-const { getStaticData } = require("./services/static-data");
-const { getSitemapPages } = require("./services/sitemap-metadata");
+const { getRoster } = require("./server/services/roster-service");
+const { getStaticData } = require("./server/services/static-data");
+const { getSitemapPages } = require("./server/services/sitemap-metadata");
 const {
   getDataStatus,
   getCooldownStatus,
