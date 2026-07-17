@@ -158,7 +158,7 @@ function Stats() {
       {isPriorSeason && seasonLabel && (
         <p className="season-note">
           Showing final stats from the {seasonLabel} season — current-season
-          stats will appear once the puck drops.
+          stats will appear once the puck drops
         </p>
       )}
 
