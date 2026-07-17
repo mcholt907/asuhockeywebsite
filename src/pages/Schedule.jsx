@@ -1,7 +1,11 @@
 import React, { useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { useSchedule } from "../hooks/queries/useSchedule";
-import { SEASON_FULL, SEASON_SHORT } from "../config/season";
+import {
+  SEASON_FULL,
+  SEASON_SHORT,
+  PRIOR_SEASON_SHORT,
+} from "../config/season";
 import "./Schedule.css";
 
 function Schedule() {
@@ -13,6 +17,8 @@ function Schedule() {
   }, [data]);
 
   const teamRecord = data?.team_record || null;
+  // Until a game has a result, the scraped record is last season's final.
+  const seasonStarted = games.some((game) => game.result);
   const error = isError
     ? "Failed to load schedule data. Please try again later."
     : null;
@@ -196,7 +202,11 @@ function Schedule() {
       {/* Team Record Display */}
       <div className="team-record">
         <div className="record-card">
-          <div className="record-label">Team Record</div>
+          <div className="record-label">
+            {teamRecord && !seasonStarted
+              ? `Team Record (${PRIOR_SEASON_SHORT} Final)`
+              : "Team Record"}
+          </div>
           {teamRecord ? (
             <div className="record-grid">
               <div className="record-stat featured">
