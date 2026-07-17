@@ -1,24 +1,24 @@
-/**
- * Alumni Scraper - "Where Are They Now?"
- * Scrapes former player data from Elite Prospects team alumni page
- * V3: Captures ALL team entries per player with individual stats per team
- */
-
+// alumni.js — EliteProspects "Where Are They Now?" alumni tracker
+// (fallback-only in production: EP 403s cloud IPs; bundled JSON refreshed
+// weekly via scripts/refresh-and-push.cmd)
+// V3: Captures ALL team entries per player with individual stats per team
 const cheerio = require("cheerio");
 const fs = require("fs");
 const path = require("path");
-const { saveToCache, getFromCache } = require("./server/cache/caching-system");
-const { reportScrapeHealth } = require("./server/cache/scrape-health");
-const { requestWithRetry } = require("./server/lib/request-helper");
+const { reportScrapeHealth } = require("../cache/scrape-health");
+const { requestWithRetry } = require("../lib/request-helper");
+const { createCachedScraper } = require("./create-cached-scraper");
 
 const BASE_URL =
   "https://www.eliteprospects.com/team/18066/arizona-state-univ/where-are-they-now";
-const CACHE_KEY = "asu_alumni";
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours in ms
-const FALLBACK_FILE = path.join(__dirname, "data", "asu_alumni_fallback.json");
-
-// Request coalescing
-let alumniPromise = null;
+const FALLBACK_FILE = path.join(
+  __dirname,
+  "..",
+  "..",
+  "data",
+  "asu_alumni_fallback.json",
+);
 
 function getFallbackAlumniData() {
   try {
@@ -31,9 +31,7 @@ function getFallbackAlumniData() {
     ) {
       return fallback;
     }
-    console.warn(
-      "[Alumni Scraper] Fallback alumni data has an unexpected shape.",
-    );
+    console.warn("[Alumni Scraper] Fallback alumni data has an unexpected shape.");
   } catch (error) {
     console.warn(
       `[Alumni Scraper] Fallback alumni data unavailable: ${error.message}`,
@@ -42,6 +40,9 @@ function getFallbackAlumniData() {
   return null;
 }
 
+// In production / prerender, skip live scraping and use bundled fallback.
+// EliteProspects 403s cloud-host IPs; live scraping only succeeds from a
+// residential IP (set ALUMNI_SCRAPE_LIVE=true to override).
 function shouldUseFallbackOnly() {
   if (process.env.ALUMNI_SCRAPE_LIVE === "true") {
     return false;
@@ -317,160 +318,58 @@ async function scrapeAllPages(type) {
 }
 
 /**
- * Main function to scrape all alumni data
+ * Live scrape of all alumni data (skaters + goalies, all pages)
  */
+async function scrapeAlumniLive() {
+  const [skaters, goalies] = await Promise.all([
+    scrapeAllPages("skaters"),
+    scrapeAllPages("goalies"),
+  ]);
+
+  const result = {
+    skaters,
+    goalies,
+    lastUpdated: new Date().toISOString(),
+  };
+
+  // Count unique players
+  const uniqueSkaters = new Set(skaters.map((s) => s.playerId)).size;
+  const uniqueGoalies = new Set(goalies.map((g) => g.playerId)).size;
+
+  console.log(
+    `[Alumni Scraper] Complete - ${skaters.length} skater entries (${uniqueSkaters} unique), ${goalies.length} goalie entries (${uniqueGoalies} unique)`,
+  );
+
+  // Log NHL players
+  const nhlEntries = [...skaters, ...goalies].filter((p) => p.league === "NHL");
+  if (nhlEntries.length > 0) {
+    console.log("[Alumni Scraper] NHL entries:");
+    nhlEntries.forEach((p) => console.log(`  - ${p.name} (${p.team})`));
+  }
+
+  return result;
+}
+
+const fetchAlumni = createCachedScraper({
+  name: "alumni",
+  cacheKey: "asu_alumni",
+  ttl: CACHE_TTL,
+  swr: false, // EP scrapers never served stale pre-scrape; stale is error recovery only
+  scrape: scrapeAlumniLive,
+  // Selector-health guard: don't overwrite last-known-good cache with an
+  // empty result if EP changed their markup.
+  validate: (result) =>
+    reportScrapeHealth("alumni", {
+      skaters: result.skaters.length,
+      goalies: result.goalies.length,
+    }),
+  fallback: getFallbackAlumniData,
+  fallbackOnly: shouldUseFallbackOnly,
+  onScrapeError: () => ({ skaters: [], goalies: [], lastUpdated: null }),
+});
+
 async function scrapeAlumniData() {
-  console.log("[Alumni Scraper] Starting to scrape alumni data...");
-
-  // Check cache first - caching system handles TTL automatically
-  try {
-    const cached = getFromCache(CACHE_KEY);
-    if (cached) {
-      console.log("[Alumni Scraper] Returning cached alumni data");
-      return cached;
-    }
-  } catch (error) {
-    console.log("[Alumni Scraper] No valid cache found, scraping fresh data");
-  }
-
-  if (shouldUseFallbackOnly()) {
-    const fallback = getFallbackAlumniData();
-    if (fallback) {
-      console.log("[Alumni Scraper] Returning bundled fallback alumni data");
-      return fallback;
-    }
-  }
-
-  // Request Coalescing: if a scrape is already in progress, return that promise
-  if (alumniPromise) {
-    console.log(
-      "[Alumni Scraper] Scrape already in progress. Returning shared promise.",
-    );
-    return await alumniPromise;
-  }
-
-  alumniPromise = (async () => {
-    try {
-      const [skaters, goalies] = await Promise.all([
-        scrapeAllPages("skaters"),
-        scrapeAllPages("goalies"),
-      ]);
-
-      const result = {
-        skaters,
-        goalies,
-        lastUpdated: new Date().toISOString(),
-      };
-
-      // Count unique players
-      const uniqueSkaters = new Set(skaters.map((s) => s.playerId)).size;
-      const uniqueGoalies = new Set(goalies.map((g) => g.playerId)).size;
-
-      console.log(
-        `[Alumni Scraper] Complete - ${skaters.length} skater entries (${uniqueSkaters} unique), ${goalies.length} goalie entries (${uniqueGoalies} unique)`,
-      );
-
-      // Log NHL players
-      const nhlEntries = [...skaters, ...goalies].filter(
-        (p) => p.league === "NHL",
-      );
-      if (nhlEntries.length > 0) {
-        console.log("[Alumni Scraper] NHL entries:");
-        nhlEntries.forEach((p) => console.log(`  - ${p.name} (${p.team})`));
-      }
-
-      // Selector-health guard: don't overwrite last-known-good cache
-      // with an empty result if EP changed their markup.
-      if (
-        !reportScrapeHealth("alumni", {
-          skaters: skaters.length,
-          goalies: goalies.length,
-        })
-      ) {
-        const stale = getFromCache(CACHE_KEY, true);
-        if (stale) {
-          console.log("[Alumni Scraper] Empty result; returning stale cache");
-          return stale;
-        }
-        const fallback = getFallbackAlumniData();
-        if (fallback) {
-          console.log(
-            "[Alumni Scraper] Empty result; returning bundled fallback",
-          );
-          return fallback;
-        }
-        return result;
-      }
-
-      // Cache results - pass result directly, caching system wraps with timestamp
-      await saveToCache(result, CACHE_KEY, CACHE_TTL);
-
-      return result;
-    } catch (error) {
-      console.error("[Alumni Scraper] Error:", error.message);
-
-      // Try to return stale cache on error (ignoreExpiration=true)
-      try {
-        const stale = getFromCache(CACHE_KEY, true);
-        if (stale) {
-          console.log("[Alumni Scraper] Returning stale cached data");
-          return stale;
-        }
-      } catch (e) {}
-
-      const fallback = getFallbackAlumniData();
-      if (fallback) {
-        console.log(
-          "[Alumni Scraper] Returning bundled fallback alumni data after scrape error",
-        );
-        return fallback;
-      }
-
-      return { skaters: [], goalies: [], lastUpdated: null };
-    } finally {
-      alumniPromise = null;
-    }
-  })();
-
-  return await alumniPromise;
-}
-
-/**
- * Test function
- */
-async function testScraper() {
-  console.log("=== Testing Alumni Scraper V3 ===\n");
-  const data = await scrapeAlumniData();
-  console.log(`\n=== Results ===`);
-  console.log(`Skater entries: ${data.skaters.length}`);
-  console.log(`Goalie entries: ${data.goalies.length}`);
-
-  // Show Ryan Kirwan (multi-team player) as example
-  console.log("\n=== Multi-team example (Ryan Kirwan) ===");
-  data.skaters
-    .filter((s) => s.name.includes("Kirwan"))
-    .forEach((e) => {
-      console.log(
-        `  ${e.isTotals ? "[TOTALS]" : e.team} [${e.league}] - GP:${e.gp} G:${e.g} A:${e.a} P:${e.tp} PIM:${e.pim}`,
-      );
-    });
-
-  // Show sample goalies with stats
-  console.log("\n=== Sample Goalies ===");
-  data.goalies.slice(0, 5).forEach((g) => {
-    console.log(
-      `  ${g.name} - ${g.team || "TOTALS"} [${g.league}] | GP:${g.gp} GAA:${g.gaa || "-"} SV%:${g.svPct || "-"}`,
-    );
-  });
-}
-
-if (require.main === module) {
-  testScraper()
-    .then(() => process.exit(0))
-    .catch((err) => {
-      console.error("Test failed:", err);
-      process.exit(1);
-    });
+  return fetchAlumni();
 }
 
 module.exports = { scrapeAlumniData };

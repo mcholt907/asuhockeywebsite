@@ -6,9 +6,9 @@ const {
   scrapeCHNStats,
   scrapeCHNRoster,
   scrapeNCHCStandings,
+  scrapeTransferData,
+  scrapeAlumniData,
 } = require("./scrapers");
-const { scrapeTransferData } = require("../transfer-scraper");
-const { scrapeAlumniData } = require("../alumni-scraper");
 const { runCacheMaintenance } = require("./cache/cache-maintenance");
 
 const RETRY_DELAY_MS = 5 * 60 * 1000; // 5 minutes
