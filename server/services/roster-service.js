@@ -14,6 +14,35 @@ staticPlayers.forEach((p) => {
   if (num) staticByNumber[num] = p;
 });
 
+// Lowercase, strip diacritics/punctuation — CHN and EP spell names slightly
+// differently ("Nordberg" vs "Nordberg (D)", accented characters).
+function normalizeName(name) {
+  return String(name)
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z ]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// Direct EP profile links by player name, from the curated roster plus all
+// recruiting classes (this season's freshmen live in recruiting entries).
+// EP's /search/player?q= route stopped auto-running queries, so a real
+// profile URL is the only reliable link.
+const epLinkByName = {};
+for (const p of staticPlayers) {
+  if (p.player_link && p.name)
+    epLinkByName[normalizeName(p.name)] = p.player_link;
+}
+for (const seasonEntries of Object.values(staticData.recruiting || {})) {
+  if (!Array.isArray(seasonEntries)) continue;
+  for (const p of seasonEntries) {
+    if (p.player_link && p.name)
+      epLinkByName[normalizeName(p.name)] = p.player_link;
+  }
+}
+
 function determineNationality(hometown) {
   if (!hometown || hometown === "-") return "USA";
 
@@ -104,7 +133,9 @@ async function getRoster() {
         born: p.DOB || "-",
         birthplace: hometown || "-",
         nationality: determineNationality(hometown),
-        player_link: `https://www.eliteprospects.com/search/player?q=${encodeURIComponent(cleanName)}`,
+        player_link:
+          epLinkByName[normalizeName(cleanName)] ||
+          `https://www.eliteprospects.com/search/player?q=${encodeURIComponent(cleanName)}`,
       };
     });
 }
