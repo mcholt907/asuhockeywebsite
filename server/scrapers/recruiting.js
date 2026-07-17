@@ -1,12 +1,13 @@
+// recruiting.js — EliteProspects future-season roster scrape (recruiting
+// tracker). fetchRecruitingData feeds local curation scripts; the live
+// /api/recruits endpoint reads asu_hockey_data.json directly.
 const cheerio = require("cheerio");
-const { saveToCache, getFromCache } = require("./server/cache/caching-system");
-const config = require("./config/scraper-config");
+const config = require("../../config/scraper-config");
 const {
   requestWithRetry,
   delayBetweenRequests,
-} = require("./server/lib/request-helper");
-
-let recruitingPromise = null;
+} = require("../lib/request-helper");
+const { createCachedScraper } = require("./create-cached-scraper");
 
 /**
  * Scrapes player photo and current team from a single Elite Prospects profile page visit
@@ -28,9 +29,7 @@ async function scrapePlayerProfile(playerLink) {
     // Scope to the profile header region when possible so a "related
     // players" widget can't supply the wrong player's image.
     const photoEl =
-      $(
-        '[class*="ProfileHeader"], [class*="PlayerHeader"], [class*="PlayerInfo"]',
-      )
+      $('[class*="ProfileHeader"], [class*="PlayerHeader"], [class*="PlayerInfo"]')
         .find('img[src*="files.eliteprospects.com/layout/players"]')
         .first()
         .attr("src") ||
@@ -71,10 +70,7 @@ async function scrapePlayerProfile(playerLink) {
 
     return { player_photo, current_team };
   } catch (error) {
-    console.error(
-      `[Profile Scraper] Error scraping ${playerLink}:`,
-      error.message,
-    );
+    console.error(`[Profile Scraper] Error scraping ${playerLink}:`, error.message);
     return { player_photo: "", current_team: "" };
   }
 }
@@ -290,15 +286,13 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
 }
 
 /**
- * Scrapes recruiting data for all configured future seasons and saves to cache
- * @param {string} cacheKey - Cache key to save data under
- * @param {boolean} includePhotos - Whether to scrape player photos (much slower)
+ * Scrapes recruiting data for all configured future seasons
+ * @param {{includePhotos?: boolean}} args
  * @returns {Object} Object with season keys and player arrays as values
  */
-async function scrapeAndCacheRecruiting(cacheKey, includePhotos = false) {
+async function scrapeAllSeasons({ includePhotos = false } = {}) {
   const recruitingData = {};
 
-  // Scrape data for each future season configured
   for (const season of config.FUTURE_SEASONS || [
     "2026-2027",
     "2027-2028",
@@ -307,80 +301,36 @@ async function scrapeAndCacheRecruiting(cacheKey, includePhotos = false) {
     console.log(
       `[Recruiting] Scraping season: ${season}${includePhotos ? " with photos" : ""}`,
     );
-    const players = await scrapeEliteProspectsRecruiting(season, includePhotos);
-    recruitingData[season] = players;
+    recruitingData[season] = await scrapeEliteProspectsRecruiting(
+      season,
+      includePhotos,
+    );
 
     // Add delay between requests to be respectful
     await delayBetweenRequests();
   }
 
-  // Save to cache only if at least one player was returned across all seasons
-  const hasAnyPlayers = Object.values(recruitingData).some(
-    (arr) => arr.length > 0,
-  );
-  if (hasAnyPlayers) {
-    console.log(
-      `[Cache System] Successfully scraped recruiting data. Saving to cache.`,
-    );
-    saveToCache(recruitingData, cacheKey);
-  } else {
-    console.log(
-      "[Cache System] No recruiting data returned from scraper. Not caching.",
-    );
-  }
-
   return recruitingData;
 }
 
+const fetchRecruiting = createCachedScraper({
+  name: "recruiting",
+  cacheKey: "asu_hockey_recruiting",
+  // no ttl: saveToCache's 24h default, same as the old bare saveToCache call
+  scrape: scrapeAllSeasons,
+  validate: (data) => Object.values(data).some((arr) => arr.length > 0),
+});
+
 /**
- * Fetches recruiting data for all configured future seasons
- * Uses stale-while-revalidate caching to avoid excessive scraping
+ * Fetches recruiting data for all configured future seasons.
+ * includePhotos=true bypasses the cache entirely (local curation scripts only).
  * @param {boolean} includePhotos - Whether to scrape player photos (much slower)
- * @returns {Object} Object with season keys and player arrays as values
  */
 async function fetchRecruitingData(includePhotos = false) {
-  const RECRUITING_CACHE_KEY = "asu_hockey_recruiting";
-
-  // 1. Fresh cache
-  try {
-    const cachedData = getFromCache(RECRUITING_CACHE_KEY);
-    if (cachedData && !includePhotos) {
-      console.log("[Recruiting Scraper] Returning cached recruiting data.");
-      return cachedData;
-    }
-
-    // 2. SWR: return stale immediately, refresh in background
-    const staleData = getFromCache(RECRUITING_CACHE_KEY, true);
-    if (staleData && !includePhotos) {
-      console.log(
-        "[Recruiting Scraper] Stale data found. Returning immediately and refreshing in background.",
-      );
-      if (!recruitingPromise) {
-        // Phase 2 background refresh — always false here because includePhotos=true bypasses cache entirely
-        recruitingPromise = scrapeAndCacheRecruiting(
-          RECRUITING_CACHE_KEY,
-          false,
-        ).finally(() => {
-          recruitingPromise = null;
-        });
-      }
-      return staleData;
-    }
-  } catch (error) {
-    console.log("[Recruiting Scraper] No valid cache found.");
-  }
-
-  // 3. No cache — must block on live scrape
-  if (recruitingPromise) {
-    return await recruitingPromise;
-  }
-  recruitingPromise = scrapeAndCacheRecruiting(
-    RECRUITING_CACHE_KEY,
-    includePhotos,
-  ).finally(() => {
-    recruitingPromise = null;
+  return fetchRecruiting({
+    bypassCache: includePhotos,
+    scrapeArgs: { includePhotos },
   });
-  return await recruitingPromise;
 }
 
 module.exports = {

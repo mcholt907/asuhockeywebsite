@@ -7,4 +7,5 @@ module.exports = {
   ...require("./roster"),
   ...require("./transfers"),
   ...require("./alumni"),
+  ...require("./recruiting"),
 };
