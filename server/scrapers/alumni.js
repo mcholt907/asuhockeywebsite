@@ -20,18 +20,28 @@ const FALLBACK_FILE = path.join(
   "asu_alumni_fallback.json",
 );
 
+// Memoized by mtime: fallback-only mode serves this on every production
+// request, so re-parse only when the weekly refresh rewrites the file.
+let fallbackCache = { mtimeMs: 0, value: null };
+
 function getFallbackAlumniData() {
   try {
-    const raw = fs.readFileSync(FALLBACK_FILE, "utf8");
-    const fallback = JSON.parse(raw);
+    const stat = fs.statSync(FALLBACK_FILE);
+    if (fallbackCache.value && stat.mtimeMs === fallbackCache.mtimeMs) {
+      return fallbackCache.value;
+    }
+    const fallback = JSON.parse(fs.readFileSync(FALLBACK_FILE, "utf8"));
     if (
       fallback &&
       Array.isArray(fallback.skaters) &&
       Array.isArray(fallback.goalies)
     ) {
+      fallbackCache = { mtimeMs: stat.mtimeMs, value: fallback };
       return fallback;
     }
-    console.warn("[Alumni Scraper] Fallback alumni data has an unexpected shape.");
+    console.warn(
+      "[Alumni Scraper] Fallback alumni data has an unexpected shape.",
+    );
   } catch (error) {
     console.warn(
       `[Alumni Scraper] Fallback alumni data unavailable: ${error.message}`,

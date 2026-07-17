@@ -18,15 +18,23 @@ const FALLBACK_FILE = path.join(
   "asu_transfers_fallback.json",
 );
 
+// Memoized by mtime: fallback-only mode serves this on every production
+// request, so re-parse only when the weekly refresh rewrites the file.
+let fallbackCache = { mtimeMs: 0, value: null };
+
 function getFallbackTransferData() {
   try {
-    const raw = fs.readFileSync(FALLBACK_FILE, "utf8");
-    const fallback = JSON.parse(raw);
+    const stat = fs.statSync(FALLBACK_FILE);
+    if (fallbackCache.value && stat.mtimeMs === fallbackCache.mtimeMs) {
+      return fallbackCache.value;
+    }
+    const fallback = JSON.parse(fs.readFileSync(FALLBACK_FILE, "utf8"));
     if (
       fallback &&
       Array.isArray(fallback.incoming) &&
       Array.isArray(fallback.outgoing)
     ) {
+      fallbackCache = { mtimeMs: stat.mtimeMs, value: fallback };
       return fallback;
     }
     console.warn(
@@ -261,7 +269,9 @@ async function scrapeTransfersLive() {
         lastPlayer.direction === "incoming" ? incoming : outgoing;
 
       // Check if already added
-      const exists = targetArray.some((p) => p.playerId === lastPlayer.playerId);
+      const exists = targetArray.some(
+        (p) => p.playerId === lastPlayer.playerId,
+      );
       if (!exists) {
         targetArray.push({ ...lastPlayer });
       }

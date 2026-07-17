@@ -29,7 +29,9 @@ async function scrapePlayerProfile(playerLink) {
     // Scope to the profile header region when possible so a "related
     // players" widget can't supply the wrong player's image.
     const photoEl =
-      $('[class*="ProfileHeader"], [class*="PlayerHeader"], [class*="PlayerInfo"]')
+      $(
+        '[class*="ProfileHeader"], [class*="PlayerHeader"], [class*="PlayerInfo"]',
+      )
         .find('img[src*="files.eliteprospects.com/layout/players"]')
         .first()
         .attr("src") ||
@@ -70,7 +72,10 @@ async function scrapePlayerProfile(playerLink) {
 
     return { player_photo, current_team };
   } catch (error) {
-    console.error(`[Profile Scraper] Error scraping ${playerLink}:`, error.message);
+    console.error(
+      `[Profile Scraper] Error scraping ${playerLink}:`,
+      error.message,
+    );
     return { player_photo: "", current_team: "" };
   }
 }
@@ -323,7 +328,8 @@ const fetchRecruiting = createCachedScraper({
 
 /**
  * Fetches recruiting data for all configured future seasons.
- * includePhotos=true bypasses the cache entirely (local curation scripts only).
+ * includePhotos=true bypasses cache reads and always scrapes live (local
+ * curation scripts only); the result still refreshes the shared cache key.
  * @param {boolean} includePhotos - Whether to scrape player photos (much slower)
  */
 async function fetchRecruitingData(includePhotos = false) {
