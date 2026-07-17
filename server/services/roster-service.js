@@ -2,17 +2,9 @@
 const { scrapeCHNRoster } = require("../scrapers/roster");
 const staticData = require("../../asu_hockey_data.json");
 
-// Build a lookup of shoots by jersey number from static data (fallback for when CHN drops the column)
-const staticByNumber = {};
 const staticPlayers = Array.isArray(staticData)
   ? staticData
   : staticData.roster || staticData.players || [];
-staticPlayers.forEach((p) => {
-  const num = String(p.number || "")
-    .replace("#", "")
-    .trim();
-  if (num) staticByNumber[num] = p;
-});
 
 // Lowercase, strip diacritics/punctuation — CHN and EP spell names slightly
 // differently ("Nordberg" vs "Nordberg (D)", accented characters).
@@ -26,21 +18,27 @@ function normalizeName(name) {
     .trim();
 }
 
-// Direct EP profile links by player name, from the curated roster plus all
-// recruiting classes (this season's freshmen live in recruiting entries).
-// EP's /search/player?q= route stopped auto-running queries, so a real
-// profile URL is the only reliable link.
-const epLinkByName = {};
-for (const p of staticPlayers) {
-  if (p.player_link && p.name)
-    epLinkByName[normalizeName(p.name)] = p.player_link;
+// Static-data lookup by player name: curated roster entries first, recruiting
+// classes filling gaps (this season's freshmen live in recruiting entries).
+// Name-keyed, not number-keyed — CHN lists placeholder jersey numbers early
+// in the season, so number matching hands out the wrong player's data.
+// Supplies:
+// - player_link: EP's /search/player?q= route stopped auto-running queries,
+//   so a real profile URL is the only reliable link.
+// - shoots: fallback for when CHN drops the S/C column.
+const staticByName = {};
+function indexStaticPlayer(p) {
+  if (!p || !p.name) return;
+  const key = normalizeName(p.name);
+  const existing = staticByName[key] || {};
+  staticByName[key] = {
+    player_link: existing.player_link || p.player_link || "",
+    shoots: existing.shoots || p.shoots || "",
+  };
 }
+staticPlayers.forEach(indexStaticPlayer);
 for (const seasonEntries of Object.values(staticData.recruiting || {})) {
-  if (!Array.isArray(seasonEntries)) continue;
-  for (const p of seasonEntries) {
-    if (p.player_link && p.name)
-      epLinkByName[normalizeName(p.name)] = p.player_link;
-  }
+  if (Array.isArray(seasonEntries)) seasonEntries.forEach(indexStaticPlayer);
 }
 
 function determineNationality(hometown) {
@@ -119,6 +117,7 @@ async function getRoster() {
       const pos = p.Pos || "";
       const hometown = p.Hometown || "";
       const cleanName = name.replace(/\s*\([A-Z]+\)\s*/i, "").trim();
+      const staticEntry = staticByName[normalizeName(cleanName)] || {};
 
       return {
         number: p["#"] || "",
@@ -126,15 +125,12 @@ async function getRoster() {
         position: pos,
         height: p.Ht || "-",
         weight: p.Wt || "-",
-        shoots:
-          p["S/C"] ||
-          staticByNumber[String(p["#"] || "").trim()]?.shoots ||
-          "-",
+        shoots: p["S/C"] || staticEntry.shoots || "-",
         born: p.DOB || "-",
         birthplace: hometown || "-",
         nationality: determineNationality(hometown),
         player_link:
-          epLinkByName[normalizeName(cleanName)] ||
+          staticEntry.player_link ||
           `https://www.eliteprospects.com/search/player?q=${encodeURIComponent(cleanName)}`,
       };
     });
