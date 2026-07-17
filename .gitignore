@@ -40,7 +40,7 @@ lerna-debug.log*
 .pnpm-debug.log*
 
 # cache
-src/scripts/cache/
+server/cache/data/
 /.cache
 
 # misc

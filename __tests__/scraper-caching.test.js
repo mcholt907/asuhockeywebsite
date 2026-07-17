@@ -1,12 +1,12 @@
 // Tests for scraper caching behaviour (server-side Jest)
 // Run: npx jest --config jest.server.config.js
 
-jest.mock("../src/scripts/caching-system", () => ({
+jest.mock("../server/cache/caching-system", () => ({
   getFromCache: jest.fn(),
   saveToCache: jest.fn().mockResolvedValue(undefined),
 }));
 
-jest.mock("../utils/request-helper", () => ({
+jest.mock("../server/lib/request-helper", () => ({
   requestWithRetry: jest.fn(),
   delayBetweenRequests: jest.fn().mockResolvedValue(undefined),
 }));
@@ -35,17 +35,18 @@ jest.mock("../config/scraper-config", () => ({
     sunDevilsScheduleEvents: (id) => `http://test/sd-schedule-events/${id}`,
     uscho: "http://test/uscho",
     chnSchedule: "http://test/chn-schedule",
+    chnRoster: "http://test/chn-roster",
   },
 }));
 
-const { getFromCache, saveToCache } = require("../src/scripts/caching-system");
-const { requestWithRetry } = require("../utils/request-helper");
+const { getFromCache, saveToCache } = require("../server/cache/caching-system");
+const { requestWithRetry } = require("../server/lib/request-helper");
 const {
-  scrapeCHNRoster,
   scrapeCHNScheduleLinks,
-  scrapeCHNStats,
   scrapeUSCHORecord,
-} = require("../scraper");
+} = require("../server/scrapers/schedule");
+const { scrapeCHNRoster } = require("../server/scrapers/roster");
+const { scrapeCHNStats } = require("../server/scrapers/stats");
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -53,7 +54,7 @@ beforeEach(() => {
   requestWithRetry.mockResolvedValue({ data: "<html></html>" });
 });
 
-describe("scrapeCHNRoster — SWR caching", () => {
+describe("scrapeCHNRoster â€” SWR caching", () => {
   test("returns fresh cached roster without hitting the network", async () => {
     const freshRoster = [
       {

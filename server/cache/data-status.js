@@ -1,7 +1,7 @@
 // data-status.js
 // Read-only introspection over the file cache and bundled fallback data.
 // Powers /api/status and the scheduler's staleness alerting. The site's
-// failure mode is not crashing — it's silently serving old data when an
+// failure mode is not crashing â€” it's silently serving old data when an
 // upstream site changes markup; this module makes data age observable.
 
 const fs = require('fs');
@@ -12,9 +12,9 @@ const { getCacheMeta, CACHE_DIR } = require('./caching-system');
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
 const ROOT_DIR = path.join(__dirname, '..', '..');
-const COOLDOWN_TTL_MS = 24 * HOUR_MS; // mirrors utils/request-helper.js
+const COOLDOWN_TTL_MS = 24 * HOUR_MS; // mirrors server/lib/request-helper.js
 
-// staleAfterMs ≈ 2–3× each dataset's refresh cadence (see scheduler.js).
+// staleAfterMs â‰ˆ 2â€“3Ã— each dataset's refresh cadence (see scheduler.js).
 // Transfers/alumni run from bundled fallback JSON in production (EP 403s
 // cloud IPs); that JSON refreshes weekly via scripts/refresh-and-push.cmd,
 // so its threshold is 3 weeks. `alert: false` datasets are hand-maintained
@@ -47,7 +47,7 @@ function readFallbackMeta(relPath) {
       const parsed = JSON.parse(fs.readFileSync(filePath, 'utf8'));
       lastUpdated = parsed.lastUpdated || null;
     } catch (_) {
-      // Unparseable fallback — report mtime-based age below.
+      // Unparseable fallback â€” report mtime-based age below.
     }
     const ts = lastUpdated ? new Date(lastUpdated).getTime() : stat.mtimeMs;
     return {
@@ -101,7 +101,7 @@ function getDataStatus() {
     const cacheMeta = cacheKey ? getCacheMeta(cacheKey) : null;
     const fallbackMeta = dataset.fallbackFile ? readFallbackMeta(dataset.fallbackFile) : null;
 
-    // Report whichever source is fresher — in production the EP scrapers
+    // Report whichever source is fresher â€” in production the EP scrapers
     // never write cache (fallback-only mode), so fallback is the live source.
     let source = null;
     let meta = null;
@@ -119,8 +119,8 @@ function getDataStatus() {
 }
 
 /**
- * Lists 403-cooldown markers written by utils/request-helper.js:
- * { host, since, active } — active markers mean live scraping of that host
+ * Lists 403-cooldown markers written by server/lib/request-helper.js:
+ * { host, since, active } â€” active markers mean live scraping of that host
  * is currently skipped.
  */
 function getCooldownStatus() {

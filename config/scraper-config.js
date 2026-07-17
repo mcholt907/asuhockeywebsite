@@ -56,6 +56,8 @@ module.exports = {
     chnNews: "https://www.collegehockeynews.com/reports/team/Arizona-State/61",
     chnStats: (season) =>
       `https://www.collegehockeynews.com/stats/team/Arizona-State/61/overall,${season}`,
+    chnRoster:
+      "https://www.collegehockeynews.com/reports/roster/Arizona-State/61",
     chnSchedule:
       "https://www.collegehockeynews.com/schedules/team/Arizona-State/61",
     nchcStandings: "https://www.uscho.com/standings/division-i-men",

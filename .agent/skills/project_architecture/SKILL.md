@@ -7,18 +7,18 @@ This file provides guidance and reference instructions when working with code in
 
 ## Architecture
 
-This is a **monorepo** combining a React frontend (Create React App) and an Express backend in a single Node.js project.
+This is a **monorepo** combining a React frontend (Vite) and an Express backend in a single Node.js project.
 
 **Data flow:**
 
-1. `scraper.js` / `transfer-scraper.js` / `alumni-scraper.js` / `recruiting-scraper.js` — scrape external sites (thesundevils.com, collegehockeynews.com, uscho.com) using cheerio + axios
-2. `src/scripts/caching-system.js` — file-based cache at `src/scripts/cache/`, implements stale-while-revalidate (expired cache is served while background refresh runs)
-3. `src/scripts/scheduler.js` — node-cron jobs that pre-warm the cache on startup and on schedule (news/stats/standings: 12 AM & 12 PM; roster/alumni/transfers: 3 AM daily; post-game force refresh: 2–6 AM UTC Sat/Sun)
-4. `server.js` — Express server on port 5000 that serves API routes and the React `build/` as static files
-5. `src/services/api.js` — frontend axios wrapper that calls the backend via `/api/*` (proxied via CRA proxy in dev)
-6. `src/pages/` — React pages, each fetching from `src/services/api.js`
+1. `server/scrapers/` — one module per dataset (`news.js`, `schedule.js`, `stats.js`, `standings.js`, `roster.js`, `transfers.js`, `alumni.js`, `recruiting.js`) scraping external sites (thesundevils.com website-api, collegehockeynews.com, uscho.com, eliteprospects.com) using cheerio + axios, all built on the shared `server/scrapers/create-cached-scraper.js` pipeline
+2. `server/cache/caching-system.js` — file-based cache at `server/cache/data/`, implements stale-while-revalidate (expired cache is served while background refresh runs)
+3. `server/scheduler.js` — node-cron jobs that pre-warm the cache on startup and on schedule (news/stats/standings: 12 AM & 12 PM; roster/alumni/transfers: 3 AM daily; post-game force refresh: 2–6 AM UTC Sat/Sun)
+4. `server.js` — thin entry point (Sentry init, scheduler, listen); app assembly in `server/app.js`, API handlers in `server/routes/api.js`, static React `build/` served by the same process
+5. `src/services/api.ts` — frontend axios wrapper that calls the backend via `/api/*` (proxied via Vite `server.proxy` in dev)
+6. `src/pages/` — React pages, fetching via the React Query hooks in `src/hooks/queries/`
 
-**Key architectural decision:** The `/api/roster` endpoint merges data from two sources — `asu_hockey_data.json` (static file with photos and curated data) and a live CHN scrape — via `services/roster-service.js` at request time. `roster-service.js` also contains `determineNationality()`, which infers player country from hometown strings. Recruiting data reads directly from `asu_hockey_data.json`. Stats/news/schedule use the caching system with request coalescing (module-level promise variables in `scraper.js`).
+**Key architectural decision:** The `/api/roster` endpoint merges data from two sources — `asu_hockey_data.json` (static file with photos and curated data) and a live CHN scrape — via `server/services/roster-service.js` at request time. `roster-service.js` also contains `determineNationality()`, which infers player country from hometown strings. Recruiting data reads directly from `asu_hockey_data.json`. Request coalescing lives inside `createCachedScraper`.
 
 **Scraper config is centralized** in `config/scraper-config.js` — all URLs, cache durations, retry settings, and season constants live there. Update `CURRENT_SEASON` there when the season changes.
 

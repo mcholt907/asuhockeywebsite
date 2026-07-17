@@ -2,7 +2,7 @@
 // Daily scheduler job (see scheduler.js): alert on stale datasets and prune
 // dead files from the cache directory.
 //
-// Pruning never touches the cache keys of current datasets — SWR serves
+// Pruning never touches the cache keys of current datasets â€” SWR serves
 // stale data indefinitely when scrapes keep failing, and that is the last
 // line of defense. Only abandoned files are removed: orphaned atomic-write
 // tmp files, expired 403-cooldown markers, and keys no longer produced by
@@ -15,12 +15,12 @@ const { CACHE_DIR, DEFAULT_CACHE_DURATION } = require('./caching-system');
 const { getDataStatus, getCooldownStatus, DATASETS, resolveCacheKey } = require('./data-status');
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const COOLDOWN_TTL_MS = DAY_MS; // mirrors utils/request-helper.js
+const COOLDOWN_TTL_MS = DAY_MS; // mirrors server/lib/request-helper.js
 const TMP_FILE_MAX_AGE_MS = DAY_MS;
 const UNKNOWN_FILE_MAX_AGE_MS = 7 * DAY_MS;
 const ABANDONED_TTL_MULTIPLIER = 3;
 
-// Keys legitimately written by current scrapers — never pruned.
+// Keys legitimately written by current scrapers â€” never pruned.
 // asu_hockey_recruiting is only written by local curation scripts but is
 // cheap to protect.
 function getProtectedKeys() {
@@ -64,7 +64,7 @@ function pruneCache() {
 
       let shouldRemove = false;
       if (name.includes('.tmp.')) {
-        // Orphaned atomic-write temp file — a completed write renames it away.
+        // Orphaned atomic-write temp file â€” a completed write renames it away.
         shouldRemove = fileAgeMs(filePath) > TMP_FILE_MAX_AGE_MS;
       } else if (name.startsWith('.403-cooldown-')) {
         shouldRemove = fileAgeMs(filePath) > COOLDOWN_TTL_MS;
@@ -117,7 +117,7 @@ function checkDataStaleness() {
 async function runCacheMaintenance() {
   const removed = pruneCache();
   const alerts = checkDataStaleness();
-  console.log(`[Cache Maintenance] Done — pruned ${removed.length} file(s), ${alerts.length} staleness alert(s).`);
+  console.log(`[Cache Maintenance] Done â€” pruned ${removed.length} file(s), ${alerts.length} staleness alert(s).`);
   return { removed, alerts };
 }
 

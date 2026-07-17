@@ -1,17 +1,17 @@
 // caching-system.js
-const fs = require('fs');
-const path = require('path');
-const Sentry = require('@sentry/node');
+const fs = require("fs");
+const path = require("path");
+const Sentry = require("@sentry/node");
 
 // Default cache duration, can be overridden if needed by specific scrapers
 const DEFAULT_CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 // CACHE_DIR env override exists so server-side tests can isolate to a tmp dir
 // without touching the real cache. Unset in production.
-const CACHE_DIR = process.env.CACHE_DIR || path.join(__dirname, 'cache');
+const CACHE_DIR = process.env.CACHE_DIR || path.join(__dirname, "data");
 
 function saveToCache(data, filename, duration = DEFAULT_CACHE_DURATION) {
   if (!filename) {
-    console.error('Filename not provided to saveToCache');
+    console.error("Filename not provided to saveToCache");
     return;
   }
   const cacheFilePath = path.join(CACHE_DIR, filename);
@@ -36,8 +36,13 @@ function saveToCache(data, filename, duration = DEFAULT_CACHE_DURATION) {
     fs.renameSync(tmpPath, cacheFilePath);
     console.log(`Data saved to cache at ${cacheFilePath}`);
   } catch (error) {
-    console.error(`[Cache System] Failed to save cache for ${filename}:`, error.message);
-    Sentry.captureException(error, { tags: { component: 'caching-system', filename } });
+    console.error(
+      `[Cache System] Failed to save cache for ${filename}:`,
+      error.message,
+    );
+    Sentry.captureException(error, {
+      tags: { component: "caching-system", filename },
+    });
     // Best-effort cleanup of the orphaned tmp file.
     try {
       if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath);
@@ -49,7 +54,7 @@ function saveToCache(data, filename, duration = DEFAULT_CACHE_DURATION) {
 
 function getFromCache(filename, ignoreExpiration = false) {
   if (!filename) {
-    console.error('Filename not provided to getFromCache');
+    console.error("Filename not provided to getFromCache");
     return null;
   }
   const cacheFilePath = path.join(CACHE_DIR, filename);
@@ -57,14 +62,18 @@ function getFromCache(filename, ignoreExpiration = false) {
   try {
     if (!fs.existsSync(cacheFilePath)) {
       console.log(`Cache file not found: ${cacheFilePath}`);
-      Sentry.metrics.count('cache.miss', 1, { attributes: { key: filename, reason: 'missing' } });
+      Sentry.metrics.count("cache.miss", 1, {
+        attributes: { key: filename, reason: "missing" },
+      });
       return null;
     }
 
-    const fileContents = fs.readFileSync(cacheFilePath, 'utf8');
+    const fileContents = fs.readFileSync(cacheFilePath, "utf8");
     if (!fileContents) {
       console.log(`Cache file is empty: ${cacheFilePath}`);
-      Sentry.metrics.count('cache.miss', 1, { attributes: { key: filename, reason: 'empty' } });
+      Sentry.metrics.count("cache.miss", 1, {
+        attributes: { key: filename, reason: "empty" },
+      });
       return null;
     }
 
@@ -76,23 +85,29 @@ function getFromCache(filename, ignoreExpiration = false) {
     // Check if cache is still valid
     if (currentTime - cacheTime > cacheDuration) {
       if (ignoreExpiration) {
-        console.log(`Cache expired for ${filename} but returning stale data (ignoreExpiration=true)`);
-        Sentry.metrics.count('cache.stale_used', 1, { attributes: { key: filename } });
+        console.log(
+          `Cache expired for ${filename} but returning stale data (ignoreExpiration=true)`,
+        );
+        Sentry.metrics.count("cache.stale_used", 1, {
+          attributes: { key: filename },
+        });
         return cacheData.data;
       }
 
       console.log(`Cache expired for ${filename}`);
       // Don't delete expired cache — let SWR serve stale data while refreshing
-      Sentry.metrics.count('cache.miss', 1, { attributes: { key: filename, reason: 'expired' } });
+      Sentry.metrics.count("cache.miss", 1, {
+        attributes: { key: filename, reason: "expired" },
+      });
       return null;
     }
 
     console.log(`Cache hit for ${filename}`);
-    Sentry.metrics.count('cache.hit', 1, { attributes: { key: filename } });
+    Sentry.metrics.count("cache.hit", 1, { attributes: { key: filename } });
     return cacheData.data; // Return only the data part, as scraper.js expects
   } catch (error) {
     console.error(`Error reading cache for ${filename}:`, error);
-    Sentry.metrics.count('cache.error', 1, { attributes: { key: filename } });
+    Sentry.metrics.count("cache.error", 1, { attributes: { key: filename } });
 
     // If there's an error (e.g., corrupted JSON), treat it as a cache miss
     if (fs.existsSync(cacheFilePath)) {
@@ -100,7 +115,10 @@ function getFromCache(filename, ignoreExpiration = false) {
         fs.unlinkSync(cacheFilePath); // Attempt to delete corrupted cache file
         console.log(`Deleted corrupted cache file: ${cacheFilePath}`);
       } catch (delError) {
-        console.error(`Error deleting corrupted cache file ${cacheFilePath}:`, delError);
+        console.error(
+          `Error deleting corrupted cache file ${cacheFilePath}:`,
+          delError,
+        );
       }
     }
     return null;
@@ -115,7 +133,7 @@ function getCacheMeta(filename) {
   try {
     if (!fs.existsSync(cacheFilePath)) return null;
     const stat = fs.statSync(cacheFilePath);
-    const parsed = JSON.parse(fs.readFileSync(cacheFilePath, 'utf8'));
+    const parsed = JSON.parse(fs.readFileSync(cacheFilePath, "utf8"));
     const cacheTime = new Date(parsed.timestamp).getTime();
     const ageMs = Number.isFinite(cacheTime) ? Date.now() - cacheTime : null;
     return {
@@ -126,9 +144,18 @@ function getCacheMeta(filename) {
       sizeBytes: stat.size,
     };
   } catch (error) {
-    console.error(`[Cache System] Failed to read cache meta for ${filename}:`, error.message);
+    console.error(
+      `[Cache System] Failed to read cache meta for ${filename}:`,
+      error.message,
+    );
     return null;
   }
 }
 
-module.exports = { saveToCache, getFromCache, getCacheMeta, CACHE_DIR, DEFAULT_CACHE_DURATION };
+module.exports = {
+  saveToCache,
+  getFromCache,
+  getCacheMeta,
+  CACHE_DIR,
+  DEFAULT_CACHE_DURATION,
+};

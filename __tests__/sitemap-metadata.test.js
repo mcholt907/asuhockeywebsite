@@ -2,7 +2,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-const { getSitemapPages, toSitemapDate } = require('../services/sitemap-metadata');
+const { getSitemapPages, toSitemapDate } = require('../server/services/sitemap-metadata');
 
 function writeJson(filePath, value) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -23,23 +23,23 @@ describe('sitemap metadata', () => {
       ],
     });
 
-    writeJson(path.join(rootDir, 'src', 'scripts', 'cache', 'asu_hockey_news'), {
+    writeJson(path.join(rootDir, 'server', 'cache', 'data', 'asu_hockey_news'), {
       timestamp: '2026-05-01T12:00:00.000Z',
       data: [],
     });
-    writeJson(path.join(rootDir, 'src', 'scripts', 'cache', 'asu_hockey_schedule_2025'), {
+    writeJson(path.join(rootDir, 'server', 'cache', 'data', 'asu_hockey_schedule_2025'), {
       timestamp: '2026-05-02T12:00:00.000Z',
       data: {},
     });
-    writeJson(path.join(rootDir, 'src', 'scripts', 'cache', 'asu_hockey_roster'), {
+    writeJson(path.join(rootDir, 'server', 'cache', 'data', 'asu_hockey_roster'), {
       timestamp: '2026-03-01T12:00:00.000Z',
       data: [],
     });
-    writeJson(path.join(rootDir, 'src', 'scripts', 'cache', 'asu_hockey_stats'), {
+    writeJson(path.join(rootDir, 'server', 'cache', 'data', 'asu_hockey_stats'), {
       timestamp: '2026-04-15T12:00:00.000Z',
       data: {},
     });
-    writeJson(path.join(rootDir, 'src', 'scripts', 'cache', 'asu_transfers'), {
+    writeJson(path.join(rootDir, 'server', 'cache', 'data', 'asu_transfers'), {
       timestamp: '2026-04-20T12:00:00.000Z',
       data: {},
     });

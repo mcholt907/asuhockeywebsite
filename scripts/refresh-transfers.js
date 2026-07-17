@@ -2,23 +2,29 @@
 // Runs the transfer scraper with the live flag and writes a validated result
 // to data/asu_transfers_fallback.json. Must be run from a residential IP.
 
-process.env.TRANSFER_SCRAPE_LIVE = 'true';
+process.env.TRANSFER_SCRAPE_LIVE = "true";
 // EP 403s the axios TLS fingerprint even from residential IPs; headless Chrome gets through
-process.env.SCRAPER_PUPPETEER_FALLBACK = process.env.SCRAPER_PUPPETEER_FALLBACK || 'true';
+process.env.SCRAPER_PUPPETEER_FALLBACK =
+  process.env.SCRAPER_PUPPETEER_FALLBACK || "true";
 
-const fs = require('fs');
-const path = require('path');
-const { scrapeTransferData } = require('../transfer-scraper');
+const fs = require("fs");
+const path = require("path");
+const { scrapeTransferData } = require("../server/scrapers/transfers");
 
-const FALLBACK_FILE = path.join(__dirname, '..', 'data', 'asu_transfers_fallback.json');
+const FALLBACK_FILE = path.join(
+  __dirname,
+  "..",
+  "data",
+  "asu_transfers_fallback.json",
+);
 
 (async () => {
-  console.log('[refresh-transfers] Running live scrape...');
+  console.log("[refresh-transfers] Running live scrape...");
   let data;
   try {
     data = await scrapeTransferData();
   } catch (err) {
-    console.error('[refresh-transfers] Scrape threw:', err.message);
+    console.error("[refresh-transfers] Scrape threw:", err.message);
     process.exit(1);
   }
 
@@ -30,7 +36,7 @@ const FALLBACK_FILE = path.join(__dirname, '..', 'data', 'asu_transfers_fallback
   ) {
     console.error(
       `[refresh-transfers] Validation failed — refusing to overwrite fallback. ` +
-      `incoming=${data?.incoming?.length ?? 'n/a'}, outgoing=${data?.outgoing?.length ?? 'n/a'}`
+        `incoming=${data?.incoming?.length ?? "n/a"}, outgoing=${data?.outgoing?.length ?? "n/a"}`,
     );
     process.exit(1);
   }
@@ -39,6 +45,6 @@ const FALLBACK_FILE = path.join(__dirname, '..', 'data', 'asu_transfers_fallback
   fs.writeFileSync(FALLBACK_FILE, JSON.stringify(data, null, 2));
   console.log(
     `[refresh-transfers] Wrote ${FALLBACK_FILE} ` +
-    `(${data.incoming.length} incoming, ${data.outgoing.length} outgoing)`
+      `(${data.incoming.length} incoming, ${data.outgoing.length} outgoing)`,
   );
 })();

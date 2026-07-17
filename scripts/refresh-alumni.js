@@ -2,23 +2,29 @@
 // Runs the alumni scraper with the live flag and writes a validated result
 // to data/asu_alumni_fallback.json. Must be run from a residential IP.
 
-process.env.ALUMNI_SCRAPE_LIVE = 'true';
+process.env.ALUMNI_SCRAPE_LIVE = "true";
 // EP 403s the axios TLS fingerprint even from residential IPs; headless Chrome gets through
-process.env.SCRAPER_PUPPETEER_FALLBACK = process.env.SCRAPER_PUPPETEER_FALLBACK || 'true';
+process.env.SCRAPER_PUPPETEER_FALLBACK =
+  process.env.SCRAPER_PUPPETEER_FALLBACK || "true";
 
-const fs = require('fs');
-const path = require('path');
-const { scrapeAlumniData } = require('../alumni-scraper');
+const fs = require("fs");
+const path = require("path");
+const { scrapeAlumniData } = require("../server/scrapers/alumni");
 
-const FALLBACK_FILE = path.join(__dirname, '..', 'data', 'asu_alumni_fallback.json');
+const FALLBACK_FILE = path.join(
+  __dirname,
+  "..",
+  "data",
+  "asu_alumni_fallback.json",
+);
 
 (async () => {
-  console.log('[refresh-alumni] Running live scrape...');
+  console.log("[refresh-alumni] Running live scrape...");
   let data;
   try {
     data = await scrapeAlumniData();
   } catch (err) {
-    console.error('[refresh-alumni] Scrape threw:', err.message);
+    console.error("[refresh-alumni] Scrape threw:", err.message);
     process.exit(1);
   }
 
@@ -31,7 +37,7 @@ const FALLBACK_FILE = path.join(__dirname, '..', 'data', 'asu_alumni_fallback.js
   ) {
     console.error(
       `[refresh-alumni] Validation failed — refusing to overwrite fallback. ` +
-      `skaters=${data?.skaters?.length ?? 'n/a'}, goalies=${data?.goalies?.length ?? 'n/a'}`
+        `skaters=${data?.skaters?.length ?? "n/a"}, goalies=${data?.goalies?.length ?? "n/a"}`,
     );
     process.exit(1);
   }
@@ -40,6 +46,6 @@ const FALLBACK_FILE = path.join(__dirname, '..', 'data', 'asu_alumni_fallback.js
   fs.writeFileSync(FALLBACK_FILE, JSON.stringify(data, null, 2));
   console.log(
     `[refresh-alumni] Wrote ${FALLBACK_FILE} ` +
-    `(${data.skaters.length} skater entries, ${data.goalies.length} goalie entries)`
+      `(${data.skaters.length} skater entries, ${data.goalies.length} goalie entries)`,
   );
 })();
