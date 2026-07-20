@@ -82,6 +82,6 @@
     "jest-environment-jsdom": "^29.7.0",
     "prettier": "3.9.4",
     "sharp": "^0.34.5",
-    "typescript": "^5.9.3"
+    "typescript": "^7.0.2"
   }
 }
