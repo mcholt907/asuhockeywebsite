@@ -35,12 +35,13 @@ The fallback loader will:
 
 - Read `data/asu_recruiting_fallback.json` with mtime-based memoization.
 - Accept only an object containing every configured future-season key.
-- Require each season value to be an array with at least one player.
+- Require each season value to be an array; an individual far-future season may legitimately be empty when Elite Prospects lists no players yet.
 - Require every player to have a non-empty `name` and `player_link`.
+- Require at least one player across the complete snapshot so a selector failure that empties every season cannot replace valid data.
 - Return the last valid bundled snapshot when live scraping fails.
 - Return an empty object only when neither live, cached, nor bundled data is available.
 
-The refresh command validates the entire candidate in memory before writing. If any configured season is missing, empty, malformed, or contains a player without required identity fields, the command exits nonzero and leaves the prior fallback untouched. This all-or-nothing rule prevents a selector change or partial request failure from deleting a single future roster.
+The refresh command validates the entire candidate in memory before writing. If any configured season is missing or malformed, every season is empty, or a player lacks required identity fields, the command exits nonzero and leaves the prior fallback untouched. This all-or-nothing rule prevents a selector change or partial request failure from deleting future rosters while still representing a legitimately empty far-future Elite Prospects season exactly.
 
 The bundled object includes `lastUpdated` metadata only if the API type is deliberately expanded. To preserve the current response shape and minimize scope, this change will not add metadata to the top-level response.
 
@@ -80,7 +81,7 @@ Server tests will prove:
 - Season rosters are kept separate.
 - A player can appear in two seasons without cross-season deduplication.
 - The fallback loader accepts a complete valid snapshot.
-- Missing seasons, empty season arrays, and malformed players are rejected.
+- Missing seasons, an all-empty snapshot, and malformed players are rejected; an empty individual far-future season is accepted.
 - Production/prerender mode serves the bundled fallback without network access.
 - The explicit refresh flag permits a live scrape.
 - `/api/recruits` returns the scraper/service result rather than curated class data.
