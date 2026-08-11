@@ -26,6 +26,23 @@ const FALLBACK_FILE = path.join(
 );
 let fallbackCache = { mtimeMs: 0, value: null };
 
+class RecruitingDataUnavailableError extends Error {
+  constructor(cause) {
+    super("Recruiting data is unavailable");
+    this.name = "RecruitingDataUnavailableError";
+    this.code = "RECRUITING_DATA_UNAVAILABLE";
+    this.cause = cause;
+  }
+}
+
+class InvalidRecruitingSnapshotError extends Error {
+  constructor() {
+    super("Recruiting snapshot is incomplete or malformed");
+    this.name = "InvalidRecruitingSnapshotError";
+    this.code = "INVALID_RECRUITING_SNAPSHOT";
+  }
+}
+
 function getFallbackRecruitingData() {
   try {
     const stat = fs.statSync(FALLBACK_FILE);
@@ -45,7 +62,6 @@ function getFallbackRecruitingData() {
 }
 
 function shouldUseFallbackOnly() {
-  if (process.env.RECRUITING_SCRAPE_LIVE === "true") return false;
   return process.env.NODE_ENV === "production" || process.env.IS_PRERENDER === "true";
 }
 
@@ -254,6 +270,16 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
         let fullNameWithPos = playerLinkElement.text().trim();
         const playerLink = playerLinkElement.attr("href");
 
+        if (!playerLinkElement.length || !fullNameWithPos || !playerLink) {
+          const playerCellText = $(cells[headerMap.player]).text().trim();
+          if (playerCellText) {
+            throw new Error(
+              `[EP Recruiting Scraper] Player-like row ${index} is missing a valid player name or link`,
+            );
+          }
+          continue;
+        }
+
         // Extract position from name (e.g., "John Doe (F)" -> position: "F", name: "John Doe")
         let name = fullNameWithPos;
         let position = "";
@@ -263,20 +289,10 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
           position = posMatch[2];
         }
 
-        // Skip if name is just a number (invalid row)
-        if (name && !isNaN(name)) {
-          console.log(
-            `[EP Recruiting Scraper] Skipping invalid row with numeric name: ${name}`,
+        if (!name || !isNaN(name)) {
+          throw new Error(
+            `[EP Recruiting Scraper] Player-like row ${index} is missing a valid player name or link`,
           );
-          continue;
-        }
-
-        // Skip Carson McGinley as requested
-        if (name && name === "Carson McGinley") {
-          console.log(
-            `[EP Recruiting Scraper] Skipping removed recruit: Carson McGinley`,
-          );
-          continue;
         }
 
         // Extract other fields
@@ -304,9 +320,9 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
         const weight = $(cells[headerMap.weight]).text().trim();
         const shoots = $(cells[headerMap.shoots]).text().trim();
 
-        const fullPlayerLink = playerLink
-          ? `https://www.eliteprospects.com${playerLink}`
-          : "";
+        const fullPlayerLink = playerLink.startsWith("http")
+          ? playerLink
+          : `https://www.eliteprospects.com${playerLink}`;
 
         // Skip players already captured from another matching table
         // (structural table selection can match more than one)
@@ -328,33 +344,31 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
           await delayBetweenRequests();
         }
 
-        // Only add if we have a valid player name
-        if (name && name.length > 0) {
-          const player = {
-            number: number || "",
-            name: name,
-            position: position,
-            age: age || "",
-            birth_year: birthYear || "",
-            birthplace: birthplace || "",
-            height: height || "",
-            weight: weight || "",
-            shoots: shoots || "",
-            player_link: fullPlayerLink,
-            player_photo: player_photo,
-            current_team: current_team,
-          };
+        const player = {
+          number: number || "",
+          name: name,
+          position: position,
+          age: age || "",
+          birth_year: birthYear || "",
+          birthplace: birthplace || "",
+          height: height || "",
+          weight: weight || "",
+          shoots: shoots || "",
+          player_link: fullPlayerLink,
+          player_photo: player_photo,
+          current_team: current_team,
+        };
 
-          players.push(player);
-          console.log(
-            `[EP Recruiting Scraper] Added player: ${name} (${position})${player_photo ? " with photo" : ""}`,
-          );
-        }
+        players.push(player);
+        console.log(
+          `[EP Recruiting Scraper] Added player: ${name} (${position})${player_photo ? " with photo" : ""}`,
+        );
       } catch (error) {
         console.error(
           `[EP Recruiting Scraper] Error parsing row ${index}:`,
           error.message,
         );
+        throw error;
       }
     }
 
@@ -399,6 +413,22 @@ async function scrapeAllSeasons({ includePhotos = false } = {}) {
   return recruitingData;
 }
 
+function isValidRecruitingSnapshot(data) {
+  return validateRecruitingSnapshot(data, config.FUTURE_SEASONS);
+}
+
+function requireValidRecruitingSnapshot(data) {
+  if (!isValidRecruitingSnapshot(data)) {
+    throw new InvalidRecruitingSnapshotError();
+  }
+  return data;
+}
+
+function getValidatedFallback() {
+  const fallback = getFallbackRecruitingData();
+  return fallback && isValidRecruitingSnapshot(fallback) ? fallback : null;
+}
+
 const fetchRecruiting = createCachedScraper({
   name: "recruiting",
   cacheKey: "asu_hockey_recruiting",
@@ -406,7 +436,7 @@ const fetchRecruiting = createCachedScraper({
   swr: false,
   scrape: scrapeAllSeasons,
   validate: (data) => {
-    const valid = validateRecruitingSnapshot(data, config.FUTURE_SEASONS);
+    const valid = isValidRecruitingSnapshot(data);
     const totalPlayers = valid
       ? config.FUTURE_SEASONS.reduce(
           (sum, season) => sum + data[season].length,
@@ -420,13 +450,16 @@ const fetchRecruiting = createCachedScraper({
   },
   fallback: getFallbackRecruitingData,
   fallbackOnly: shouldUseFallbackOnly,
-  onScrapeError: () => ({}),
+  normalizeCached: requireValidRecruitingSnapshot,
+  onScrapeError: (error) => {
+    throw new RecruitingDataUnavailableError(error);
+  },
 });
 
 /**
  * Fetches recruiting data for all configured future seasons.
- * includePhotos=true bypasses cache reads and always scrapes live (local
- * curation scripts only); the result still refreshes the shared cache key.
+ * includePhotos=true bypasses cache reads in local/live mode. Production and
+ * prerender calls always remain on the bundled-snapshot path.
  * @param {boolean} includePhotos - Whether to scrape player photos (much slower)
  */
 async function fetchRecruitingData(includePhotos = false, options = {}) {
@@ -434,12 +467,29 @@ async function fetchRecruitingData(includePhotos = false, options = {}) {
   // Prospects. This guard intentionally precedes cache-bypass handling so a
   // profile-enrichment request cannot become a live network escape hatch.
   if (shouldUseFallbackOnly()) {
-    return getFallbackRecruitingData() || {};
+    const fallback = getValidatedFallback();
+    if (fallback) return fallback;
+    throw new RecruitingDataUnavailableError();
   }
-  return fetchRecruiting({
+  const fetchOptions = {
     bypassCache: includePhotos || options.bypassCache === true,
     scrapeArgs: { includePhotos },
-  });
+  };
+
+  try {
+    return await fetchRecruiting(fetchOptions);
+  } catch (error) {
+    if (error.code !== "INVALID_RECRUITING_SNAPSHOT") throw error;
+
+    const fallback = getValidatedFallback();
+    if (fallback) return fallback;
+
+    try {
+      return await fetchRecruiting({ ...fetchOptions, bypassCache: true });
+    } catch (liveError) {
+      throw new RecruitingDataUnavailableError(liveError);
+    }
+  }
 }
 
 module.exports = {

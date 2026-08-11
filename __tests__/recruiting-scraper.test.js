@@ -57,6 +57,12 @@ const {
   shouldUseFallbackOnly,
 } = require("../server/scrapers/recruiting");
 
+const originalEnvironment = {
+  RECRUITING_SCRAPE_LIVE: process.env.RECRUITING_SCRAPE_LIVE,
+  NODE_ENV: process.env.NODE_ENV,
+  IS_PRERENDER: process.env.IS_PRERENDER,
+};
+
 beforeEach(() => {
   jest.clearAllMocks();
   saveToCache.mockReturnValue(undefined);
@@ -65,14 +71,15 @@ beforeEach(() => {
 
 afterEach(() => {
   jest.restoreAllMocks();
-  delete process.env.RECRUITING_SCRAPE_LIVE;
-  delete process.env.NODE_ENV;
-  delete process.env.IS_PRERENDER;
+  for (const [key, value] of Object.entries(originalEnvironment)) {
+    if (value === undefined) delete process.env[key];
+    else process.env[key] = value;
+  }
 });
 
 describe("fetchRecruitingData â€” SWR caching", () => {
   test("returns fresh cached data without hitting the network", async () => {
-    const freshData = { "2026-2027": [{ name: "Jane Smith" }] };
+    const freshData = snapshotData;
     getFromCache.mockReturnValueOnce(freshData);
 
     const result = await fetchRecruitingData();
@@ -82,18 +89,25 @@ describe("fetchRecruitingData â€” SWR caching", () => {
   });
 
   test("recovers with stale data when a blocking live scrape fails", async () => {
-    const staleData = { "2026-2027": [{ name: "John Doe" }] };
+    const staleData = snapshotData;
     getFromCache.mockReturnValueOnce(null).mockReturnValueOnce(staleData);
     requestWithRetry.mockRejectedValue(new Error("EP unavailable"));
 
     await expect(fetchRecruitingData()).resolves.toEqual(staleData);
   });
+
+  test("ignores a partial cached snapshot in favor of the bundled fallback", async () => {
+    getFromCache.mockReturnValue({
+      "2026-2027": [{ name: "Jane Smith", player_link: "https://example.test/1" }],
+    });
+    jest.spyOn(fs, "statSync").mockReturnValue({ mtimeMs: 1 });
+
+    await expect(fetchRecruitingData()).resolves.toEqual(snapshotData);
+  });
 });
 
 describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
-  // Pins the positional cell contract the parser relies on:
-  // td[1]=number, td[3]=player link, td[4]=age, td[5]=birth year,
-  // td[6]=birthplace, td[7]=height, td[8]=weight, td[9]=shoots.
+  // Defines the semantic roster headers and the corresponding row values.
   const rosterRow = (num, name, pos, playerId, age, born, place, h, w, s) => `
     <tr>
       <td></td><td>${num}</td><td><img /></td>
@@ -217,6 +231,29 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
     ).rejects.toThrow("Unable to identify roster table");
   });
 
+  test("preserves Carson McGinley when Elite Prospects lists him", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: fixtureHtml.replace("Bob Jones", "Carson McGinley"),
+    });
+
+    const players = await scrapeEliteProspectsRecruiting("2026-2027", false);
+
+    expect(players.map((player) => player.name)).toContain("Carson McGinley");
+  });
+
+  test("rejects a player-like row without a profile link", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: fixtureHtml.replace(
+        '<a href="/player/222/x">Bob Jones (G)</a>',
+        "Bob Jones (G)",
+      ),
+    });
+
+    await expect(
+      scrapeEliteProspectsRecruiting("2026-2027", false),
+    ).rejects.toThrow("missing a valid player name or link");
+  });
+
   test("keeps the same player in every Elite Prospects season that lists them", async () => {
     getFromCache.mockReturnValue(null);
     requestWithRetry
@@ -237,7 +274,24 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
 
     await expect(
       fetchRecruitingData(false, { bypassCache: true }),
-    ).resolves.toEqual({});
+    ).rejects.toMatchObject({ code: "RECRUITING_DATA_UNAVAILABLE" });
+    expect(saveToCache).not.toHaveBeenCalled();
+  });
+
+  test("does not cache a season when a mixed roster contains an unparseable player row", async () => {
+    getFromCache.mockReturnValue(null);
+    requestWithRetry
+      .mockResolvedValueOnce({ data: fixtureHtml })
+      .mockResolvedValueOnce({
+        data: fixtureHtml.replace(
+          '<a href="/player/222/x">Bob Jones (G)</a>',
+          "Bob Jones (G)",
+        ),
+      });
+
+    await expect(
+      fetchRecruitingData(false, { bypassCache: true }),
+    ).rejects.toMatchObject({ code: "RECRUITING_DATA_UNAVAILABLE" });
     expect(saveToCache).not.toHaveBeenCalled();
   });
 });
@@ -256,13 +310,15 @@ describe("fallback-only mode", () => {
     expect(requestWithRetry).not.toHaveBeenCalled();
   });
 
-  test("returns controlled unavailable data without a network request when the snapshot is missing", async () => {
+  test("throws controlled unavailable data without a network request when the snapshot is missing", async () => {
     process.env.NODE_ENV = "production";
     jest.spyOn(fs, "statSync").mockImplementation(() => {
       throw new Error("snapshot missing");
     });
 
-    await expect(fetchRecruitingData()).resolves.toEqual({});
+    await expect(fetchRecruitingData()).rejects.toMatchObject({
+      code: "RECRUITING_DATA_UNAVAILABLE",
+    });
     expect(requestWithRetry).not.toHaveBeenCalled();
   });
 
@@ -274,10 +330,23 @@ describe("fallback-only mode", () => {
     expect(requestWithRetry).not.toHaveBeenCalled();
   });
 
-  test("the explicit live flag disables fallback-only mode", () => {
+  test("production remains fallback-only even when the live flag is set", async () => {
     process.env.NODE_ENV = "production";
     process.env.RECRUITING_SCRAPE_LIVE = "true";
+    jest.spyOn(fs, "statSync").mockReturnValue({ mtimeMs: 1 });
 
-    expect(shouldUseFallbackOnly()).toBe(false);
+    await expect(fetchRecruitingData()).resolves.toEqual(snapshotData);
+    expect(shouldUseFallbackOnly()).toBe(true);
+    expect(requestWithRetry).not.toHaveBeenCalled();
+  });
+
+  test("prerendering remains fallback-only even when the live flag is set", async () => {
+    process.env.IS_PRERENDER = "true";
+    process.env.RECRUITING_SCRAPE_LIVE = "true";
+    jest.spyOn(fs, "statSync").mockReturnValue({ mtimeMs: 1 });
+
+    await expect(fetchRecruitingData()).resolves.toEqual(snapshotData);
+    expect(shouldUseFallbackOnly()).toBe(true);
+    expect(requestWithRetry).not.toHaveBeenCalled();
   });
 });
