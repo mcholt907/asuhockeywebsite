@@ -194,7 +194,7 @@ function getRosterHeaderMap($, table) {
 }
 
 async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
-  const url = `https://www.eliteprospects.com/team/18066/arizona-state-univ/${season}?tab=stats`;
+  const url = `https://www.eliteprospects.com/team/18066/arizona-state-univ/${season}`;
   console.log(
     `[EP Recruiting Scraper] Fetching recruiting data for ${season} from: ${url}`,
   );

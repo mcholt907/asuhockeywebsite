@@ -159,6 +159,16 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
       </tr>`,
   );
 
+  test("requests the default Elite Prospects season roster route", async () => {
+    requestWithRetry.mockResolvedValue({ data: fixtureHtml });
+
+    await scrapeEliteProspectsRecruiting("2027-2028", false);
+
+    expect(requestWithRetry).toHaveBeenCalledWith(
+      "https://www.eliteprospects.com/team/18066/arizona-state-univ/2027-2028",
+    );
+  });
+
   test("parses roster rows by position, skips decoy stats tables, summary rows, and duplicates", async () => {
     requestWithRetry.mockResolvedValue({ data: fixtureHtml });
 
