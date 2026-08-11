@@ -234,8 +234,31 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
       const headerMap = getRosterHeaderMap($, $row.closest("table").get(0));
       const requiredCellIndex = Math.max(...Object.values(headerMap));
 
-      // Skip summary or section rows that do not satisfy this table's schema.
+      // A short row is only safe to ignore when it has no player evidence.
+      // EP can truncate a player row after its profile cell, which would
+      // otherwise silently remove that player from a cached snapshot.
       if (cells.length <= requiredCellIndex) {
+        const playerCellText =
+          headerMap.player < cells.length
+            ? $(cells[headerMap.player]).text().trim()
+            : "";
+        const numberCellText =
+          headerMap.number !== undefined && headerMap.number < cells.length
+            ? $(cells[headerMap.number]).text().trim()
+            : "";
+        const hasPlayerLink = $(row).find('a[href*="/player/"]').length > 0;
+        const isKnownSection = /^(forwards|defensemen|goaltenders|goalies|skaters)$/i.test(
+          playerCellText,
+        );
+        const isKnownSummary = /^(ncaa|total)/i.test(numberCellText);
+        if (
+          hasPlayerLink ||
+          (playerCellText && !isKnownSection && !isKnownSummary)
+        ) {
+          throw new Error(
+            `[EP Recruiting Scraper] truncated player-like row ${index}`,
+          );
+        }
         continue;
       }
 

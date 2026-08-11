@@ -150,6 +150,15 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
       </table>
     </body></html>`;
 
+  const truncatedPlayerFixture = fixtureHtml.replace(
+    /<tr>\s*<td><\/td><td>30<\/td>[\s\S]*?<\/tr>/,
+    `
+      <tr>
+        <td></td><td>30</td><td><img /></td>
+        <td><a href="/player/222/x">Bob Jones (G)</a></td><td>19</td>
+      </tr>`,
+  );
+
   test("parses roster rows by position, skips decoy stats tables, summary rows, and duplicates", async () => {
     requestWithRetry.mockResolvedValue({ data: fixtureHtml });
 
@@ -254,6 +263,14 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
     ).rejects.toThrow("missing a valid player name or link");
   });
 
+  test("rejects a truncated player row that still has an Elite Prospects link", async () => {
+    requestWithRetry.mockResolvedValue({ data: truncatedPlayerFixture });
+
+    await expect(
+      scrapeEliteProspectsRecruiting("2026-2027", false),
+    ).rejects.toThrow("truncated player-like row");
+  });
+
   test("keeps the same player in every Elite Prospects season that lists them", async () => {
     getFromCache.mockReturnValue(null);
     requestWithRetry
@@ -288,6 +305,18 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
           "Bob Jones (G)",
         ),
       });
+
+    await expect(
+      fetchRecruitingData(false, { bypassCache: true }),
+    ).rejects.toMatchObject({ code: "RECRUITING_DATA_UNAVAILABLE" });
+    expect(saveToCache).not.toHaveBeenCalled();
+  });
+
+  test("uses controlled recovery instead of saving a mixed roster with a truncated player row", async () => {
+    getFromCache.mockReturnValue(null);
+    requestWithRetry
+      .mockResolvedValueOnce({ data: fixtureHtml })
+      .mockResolvedValueOnce({ data: truncatedPlayerFixture });
 
     await expect(
       fetchRecruitingData(false, { bypassCache: true }),
