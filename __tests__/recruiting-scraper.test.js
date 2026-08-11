@@ -130,6 +130,8 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
         </tbody>
       </table>
       <!-- Real roster table -->
+      <div class="LineupCard_wrapper__liveHash">
+        <h2>2026-2027 Arizona State Univ. Roster</h2>
       <table>
         <thead><tr><th></th><th>#</th><th></th><th>Player</th><th>Age</th><th>Born</th><th>Birthplace</th><th>Height</th><th>Weight</th><th>Shoots</th></tr></thead>
         <tbody>
@@ -141,14 +143,24 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
           </tr>
         </tbody>
       </table>
+      </div>
       <!-- Duplicate of Jane in a second roster-shaped table (e.g. a widget) -->
+      <div class="LineupCard_wrapper__widgetHash">
+        <h2>2026-2027 Arizona State Univ. Roster</h2>
       <table>
         <thead><tr><th></th><th>#</th><th></th><th>Player</th><th>Age</th><th>Born</th><th>Birthplace</th><th>Height</th><th>Weight</th><th>Shoots</th></tr></thead>
         <tbody>
           ${rosterRow("17", "Jane Smith", "F", "111", "18", "2008", "Phoenix, AZ", "180 cm", "172 lbs", "L")}
         </tbody>
       </table>
+      </div>
     </body></html>`;
+
+  const fixtureForSeason = (season) =>
+    fixtureHtml.replaceAll(
+      "2026-2027 Arizona State Univ. Roster",
+      `${season} Arizona State Univ. Roster`,
+    );
 
   const truncatedPlayerFixture = fixtureHtml.replace(
     /<tr>\s*<td><\/td><td>30<\/td>[\s\S]*?<\/tr>/,
@@ -160,7 +172,7 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
   );
 
   test("requests the default Elite Prospects season roster route", async () => {
-    requestWithRetry.mockResolvedValue({ data: fixtureHtml });
+    requestWithRetry.mockResolvedValue({ data: fixtureForSeason("2027-2028") });
 
     await scrapeEliteProspectsRecruiting("2027-2028", false);
 
@@ -190,12 +202,58 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
     );
   });
 
+  test("parses the live abbreviated roster headers without accepting the stats decoy", async () => {
+    const liveHeaderHtml = fixtureHtml.replaceAll(
+      "<th></th><th>#</th><th></th><th>Player</th><th>Age</th><th>Born</th><th>Birthplace</th><th>Height</th><th>Weight</th><th>Shoots</th>",
+      "<th></th><th>#</th><th>N</th><th>PLAYER</th><th>A</th><th>BORN</th><th>Birthplace</th><th>HT</th><th>WT</th><th>S</th>",
+    );
+    requestWithRetry.mockResolvedValue({ data: liveHeaderHtml });
+
+    const players = await scrapeEliteProspectsRecruiting("2026-2027", false);
+
+    expect(players.map((player) => player.name)).toEqual([
+      "Jane Smith",
+      "Bob Jones",
+    ]);
+    expect(players[0]).toMatchObject({
+      age: "18",
+      birth_year: "2008",
+      birthplace: "Phoenix, AZ",
+      height: "180 cm",
+      weight: "172 lbs",
+      shoots: "L",
+    });
+  });
+
   test("rejects an unrecognized page instead of treating it as an empty roster", async () => {
     requestWithRetry.mockResolvedValue({
       data: "<html><body><p>no tables</p></body></html>",
     });
     await expect(
       scrapeEliteProspectsRecruiting("2026-2027", false),
+    ).rejects.toThrow("Unable to identify roster table");
+  });
+
+  test("rejects a roster card labeled for a different season", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: fixtureHtml,
+    });
+
+    await expect(
+      scrapeEliteProspectsRecruiting("2029-2030", false),
+    ).rejects.toThrow("Unable to identify roster table");
+  });
+
+  test("rejects a combined-season roster card that mentions the requested season", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: fixtureHtml.replaceAll(
+        "2026-2027 Arizona State Univ. Roster",
+        "2029-2030 / 2026-2027 Arizona State Univ. Roster",
+      ),
+    });
+
+    await expect(
+      scrapeEliteProspectsRecruiting("2029-2030", false),
     ).rejects.toThrow("Unable to identify roster table");
   });
 
@@ -285,7 +343,7 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
     getFromCache.mockReturnValue(null);
     requestWithRetry
       .mockResolvedValueOnce({ data: fixtureHtml })
-      .mockResolvedValueOnce({ data: fixtureHtml });
+      .mockResolvedValueOnce({ data: fixtureForSeason("2027-2028") });
 
     const result = await fetchRecruitingData(false, { bypassCache: true });
 
@@ -310,7 +368,7 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
     requestWithRetry
       .mockResolvedValueOnce({ data: fixtureHtml })
       .mockResolvedValueOnce({
-        data: fixtureHtml.replace(
+        data: fixtureForSeason("2027-2028").replace(
           '<a href="/player/222/x">Bob Jones (G)</a>',
           "Bob Jones (G)",
         ),
@@ -326,7 +384,12 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
     getFromCache.mockReturnValue(null);
     requestWithRetry
       .mockResolvedValueOnce({ data: fixtureHtml })
-      .mockResolvedValueOnce({ data: truncatedPlayerFixture });
+      .mockResolvedValueOnce({
+        data: truncatedPlayerFixture.replaceAll(
+          "2026-2027 Arizona State Univ. Roster",
+          "2027-2028 Arizona State Univ. Roster",
+        ),
+      });
 
     await expect(
       fetchRecruitingData(false, { bypassCache: true }),

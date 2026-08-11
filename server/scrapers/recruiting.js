@@ -161,12 +161,12 @@ function getRosterHeaderKey(text) {
   const header = normalizeRosterHeader(text);
   if (header === "#" || /^(no\.?|number)$/.test(header)) return "number";
   if (/^player\b/.test(header)) return "player";
-  if (/^age\b/.test(header)) return "age";
+  if (header === "a" || /^age\b/.test(header)) return "age";
   if (/^(born|birth year)\b/.test(header)) return "birthYear";
   if (/^birth ?place\b/.test(header)) return "birthplace";
-  if (/^height\b/.test(header)) return "height";
-  if (/^weight\b/.test(header)) return "weight";
-  if (/^(shoots|catches)\b/.test(header)) return "shoots";
+  if (header === "ht" || /^height\b/.test(header)) return "height";
+  if (header === "wt" || /^weight\b/.test(header)) return "weight";
+  if (header === "s" || /^(shoots|catches)\b/.test(header)) return "shoots";
   return null;
 }
 
@@ -193,6 +193,17 @@ function getRosterHeaderMap($, table) {
     : null;
 }
 
+function isRosterCardForSeason($, card, season) {
+  const heading = normalizeRosterHeader($(card).find("h2").first().text());
+  const headingSeasons = heading.match(/\b20\d{2}-20\d{2}\b/g) || [];
+  return (
+    headingSeasons.length === 1 &&
+    headingSeasons[0] === normalizeRosterHeader(season) &&
+    heading.startsWith(`${headingSeasons[0]} `) &&
+    /\broster\b/.test(heading)
+  );
+}
+
 async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
   const url = `https://www.eliteprospects.com/team/18066/arizona-state-univ/${season}`;
   console.log(
@@ -204,16 +215,16 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
     const $ = cheerio.load(data);
     const players = [];
 
-    // Find all player rows in the roster table. Structural selection
-    // first — the hashed CSS-module class names (SortTable_*) rotate
-    // whenever EP redeploys. A roster table is one that contains player
-    // profile links AND has an Age column in its header; the header check
-    // keeps pure stats tables (GP/G/A columns at the same indexes) from
-    // being parsed as roster rows. Header/summary rows inside the table
-    // are filtered by the cell-count and name checks below.
-    const rosterTables = $("table").filter(
-      (_, table) => getRosterHeaderMap($, table) !== null,
-    );
+    // Scope tables to EP's roster card for the requested season before
+    // checking semantic headers. This prevents a redirected older-season
+    // page from being accepted as the requested snapshot. The CSS-module
+    // hash rotates, so match only the stable LineupCard_wrapper prefix.
+    const rosterTables = $(
+      'div[class^="LineupCard_wrapper"], div[class*=" LineupCard_wrapper"]',
+    )
+      .filter((_, card) => isRosterCardForSeason($, card, season))
+      .find("table")
+      .filter((_, table) => getRosterHeaderMap($, table) !== null);
     if (rosterTables.length === 0) {
       throw new Error(
         `[EP Recruiting Scraper] Unable to identify roster table for ${season}`,
