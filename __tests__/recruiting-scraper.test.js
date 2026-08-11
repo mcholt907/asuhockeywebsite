@@ -11,11 +11,12 @@ jest.mock("../server/lib/request-helper", () => ({
 jest.mock("@sentry/node", () => ({
   init: jest.fn(),
   metrics: { distribution: jest.fn(), count: jest.fn() },
+  captureMessage: jest.fn(),
 }));
 
 jest.mock("../config/scraper-config", () => ({
   CURRENT_SEASON: "2025-2026",
-  FUTURE_SEASONS: ["2026-2027"],
+  FUTURE_SEASONS: ["2026-2027", "2027-2028"],
   seasons: { current: 2025, stats: "20252026" },
   http: {
     userAgent: "test-agent",
@@ -33,17 +34,39 @@ jest.mock("../config/scraper-config", () => ({
   },
 }));
 
+const snapshotData = {
+  "2026-2027": [
+    { name: "Jane Smith", player_link: "https://www.eliteprospects.com/player/111/x" },
+  ],
+  "2027-2028": [
+    { name: "Bob Jones", player_link: "https://www.eliteprospects.com/player/222/x" },
+  ],
+};
+
+jest.mock("../server/services/recruiting-snapshot", () => ({
+  ...jest.requireActual("../server/services/recruiting-snapshot"),
+  readRecruitingSnapshot: jest.fn(() => snapshotData),
+}));
+
+const fs = require("fs");
 const { getFromCache, saveToCache } = require("../server/cache/caching-system");
 const { requestWithRetry } = require("../server/lib/request-helper");
 const {
   fetchRecruitingData,
   scrapeEliteProspectsRecruiting,
+  shouldUseFallbackOnly,
 } = require("../server/scrapers/recruiting");
 
 beforeEach(() => {
   jest.clearAllMocks();
   saveToCache.mockReturnValue(undefined);
   requestWithRetry.mockResolvedValue({ data: "<html></html>" });
+});
+
+afterEach(() => {
+  jest.restoreAllMocks();
+  delete process.env.RECRUITING_SCRAPE_LIVE;
+  delete process.env.NODE_ENV;
 });
 
 describe("fetchRecruitingData â€” SWR caching", () => {
@@ -57,13 +80,12 @@ describe("fetchRecruitingData â€” SWR caching", () => {
     expect(requestWithRetry).not.toHaveBeenCalled();
   });
 
-  test("returns stale data immediately when cache is expired", async () => {
+  test("recovers with stale data when a blocking live scrape fails", async () => {
     const staleData = { "2026-2027": [{ name: "John Doe" }] };
     getFromCache.mockReturnValueOnce(null).mockReturnValueOnce(staleData);
+    requestWithRetry.mockRejectedValue(new Error("EP unavailable"));
 
-    const result = await fetchRecruitingData();
-
-    expect(result).toEqual(staleData);
+    await expect(fetchRecruitingData()).resolves.toEqual(staleData);
   });
 });
 
@@ -140,5 +162,39 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
     });
     const players = await scrapeEliteProspectsRecruiting("2026-2027", false);
     expect(players).toEqual([]);
+  });
+
+  test("keeps the same player in every Elite Prospects season that lists them", async () => {
+    getFromCache.mockReturnValue(null);
+    requestWithRetry
+      .mockResolvedValueOnce({ data: fixtureHtml })
+      .mockResolvedValueOnce({ data: fixtureHtml });
+
+    const result = await fetchRecruitingData(false, { bypassCache: true });
+
+    expect(result["2026-2027"].map((p) => p.name)).toContain("Jane Smith");
+    expect(result["2027-2028"].map((p) => p.name)).toContain("Jane Smith");
+  });
+});
+
+describe("fallback-only mode", () => {
+  test("uses the bundled snapshot without a network request in production", async () => {
+    process.env.NODE_ENV = "production";
+    getFromCache.mockReturnValue(null);
+    jest.spyOn(fs, "statSync").mockReturnValue({ mtimeMs: 1 });
+
+    const result = await fetchRecruitingData();
+
+    expect(result).toEqual(expect.objectContaining({
+      "2027-2028": expect.any(Array),
+    }));
+    expect(requestWithRetry).not.toHaveBeenCalled();
+  });
+
+  test("the explicit live flag disables fallback-only mode", () => {
+    process.env.NODE_ENV = "production";
+    process.env.RECRUITING_SCRAPE_LIVE = "true";
+
+    expect(shouldUseFallbackOnly()).toBe(false);
   });
 });

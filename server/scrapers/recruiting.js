@@ -2,12 +2,52 @@
 // tracker). fetchRecruitingData feeds local curation scripts; the live
 // /api/recruits endpoint reads asu_hockey_data.json directly.
 const cheerio = require("cheerio");
+const fs = require("fs");
+const path = require("path");
 const config = require("../../config/scraper-config");
 const {
   requestWithRetry,
   delayBetweenRequests,
 } = require("../lib/request-helper");
 const { createCachedScraper } = require("./create-cached-scraper");
+const { reportScrapeHealth } = require("../cache/scrape-health");
+const {
+  validateRecruitingSnapshot,
+  readRecruitingSnapshot,
+} = require("../services/recruiting-snapshot");
+
+const CACHE_TTL = 24 * 60 * 60 * 1000;
+const FALLBACK_FILE = path.join(
+  __dirname,
+  "..",
+  "..",
+  "data",
+  "asu_recruiting_fallback.json",
+);
+let fallbackCache = { mtimeMs: 0, value: null };
+
+function getFallbackRecruitingData() {
+  try {
+    const stat = fs.statSync(FALLBACK_FILE);
+    if (fallbackCache.value && fallbackCache.mtimeMs === stat.mtimeMs) {
+      return fallbackCache.value;
+    }
+    const value = readRecruitingSnapshot(
+      FALLBACK_FILE,
+      config.FUTURE_SEASONS,
+    );
+    if (value) fallbackCache = { mtimeMs: stat.mtimeMs, value };
+    return value;
+  } catch (error) {
+    console.warn(`[Recruiting] Fallback unavailable: ${error.message}`);
+    return null;
+  }
+}
+
+function shouldUseFallbackOnly() {
+  if (process.env.RECRUITING_SCRAPE_LIVE === "true") return false;
+  return process.env.NODE_ENV === "production" || process.env.IS_PRERENDER === "true";
+}
 
 /**
  * Scrapes player photo and current team from a single Elite Prospects profile page visit
@@ -321,9 +361,25 @@ async function scrapeAllSeasons({ includePhotos = false } = {}) {
 const fetchRecruiting = createCachedScraper({
   name: "recruiting",
   cacheKey: "asu_hockey_recruiting",
-  // no ttl: saveToCache's 24h default, same as the old bare saveToCache call
+  ttl: CACHE_TTL,
+  swr: false,
   scrape: scrapeAllSeasons,
-  validate: (data) => Object.values(data).some((arr) => arr.length > 0),
+  validate: (data) => {
+    const valid = validateRecruitingSnapshot(data, config.FUTURE_SEASONS);
+    const totalPlayers = valid
+      ? config.FUTURE_SEASONS.reduce(
+          (sum, season) => sum + data[season].length,
+          0,
+        )
+      : 0;
+    return reportScrapeHealth("recruiting", {
+      validSnapshot: valid ? 1 : 0,
+      totalPlayers,
+    });
+  },
+  fallback: getFallbackRecruitingData,
+  fallbackOnly: shouldUseFallbackOnly,
+  onScrapeError: () => ({}),
 });
 
 /**
@@ -332,9 +388,9 @@ const fetchRecruiting = createCachedScraper({
  * curation scripts only); the result still refreshes the shared cache key.
  * @param {boolean} includePhotos - Whether to scrape player photos (much slower)
  */
-async function fetchRecruitingData(includePhotos = false) {
+async function fetchRecruitingData(includePhotos = false, options = {}) {
   return fetchRecruiting({
-    bypassCache: includePhotos,
+    bypassCache: includePhotos || options.bypassCache === true,
     scrapeArgs: { includePhotos },
   });
 }
@@ -344,4 +400,6 @@ module.exports = {
   scrapeEliteProspectsRecruiting,
   scrapePlayerProfile,
   scrapePlayerPhoto,
+  getFallbackRecruitingData,
+  shouldUseFallbackOnly,
 };
