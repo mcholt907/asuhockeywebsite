@@ -67,6 +67,7 @@ afterEach(() => {
   jest.restoreAllMocks();
   delete process.env.RECRUITING_SCRAPE_LIVE;
   delete process.env.NODE_ENV;
+  delete process.env.IS_PRERENDER;
 });
 
 describe("fetchRecruitingData â€” SWR caching", () => {
@@ -156,12 +157,64 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
     );
   });
 
-  test("returns empty array when the page has no player tables", async () => {
+  test("rejects an unrecognized page instead of treating it as an empty roster", async () => {
     requestWithRetry.mockResolvedValue({
       data: "<html><body><p>no tables</p></body></html>",
     });
+    await expect(
+      scrapeEliteProspectsRecruiting("2026-2027", false),
+    ).rejects.toThrow("Unable to identify roster table");
+  });
+
+  test("recognizes a renamed Age header using roster semantics", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: fixtureHtml.replace("<th>Age</th>", "<th>Age on Sep. 15</th>"),
+    });
+
     const players = await scrapeEliteProspectsRecruiting("2026-2027", false);
-    expect(players).toEqual([]);
+
+    expect(players.map((player) => player.name)).toEqual([
+      "Jane Smith",
+      "Bob Jones",
+    ]);
+  });
+
+  test("maps roster values correctly after an inserted column", async () => {
+    const insertedColumnHtml = fixtureHtml
+      .replace(
+        "<th>Age</th><th>Born</th>",
+        "<th>Age</th><th>Status</th><th>Born</th>",
+      )
+      .replace(
+        /<td>(18|19)<\/td><td><span/g,
+        "<td>$1</td><td>Committed</td><td><span",
+      );
+    requestWithRetry.mockResolvedValue({ data: insertedColumnHtml });
+
+    const [jane] = await scrapeEliteProspectsRecruiting("2026-2027", false);
+
+    expect(jane).toMatchObject({
+      age: "18",
+      birth_year: "2008",
+      birthplace: "Phoenix, AZ",
+      height: "180 cm",
+      weight: "172 lbs",
+      shoots: "L",
+    });
+  });
+
+  test("rejects a player-link decoy without roster headers", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: `
+        <table>
+          <thead><tr><th>Player</th><th>GP</th><th>G</th></tr></thead>
+          <tbody><tr><td><a href="/player/999/decoy">Decoy Player (F)</a></td><td>34</td><td>12</td></tr></tbody>
+        </table>`,
+    });
+
+    await expect(
+      scrapeEliteProspectsRecruiting("2026-2027", false),
+    ).rejects.toThrow("Unable to identify roster table");
   });
 
   test("keeps the same player in every Elite Prospects season that lists them", async () => {
@@ -174,6 +227,18 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
 
     expect(result["2026-2027"].map((p) => p.name)).toContain("Jane Smith");
     expect(result["2027-2028"].map((p) => p.name)).toContain("Jane Smith");
+  });
+
+  test("does not cache a partial snapshot when one season request fails", async () => {
+    getFromCache.mockReturnValue(null);
+    requestWithRetry
+      .mockResolvedValueOnce({ data: fixtureHtml })
+      .mockRejectedValueOnce(new Error("second season unavailable"));
+
+    await expect(
+      fetchRecruitingData(false, { bypassCache: true }),
+    ).resolves.toEqual({});
+    expect(saveToCache).not.toHaveBeenCalled();
   });
 });
 
@@ -188,6 +253,24 @@ describe("fallback-only mode", () => {
     expect(result).toEqual(expect.objectContaining({
       "2027-2028": expect.any(Array),
     }));
+    expect(requestWithRetry).not.toHaveBeenCalled();
+  });
+
+  test("returns controlled unavailable data without a network request when the snapshot is missing", async () => {
+    process.env.NODE_ENV = "production";
+    jest.spyOn(fs, "statSync").mockImplementation(() => {
+      throw new Error("snapshot missing");
+    });
+
+    await expect(fetchRecruitingData()).resolves.toEqual({});
+    expect(requestWithRetry).not.toHaveBeenCalled();
+  });
+
+  test("does not bypass the production snapshot policy when profiles are requested", async () => {
+    process.env.NODE_ENV = "production";
+    jest.spyOn(fs, "statSync").mockReturnValue({ mtimeMs: 1 });
+
+    await expect(fetchRecruitingData(true)).resolves.toEqual(snapshotData);
     expect(requestWithRetry).not.toHaveBeenCalled();
   });
 

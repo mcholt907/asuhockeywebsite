@@ -137,6 +137,46 @@ async function scrapePlayerPhoto(playerLink) {
  * @param {boolean} includePhotos - Whether to scrape individual player photos (slower)
  * @returns {Array} Array of player objects with recruiting information
  */
+function normalizeRosterHeader(text) {
+  return text.toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+function getRosterHeaderKey(text) {
+  const header = normalizeRosterHeader(text);
+  if (header === "#" || /^(no\.?|number)$/.test(header)) return "number";
+  if (/^player\b/.test(header)) return "player";
+  if (/^age\b/.test(header)) return "age";
+  if (/^(born|birth year)\b/.test(header)) return "birthYear";
+  if (/^birth ?place\b/.test(header)) return "birthplace";
+  if (/^height\b/.test(header)) return "height";
+  if (/^weight\b/.test(header)) return "weight";
+  if (/^(shoots|catches)\b/.test(header)) return "shoots";
+  return null;
+}
+
+function getRosterHeaderMap($, table) {
+  const headerMap = {};
+  $(table)
+    .find("thead th")
+    .each((index, header) => {
+      const key = getRosterHeaderKey($(header).text());
+      if (key && headerMap[key] === undefined) headerMap[key] = index;
+    });
+
+  const requiredHeaders = [
+    "player",
+    "age",
+    "birthYear",
+    "birthplace",
+    "height",
+    "weight",
+    "shoots",
+  ];
+  return requiredHeaders.every((key) => headerMap[key] !== undefined)
+    ? headerMap
+    : null;
+}
+
 async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
   const url = `https://www.eliteprospects.com/team/18066/arizona-state-univ/${season}?tab=stats`;
   console.log(
@@ -155,22 +195,15 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
     // keeps pure stats tables (GP/G/A columns at the same indexes) from
     // being parsed as roster rows. Header/summary rows inside the table
     // are filtered by the cell-count and name checks below.
-    const candidateTables = $("table").filter(
-      (_, t) => $(t).find('a[href*="/player/"]').length > 0,
+    const rosterTables = $("table").filter(
+      (_, table) => getRosterHeaderMap($, table) !== null,
     );
-    let rosterTables = candidateTables.filter((_, t) =>
-      $(t)
-        .find("thead th")
-        .toArray()
-        .some((th) => /^\s*age\s*$/i.test($(th).text())),
-    );
-    if (rosterTables.length === 0) rosterTables = candidateTables;
-    let playerRows = rosterTables.find("tbody tr");
-    if (playerRows.length === 0) {
-      playerRows = $(
-        "table.SortTable_table__jnnJk tbody.SortTable_tbody__VrcrZ tr.SortTable_tr__L9yVC",
+    if (rosterTables.length === 0) {
+      throw new Error(
+        `[EP Recruiting Scraper] Unable to identify roster table for ${season}`,
       );
     }
+    const playerRows = rosterTables.find("tbody tr");
 
     console.log(
       `[EP Recruiting Scraper] Found ${playerRows.length} potential player rows`,
@@ -182,15 +215,20 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
       // children() not find(): a nested table inside a cell must not
       // pollute the positional index space.
       const cells = $row.children("td");
+      const headerMap = getRosterHeaderMap($, $row.closest("table").get(0));
+      const requiredCellIndex = Math.max(...Object.values(headerMap));
 
-      // Skip if not enough cells (likely a header or section row)
-      if (cells.length < 10) {
+      // Skip summary or section rows that do not satisfy this table's schema.
+      if (cells.length <= requiredCellIndex) {
         continue;
       }
 
       try {
         // Extract player data from cells
-        const number = $(cells[1]).text().trim();
+        const number =
+          headerMap.number === undefined
+            ? ""
+            : $(cells[headerMap.number]).text().trim();
 
         // Skip statistics/summary rows (they have "NCAA" or numbers as the number field)
         if (
@@ -205,9 +243,11 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
         }
 
         // Get player name and link (structural first, hashed fallback)
-        let playerLinkElement = $(cells[3]).find('a[href*="/player/"]').first();
+        let playerLinkElement = $(cells[headerMap.player])
+          .find('a[href*="/player/"]')
+          .first();
         if (!playerLinkElement.length) {
-          playerLinkElement = $(cells[3]).find(
+          playerLinkElement = $(cells[headerMap.player]).find(
             "div.Roster_player__e6EbP a.TextLink_link__RhSiC",
           );
         }
@@ -240,10 +280,10 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
         }
 
         // Extract other fields
-        const age = $(cells[4]).text().trim();
+        const age = $(cells[headerMap.age]).text().trim();
 
         // Birth year extraction
-        const birthYearSpan = $(cells[5]).find("span");
+        const birthYearSpan = $(cells[headerMap.birthYear]).find("span");
         let birthYear = "";
         if (birthYearSpan.length && birthYearSpan.attr("title")) {
           const birthYearMatch = birthYearSpan.attr("title").match(/(\d{4})/);
@@ -252,16 +292,17 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
           }
         }
         if (!birthYear) {
-          birthYear = $(cells[5]).text().trim();
+          birthYear = $(cells[headerMap.birthYear]).text().trim();
         }
 
         // .text() over all links concatenates city + country when EP
         // splits birthplace across two anchors
         const birthplace =
-          $(cells[6]).find("a").text().trim() || $(cells[6]).text().trim();
-        const height = $(cells[7]).text().trim();
-        const weight = $(cells[8]).text().trim();
-        const shoots = $(cells[9]).text().trim();
+          $(cells[headerMap.birthplace]).find("a").text().trim() ||
+          $(cells[headerMap.birthplace]).text().trim();
+        const height = $(cells[headerMap.height]).text().trim();
+        const weight = $(cells[headerMap.weight]).text().trim();
+        const shoots = $(cells[headerMap.shoots]).text().trim();
 
         const fullPlayerLink = playerLink
           ? `https://www.eliteprospects.com${playerLink}`
@@ -326,7 +367,7 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
       `[EP Recruiting Scraper] Error fetching recruiting data for ${season}:`,
       error.message,
     );
-    return [];
+    throw error;
   }
 }
 
@@ -389,6 +430,12 @@ const fetchRecruiting = createCachedScraper({
  * @param {boolean} includePhotos - Whether to scrape player photos (much slower)
  */
 async function fetchRecruitingData(includePhotos = false, options = {}) {
+  // Production and prerender environments cannot reliably access Elite
+  // Prospects. This guard intentionally precedes cache-bypass handling so a
+  // profile-enrichment request cannot become a live network escape hatch.
+  if (shouldUseFallbackOnly()) {
+    return getFallbackRecruitingData() || {};
+  }
   return fetchRecruiting({
     bypassCache: includePhotos || options.bypassCache === true,
     scrapeArgs: { includePhotos },
