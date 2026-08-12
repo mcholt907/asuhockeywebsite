@@ -12,6 +12,7 @@ const {
 const { getRoster } = require("../services/roster-service");
 const { getStaticData } = require("../services/static-data");
 const { validateRecruitingSnapshot } = require("../services/recruiting-snapshot");
+const { validateStandingsSnapshot } = require("../services/standings-snapshot");
 const { getDataStatus, getCooldownStatus } = require("../cache/data-status");
 const config = require("../../config/scraper-config");
 
@@ -194,8 +195,13 @@ router.get("/stats", async (req, res) => {
 router.get("/standings", async (req, res) => {
   try {
     const standings = await scrapeNCHCStandings();
-    if (standings && standings.length > 0) {
-      res.json({ data: standings, timestamp: new Date().toISOString() });
+    if (validateStandingsSnapshot(standings)) {
+      res.json({
+        data: standings.teams,
+        season: standings.season,
+        isPriorSeason: standings.season !== config.CURRENT_SEASON,
+        timestamp: new Date().toISOString(),
+      });
     } else {
       res.status(500).json({ error: "Failed to fetch standings data." });
     }

@@ -123,7 +123,8 @@ export interface StandingsTeam {
 
 export interface StandingsResponse {
   data: StandingsTeam[];
-  source?: string;
+  season: string;
+  isPriorSeason: boolean;
   timestamp?: string;
 }
 

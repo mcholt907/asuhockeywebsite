@@ -57,4 +57,11 @@ test.describe("Home Page", () => {
     await expect(widget).toBeVisible();
     await expect(widget.locator("ul li, p.no-games").first()).toBeVisible();
   });
+
+  test("should display season-labelled NCHC standings", async ({ page }) => {
+    await expect(page.getByRole("heading", {
+      name: /^\d{4}-\d{2} NCHC Standings$/,
+    })).toBeVisible();
+    await expect(page.locator(".standings-widget-table tbody tr").first()).toBeVisible();
+  });
 });

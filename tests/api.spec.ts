@@ -29,7 +29,7 @@ test.describe('API Endpoints', () => {
         expect(Array.isArray(data.cooldowns)).toBeTruthy();
 
         const names = data.datasets.map((d: { name: string }) => d.name);
-        for (const expected of ['news', 'schedule', 'stats', 'roster', 'transfers', 'alumni']) {
+        for (const expected of ['news', 'schedule', 'stats', 'standings', 'roster', 'transfers', 'alumni']) {
             expect(names).toContain(expected);
         }
         for (const dataset of data.datasets) {
@@ -84,6 +84,19 @@ test.describe('API Endpoints', () => {
 
         const data = await response.json();
         expect(data).toBeDefined();
+    });
+
+    test("GET /api/standings should return a season-tagged played table", async () => {
+        const response = await apiContext.get("/api/standings");
+        expect(response.ok()).toBeTruthy();
+        const body = await response.json();
+        expect(Array.isArray(body.data)).toBeTruthy();
+        expect(body.data.length).toBeGreaterThan(0);
+        expect(body.season).toMatch(/^\d{4}-\d{4}$/);
+        expect(typeof body.isPriorSeason).toBe("boolean");
+        expect(body.data.some((team: { overallRecord: string }) =>
+            team.overallRecord !== "0-0-0",
+        )).toBeTruthy();
     });
 
     test('GET /api/recruits should return recruiting data', async () => {
