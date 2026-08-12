@@ -53,7 +53,8 @@
     "test:e2e:report": "npx playwright show-report",
     "refresh-alumni": "node scripts/refresh-alumni.js",
     "refresh-transfers": "node scripts/refresh-transfers.js",
-    "refresh-data": "npm run refresh-alumni && npm run refresh-transfers",
+    "refresh-recruiting": "node scripts/refresh-recruiting.js",
+    "refresh-data": "npm run refresh-alumni && npm run refresh-transfers && npm run refresh-recruiting",
     "typecheck": "tsc --noEmit"
   },
   "browserslist": {
