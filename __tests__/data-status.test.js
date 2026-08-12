@@ -20,17 +20,63 @@ const DAY_MS = 24 * HOUR_MS;
 let tmpDir;
 let dataStatus;
 
-function writeCacheEntry(key, ageMs, cacheDuration = DAY_MS) {
+function writeCacheEntry(
+  key,
+  ageMs,
+  cacheDuration = DAY_MS,
+  data = { some: 'data' },
+) {
   const entry = {
     timestamp: new Date(Date.now() - ageMs).toISOString(),
-    data: { some: 'data' },
+    data,
     cacheDuration,
   };
   fs.writeFileSync(path.join(tmpDir, key), JSON.stringify(entry));
 }
 
-function datasetByName(name) {
-  return dataStatus.getDataStatus().find((d) => d.name === name);
+function datasetByName(name, options) {
+  return dataStatus.getDataStatus(options).find((d) => d.name === name);
+}
+
+function standingsSnapshot({
+  season = '2025-2026',
+  overallRecord = '1-0-0',
+  teams = 9,
+} = {}) {
+  const names = [
+    'North Dakota',
+    'Denver',
+    'Western Michigan',
+    'Minnesota Duluth',
+    'St. Cloud State',
+    'Colorado College',
+    'Miami',
+    'Omaha',
+    'Arizona State',
+  ];
+  return {
+    season,
+    lastUpdated: new Date(Date.now() - 2 * HOUR_MS).toISOString(),
+    teams: names.slice(0, teams).map((team, index) => ({
+      rank: String(index + 1),
+      team,
+      pts: '3',
+      confRecord: overallRecord,
+      overallRecord,
+      isASU: team === 'Arizona State',
+    })),
+  };
+}
+
+function createStandingsRoot(contents) {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), 'asu-status-root-'));
+  const fallbackFile = path.join(rootDir, 'data', 'nchc_standings_fallback.json');
+  fs.mkdirSync(path.dirname(fallbackFile), { recursive: true });
+  fs.writeFileSync(
+    fallbackFile,
+    typeof contents === 'string' ? contents : JSON.stringify(contents),
+  );
+  return rootDir;
 }
 
 beforeEach(() => {
@@ -108,6 +154,75 @@ describe('getDataStatus', () => {
     expect(standings.key).toBe(`nchc_standings_${config.CURRENT_SEASON}`);
     expect(standings.source).toBe('fallback');
     expect(standings.file).toBe('data/nchc_standings_fallback.json');
+  });
+
+  test.each([
+    ['malformed shape', { season: '2026-2027', teams: [] }],
+    ['all-zero table', standingsSnapshot({ season: '2026-2027', overallRecord: '0-0-0' })],
+    ['incomplete table', standingsSnapshot({ season: '2026-2027', teams: 8 })],
+    ['wrong season', standingsSnapshot({ season: '2025-2026' })],
+  ])('ignores a standings cache with %s and reports the valid prior-season fallback', (_, cachePayload) => {
+    const config = require('../config/scraper-config');
+    const rootDir = createStandingsRoot(standingsSnapshot());
+    writeCacheEntry(
+      `nchc_standings_${config.CURRENT_SEASON}`,
+      1 * HOUR_MS,
+      DAY_MS,
+      cachePayload,
+    );
+
+    try {
+      const standings = datasetByName('standings', { rootDir });
+      expect(standings.source).toBe('fallback');
+      expect(standings.file).toBe('data/nchc_standings_fallback.json');
+    } finally {
+      fs.rmSync(rootDir, { recursive: true, force: true });
+    }
+  });
+
+  test('ignores invalid JSON in the standings cache', () => {
+    const config = require('../config/scraper-config');
+    const rootDir = createStandingsRoot(standingsSnapshot());
+    fs.writeFileSync(
+      path.join(tmpDir, `nchc_standings_${config.CURRENT_SEASON}`),
+      '{not valid JSON',
+    );
+
+    try {
+      expect(datasetByName('standings', { rootDir }).source).toBe('fallback');
+    } finally {
+      fs.rmSync(rootDir, { recursive: true, force: true });
+    }
+  });
+
+  test.each([
+    ['invalid JSON', '{not valid JSON'],
+    ['malformed shape', JSON.stringify({ season: '2025-2026', teams: [] })],
+    ['all-zero table', JSON.stringify(standingsSnapshot({ overallRecord: '0-0-0' }))],
+    ['incomplete table', JSON.stringify(standingsSnapshot({ teams: 8 }))],
+  ])('reports standings missing when cache is absent and fallback has %s', (_, fallbackContents) => {
+    const rootDir = createStandingsRoot(fallbackContents);
+
+    try {
+      const standings = datasetByName('standings', { rootDir });
+      expect(standings.source).toBe('none');
+      expect(standings.status).toBe('missing');
+      expect(standings.file).toBeUndefined();
+    } finally {
+      fs.rmSync(rootDir, { recursive: true, force: true });
+    }
+  });
+
+  test('accepts a complete played prior-season standings fallback', () => {
+    const rootDir = createStandingsRoot(standingsSnapshot({ season: '2024-2025' }));
+
+    try {
+      const standings = datasetByName('standings', { rootDir });
+      expect(standings.source).toBe('fallback');
+      expect(standings.status).toBe('ok');
+    } finally {
+      fs.rmSync(rootDir, { recursive: true, force: true });
+    }
   });
 });
 
