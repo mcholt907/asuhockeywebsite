@@ -68,7 +68,7 @@ export interface Recruit {
   player_photo?: string;
 }
 
-// /api/recruits returns an object keyed by season label ("2026-2027").
+// /api/recruits returns Elite Prospects projected team rosters keyed by season ("2026-2027").
 export type RecruitsResponse = Record<string, Recruit[]>;
 
 export interface Transfer {

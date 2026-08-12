@@ -27,7 +27,7 @@ const DATASETS = [
   { name: 'roster', cacheKey: 'asu_hockey_roster', staleAfterMs: 3 * DAY_MS, alert: true },
   { name: 'transfers', cacheKey: 'asu_transfers', fallbackFile: 'data/asu_transfers_fallback.json', staleAfterMs: 21 * DAY_MS, alert: true },
   { name: 'alumni', cacheKey: 'asu_alumni', fallbackFile: 'data/asu_alumni_fallback.json', staleAfterMs: 21 * DAY_MS, alert: true },
-  { name: 'recruiting', staticFile: 'asu_hockey_data.json', staleAfterMs: null, alert: false },
+  { name: 'recruiting', cacheKey: 'asu_hockey_recruiting', fallbackFile: 'data/asu_recruiting_fallback.json', staleAfterMs: 21 * DAY_MS, alert: true },
 ];
 
 function resolveCacheKey(dataset) {

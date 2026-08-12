@@ -70,3 +70,6 @@ Thumbs.db
 
 # Superpowers brainstorming visual-companion mockups (local only)
 .superpowers/
+
+# Local git worktrees
+.worktrees/

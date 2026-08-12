@@ -11,11 +11,12 @@ jest.mock("../server/lib/request-helper", () => ({
 jest.mock("@sentry/node", () => ({
   init: jest.fn(),
   metrics: { distribution: jest.fn(), count: jest.fn() },
+  captureMessage: jest.fn(),
 }));
 
 jest.mock("../config/scraper-config", () => ({
   CURRENT_SEASON: "2025-2026",
-  FUTURE_SEASONS: ["2026-2027"],
+  FUTURE_SEASONS: ["2026-2027", "2027-2028"],
   seasons: { current: 2025, stats: "20252026" },
   http: {
     userAgent: "test-agent",
@@ -33,12 +34,35 @@ jest.mock("../config/scraper-config", () => ({
   },
 }));
 
+const snapshotData = {
+  "2026-2027": [
+    { name: "Jane Smith", player_link: "https://www.eliteprospects.com/player/111/x" },
+  ],
+  "2027-2028": [
+    { name: "Bob Jones", player_link: "https://www.eliteprospects.com/player/222/x" },
+  ],
+};
+
+jest.mock("../server/services/recruiting-snapshot", () => ({
+  ...jest.requireActual("../server/services/recruiting-snapshot"),
+  readRecruitingSnapshot: jest.fn(() => snapshotData),
+}));
+
+const fs = require("fs");
 const { getFromCache, saveToCache } = require("../server/cache/caching-system");
 const { requestWithRetry } = require("../server/lib/request-helper");
+const { readRecruitingSnapshot } = require("../server/services/recruiting-snapshot");
 const {
   fetchRecruitingData,
   scrapeEliteProspectsRecruiting,
+  shouldUseFallbackOnly,
 } = require("../server/scrapers/recruiting");
+
+const originalEnvironment = {
+  RECRUITING_SCRAPE_LIVE: process.env.RECRUITING_SCRAPE_LIVE,
+  NODE_ENV: process.env.NODE_ENV,
+  IS_PRERENDER: process.env.IS_PRERENDER,
+};
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -46,9 +70,17 @@ beforeEach(() => {
   requestWithRetry.mockResolvedValue({ data: "<html></html>" });
 });
 
+afterEach(() => {
+  jest.restoreAllMocks();
+  for (const [key, value] of Object.entries(originalEnvironment)) {
+    if (value === undefined) delete process.env[key];
+    else process.env[key] = value;
+  }
+});
+
 describe("fetchRecruitingData â€” SWR caching", () => {
   test("returns fresh cached data without hitting the network", async () => {
-    const freshData = { "2026-2027": [{ name: "Jane Smith" }] };
+    const freshData = snapshotData;
     getFromCache.mockReturnValueOnce(freshData);
 
     const result = await fetchRecruitingData();
@@ -57,20 +89,26 @@ describe("fetchRecruitingData â€” SWR caching", () => {
     expect(requestWithRetry).not.toHaveBeenCalled();
   });
 
-  test("returns stale data immediately when cache is expired", async () => {
-    const staleData = { "2026-2027": [{ name: "John Doe" }] };
+  test("recovers with stale data when a blocking live scrape fails", async () => {
+    const staleData = snapshotData;
     getFromCache.mockReturnValueOnce(null).mockReturnValueOnce(staleData);
+    requestWithRetry.mockRejectedValue(new Error("EP unavailable"));
 
-    const result = await fetchRecruitingData();
+    await expect(fetchRecruitingData()).resolves.toEqual(staleData);
+  });
 
-    expect(result).toEqual(staleData);
+  test("ignores a partial cached snapshot in favor of the bundled fallback", async () => {
+    getFromCache.mockReturnValue({
+      "2026-2027": [{ name: "Jane Smith", player_link: "https://example.test/1" }],
+    });
+    jest.spyOn(fs, "statSync").mockReturnValue({ mtimeMs: 1 });
+
+    await expect(fetchRecruitingData()).resolves.toEqual(snapshotData);
   });
 });
 
 describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
-  // Pins the positional cell contract the parser relies on:
-  // td[1]=number, td[3]=player link, td[4]=age, td[5]=birth year,
-  // td[6]=birthplace, td[7]=height, td[8]=weight, td[9]=shoots.
+  // Defines the semantic roster headers and the corresponding row values.
   const rosterRow = (num, name, pos, playerId, age, born, place, h, w, s) => `
     <tr>
       <td></td><td>${num}</td><td><img /></td>
@@ -93,6 +131,8 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
         </tbody>
       </table>
       <!-- Real roster table -->
+      <div class="LineupCard_wrapper__liveHash">
+        <h2>2026-2027 Arizona State Univ. Roster</h2>
       <table>
         <thead><tr><th></th><th>#</th><th></th><th>Player</th><th>Age</th><th>Born</th><th>Birthplace</th><th>Height</th><th>Weight</th><th>Shoots</th></tr></thead>
         <tbody>
@@ -104,14 +144,53 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
           </tr>
         </tbody>
       </table>
+      </div>
       <!-- Duplicate of Jane in a second roster-shaped table (e.g. a widget) -->
+      <div class="LineupCard_wrapper__widgetHash">
+        <h2>2026-2027 Arizona State Univ. Roster</h2>
       <table>
         <thead><tr><th></th><th>#</th><th></th><th>Player</th><th>Age</th><th>Born</th><th>Birthplace</th><th>Height</th><th>Weight</th><th>Shoots</th></tr></thead>
         <tbody>
           ${rosterRow("17", "Jane Smith", "F", "111", "18", "2008", "Phoenix, AZ", "180 cm", "172 lbs", "L")}
         </tbody>
       </table>
+      </div>
     </body></html>`;
+
+  const fixtureForSeason = (season) =>
+    fixtureHtml.replaceAll(
+      "2026-2027 Arizona State Univ. Roster",
+      `${season} Arizona State Univ. Roster`,
+    );
+
+  const truncatedPlayerFixture = fixtureHtml.replace(
+    /<tr>\s*<td><\/td><td>30<\/td>[\s\S]*?<\/tr>/,
+    `
+      <tr>
+        <td></td><td>30</td><td><img /></td>
+        <td><a href="/player/222/x">Bob Jones (G)</a></td><td>19</td>
+      </tr>`,
+  );
+
+  const movedPlayerLinkFixture = fixtureHtml.replace(
+    /<tr>\s*<td><\/td><td>30<\/td>[\s\S]*?<\/tr>/,
+    `
+      <tr>
+        <td><a href="/player/222/x">Bob Jones (G)</a></td><td>30</td><td><img /></td>
+        <td></td><td>19</td><td><span title="2007-01-01">2007</span></td>
+        <td><a href="/place">Calgary, AB</a></td><td>188 cm</td><td>190 lbs</td><td>L</td>
+      </tr>`,
+  );
+
+  test("requests the default Elite Prospects season roster route", async () => {
+    requestWithRetry.mockResolvedValue({ data: fixtureForSeason("2027-2028") });
+
+    await scrapeEliteProspectsRecruiting("2027-2028", false);
+
+    expect(requestWithRetry).toHaveBeenCalledWith(
+      "https://www.eliteprospects.com/team/18066/arizona-state-univ/2027-2028",
+    );
+  });
 
   test("parses roster rows by position, skips decoy stats tables, summary rows, and duplicates", async () => {
     requestWithRetry.mockResolvedValue({ data: fixtureHtml });
@@ -134,11 +213,264 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
     );
   });
 
-  test("returns empty array when the page has no player tables", async () => {
+  test("parses the live abbreviated roster headers without accepting the stats decoy", async () => {
+    const liveHeaderHtml = fixtureHtml.replaceAll(
+      "<th></th><th>#</th><th></th><th>Player</th><th>Age</th><th>Born</th><th>Birthplace</th><th>Height</th><th>Weight</th><th>Shoots</th>",
+      "<th></th><th>#</th><th>N</th><th>PLAYER</th><th>A</th><th>BORN</th><th>Birthplace</th><th>HT</th><th>WT</th><th>S</th>",
+    );
+    requestWithRetry.mockResolvedValue({ data: liveHeaderHtml });
+
+    const players = await scrapeEliteProspectsRecruiting("2026-2027", false);
+
+    expect(players.map((player) => player.name)).toEqual([
+      "Jane Smith",
+      "Bob Jones",
+    ]);
+    expect(players[0]).toMatchObject({
+      age: "18",
+      birth_year: "2008",
+      birthplace: "Phoenix, AZ",
+      height: "180 cm",
+      weight: "172 lbs",
+      shoots: "L",
+    });
+  });
+
+  test("rejects an unrecognized page instead of treating it as an empty roster", async () => {
     requestWithRetry.mockResolvedValue({
       data: "<html><body><p>no tables</p></body></html>",
     });
+    await expect(
+      scrapeEliteProspectsRecruiting("2026-2027", false),
+    ).rejects.toThrow("Unable to identify roster table");
+  });
+
+  test("rejects a roster card labeled for a different season", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: fixtureHtml,
+    });
+
+    await expect(
+      scrapeEliteProspectsRecruiting("2029-2030", false),
+    ).rejects.toThrow("Unable to identify roster table");
+  });
+
+  test("rejects a combined-season roster card that mentions the requested season", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: fixtureHtml.replaceAll(
+        "2026-2027 Arizona State Univ. Roster",
+        "2029-2030 / 2026-2027 Arizona State Univ. Roster",
+      ),
+    });
+
+    await expect(
+      scrapeEliteProspectsRecruiting("2029-2030", false),
+    ).rejects.toThrow("Unable to identify roster table");
+  });
+
+  test("recognizes a renamed Age header using roster semantics", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: fixtureHtml.replace("<th>Age</th>", "<th>Age on Sep. 15</th>"),
+    });
+
     const players = await scrapeEliteProspectsRecruiting("2026-2027", false);
-    expect(players).toEqual([]);
+
+    expect(players.map((player) => player.name)).toEqual([
+      "Jane Smith",
+      "Bob Jones",
+    ]);
+  });
+
+  test("maps roster values correctly after an inserted column", async () => {
+    const insertedColumnHtml = fixtureHtml
+      .replace(
+        "<th>Age</th><th>Born</th>",
+        "<th>Age</th><th>Status</th><th>Born</th>",
+      )
+      .replace(
+        /<td>(18|19)<\/td><td><span/g,
+        "<td>$1</td><td>Committed</td><td><span",
+      );
+    requestWithRetry.mockResolvedValue({ data: insertedColumnHtml });
+
+    const [jane] = await scrapeEliteProspectsRecruiting("2026-2027", false);
+
+    expect(jane).toMatchObject({
+      age: "18",
+      birth_year: "2008",
+      birthplace: "Phoenix, AZ",
+      height: "180 cm",
+      weight: "172 lbs",
+      shoots: "L",
+    });
+  });
+
+  test("rejects a player-link decoy without roster headers", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: `
+        <table>
+          <thead><tr><th>Player</th><th>GP</th><th>G</th></tr></thead>
+          <tbody><tr><td><a href="/player/999/decoy">Decoy Player (F)</a></td><td>34</td><td>12</td></tr></tbody>
+        </table>`,
+    });
+
+    await expect(
+      scrapeEliteProspectsRecruiting("2026-2027", false),
+    ).rejects.toThrow("Unable to identify roster table");
+  });
+
+  test("preserves Carson McGinley when Elite Prospects lists him", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: fixtureHtml.replace("Bob Jones", "Carson McGinley"),
+    });
+
+    const players = await scrapeEliteProspectsRecruiting("2026-2027", false);
+
+    expect(players.map((player) => player.name)).toContain("Carson McGinley");
+  });
+
+  test("rejects a player-like row without a profile link", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: fixtureHtml.replace(
+        '<a href="/player/222/x">Bob Jones (G)</a>',
+        "Bob Jones (G)",
+      ),
+    });
+
+    await expect(
+      scrapeEliteProspectsRecruiting("2026-2027", false),
+    ).rejects.toThrow("missing a valid player name or link");
+  });
+
+  test("rejects a truncated player row that still has an Elite Prospects link", async () => {
+    requestWithRetry.mockResolvedValue({ data: truncatedPlayerFixture });
+
+    await expect(
+      scrapeEliteProspectsRecruiting("2026-2027", false),
+    ).rejects.toThrow("truncated player-like row");
+  });
+
+  test("rejects a full-width row when its player link moved outside the Player cell", async () => {
+    requestWithRetry.mockResolvedValue({ data: movedPlayerLinkFixture });
+
+    await expect(
+      scrapeEliteProspectsRecruiting("2026-2027", false),
+    ).rejects.toThrow("missing a valid player name or link");
+  });
+
+  test("keeps the same player in every Elite Prospects season that lists them", async () => {
+    getFromCache.mockReturnValue(null);
+    requestWithRetry
+      .mockResolvedValueOnce({ data: fixtureHtml })
+      .mockResolvedValueOnce({ data: fixtureForSeason("2027-2028") });
+
+    const result = await fetchRecruitingData(false, { bypassCache: true });
+
+    expect(result["2026-2027"].map((p) => p.name)).toContain("Jane Smith");
+    expect(result["2027-2028"].map((p) => p.name)).toContain("Jane Smith");
+  });
+
+  test("does not cache a partial snapshot when one season request fails", async () => {
+    getFromCache.mockReturnValue(null);
+    readRecruitingSnapshot.mockReturnValueOnce(null);
+    requestWithRetry
+      .mockResolvedValueOnce({ data: fixtureHtml })
+      .mockRejectedValueOnce(new Error("second season unavailable"));
+
+    await expect(
+      fetchRecruitingData(false, { bypassCache: true }),
+    ).rejects.toMatchObject({ code: "RECRUITING_DATA_UNAVAILABLE" });
+    expect(saveToCache).not.toHaveBeenCalled();
+  });
+
+  test("does not cache a season when a mixed roster contains an unparseable player row", async () => {
+    getFromCache.mockReturnValue(null);
+    readRecruitingSnapshot.mockReturnValueOnce(null);
+    requestWithRetry
+      .mockResolvedValueOnce({ data: fixtureHtml })
+      .mockResolvedValueOnce({
+        data: fixtureForSeason("2027-2028").replace(
+          '<a href="/player/222/x">Bob Jones (G)</a>',
+          "Bob Jones (G)",
+        ),
+      });
+
+    await expect(
+      fetchRecruitingData(false, { bypassCache: true }),
+    ).rejects.toMatchObject({ code: "RECRUITING_DATA_UNAVAILABLE" });
+    expect(saveToCache).not.toHaveBeenCalled();
+  });
+
+  test("uses controlled recovery instead of saving a mixed roster with a truncated player row", async () => {
+    getFromCache.mockReturnValue(null);
+    readRecruitingSnapshot.mockReturnValueOnce(null);
+    requestWithRetry
+      .mockResolvedValueOnce({ data: fixtureHtml })
+      .mockResolvedValueOnce({
+        data: truncatedPlayerFixture.replaceAll(
+          "2026-2027 Arizona State Univ. Roster",
+          "2027-2028 Arizona State Univ. Roster",
+        ),
+      });
+
+    await expect(
+      fetchRecruitingData(false, { bypassCache: true }),
+    ).rejects.toMatchObject({ code: "RECRUITING_DATA_UNAVAILABLE" });
+    expect(saveToCache).not.toHaveBeenCalled();
+  });
+});
+
+describe("fallback-only mode", () => {
+  test("uses the bundled snapshot without a network request in production", async () => {
+    process.env.NODE_ENV = "production";
+    getFromCache.mockReturnValue(null);
+    jest.spyOn(fs, "statSync").mockReturnValue({ mtimeMs: 1 });
+
+    const result = await fetchRecruitingData();
+
+    expect(result).toEqual(expect.objectContaining({
+      "2027-2028": expect.any(Array),
+    }));
+    expect(requestWithRetry).not.toHaveBeenCalled();
+  });
+
+  test("throws controlled unavailable data without a network request when the snapshot is missing", async () => {
+    process.env.NODE_ENV = "production";
+    jest.spyOn(fs, "statSync").mockImplementation(() => {
+      throw new Error("snapshot missing");
+    });
+
+    await expect(fetchRecruitingData()).rejects.toMatchObject({
+      code: "RECRUITING_DATA_UNAVAILABLE",
+    });
+    expect(requestWithRetry).not.toHaveBeenCalled();
+  });
+
+  test("does not bypass the production snapshot policy when profiles are requested", async () => {
+    process.env.NODE_ENV = "production";
+    jest.spyOn(fs, "statSync").mockReturnValue({ mtimeMs: 1 });
+
+    await expect(fetchRecruitingData(true)).resolves.toEqual(snapshotData);
+    expect(requestWithRetry).not.toHaveBeenCalled();
+  });
+
+  test("production remains fallback-only even when the live flag is set", async () => {
+    process.env.NODE_ENV = "production";
+    process.env.RECRUITING_SCRAPE_LIVE = "true";
+    jest.spyOn(fs, "statSync").mockReturnValue({ mtimeMs: 1 });
+
+    await expect(fetchRecruitingData()).resolves.toEqual(snapshotData);
+    expect(shouldUseFallbackOnly()).toBe(true);
+    expect(requestWithRetry).not.toHaveBeenCalled();
+  });
+
+  test("prerendering remains fallback-only even when the live flag is set", async () => {
+    process.env.IS_PRERENDER = "true";
+    process.env.RECRUITING_SCRAPE_LIVE = "true";
+    jest.spyOn(fs, "statSync").mockReturnValue({ mtimeMs: 1 });
+
+    await expect(fetchRecruitingData()).resolves.toEqual(snapshotData);
+    expect(shouldUseFallbackOnly()).toBe(true);
+    expect(requestWithRetry).not.toHaveBeenCalled();
   });
 });

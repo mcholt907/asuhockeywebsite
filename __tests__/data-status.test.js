@@ -94,10 +94,11 @@ describe('getDataStatus', () => {
     expect(transfers.status).toBe('ok');
   });
 
-  test('reports the hand-maintained recruiting file as static and never alerting', () => {
+  test('reports the bundled recruiting roster as an alerting fallback dataset', () => {
     const recruiting = datasetByName('recruiting');
-    expect(recruiting.source).toBe('static');
-    expect(recruiting.alert).toBe(false);
+    expect(recruiting.source).toBe('fallback');
+    expect(recruiting.file).toBe('data/asu_recruiting_fallback.json');
+    expect(recruiting.alert).toBe(true);
     expect(recruiting.status).toBe('ok');
   });
 });

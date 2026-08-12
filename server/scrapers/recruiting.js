@@ -2,12 +2,68 @@
 // tracker). fetchRecruitingData feeds local curation scripts; the live
 // /api/recruits endpoint reads asu_hockey_data.json directly.
 const cheerio = require("cheerio");
+const fs = require("fs");
+const path = require("path");
 const config = require("../../config/scraper-config");
 const {
   requestWithRetry,
   delayBetweenRequests,
 } = require("../lib/request-helper");
 const { createCachedScraper } = require("./create-cached-scraper");
+const { reportScrapeHealth } = require("../cache/scrape-health");
+const {
+  validateRecruitingSnapshot,
+  readRecruitingSnapshot,
+} = require("../services/recruiting-snapshot");
+
+const CACHE_TTL = 24 * 60 * 60 * 1000;
+const FALLBACK_FILE = path.join(
+  __dirname,
+  "..",
+  "..",
+  "data",
+  "asu_recruiting_fallback.json",
+);
+let fallbackCache = { mtimeMs: 0, value: null };
+
+class RecruitingDataUnavailableError extends Error {
+  constructor(cause) {
+    super("Recruiting data is unavailable");
+    this.name = "RecruitingDataUnavailableError";
+    this.code = "RECRUITING_DATA_UNAVAILABLE";
+    this.cause = cause;
+  }
+}
+
+class InvalidRecruitingSnapshotError extends Error {
+  constructor() {
+    super("Recruiting snapshot is incomplete or malformed");
+    this.name = "InvalidRecruitingSnapshotError";
+    this.code = "INVALID_RECRUITING_SNAPSHOT";
+  }
+}
+
+function getFallbackRecruitingData() {
+  try {
+    const stat = fs.statSync(FALLBACK_FILE);
+    if (fallbackCache.value && fallbackCache.mtimeMs === stat.mtimeMs) {
+      return fallbackCache.value;
+    }
+    const value = readRecruitingSnapshot(
+      FALLBACK_FILE,
+      config.FUTURE_SEASONS,
+    );
+    if (value) fallbackCache = { mtimeMs: stat.mtimeMs, value };
+    return value;
+  } catch (error) {
+    console.warn(`[Recruiting] Fallback unavailable: ${error.message}`);
+    return null;
+  }
+}
+
+function shouldUseFallbackOnly() {
+  return process.env.NODE_ENV === "production" || process.env.IS_PRERENDER === "true";
+}
 
 /**
  * Scrapes player photo and current team from a single Elite Prospects profile page visit
@@ -97,8 +153,59 @@ async function scrapePlayerPhoto(playerLink) {
  * @param {boolean} includePhotos - Whether to scrape individual player photos (slower)
  * @returns {Array} Array of player objects with recruiting information
  */
+function normalizeRosterHeader(text) {
+  return text.toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+function getRosterHeaderKey(text) {
+  const header = normalizeRosterHeader(text);
+  if (header === "#" || /^(no\.?|number)$/.test(header)) return "number";
+  if (/^player\b/.test(header)) return "player";
+  if (header === "a" || /^age\b/.test(header)) return "age";
+  if (/^(born|birth year)\b/.test(header)) return "birthYear";
+  if (/^birth ?place\b/.test(header)) return "birthplace";
+  if (header === "ht" || /^height\b/.test(header)) return "height";
+  if (header === "wt" || /^weight\b/.test(header)) return "weight";
+  if (header === "s" || /^(shoots|catches)\b/.test(header)) return "shoots";
+  return null;
+}
+
+function getRosterHeaderMap($, table) {
+  const headerMap = {};
+  $(table)
+    .find("thead th")
+    .each((index, header) => {
+      const key = getRosterHeaderKey($(header).text());
+      if (key && headerMap[key] === undefined) headerMap[key] = index;
+    });
+
+  const requiredHeaders = [
+    "player",
+    "age",
+    "birthYear",
+    "birthplace",
+    "height",
+    "weight",
+    "shoots",
+  ];
+  return requiredHeaders.every((key) => headerMap[key] !== undefined)
+    ? headerMap
+    : null;
+}
+
+function isRosterCardForSeason($, card, season) {
+  const heading = normalizeRosterHeader($(card).find("h2").first().text());
+  const headingSeasons = heading.match(/\b20\d{2}-20\d{2}\b/g) || [];
+  return (
+    headingSeasons.length === 1 &&
+    headingSeasons[0] === normalizeRosterHeader(season) &&
+    heading.startsWith(`${headingSeasons[0]} `) &&
+    /\broster\b/.test(heading)
+  );
+}
+
 async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
-  const url = `https://www.eliteprospects.com/team/18066/arizona-state-univ/${season}?tab=stats`;
+  const url = `https://www.eliteprospects.com/team/18066/arizona-state-univ/${season}`;
   console.log(
     `[EP Recruiting Scraper] Fetching recruiting data for ${season} from: ${url}`,
   );
@@ -108,29 +215,22 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
     const $ = cheerio.load(data);
     const players = [];
 
-    // Find all player rows in the roster table. Structural selection
-    // first — the hashed CSS-module class names (SortTable_*) rotate
-    // whenever EP redeploys. A roster table is one that contains player
-    // profile links AND has an Age column in its header; the header check
-    // keeps pure stats tables (GP/G/A columns at the same indexes) from
-    // being parsed as roster rows. Header/summary rows inside the table
-    // are filtered by the cell-count and name checks below.
-    const candidateTables = $("table").filter(
-      (_, t) => $(t).find('a[href*="/player/"]').length > 0,
-    );
-    let rosterTables = candidateTables.filter((_, t) =>
-      $(t)
-        .find("thead th")
-        .toArray()
-        .some((th) => /^\s*age\s*$/i.test($(th).text())),
-    );
-    if (rosterTables.length === 0) rosterTables = candidateTables;
-    let playerRows = rosterTables.find("tbody tr");
-    if (playerRows.length === 0) {
-      playerRows = $(
-        "table.SortTable_table__jnnJk tbody.SortTable_tbody__VrcrZ tr.SortTable_tr__L9yVC",
+    // Scope tables to EP's roster card for the requested season before
+    // checking semantic headers. This prevents a redirected older-season
+    // page from being accepted as the requested snapshot. The CSS-module
+    // hash rotates, so match only the stable LineupCard_wrapper prefix.
+    const rosterTables = $(
+      'div[class^="LineupCard_wrapper"], div[class*=" LineupCard_wrapper"]',
+    )
+      .filter((_, card) => isRosterCardForSeason($, card, season))
+      .find("table")
+      .filter((_, table) => getRosterHeaderMap($, table) !== null);
+    if (rosterTables.length === 0) {
+      throw new Error(
+        `[EP Recruiting Scraper] Unable to identify roster table for ${season}`,
       );
     }
+    const playerRows = rosterTables.find("tbody tr");
 
     console.log(
       `[EP Recruiting Scraper] Found ${playerRows.length} potential player rows`,
@@ -142,15 +242,43 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
       // children() not find(): a nested table inside a cell must not
       // pollute the positional index space.
       const cells = $row.children("td");
+      const headerMap = getRosterHeaderMap($, $row.closest("table").get(0));
+      const requiredCellIndex = Math.max(...Object.values(headerMap));
 
-      // Skip if not enough cells (likely a header or section row)
-      if (cells.length < 10) {
+      // A short row is only safe to ignore when it has no player evidence.
+      // EP can truncate a player row after its profile cell, which would
+      // otherwise silently remove that player from a cached snapshot.
+      if (cells.length <= requiredCellIndex) {
+        const playerCellText =
+          headerMap.player < cells.length
+            ? $(cells[headerMap.player]).text().trim()
+            : "";
+        const numberCellText =
+          headerMap.number !== undefined && headerMap.number < cells.length
+            ? $(cells[headerMap.number]).text().trim()
+            : "";
+        const hasPlayerLink = $(row).find('a[href*="/player/"]').length > 0;
+        const isKnownSection = /^(forwards|defensemen|goaltenders|goalies|skaters)$/i.test(
+          playerCellText,
+        );
+        const isKnownSummary = /^(ncaa|total)/i.test(numberCellText);
+        if (
+          hasPlayerLink ||
+          (playerCellText && !isKnownSection && !isKnownSummary)
+        ) {
+          throw new Error(
+            `[EP Recruiting Scraper] truncated player-like row ${index}`,
+          );
+        }
         continue;
       }
 
       try {
         // Extract player data from cells
-        const number = $(cells[1]).text().trim();
+        const number =
+          headerMap.number === undefined
+            ? ""
+            : $(cells[headerMap.number]).text().trim();
 
         // Skip statistics/summary rows (they have "NCAA" or numbers as the number field)
         if (
@@ -165,14 +293,27 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
         }
 
         // Get player name and link (structural first, hashed fallback)
-        let playerLinkElement = $(cells[3]).find('a[href*="/player/"]').first();
+        let playerLinkElement = $(cells[headerMap.player])
+          .find('a[href*="/player/"]')
+          .first();
         if (!playerLinkElement.length) {
-          playerLinkElement = $(cells[3]).find(
+          playerLinkElement = $(cells[headerMap.player]).find(
             "div.Roster_player__e6EbP a.TextLink_link__RhSiC",
           );
         }
         let fullNameWithPos = playerLinkElement.text().trim();
         const playerLink = playerLinkElement.attr("href");
+
+        if (!playerLinkElement.length || !fullNameWithPos || !playerLink) {
+          const playerCellText = $(cells[headerMap.player]).text().trim();
+          const hasRowPlayerLink = $row.find('a[href*="/player/"]').length > 0;
+          if (playerCellText || hasRowPlayerLink) {
+            throw new Error(
+              `[EP Recruiting Scraper] Player-like row ${index} is missing a valid player name or link`,
+            );
+          }
+          continue;
+        }
 
         // Extract position from name (e.g., "John Doe (F)" -> position: "F", name: "John Doe")
         let name = fullNameWithPos;
@@ -183,27 +324,17 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
           position = posMatch[2];
         }
 
-        // Skip if name is just a number (invalid row)
-        if (name && !isNaN(name)) {
-          console.log(
-            `[EP Recruiting Scraper] Skipping invalid row with numeric name: ${name}`,
+        if (!name || !isNaN(name)) {
+          throw new Error(
+            `[EP Recruiting Scraper] Player-like row ${index} is missing a valid player name or link`,
           );
-          continue;
-        }
-
-        // Skip Carson McGinley as requested
-        if (name && name === "Carson McGinley") {
-          console.log(
-            `[EP Recruiting Scraper] Skipping removed recruit: Carson McGinley`,
-          );
-          continue;
         }
 
         // Extract other fields
-        const age = $(cells[4]).text().trim();
+        const age = $(cells[headerMap.age]).text().trim();
 
         // Birth year extraction
-        const birthYearSpan = $(cells[5]).find("span");
+        const birthYearSpan = $(cells[headerMap.birthYear]).find("span");
         let birthYear = "";
         if (birthYearSpan.length && birthYearSpan.attr("title")) {
           const birthYearMatch = birthYearSpan.attr("title").match(/(\d{4})/);
@@ -212,20 +343,21 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
           }
         }
         if (!birthYear) {
-          birthYear = $(cells[5]).text().trim();
+          birthYear = $(cells[headerMap.birthYear]).text().trim();
         }
 
         // .text() over all links concatenates city + country when EP
         // splits birthplace across two anchors
         const birthplace =
-          $(cells[6]).find("a").text().trim() || $(cells[6]).text().trim();
-        const height = $(cells[7]).text().trim();
-        const weight = $(cells[8]).text().trim();
-        const shoots = $(cells[9]).text().trim();
+          $(cells[headerMap.birthplace]).find("a").text().trim() ||
+          $(cells[headerMap.birthplace]).text().trim();
+        const height = $(cells[headerMap.height]).text().trim();
+        const weight = $(cells[headerMap.weight]).text().trim();
+        const shoots = $(cells[headerMap.shoots]).text().trim();
 
-        const fullPlayerLink = playerLink
-          ? `https://www.eliteprospects.com${playerLink}`
-          : "";
+        const fullPlayerLink = playerLink.startsWith("http")
+          ? playerLink
+          : `https://www.eliteprospects.com${playerLink}`;
 
         // Skip players already captured from another matching table
         // (structural table selection can match more than one)
@@ -247,33 +379,31 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
           await delayBetweenRequests();
         }
 
-        // Only add if we have a valid player name
-        if (name && name.length > 0) {
-          const player = {
-            number: number || "",
-            name: name,
-            position: position,
-            age: age || "",
-            birth_year: birthYear || "",
-            birthplace: birthplace || "",
-            height: height || "",
-            weight: weight || "",
-            shoots: shoots || "",
-            player_link: fullPlayerLink,
-            player_photo: player_photo,
-            current_team: current_team,
-          };
+        const player = {
+          number: number || "",
+          name: name,
+          position: position,
+          age: age || "",
+          birth_year: birthYear || "",
+          birthplace: birthplace || "",
+          height: height || "",
+          weight: weight || "",
+          shoots: shoots || "",
+          player_link: fullPlayerLink,
+          player_photo: player_photo,
+          current_team: current_team,
+        };
 
-          players.push(player);
-          console.log(
-            `[EP Recruiting Scraper] Added player: ${name} (${position})${player_photo ? " with photo" : ""}`,
-          );
-        }
+        players.push(player);
+        console.log(
+          `[EP Recruiting Scraper] Added player: ${name} (${position})${player_photo ? " with photo" : ""}`,
+        );
       } catch (error) {
         console.error(
           `[EP Recruiting Scraper] Error parsing row ${index}:`,
           error.message,
         );
+        throw error;
       }
     }
 
@@ -286,7 +416,7 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
       `[EP Recruiting Scraper] Error fetching recruiting data for ${season}:`,
       error.message,
     );
-    return [];
+    throw error;
   }
 }
 
@@ -318,25 +448,83 @@ async function scrapeAllSeasons({ includePhotos = false } = {}) {
   return recruitingData;
 }
 
+function isValidRecruitingSnapshot(data) {
+  return validateRecruitingSnapshot(data, config.FUTURE_SEASONS);
+}
+
+function requireValidRecruitingSnapshot(data) {
+  if (!isValidRecruitingSnapshot(data)) {
+    throw new InvalidRecruitingSnapshotError();
+  }
+  return data;
+}
+
+function getValidatedFallback() {
+  const fallback = getFallbackRecruitingData();
+  return fallback && isValidRecruitingSnapshot(fallback) ? fallback : null;
+}
+
 const fetchRecruiting = createCachedScraper({
   name: "recruiting",
   cacheKey: "asu_hockey_recruiting",
-  // no ttl: saveToCache's 24h default, same as the old bare saveToCache call
+  ttl: CACHE_TTL,
+  swr: false,
   scrape: scrapeAllSeasons,
-  validate: (data) => Object.values(data).some((arr) => arr.length > 0),
+  validate: (data) => {
+    const valid = isValidRecruitingSnapshot(data);
+    const totalPlayers = valid
+      ? config.FUTURE_SEASONS.reduce(
+          (sum, season) => sum + data[season].length,
+          0,
+        )
+      : 0;
+    return reportScrapeHealth("recruiting", {
+      validSnapshot: valid ? 1 : 0,
+      totalPlayers,
+    });
+  },
+  fallback: getFallbackRecruitingData,
+  fallbackOnly: shouldUseFallbackOnly,
+  normalizeCached: requireValidRecruitingSnapshot,
+  onScrapeError: (error) => {
+    throw new RecruitingDataUnavailableError(error);
+  },
 });
 
 /**
  * Fetches recruiting data for all configured future seasons.
- * includePhotos=true bypasses cache reads and always scrapes live (local
- * curation scripts only); the result still refreshes the shared cache key.
+ * includePhotos=true bypasses cache reads in local/live mode. Production and
+ * prerender calls always remain on the bundled-snapshot path.
  * @param {boolean} includePhotos - Whether to scrape player photos (much slower)
  */
-async function fetchRecruitingData(includePhotos = false) {
-  return fetchRecruiting({
-    bypassCache: includePhotos,
+async function fetchRecruitingData(includePhotos = false, options = {}) {
+  // Production and prerender environments cannot reliably access Elite
+  // Prospects. This guard intentionally precedes cache-bypass handling so a
+  // profile-enrichment request cannot become a live network escape hatch.
+  if (shouldUseFallbackOnly()) {
+    const fallback = getValidatedFallback();
+    if (fallback) return fallback;
+    throw new RecruitingDataUnavailableError();
+  }
+  const fetchOptions = {
+    bypassCache: includePhotos || options.bypassCache === true,
     scrapeArgs: { includePhotos },
-  });
+  };
+
+  try {
+    return await fetchRecruiting(fetchOptions);
+  } catch (error) {
+    if (error.code !== "INVALID_RECRUITING_SNAPSHOT") throw error;
+
+    const fallback = getValidatedFallback();
+    if (fallback) return fallback;
+
+    try {
+      return await fetchRecruiting({ ...fetchOptions, bypassCache: true });
+    } catch (liveError) {
+      throw new RecruitingDataUnavailableError(liveError);
+    }
+  }
 }
 
 module.exports = {
@@ -344,4 +532,6 @@ module.exports = {
   scrapeEliteProspectsRecruiting,
   scrapePlayerProfile,
   scrapePlayerPhoto,
+  getFallbackRecruitingData,
+  shouldUseFallbackOnly,
 };
