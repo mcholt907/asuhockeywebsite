@@ -101,6 +101,14 @@ describe('getDataStatus', () => {
     expect(recruiting.alert).toBe(true);
     expect(recruiting.status).toBe('ok');
   });
+
+  test('uses the season-scoped standings cache key and bundled fallback', () => {
+    const config = require('../config/scraper-config');
+    const standings = datasetByName('standings');
+    expect(standings.key).toBe(`nchc_standings_${config.CURRENT_SEASON}`);
+    expect(standings.source).toBe('fallback');
+    expect(standings.file).toBe('data/nchc_standings_fallback.json');
+  });
 });
 
 describe('getCooldownStatus', () => {

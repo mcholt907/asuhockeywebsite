@@ -23,7 +23,13 @@ const DATASETS = [
   { name: 'news', cacheKey: 'asu_hockey_news', staleAfterMs: DAY_MS, alert: true },
   { name: 'schedule', cacheKey: () => `asu_hockey_schedule_${config.seasons.current}`, staleAfterMs: DAY_MS, alert: true },
   { name: 'stats', cacheKey: 'asu_hockey_stats', staleAfterMs: DAY_MS, alert: true },
-  { name: 'standings', cacheKey: 'nchc_standings', staleAfterMs: DAY_MS, alert: true },
+  {
+    name: "standings",
+    cacheKey: () => `nchc_standings_${config.CURRENT_SEASON}`,
+    fallbackFile: "data/nchc_standings_fallback.json",
+    staleAfterMs: DAY_MS,
+    alert: true,
+  },
   { name: 'roster', cacheKey: 'asu_hockey_roster', staleAfterMs: 3 * DAY_MS, alert: true },
   { name: 'transfers', cacheKey: 'asu_transfers', fallbackFile: 'data/asu_transfers_fallback.json', staleAfterMs: 21 * DAY_MS, alert: true },
   { name: 'alumni', cacheKey: 'asu_alumni', fallbackFile: 'data/asu_alumni_fallback.json', staleAfterMs: 21 * DAY_MS, alert: true },
@@ -110,7 +116,7 @@ function getDataStatus() {
       meta = { key: cacheMeta.key, timestamp: cacheMeta.timestamp, ageMs: cacheMeta.ageMs };
     } else if (fallbackMeta) {
       source = 'fallback';
-      meta = { file: fallbackMeta.file, timestamp: fallbackMeta.timestamp, ageMs: fallbackMeta.ageMs };
+      meta = { key: cacheKey, file: fallbackMeta.file, timestamp: fallbackMeta.timestamp, ageMs: fallbackMeta.ageMs };
     }
 
     if (!meta) return { ...base, source: 'none', status: 'missing' };
