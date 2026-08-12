@@ -51,6 +51,7 @@ jest.mock("../server/services/recruiting-snapshot", () => ({
 const fs = require("fs");
 const { getFromCache, saveToCache } = require("../server/cache/caching-system");
 const { requestWithRetry } = require("../server/lib/request-helper");
+const { readRecruitingSnapshot } = require("../server/services/recruiting-snapshot");
 const {
   fetchRecruitingData,
   scrapeEliteProspectsRecruiting,
@@ -353,6 +354,7 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
 
   test("does not cache a partial snapshot when one season request fails", async () => {
     getFromCache.mockReturnValue(null);
+    readRecruitingSnapshot.mockReturnValueOnce(null);
     requestWithRetry
       .mockResolvedValueOnce({ data: fixtureHtml })
       .mockRejectedValueOnce(new Error("second season unavailable"));
@@ -365,6 +367,7 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
 
   test("does not cache a season when a mixed roster contains an unparseable player row", async () => {
     getFromCache.mockReturnValue(null);
+    readRecruitingSnapshot.mockReturnValueOnce(null);
     requestWithRetry
       .mockResolvedValueOnce({ data: fixtureHtml })
       .mockResolvedValueOnce({
@@ -382,6 +385,7 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
 
   test("uses controlled recovery instead of saving a mixed roster with a truncated player row", async () => {
     getFromCache.mockReturnValue(null);
+    readRecruitingSnapshot.mockReturnValueOnce(null);
     requestWithRetry
       .mockResolvedValueOnce({ data: fixtureHtml })
       .mockResolvedValueOnce({

@@ -127,7 +127,7 @@ describe('checkDataStaleness', () => {
     expect(alerts.find((a) => a.name === 'roster')).toBeUndefined();
   });
 
-  test('never alerts for non-alerting (hand-maintained) datasets', () => {
+  test('does not alert while the bundled recruiting fallback is fresh', () => {
     const alerts = maintenance.checkDataStaleness();
     expect(alerts.find((a) => a.name === 'recruiting')).toBeUndefined();
   });
