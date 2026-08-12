@@ -68,3 +68,18 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+## Data Refresh
+
+Elite Prospects data for alumni, transfers, and projected future teams is bundled in the repository as fallback JSON. Production and prerendering read these bundled files instead of making Elite Prospects requests. The projected Arizona State future-team seasons currently tracked are `2026-27`, `2027-28`, and `2028-29`.
+
+Run the following from a local machine to refresh the bundled data:
+
+```bash
+npm run refresh-data        # all Elite Prospects fallbacks
+npm run refresh-recruiting  # projected future team rosters only
+```
+
+`/api/recruits` reads `data/asu_recruiting_fallback.json`. `asu_hockey_data.json.recruiting` remains available only for current-roster profile enrichment; it is not the source for that API response.
+
+`npm run refresh-recruiting` enables the local `RECRUITING_SCRAPE_LIVE=true` override and Puppeteer request fallback by default, allowing a residential machine to retry Elite Prospects 403 responses through headless Chrome. Do not enable that override on Render. The refresh command refuses to run when `NODE_ENV=production` or `IS_PRERENDER=true`, preserving the existing bundled snapshot in those environments.
