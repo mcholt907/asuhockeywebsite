@@ -71,7 +71,7 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 
 ## Data Refresh
 
-Elite Prospects data for alumni, transfers, and projected future teams is bundled in the repository as fallback JSON. Production and prerendering read these bundled files instead of making Elite Prospects requests. The projected Arizona State future-team seasons currently tracked are `2026-27`, `2027-28`, and `2028-29`.
+Elite Prospects data for alumni, transfers, and projected future teams is bundled in the repository as fallback JSON. Production and prerendering read these bundled files instead of making Elite Prospects requests. The projected Arizona State future-team seasons currently tracked are `2027-28` and `2028-29`.
 
 Run the following from a local machine to refresh the bundled data:
 

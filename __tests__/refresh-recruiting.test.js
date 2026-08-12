@@ -4,7 +4,6 @@ const path = require("path");
 const { refreshRecruitingSnapshot } = require("../scripts/refresh-recruiting");
 
 const valid = {
-  "2026-2027": [],
   "2027-2028": [
     {
       name: "Jane",

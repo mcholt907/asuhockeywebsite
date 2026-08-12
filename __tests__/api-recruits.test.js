@@ -45,11 +45,10 @@ describe('/api/recruits', () => {
 
   test('returns the nonempty season map supplied by the recruiting scraper', async () => {
     const roster = {
-      '2026-2027': [{
-        name: 'Current Team Player',
+      '2027-2028': [{
+        name: 'Future Team Player',
         player_link: 'https://www.eliteprospects.com/player/1/current-team-player',
       }],
-      '2027-2028': [],
       '2028-2029': [],
     };
     fetchRecruitingData.mockResolvedValue(roster);
@@ -61,8 +60,11 @@ describe('/api/recruits', () => {
     expect(res.payload).toEqual(roster);
   });
 
-  test('returns a controlled error when the recruiting scraper has no roster data', async () => {
-    fetchRecruitingData.mockResolvedValue({});
+  test('returns a controlled error when the recruiting scraper returns all-empty rosters', async () => {
+    fetchRecruitingData.mockResolvedValue({
+      '2027-2028': [],
+      '2028-2029': [],
+    });
     const res = responseRecorder();
 
     await recruitsHandler()({}, res);
@@ -73,11 +75,10 @@ describe('/api/recruits', () => {
 
   test('returns a controlled error when the recruiting scraper omits a configured season', async () => {
     fetchRecruitingData.mockResolvedValue({
-      '2026-2027': [{
-        name: 'Current Team Player',
+      '2027-2028': [{
+        name: 'Future Team Player',
         player_link: 'https://www.eliteprospects.com/player/1/current-team-player',
       }],
-      '2027-2028': [],
     });
     const res = responseRecorder();
 
@@ -89,8 +90,27 @@ describe('/api/recruits', () => {
 
   test('returns a controlled error when the recruiting scraper returns a malformed player', async () => {
     fetchRecruitingData.mockResolvedValue({
-      '2026-2027': [{ name: 'Current Team Player' }],
-      '2027-2028': [],
+      '2027-2028': [{ name: 'Future Team Player' }],
+      '2028-2029': [],
+    });
+    const res = responseRecorder();
+
+    await recruitsHandler()({}, res);
+
+    expect(res.statusCode).toBe(500);
+    expect(res.payload).toEqual({ error: 'Recruiting roster data unavailable.' });
+  });
+
+  test('returns a controlled error when the recruiting scraper includes a current-team season', async () => {
+    fetchRecruitingData.mockResolvedValue({
+      '2026-2027': [{
+        name: 'Current Team Player',
+        player_link: 'https://www.eliteprospects.com/player/1/current-team-player',
+      }],
+      '2027-2028': [{
+        name: 'Future Team Player',
+        player_link: 'https://www.eliteprospects.com/player/2/future-team-player',
+      }],
       '2028-2029': [],
     });
     const res = responseRecorder();
