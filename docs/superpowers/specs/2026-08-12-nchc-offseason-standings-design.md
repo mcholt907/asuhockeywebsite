@@ -66,13 +66,14 @@ The Home page will continue rendering the table from `response.data`. Its headin
 
 Add a standings refresh command to the existing weekly local refresh workflow. It will bypass the cache, fetch USCHO, and overwrite `data/nchc_standings_fallback.json` only when the live result passes the played-season predicate. The write will use a same-directory temporary file and atomic rename, matching the repository's protected fallback refresh pattern. The command will reject production and prerender execution before performing network or filesystem work.
 
-An empty, all-zero, malformed, or failed scrape will exit nonzero without changing the prior snapshot. The scheduled refresh script will stage the standings fallback alongside the other tracked fallback files and use wording that covers all refreshed datasets.
+An unpublished NCHC dataset or structurally valid all-zero table is an expected offseason no-op: the command exits successfully without changing the prior snapshot. A malformed response, request failure, or write failure exits nonzero and also preserves the prior snapshot. The scheduled refresh script will stage the standings fallback alongside the other tracked fallback files and use wording that covers all refreshed datasets.
 
 `/api/status` will list the standings fallback file. When the runtime cache is unavailable, the status endpoint can therefore report `source: "fallback"` instead of `source: "none"`.
 
 ## Error Handling
 
 - A blank preseason table is expected offseason state and selects the bundled snapshot without caching the blank result.
+- A local refresh against an unpublished or all-zero preseason table succeeds without changing the bundled snapshot, so the weekly workflow can continue refreshing unrelated datasets.
 - A malformed live table is treated as source drift and must not overwrite either cache or bundled data.
 - A failed refresh preserves the existing snapshot byte-for-byte and removes any temporary file.
 - A malformed or missing bundled snapshot is not silently converted to an empty table; with no usable cache, the request fails visibly and retains the existing alert behavior.
@@ -82,7 +83,7 @@ An empty, all-zero, malformed, or failed scrape will exit nonzero without changi
 - Parser and scraper tests will cover a missing NCHC dataset, malformed records, an all-`0-0-0` preseason table, and a table after the first completed game.
 - Cache tests will verify current-season key scoping, stale-current recovery, fallback recovery after a cold deploy, and rejection of malformed fallback data.
 - Route tests will verify the compatible `data` array plus `season` and `isPriorSeason` metadata.
-- Refresh tests will use a red-green cycle to verify atomic writes, refusal to replace the snapshot with all-zero or malformed data, cleanup after write failures, and rejection of production or prerender execution before network and filesystem work.
+- Refresh tests will use a red-green cycle to verify atomic writes, successful no-change handling for unpublished or all-zero tables, rejection of malformed data, cleanup after write failures, and rejection of production or prerender execution before network and filesystem work.
 - Home page tests will verify that prior-season standings remain rendered with the prior-season label and that current-season data replaces them after the first game.
 - Final verification will include the full server and React suites, type-checking, production build, API verification from an isolated server, and Chromium verification of the Home page standings widget.
 
