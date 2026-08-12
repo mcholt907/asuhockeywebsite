@@ -172,6 +172,16 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
       </tr>`,
   );
 
+  const movedPlayerLinkFixture = fixtureHtml.replace(
+    /<tr>\s*<td><\/td><td>30<\/td>[\s\S]*?<\/tr>/,
+    `
+      <tr>
+        <td><a href="/player/222/x">Bob Jones (G)</a></td><td>30</td><td><img /></td>
+        <td></td><td>19</td><td><span title="2007-01-01">2007</span></td>
+        <td><a href="/place">Calgary, AB</a></td><td>188 cm</td><td>190 lbs</td><td>L</td>
+      </tr>`,
+  );
+
   test("requests the default Elite Prospects season roster route", async () => {
     requestWithRetry.mockResolvedValue({ data: fixtureForSeason("2027-2028") });
 
@@ -338,6 +348,14 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
     await expect(
       scrapeEliteProspectsRecruiting("2026-2027", false),
     ).rejects.toThrow("truncated player-like row");
+  });
+
+  test("rejects a full-width row when its player link moved outside the Player cell", async () => {
+    requestWithRetry.mockResolvedValue({ data: movedPlayerLinkFixture });
+
+    await expect(
+      scrapeEliteProspectsRecruiting("2026-2027", false),
+    ).rejects.toThrow("missing a valid player name or link");
   });
 
   test("keeps the same player in every Elite Prospects season that lists them", async () => {

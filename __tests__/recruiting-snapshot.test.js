@@ -24,6 +24,12 @@ test.each([
   [{ "2027-2028": [player("A")], "2028-2029": [] }],
   [{ "2027-2028": [], "2028-2029": [], "2029-2030": [] }],
   [{ "2027-2028": [{ name: "No Link" }], "2028-2029": [], "2029-2030": [] }],
+  [{
+    "2027-2028": [player("A")],
+    "2028-2029": [],
+    "2029-2030": [],
+    metadata: { source: "unexpected" },
+  }],
 ])("rejects an incomplete, all-empty, or malformed snapshot", (candidate) => {
   expect(validateRecruitingSnapshot(candidate, seasons)).toBe(false);
 });

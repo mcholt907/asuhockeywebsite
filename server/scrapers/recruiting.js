@@ -306,7 +306,8 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
 
         if (!playerLinkElement.length || !fullNameWithPos || !playerLink) {
           const playerCellText = $(cells[headerMap.player]).text().trim();
-          if (playerCellText) {
+          const hasRowPlayerLink = $row.find('a[href*="/player/"]').length > 0;
+          if (playerCellText || hasRowPlayerLink) {
             throw new Error(
               `[EP Recruiting Scraper] Player-like row ${index} is missing a valid player name or link`,
             );

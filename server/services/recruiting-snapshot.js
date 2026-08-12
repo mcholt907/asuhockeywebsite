@@ -3,6 +3,12 @@ const fs = require("fs");
 function validateRecruitingSnapshot(data, seasons) {
   if (!data || typeof data !== "object" || Array.isArray(data)) return false;
   if (!Array.isArray(seasons) || seasons.length === 0) return false;
+  if (new Set(seasons).size !== seasons.length) return false;
+  const snapshotKeys = Object.keys(data);
+  if (
+    snapshotKeys.length !== seasons.length ||
+    snapshotKeys.some((key) => !seasons.includes(key))
+  ) return false;
   let totalPlayers = 0;
   for (const season of seasons) {
     const roster = data[season];
