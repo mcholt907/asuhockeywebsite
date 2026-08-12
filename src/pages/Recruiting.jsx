@@ -160,11 +160,11 @@ function Recruiting() {
       )}
 
       <section className="recruits-section">
-        <h2>Future Commits</h2>
+        <h2>Projected Future Teams</h2>
 
-        {/* Controls Bar: Class Tabs and Position Filters */}
+        {/* Controls Bar: Team-Season Tabs and Position Filters */}
         <div className="controls-bar">
-          {/* Class selector tabs */}
+          {/* Team-season selector tabs */}
           <div className="class-tabs">
             {sortedSeasons.map(season => (
               <button
@@ -172,10 +172,10 @@ function Recruiting() {
                 className={`tab-btn ${activeSeason === season ? 'active' : ''}`}
                 onClick={() => {
                   setActiveSeason(season);
-                  setPositionFilter('all'); // Reset filter when switching classes
+                  setPositionFilter('all'); // Reset filter when switching team seasons
                 }}
               >
-                {season} Class
+                {season} Team
               </button>
             ))}
           </div>
@@ -215,7 +215,7 @@ function Recruiting() {
             <p>
               {isFiltered
                 ? 'No commitments match the selected position filter.'
-                : `No commitments announced for the ${activeSeason} class yet.`}
+                : `No players listed for the ${activeSeason} team yet.`}
             </p>
           </div>
         ) : (
