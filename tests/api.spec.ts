@@ -93,10 +93,11 @@ test.describe('API Endpoints', () => {
         expect(response.status()).toBe(200);
 
         const data = await response.json();
-        for (const season of ['2026-2027', '2027-2028', '2028-2029']) {
+        for (const season of ['2027-2028', '2028-2029']) {
             expect(Array.isArray(data[season])).toBeTruthy();
         }
-        expect(data['2026-2027'].length).toBeGreaterThan(0);
+        expect(data['2027-2028'].length).toBeGreaterThan(0);
+        expect(data).not.toHaveProperty('2026-2027');
     });
 
     test('GET /api/alumni should return alumni data', async () => {
