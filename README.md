@@ -76,10 +76,13 @@ Elite Prospects data for alumni, transfers, and projected future teams is bundle
 Run the following from a local machine to refresh the bundled data:
 
 ```bash
-npm run refresh-data        # all Elite Prospects fallbacks
+npm run refresh-data        # all bundled fallbacks
 npm run refresh-recruiting  # projected future team rosters only
+npm run refresh-standings   # latest played-season NCHC table only
 ```
 
 `/api/recruits` reads `data/asu_recruiting_fallback.json`. `asu_hockey_data.json.recruiting` remains available only for current-roster profile enrichment; it is not the source for that API response.
+
+Production serves `data/nchc_standings_fallback.json` when USCHO has no current NCHC table or every overall record is `0-0-0`, and switches after the first completed game by any NCHC member.
 
 `npm run refresh-recruiting` enables the local `RECRUITING_SCRAPE_LIVE=true` override and Puppeteer request fallback by default, allowing a residential machine to retry Elite Prospects 403 responses through headless Chrome. Do not enable that override on Render. The refresh command refuses to run when `NODE_ENV=production` or `IS_PRERENDER=true`, preserving the existing bundled snapshot in those environments.

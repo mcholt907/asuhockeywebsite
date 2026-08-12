@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.4" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
   <RegistrationInfo>
-    <Description>Weekly refresh of ASU Hockey alumni + transfer fallback JSON. Pulls main, runs npm run refresh-data, commits and pushes if anything changed.</Description>
+    <Description>Weekly refresh of ASU Hockey alumni, transfer, recruiting, and NCHC standings fallback JSON. Pulls main, runs npm run refresh-data, commits, and opens an auto-merging PR when data changes.</Description>
     <URI>\ASU Hockey Data Refresh</URI>
   </RegistrationInfo>
   <Triggers>

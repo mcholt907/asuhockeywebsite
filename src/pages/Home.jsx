@@ -7,6 +7,11 @@ import { useNews } from "../hooks/queries/useNews";
 import { useStandings } from "../hooks/queries/useStandings";
 import "./Home.css";
 
+const formatSeason = (season) => {
+  const match = /^(\d{4})-(\d{2})(\d{2})$/.exec(season || "");
+  return match ? `${match[1]}-${match[3]}` : season;
+};
+
 function Home() {
   const { data: scheduleResponse, isLoading: scheduleLoading } = useSchedule();
   const { data: newsResponse, isLoading: newsLoading } = useNews();
@@ -15,6 +20,9 @@ function Home() {
 
   const news = newsResponse?.data || [];
   const standings = standingsResponse?.data || [];
+  const standingsTitle = standingsResponse?.season
+    ? `${formatSeason(standingsResponse.season)} NCHC Standings`
+    : "NCHC Standings";
 
   const today = useMemo(() => {
     const d = new Date();
@@ -209,7 +217,7 @@ function Home() {
             {/* NCHC Conference Standings */}
             {standings.length > 0 && (
               <div className="right-section">
-                <h3 className="right-section-title">NCHC Standings</h3>
+                <h3 className="right-section-title">{standingsTitle}</h3>
                 <div className="right-standings">
                   <table className="standings-widget-table">
                     <thead>

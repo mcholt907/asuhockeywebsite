@@ -2,54 +2,73 @@
 const cheerio = require("cheerio");
 const config = require("../../config/scraper-config");
 const { requestWithRetry } = require("../lib/request-helper");
+const {
+  validateStandingsSnapshot,
+  readStandingsFallback,
+} = require("../services/standings-snapshot");
 const { createCachedScraper } = require("./create-cached-scraper");
 
-async function scrapeStandings() {
-  const url = config.urls.nchcStandings;
-  console.log(`[NCHC Standings] Fetching from: ${url}`);
-  const { data } = await requestWithRetry(url);
-  const $ = cheerio.load(data);
+class StandingsNotPublishedError extends Error {
+  constructor() {
+    super("No NCHC data found in USCHO response");
+    this.name = "StandingsNotPublishedError";
+    this.code = "STANDINGS_NOT_PUBLISHED";
+  }
+}
 
+function parseUSCHOStandings(html) {
+  const $ = cheerio.load(html);
   const raw = $("#app").attr("data-page");
   if (!raw) throw new Error("No data-page attribute found on #app");
   const page = JSON.parse(raw);
-
-  // NCHC conference code on USCHO is "nt"
-  const nchcRows = page.props.content.data["nt"];
-  if (!nchcRows || !nchcRows.length) {
-    throw new Error("No NCHC data found in USCHO response");
+  const nchcRows = page?.props?.content?.data?.nt;
+  if (!Array.isArray(nchcRows) || nchcRows.length === 0) {
+    throw new StandingsNotPublishedError();
   }
-
-  const teams = nchcRows.map((row, i) => {
-    // Team name may include a national ranking prefix (e.g. "3 North Dakota") — strip it
-    const team = row.team.replace(/^\d+\s+/, "");
-    const rank = String(i + 1); // conference standing position, not national rank
-
+  return nchcRows.map((row, index) => {
+    const team = String(row.team || "").replace(/^\d+\s+/, "").trim();
     return {
-      rank,
+      rank: String(index + 1),
       team,
-      pts: String(row.pts),
-      confRecord: row["conf-w-l-t"],
-      overallRecord: row["w-l-t"],
+      pts: row.pts == null ? "" : String(row.pts),
+      confRecord: String(row["conf-w-l-t"] || ""),
+      overallRecord: String(row["w-l-t"] || ""),
       isASU: team.toLowerCase().includes("arizona"),
     };
   });
+}
 
-  console.log(`[NCHC Standings] Scraped ${teams.length} teams.`);
-  return teams;
+async function scrapeLiveNCHCStandings() {
+  const { data } = await requestWithRetry(config.urls.nchcStandings);
+  return {
+    season: config.CURRENT_SEASON,
+    lastUpdated: new Date().toISOString(),
+    teams: parseUSCHOStandings(data),
+  };
 }
 
 const fetchStandings = createCachedScraper({
   name: "standings",
-  cacheKey: "nchc_standings",
+  cacheKey: () => `nchc_standings_${config.CURRENT_SEASON}`,
   ttl: config.cache.standings,
-  scrape: scrapeStandings,
-  validate: (teams) => teams.length > 0,
-  onScrapeError: () => [],
+  scrape: scrapeLiveNCHCStandings,
+  validate: (snapshot) => validateStandingsSnapshot(snapshot),
+  validateCached: (snapshot) =>
+    snapshot?.season === config.CURRENT_SEASON &&
+    validateStandingsSnapshot(snapshot),
+  fallback: () => readStandingsFallback(),
 });
 
-async function scrapeNCHCStandings(forceRefresh = false) {
-  return fetchStandings({ force: forceRefresh });
+async function scrapeNCHCStandings(
+  forceRefresh = false,
+  { bypassCache = false } = {},
+) {
+  return fetchStandings({ force: forceRefresh, bypassCache });
 }
 
-module.exports = { scrapeNCHCStandings };
+module.exports = {
+  StandingsNotPublishedError,
+  parseUSCHOStandings,
+  scrapeLiveNCHCStandings,
+  scrapeNCHCStandings,
+};

@@ -8,6 +8,9 @@ const fs = require('fs');
 const path = require('path');
 const config = require('../../config/scraper-config');
 const { getCacheMeta, CACHE_DIR } = require('./caching-system');
+const {
+  validateStandingsSnapshot,
+} = require('../services/standings-snapshot');
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
@@ -23,7 +26,14 @@ const DATASETS = [
   { name: 'news', cacheKey: 'asu_hockey_news', staleAfterMs: DAY_MS, alert: true },
   { name: 'schedule', cacheKey: () => `asu_hockey_schedule_${config.seasons.current}`, staleAfterMs: DAY_MS, alert: true },
   { name: 'stats', cacheKey: 'asu_hockey_stats', staleAfterMs: DAY_MS, alert: true },
-  { name: 'standings', cacheKey: 'nchc_standings', staleAfterMs: DAY_MS, alert: true },
+  {
+    name: "standings",
+    cacheKey: () => `nchc_standings_${config.CURRENT_SEASON}`,
+    fallbackFile: "data/nchc_standings_fallback.json",
+    validateStandings: true,
+    staleAfterMs: DAY_MS,
+    alert: true,
+  },
   { name: 'roster', cacheKey: 'asu_hockey_roster', staleAfterMs: 3 * DAY_MS, alert: true },
   { name: 'transfers', cacheKey: 'asu_transfers', fallbackFile: 'data/asu_transfers_fallback.json', staleAfterMs: 21 * DAY_MS, alert: true },
   { name: 'alumni', cacheKey: 'asu_alumni', fallbackFile: 'data/asu_alumni_fallback.json', staleAfterMs: 21 * DAY_MS, alert: true },
@@ -37,14 +47,17 @@ function resolveCacheKey(dataset) {
 
 // Fallback JSON freshness: prefer the embedded lastUpdated written by the
 // refresh scripts; fall back to file mtime for files without one.
-function readFallbackMeta(relPath) {
-  const filePath = path.join(ROOT_DIR, relPath);
+function readFallbackMeta(
+  relPath,
+  { rootDir = ROOT_DIR, fileSystem = fs } = {},
+) {
+  const filePath = path.join(rootDir, relPath);
   try {
-    if (!fs.existsSync(filePath)) return null;
-    const stat = fs.statSync(filePath);
+    if (!fileSystem.existsSync(filePath)) return null;
+    const stat = fileSystem.statSync(filePath);
     let lastUpdated = null;
     try {
-      const parsed = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      const parsed = JSON.parse(fileSystem.readFileSync(filePath, 'utf8'));
       lastUpdated = parsed.lastUpdated || null;
     } catch (_) {
       // Unparseable fallback â€” report mtime-based age below.
@@ -61,17 +74,72 @@ function readFallbackMeta(relPath) {
   }
 }
 
-function readStaticFileMeta(relPath) {
-  const filePath = path.join(ROOT_DIR, relPath);
+function readStaticFileMeta(
+  relPath,
+  { rootDir = ROOT_DIR, fileSystem = fs } = {},
+) {
+  const filePath = path.join(rootDir, relPath);
   try {
-    if (!fs.existsSync(filePath)) return null;
-    const stat = fs.statSync(filePath);
+    if (!fileSystem.existsSync(filePath)) return null;
+    const stat = fileSystem.statSync(filePath);
     return {
       file: relPath,
       timestamp: new Date(stat.mtimeMs).toISOString(),
       ageMs: Date.now() - stat.mtimeMs,
     };
   } catch (error) {
+    return null;
+  }
+}
+
+function readStandingsCacheMeta(
+  cacheKey,
+  { cacheDir = CACHE_DIR, fileSystem = fs } = {},
+) {
+  const cacheFile = path.join(cacheDir, cacheKey);
+  try {
+    if (!fileSystem.existsSync(cacheFile)) return null;
+    const stat = fileSystem.statSync(cacheFile);
+    const parsed = JSON.parse(fileSystem.readFileSync(cacheFile, 'utf8'));
+    if (
+      parsed?.data?.season !== config.CURRENT_SEASON ||
+      !validateStandingsSnapshot(parsed.data)
+    ) {
+      return null;
+    }
+
+    const cacheTime = new Date(parsed.timestamp).getTime();
+    return {
+      key: cacheKey,
+      timestamp: parsed.timestamp || null,
+      ageMs: Number.isFinite(cacheTime) ? Date.now() - cacheTime : null,
+      cacheDuration: parsed.cacheDuration,
+      sizeBytes: stat.size,
+    };
+  } catch (_) {
+    return null;
+  }
+}
+
+function readStandingsFallbackMeta(
+  relPath,
+  { rootDir = ROOT_DIR, fileSystem = fs } = {},
+) {
+  const fallbackFile = path.join(rootDir, relPath);
+  try {
+    if (!fileSystem.existsSync(fallbackFile)) return null;
+    const stat = fileSystem.statSync(fallbackFile);
+    const snapshot = JSON.parse(fileSystem.readFileSync(fallbackFile, 'utf8'));
+    if (!validateStandingsSnapshot(snapshot)) return null;
+
+    const timestamp = snapshot.lastUpdated || new Date(stat.mtimeMs).toISOString();
+    const parsedTime = new Date(timestamp).getTime();
+    return {
+      file: relPath,
+      timestamp,
+      ageMs: Number.isFinite(parsedTime) ? Date.now() - parsedTime : null,
+    };
+  } catch (_) {
     return null;
   }
 }
@@ -87,19 +155,37 @@ function statusFor(ageMs, staleAfterMs) {
  * { name, source: 'cache'|'fallback'|'static'|'none', key/file, timestamp,
  *   ageMs, staleAfterMs, status: 'ok'|'stale'|'missing'|'unknown', alert }
  */
-function getDataStatus() {
+function getDataStatus({
+  rootDir = ROOT_DIR,
+  cacheDir = CACHE_DIR,
+  fileSystem = fs,
+} = {}) {
   return DATASETS.map((dataset) => {
     const base = { name: dataset.name, staleAfterMs: dataset.staleAfterMs, alert: dataset.alert };
 
     if (dataset.staticFile) {
-      const meta = readStaticFileMeta(dataset.staticFile);
+      const meta = readStaticFileMeta(dataset.staticFile, {
+        rootDir,
+        fileSystem,
+      });
       if (!meta) return { ...base, source: 'none', status: 'missing' };
       return { ...base, source: 'static', file: meta.file, timestamp: meta.timestamp, ageMs: meta.ageMs, status: statusFor(meta.ageMs, dataset.staleAfterMs) };
     }
 
     const cacheKey = resolveCacheKey(dataset);
-    const cacheMeta = cacheKey ? getCacheMeta(cacheKey) : null;
-    const fallbackMeta = dataset.fallbackFile ? readFallbackMeta(dataset.fallbackFile) : null;
+    const cacheMeta = cacheKey
+      ? dataset.validateStandings
+        ? readStandingsCacheMeta(cacheKey, { cacheDir, fileSystem })
+        : getCacheMeta(cacheKey)
+      : null;
+    const fallbackMeta = dataset.fallbackFile
+      ? dataset.validateStandings
+        ? readStandingsFallbackMeta(dataset.fallbackFile, {
+            rootDir,
+            fileSystem,
+          })
+        : readFallbackMeta(dataset.fallbackFile, { rootDir, fileSystem })
+      : null;
 
     // Report whichever source is fresher â€” in production the EP scrapers
     // never write cache (fallback-only mode), so fallback is the live source.
@@ -110,7 +196,7 @@ function getDataStatus() {
       meta = { key: cacheMeta.key, timestamp: cacheMeta.timestamp, ageMs: cacheMeta.ageMs };
     } else if (fallbackMeta) {
       source = 'fallback';
-      meta = { file: fallbackMeta.file, timestamp: fallbackMeta.timestamp, ageMs: fallbackMeta.ageMs };
+      meta = { key: cacheKey, file: fallbackMeta.file, timestamp: fallbackMeta.timestamp, ageMs: fallbackMeta.ageMs };
     }
 
     if (!meta) return { ...base, source: 'none', status: 'missing' };
@@ -142,4 +228,11 @@ function getCooldownStatus() {
   }
 }
 
-module.exports = { getDataStatus, getCooldownStatus, DATASETS, resolveCacheKey };
+module.exports = {
+  getDataStatus,
+  getCooldownStatus,
+  DATASETS,
+  resolveCacheKey,
+  readStandingsCacheMeta,
+  readStandingsFallbackMeta,
+};
