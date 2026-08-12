@@ -77,6 +77,28 @@ test("preserves the previous snapshot when standings are not published", async (
   }
 });
 
+test("preserves the previous snapshot when the live request fails", async () => {
+  const { directory, file } = createTemporarySnapshotFile();
+  const previousContents = JSON.stringify(validSnapshot);
+  fs.writeFileSync(file, previousContents);
+
+  try {
+    await expect(
+      refreshStandingsSnapshot({
+        fetchData: async () => {
+          throw new Error("simulated request failure");
+        },
+        fallbackFile: file,
+      }),
+    ).rejects.toThrow("simulated request failure");
+
+    expect(fs.readFileSync(file, "utf8")).toBe(previousContents);
+    expect(fs.readdirSync(directory)).toEqual(["fallback.json"]);
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
+
 test("preserves the previous snapshot when standings validation fails", async () => {
   const { directory, file } = createTemporarySnapshotFile();
   const previousContents = JSON.stringify(validSnapshot);
