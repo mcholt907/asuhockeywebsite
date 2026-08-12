@@ -1,6 +1,7 @@
 @echo off
 REM Automated weekly refresh of data\asu_alumni_fallback.json,
-REM data\asu_transfers_fallback.json, and data\asu_recruiting_fallback.json.
+REM data\asu_transfers_fallback.json, data\asu_recruiting_fallback.json,
+REM and data\nchc_standings_fallback.json.
 REM Run by Windows Task Scheduler from the user's residential IP.
 REM
 REM Behavior:
@@ -45,11 +46,11 @@ if errorlevel 1 (
   exit /b 1
 )
 
-git diff --quiet -- data\asu_alumni_fallback.json data\asu_transfers_fallback.json data\asu_recruiting_fallback.json
+git diff --quiet -- data\asu_alumni_fallback.json data\asu_transfers_fallback.json data\asu_recruiting_fallback.json data\nchc_standings_fallback.json
 if errorlevel 1 (
   git checkout -B auto/data-refresh >> %LOG% 2>&1
-  git add data\asu_alumni_fallback.json data\asu_transfers_fallback.json data\asu_recruiting_fallback.json
-  git commit -m "data: refresh Elite Prospects fallbacks (automated)" >> %LOG% 2>&1
+  git add data\asu_alumni_fallback.json data\asu_transfers_fallback.json data\asu_recruiting_fallback.json data\nchc_standings_fallback.json
+  git commit -m "data: refresh bundled fallbacks (automated)" >> %LOG% 2>&1
   git push -f origin auto/data-refresh >> %LOG% 2>&1
   if errorlevel 1 (
     echo %DATE% %TIME% — git push failed >> %LOG%
@@ -58,7 +59,7 @@ if errorlevel 1 (
     exit /b 1
   )
   REM Create the PR; if one already exists for this branch, reuse it
-  gh pr create --head auto/data-refresh --title "data: refresh Elite Prospects fallbacks (automated)" --body "Weekly automated refresh of the alumni, transfer, and recruiting Elite Prospects fallback data from the Windows Scheduled Task." >> %LOG% 2>&1
+  gh pr create --head auto/data-refresh --title "data: refresh bundled fallbacks (automated)" --body "Weekly automated refresh of the alumni, transfer, recruiting, and NCHC standings fallback data from the Windows Scheduled Task." >> %LOG% 2>&1
   gh pr merge auto/data-refresh --auto --merge >> %LOG% 2>&1
   if errorlevel 1 (
     echo %DATE% %TIME% — gh pr auto-merge failed (check PR manually) >> %LOG%
