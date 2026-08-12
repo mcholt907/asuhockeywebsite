@@ -36,14 +36,7 @@ function responseRecorder() {
   };
 }
 
-const team = {
-  rank: "9",
-  team: "Arizona State",
-  pts: "22",
-  confRecord: "7-16-1",
-  overallRecord: "14-21-1",
-  isASU: true,
-};
+const teams = require("../data/nchc_standings_fallback.json").teams;
 
 describe("/api/standings", () => {
   beforeEach(() => {
@@ -58,7 +51,7 @@ describe("/api/standings", () => {
     scrapeNCHCStandings.mockResolvedValue({
       season: "2025-2026",
       lastUpdated: "2026-07-17T20:09:00.364Z",
-      teams: [team],
+      teams,
     });
     const res = responseRecorder();
 
@@ -67,7 +60,7 @@ describe("/api/standings", () => {
     expect(res.statusCode).toBe(200);
     expect(res.payload).toEqual(
       expect.objectContaining({
-        data: [team],
+        data: teams,
         season: "2025-2026",
         isPriorSeason: true,
         timestamp: expect.any(String),
@@ -79,7 +72,7 @@ describe("/api/standings", () => {
     scrapeNCHCStandings.mockResolvedValue({
       season: "2026-2027",
       lastUpdated: "2026-08-12T18:00:00.000Z",
-      teams: [team],
+      teams,
     });
     const res = responseRecorder();
 
@@ -88,7 +81,7 @@ describe("/api/standings", () => {
     expect(res.statusCode).toBe(200);
     expect(res.payload).toEqual(
       expect.objectContaining({
-        data: [team],
+        data: teams,
         season: "2026-2027",
         isPriorSeason: false,
       }),

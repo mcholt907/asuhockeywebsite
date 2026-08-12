@@ -53,6 +53,9 @@ const fetchStandings = createCachedScraper({
   ttl: config.cache.standings,
   scrape: scrapeLiveNCHCStandings,
   validate: (snapshot) => validateStandingsSnapshot(snapshot),
+  validateCached: (snapshot) =>
+    snapshot?.season === config.CURRENT_SEASON &&
+    validateStandingsSnapshot(snapshot),
   fallback: () => readStandingsFallback(),
 });
 

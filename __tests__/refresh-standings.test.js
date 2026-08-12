@@ -3,22 +3,49 @@ const os = require("os");
 const path = require("path");
 const { refreshStandingsSnapshot } = require("../scripts/refresh-standings");
 
-function team(overallRecord = "1-0-0") {
-  return {
-    rank: "1",
-    team: "Arizona State",
+const TEAM_NAMES = [
+  "North Dakota",
+  "Denver",
+  "Western Michigan",
+  "Minnesota Duluth",
+  "St. Cloud State",
+  "Colorado College",
+  "Miami",
+  "Omaha",
+  "Arizona State",
+];
+
+function completeTeams(overallRecord = "1-0-0") {
+  return TEAM_NAMES.map((team, index) => ({
+    rank: String(index + 1),
+    team,
     pts: "3",
-    confRecord: "1-0-0",
+    confRecord: overallRecord,
     overallRecord,
-    isASU: true,
-  };
+    isASU: team === "Arizona State",
+  }));
 }
 
 const validSnapshot = {
   season: "2026-2027",
   lastUpdated: "2026-08-12T00:00:00.000Z",
-  teams: [team()],
+  teams: completeTeams(),
 };
+
+function invalidSnapshot(kind) {
+  const snapshot = {
+    ...validSnapshot,
+    teams: validSnapshot.teams.map((team) => ({ ...team })),
+  };
+  if (kind === "truncated table") snapshot.teams.pop();
+  if (kind === "duplicate normalized team") {
+    snapshot.teams[1].team = "  NORTH   DAKOTA ";
+  }
+  if (kind === "duplicate rank") snapshot.teams[1].rank = "1";
+  if (kind === "missing ASU row") snapshot.teams[8].isASU = false;
+  if (kind === "duplicate ASU row") snapshot.teams[0].isASU = true;
+  return snapshot;
+}
 
 function createTemporarySnapshotFile() {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "refresh-standings-"));
@@ -50,7 +77,10 @@ test("preserves the previous snapshot when all teams have zero games", async () 
   try {
     await expect(
       refreshStandingsSnapshot({
-        fetchData: async () => ({ ...validSnapshot, teams: [team("0-0-0")] }),
+        fetchData: async () => ({
+          ...validSnapshot,
+          teams: completeTeams("0-0-0"),
+        }),
         fallbackFile: file,
       }),
     ).resolves.toBeNull();
@@ -113,6 +143,32 @@ test("preserves the previous snapshot when standings validation fails", async ()
     ).rejects.toThrow("validation failed; fallback preserved");
 
     expect(fs.readFileSync(file, "utf8")).toBe(previousContents);
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test.each([
+  "truncated table",
+  "duplicate normalized team",
+  "duplicate rank",
+  "missing ASU row",
+  "duplicate ASU row",
+])("refuses to overwrite the fallback for a %s", async (kind) => {
+  const { directory, file } = createTemporarySnapshotFile();
+  const previousContents = JSON.stringify(validSnapshot);
+  fs.writeFileSync(file, previousContents);
+
+  try {
+    await expect(
+      refreshStandingsSnapshot({
+        fetchData: async () => invalidSnapshot(kind),
+        fallbackFile: file,
+      }),
+    ).rejects.toThrow("validation failed; fallback preserved");
+
+    expect(fs.readFileSync(file, "utf8")).toBe(previousContents);
+    expect(fs.readdirSync(directory)).toEqual(["fallback.json"]);
   } finally {
     fs.rmSync(directory, { recursive: true, force: true });
   }
