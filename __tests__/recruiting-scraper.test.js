@@ -37,6 +37,7 @@ const { getFromCache, saveToCache } = require("../server/cache/caching-system");
 const { requestWithRetry } = require("../server/lib/request-helper");
 const {
   fetchRecruitingData,
+  scrapeAllRecruitingSeasons,
   scrapeEliteProspectsRecruiting,
 } = require("../server/scrapers/recruiting");
 
@@ -132,6 +133,20 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
     expect(jane.player_link).toBe(
       "https://www.eliteprospects.com/player/111/x",
     );
+  });
+
+  test("scrapeAllRecruitingSeasons performs a live scrape without reading cache", async () => {
+    requestWithRetry.mockResolvedValue({ data: fixtureHtml });
+
+    const result = await scrapeAllRecruitingSeasons({ includePhotos: false });
+
+    expect(Object.keys(result)).toEqual(["2026-2027"]);
+    expect(result["2026-2027"].map((player) => player.name)).toEqual([
+      "Jane Smith",
+      "Bob Jones",
+    ]);
+    expect(getFromCache).not.toHaveBeenCalled();
+    expect(saveToCache).not.toHaveBeenCalled();
   });
 
   test("returns empty array when the page has no player tables", async () => {

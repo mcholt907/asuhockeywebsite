@@ -1,6 +1,6 @@
 // recruiting.js — EliteProspects future-season roster scrape (recruiting
-// tracker). fetchRecruitingData feeds local curation scripts; the live
-// /api/recruits endpoint reads asu_hockey_data.json directly.
+// tracker). The direct all-season entry point feeds the automated local
+// refresh, while /api/recruits continues to read asu_hockey_data.json directly.
 const cheerio = require("cheerio");
 const config = require("../../config/scraper-config");
 const {
@@ -295,14 +295,10 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
  * @param {{includePhotos?: boolean}} args
  * @returns {Object} Object with season keys and player arrays as values
  */
-async function scrapeAllSeasons({ includePhotos = false } = {}) {
+async function scrapeAllRecruitingSeasons({ includePhotos = false } = {}) {
   const recruitingData = {};
 
-  for (const season of config.FUTURE_SEASONS || [
-    "2026-2027",
-    "2027-2028",
-    "2028-2029",
-  ]) {
+  for (const season of config.FUTURE_SEASONS) {
     console.log(
       `[Recruiting] Scraping season: ${season}${includePhotos ? " with photos" : ""}`,
     );
@@ -322,7 +318,7 @@ const fetchRecruiting = createCachedScraper({
   name: "recruiting",
   cacheKey: "asu_hockey_recruiting",
   // no ttl: saveToCache's 24h default, same as the old bare saveToCache call
-  scrape: scrapeAllSeasons,
+  scrape: scrapeAllRecruitingSeasons,
   validate: (data) => Object.values(data).some((arr) => arr.length > 0),
 });
 
@@ -341,6 +337,7 @@ async function fetchRecruitingData(includePhotos = false) {
 
 module.exports = {
   fetchRecruitingData,
+  scrapeAllRecruitingSeasons,
   scrapeEliteProspectsRecruiting,
   scrapePlayerProfile,
   scrapePlayerPhoto,
