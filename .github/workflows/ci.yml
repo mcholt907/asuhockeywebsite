@@ -40,6 +40,9 @@ jobs:
       - name: Unit tests
         run: CI=true npm test -- --watchAll=false
 
+      - name: Server tests
+        run: npx jest --config jest.server.config.js --runInBand
+
   e2e:
     name: e2e
     runs-on: ubuntu-latest
