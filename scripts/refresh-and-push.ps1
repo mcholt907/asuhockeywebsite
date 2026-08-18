@@ -18,8 +18,17 @@ function Write-RefreshLog([string]$Message) {
 
 function Invoke-Native([string]$FilePath, [string[]]$Arguments) {
   Write-RefreshLog ("Running: {0} {1}" -f $FilePath, ($Arguments -join ' '))
-  $output = & $FilePath @Arguments 2>&1
-  $exitCode = $LASTEXITCODE
+  Get-Command -Name $FilePath -ErrorAction Stop | Out-Null
+  $previousErrorActionPreference = $ErrorActionPreference
+
+  try {
+    $ErrorActionPreference = 'Continue'
+    $output = & $FilePath @Arguments 2>&1
+    $exitCode = $LASTEXITCODE
+  } finally {
+    $ErrorActionPreference = $previousErrorActionPreference
+  }
+
   $outputLines = @($output | ForEach-Object { "$_" })
 
   foreach ($line in $outputLines) {
@@ -64,6 +73,10 @@ function Get-StagedPaths {
     Invoke-Native 'git.exe' @('diff', '--cached', '--name-only', '--') |
       Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
   )
+}
+
+if ($MyInvocation.InvocationName -eq '.') {
+  return
 }
 
 try {
