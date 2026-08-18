@@ -43,7 +43,9 @@ function validateRecruitingSnapshot({
     if (!Array.isArray(snapshot[season])) {
       throw new Error(`Recruiting snapshot season ${season} must be an array`);
     }
-    if (!Array.isArray(existingRecruiting[season] || [])) {
+    const hasExistingSeason = Object.prototype.hasOwnProperty.call(existingRecruiting, season);
+    const existingPlayers = hasExistingSeason ? existingRecruiting[season] : [];
+    if (!Array.isArray(existingPlayers)) {
       throw new Error(`Existing recruiting season ${season} must be an array`);
     }
 
@@ -69,11 +71,11 @@ function validateRecruitingSnapshot({
       seenUrls.add(identity);
     }
 
-    if (existingRecruiting[season]?.length > 0 && snapshot[season].length === 0) {
+    if (existingPlayers.length > 0 && snapshot[season].length === 0) {
       throw new Error(`Recruiting snapshot season ${season} unexpectedly became empty`);
     }
     scrapedCount += snapshot[season].length;
-    existingCount += (existingRecruiting[season] || []).length;
+    existingCount += existingPlayers.length;
   }
 
   if (scrapedCount === 0) {
@@ -101,7 +103,9 @@ function sortByLastName(left, right) {
     return parts[parts.length - 1].toLowerCase();
   };
   const lastNameOrder = lastNameFor(left).localeCompare(lastNameFor(right));
-  return lastNameOrder || nameFor(left).toLowerCase().localeCompare(nameFor(right).toLowerCase());
+  const fullNameOrder = nameFor(left).toLowerCase().localeCompare(nameFor(right).toLowerCase());
+  return lastNameOrder || fullNameOrder
+    || normalizePlayerUrl(left.player_link).localeCompare(normalizePlayerUrl(right.player_link));
 }
 
 function recordsDiffer(left, right) {

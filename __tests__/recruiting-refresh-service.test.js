@@ -91,6 +91,21 @@ describe("validateRecruitingSnapshot", () => {
       }),
     ).not.toThrow();
   });
+
+  test.each([
+    ["null", null],
+    ["false", false],
+    ["zero", 0],
+    ["an empty string", ""],
+  ])("rejects a present existing season containing %s instead of an array", (_, malformedSeason) => {
+    expect(() =>
+      validateRecruitingSnapshot({
+        snapshot: { "2027-2028": [player(1)], "2028-2029": [player(2)] },
+        existingRecruiting: { "2027-2028": [], "2028-2029": malformedSeason },
+        seasons,
+      }),
+    ).toThrow("Existing recruiting season 2028-2029 must be an array");
+  });
 });
 
 describe("mergeRecruitingSnapshot", () => {
@@ -250,6 +265,26 @@ describe("mergeRecruitingSnapshot", () => {
 
     expect(result.document.recruiting["2027-2028"].map(({ name }) => name)).toEqual([
       "Zoe Adams", "Alice Baker", "Bob Baker",
+    ]);
+  });
+
+  test("sorts same-name recruits by normalized player URL regardless of snapshot order", () => {
+    const first = player(1, { name: "Alex Same" });
+    const second = player(2, { name: "Alex Same" });
+    const merge = (players) => mergeRecruitingSnapshot({
+      sourceDocument: documentWith({ "2027-2028": [], "2028-2029": [] }),
+      snapshot: { "2027-2028": players, "2028-2029": [] },
+      removalState: emptyRemovalState(),
+      seasons,
+    });
+
+    expect(merge([second, first]).document.recruiting["2027-2028"].map(({ player_link }) => player_link)).toEqual([
+      "https://www.eliteprospects.com/player/1/player-1",
+      "https://www.eliteprospects.com/player/2/player-2",
+    ]);
+    expect(merge([first, second]).document.recruiting["2027-2028"].map(({ player_link }) => player_link)).toEqual([
+      "https://www.eliteprospects.com/player/1/player-1",
+      "https://www.eliteprospects.com/player/2/player-2",
     ]);
   });
 });
