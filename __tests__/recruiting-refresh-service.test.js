@@ -327,6 +327,67 @@ describe("mergeRecruitingSnapshot", () => {
     });
   });
 
+  test("drops orphaned miss keys that do not identify a current recruit", () => {
+    const result = mergeRecruitingSnapshot({
+      sourceDocument: documentWith({
+        "2027-2028": [player(2)],
+        "2028-2029": [],
+      }),
+      snapshot: { "2027-2028": [player(2)], "2028-2029": [] },
+      removalState: { version: 1, misses: { [missKey]: 1 } },
+      seasons,
+    });
+
+    expect(result.removalState).toEqual({ version: 1, misses: {} });
+  });
+
+  test("drops miss keys for seasons no longer configured after rollover", () => {
+    const rolloverMissKey =
+      "2026-2027|https://www.eliteprospects.com/player/1/player-1";
+    const sourceDocument = documentWith({
+      "2026-2027": [player(1)],
+      "2027-2028": [player(2)],
+      "2028-2029": [],
+    });
+
+    const result = mergeRecruitingSnapshot({
+      sourceDocument,
+      snapshot: { "2027-2028": [player(2)], "2028-2029": [] },
+      removalState: { version: 1, misses: { [rolloverMissKey]: 1 } },
+      seasons,
+    });
+
+    expect(result.document.recruiting["2026-2027"]).toEqual([player(1)]);
+    expect(result.removalState).toEqual({ version: 1, misses: {} });
+  });
+
+  test("treats a reintroduced recruit's next absence as its first consecutive miss", () => {
+    const reintroduced = mergeRecruitingSnapshot({
+      sourceDocument: documentWith({
+        "2027-2028": [],
+        "2028-2029": [player(2)],
+      }),
+      snapshot: { "2027-2028": [player(1)], "2028-2029": [player(2)] },
+      removalState: { version: 1, misses: { [missKey]: 1 } },
+      seasons,
+    });
+
+    expect(reintroduced.removalState).toEqual({ version: 1, misses: {} });
+
+    const missingOnce = mergeRecruitingSnapshot({
+      sourceDocument: reintroduced.document,
+      snapshot: { "2027-2028": [], "2028-2029": [player(2)] },
+      removalState: reintroduced.removalState,
+      seasons,
+    });
+
+    expect(missingOnce.document.recruiting["2027-2028"]).toEqual([player(1)]);
+    expect(missingOnce.removalState).toEqual({
+      version: 1,
+      misses: { [missKey]: 1 },
+    });
+  });
+
   test("sorts configured seasons by case-insensitive last name then full name", () => {
     const result = mergeRecruitingSnapshot({
       sourceDocument: documentWith({ "2027-2028": [], "2028-2029": [] }),

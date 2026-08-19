@@ -188,6 +188,77 @@ try {
   return result;
 }
 
+function runInstallerNativeHarness(mode, childSource) {
+  const directory = fs.mkdtempSync(
+    path.join(os.tmpdir(), "refresh-installer-native-"),
+  );
+  const harnessPath = path.join(directory, "invoke-installer-native.ps1");
+  const environmentFile = path.join(directory, "source.env");
+
+  fs.writeFileSync(environmentFile, "TEST_VALUE=not-printed\n");
+  fs.writeFileSync(
+    harnessPath,
+    `param(
+  [string]$InstallerPath,
+  [string]$EnvironmentFile,
+  [string]$NodePath,
+  [string]$Mode,
+  [string]$ChildSource
+)
+
+. $InstallerPath -EnvironmentFile $EnvironmentFile
+$ErrorActionPreference = 'Stop'
+
+if ($Mode -eq 'success') {
+  $captured = @(
+    Invoke-NativeCommand -FilePath $NodePath -ArgumentList @('-e', $ChildSource) -CaptureOutput
+  )
+  if ($captured.Count -ne 1 -or $captured[0] -ne 'native-stdout-success') {
+    throw "Unexpected captured stdout: $($captured -join '|')"
+  }
+  if ($ErrorActionPreference -ne 'Stop') {
+    throw 'Invoke-NativeCommand did not restore ErrorActionPreference'
+  }
+  Write-Output 'HARNESS_OK'
+  exit 0
+}
+
+try {
+  Invoke-NativeCommand -FilePath $NodePath -ArgumentList @('-e', $ChildSource) -CaptureOutput | Out-Null
+  [Console]::Error.WriteLine('Invoke-NativeCommand did not throw')
+  exit 10
+} catch {
+  if ($ErrorActionPreference -ne 'Stop') {
+    [Console]::Error.WriteLine('Invoke-NativeCommand did not restore ErrorActionPreference')
+    exit 24
+  }
+  [Console]::Error.WriteLine("CAUGHT: $($_.Exception.Message)")
+  exit 23
+}
+`,
+  );
+
+  const result = spawnSync(
+    "powershell.exe",
+    [
+      "-NoProfile",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      harnessPath,
+      installerPath,
+      environmentFile,
+      process.execPath,
+      mode,
+      childSource,
+    ],
+    { encoding: "utf8" },
+  );
+
+  fs.rmSync(directory, { recursive: true, force: true });
+  return result;
+}
+
 function runGit(args, cwd) {
   const result = spawnSync("git", args, { cwd, encoding: "utf8" });
   if (result.status !== 0) {
@@ -342,6 +413,35 @@ describe("PowerShell native command execution", () => {
 });
 
 describe("isolated refresh runner installer", () => {
+  windowsTest(
+    "keeps successful native stdout parseable while preserving stderr diagnostics",
+    () => {
+      const result = runInstallerNativeHarness(
+        "success",
+        "process.stdout.write('native-stdout-success\\n');process.stderr.write('native-stderr-success\\n');process.exit(0)",
+      );
+
+      expect(result.status).toBe(0);
+      expect(result.stdout).toContain("HARNESS_OK");
+      expect(result.stderr).toContain("native-stderr-success");
+      expect(result.stdout).not.toContain("native-stderr-success");
+    },
+  );
+
+  windowsTest(
+    "reports native stderr and exit code when a captured command fails",
+    () => {
+      const result = runInstallerNativeHarness(
+        "failure",
+        "process.stdout.write('native-stdout-failure\\n');process.stderr.write('native-stderr-failure\\n');process.exit(7)",
+      );
+
+      expect(result.status).toBe(23);
+      expect(result.stderr).toContain("native-stderr-failure");
+      expect(result.stderr).toContain("exited with code 7");
+    },
+  );
+
   windowsTest("rejects every path that overlaps the live repository", () => {
     const repositoryRoot = path.resolve(__dirname, "..");
 

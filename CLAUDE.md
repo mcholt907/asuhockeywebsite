@@ -94,30 +94,56 @@ Root utility scripts for editing this file:
 
 ## Data Refresh Workflow
 
-Alumni and transfer data are scraped from EliteProspects, which 403s
-cloud-hosted IPs (Render). Production reads bundled fallback JSON from
-`data/`; live scraping only runs locally with override flags.
+Recruiting, alumni, and transfer data are scraped from EliteProspects, which
+403s cloud-hosted IPs (Render). A dedicated residential Windows clone performs
+the live refresh every day at 06:00 local time; production serves the committed
+recruiting data and bundled fallback JSON from `data/`.
 
 To refresh manually:
 
 ```bash
-npm run refresh-data        # both
+npm run refresh-data        # recruiting, alumni, and transfers
+npm run refresh-recruiting  # diagnostic recruiting-only override
 npm run refresh-alumni      # alumni only
 npm run refresh-transfers   # transfers only
 ```
 
 The refresh scripts validate result shape + non-emptiness; an empty or
 malformed scrape will exit non-zero and leave the existing JSON untouched.
+Recruit removals require absence from two consecutive successful scrapes, and
+a recruiting snapshot that drops more than 35 percent is rejected.
 
 EliteProspects 403s the plain-axios TLS fingerprint even from residential
 IPs; the refresh scripts enable `SCRAPER_PUPPETEER_FALLBACK` by default so
 blocked requests retry through headless Chrome.
 
-A Windows Scheduled Task (`scripts/RefreshDataTask.xml`) runs
-`scripts/refresh-and-push.cmd` weekly on Sunday 06:00. The task pulls main,
-runs the refresh, commits any changes to the `auto/data-refresh` branch, and
-opens an auto-merging PR (main is protected — direct pushes are rejected).
-Failures are logged to `.refresh-log.txt` (gitignored).
+Install or replace the Scheduled Task from the primary repository with the
+PowerShell installer and an existing readable environment file:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\install-refresh-runner.ps1 -EnvironmentFile C:\Users\farkh\asuhockeywebsite\.env
+```
+
+The installer requires Git, Node/npm, authenticated GitHub CLI access, and
+permission to register a Scheduled Task. It clones or updates an isolated
+runner, installs dependencies, copies the environment file, writes the
+`.refresh-runner` marker, and registers `ASU Hockey Data Refresh` with daily,
+wake, network, and missed-start handling. Never point the runner at the working
+repository, inside it, or at one of its parent directories.
+
+Each run pulls `main`, refreshes all three datasets, and opens or updates an
+auto-merging PR from `auto/data-refresh`. Commits are restricted to exactly
+these four generated files:
+
+- `asu_hockey_data.json`
+- `data/asu_recruiting_refresh_state.json`
+- `data/asu_alumni_fallback.json`
+- `data/asu_transfers_fallback.json`
+
+When validated data is unchanged, the run exits successfully without a commit
+or pull request. Failures and detailed runner output are logged to
+`.refresh-log.txt` (gitignored). Inspect the latest task result with
+`Get-ScheduledTaskInfo -TaskName 'ASU Hockey Data Refresh'`.
 
 The task reports a dead-man's-switch check-in to a Sentry Cron Monitor via
 `scripts/ping-refresh-monitor.js` (`ok` on success, `error` on failure), so
@@ -125,7 +151,9 @@ a run that never happens or dies part-way alerts within the monitor's grace
 period. Requires `SENTRY_CRON_MONITOR_URL` in `.env` (see `.env.example`
 for the one-time Sentry monitor setup); unset means check-ins are skipped.
 
-To install the task (one-time): `schtasks /create /xml scripts\RefreshDataTask.xml /tn "ASU Hockey Data Refresh"`. The Task Scheduler XML hardcodes `C:\Users\farkh\asuhockeywebsite` as the working directory; edit those two lines if cloning the repo elsewhere.
+At season rollover, update `config.FUTURE_SEASONS` in
+`config/scraper-config.js` so recruiting refreshes query the intended future
+classes.
 
 ## Pages & Routes
 

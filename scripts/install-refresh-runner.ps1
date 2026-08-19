@@ -148,18 +148,46 @@ function Invoke-NativeCommand {
     [switch]$CaptureOutput
   )
 
+  $previousErrorActionPreference = $ErrorActionPreference
+  $output = @()
+  $errorOutput = @()
+  $exitCode = $null
+
   if ($CaptureOutput) {
-    $output = @(& $FilePath @ArgumentList 2>&1)
-  } else {
-    & $FilePath @ArgumentList
+    $stdoutPath = [System.IO.Path]::GetTempFileName()
+    $stderrPath = [System.IO.Path]::GetTempFileName()
   }
 
-  if ($LASTEXITCODE -ne 0) {
-    $commandDescription = "$FilePath $($ArgumentList -join ' ')"
-    if ($CaptureOutput -and $output.Count -gt 0) {
-      throw "$commandDescription exited with code $LASTEXITCODE`: $($output -join [Environment]::NewLine)"
+  try {
+    $ErrorActionPreference = 'Continue'
+    if ($CaptureOutput) {
+      & $FilePath @ArgumentList 1> $stdoutPath 2> $stderrPath
+      $exitCode = $LASTEXITCODE
+      $output = @(Get-Content -LiteralPath $stdoutPath)
+      $errorOutput = @(Get-Content -LiteralPath $stderrPath)
+    } else {
+      & $FilePath @ArgumentList
+      $exitCode = $LASTEXITCODE
     }
-    throw "$commandDescription exited with code $LASTEXITCODE"
+  } finally {
+    $ErrorActionPreference = $previousErrorActionPreference
+    if ($CaptureOutput) {
+      [System.IO.File]::Delete($stdoutPath)
+      [System.IO.File]::Delete($stderrPath)
+    }
+  }
+
+  foreach ($line in $errorOutput) {
+    [Console]::Error.WriteLine($line)
+  }
+
+  if ($exitCode -ne 0) {
+    $commandDescription = "$FilePath $($ArgumentList -join ' ')"
+    $diagnostics = @($output) + @($errorOutput)
+    if ($CaptureOutput -and $diagnostics.Count -gt 0) {
+      throw "$commandDescription exited with code $exitCode`: $($diagnostics -join [Environment]::NewLine)"
+    }
+    throw "$commandDescription exited with code $exitCode"
   }
 
   if ($CaptureOutput) {

@@ -162,7 +162,8 @@ function mergeRecruitingSnapshot({
 }) {
   const sourceRecruiting = sourceDocument.recruiting || {};
   const nextRecruiting = { ...sourceRecruiting };
-  const nextMisses = { ...(removalState?.misses || {}) };
+  const priorMisses = removalState?.misses || {};
+  const nextMisses = {};
   const summary = { added: 0, updated: 0, retained: 0, removed: 0 };
 
   for (const season of seasons) {
@@ -182,8 +183,7 @@ function mergeRecruitingSnapshot({
       const scrapedPlayer = scrapedByUrl.get(identity);
 
       if (!scrapedPlayer) {
-        if (nextMisses[missKey] === 1) {
-          delete nextMisses[missKey];
+        if (priorMisses[missKey] === 1) {
           summary.removed += 1;
           continue;
         }
@@ -193,7 +193,6 @@ function mergeRecruitingSnapshot({
         continue;
       }
 
-      delete nextMisses[missKey];
       const mergedPlayer = { ...existingPlayer };
       for (const field of SCRAPER_FIELDS) {
         if (isNonblank(scrapedPlayer[field]))
