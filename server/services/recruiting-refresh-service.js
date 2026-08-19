@@ -1,8 +1,18 @@
 const fs = require("fs");
 
 const SCRAPER_FIELDS = [
-  "number", "name", "position", "age", "birth_year", "birthplace",
-  "height", "weight", "shoots", "player_link", "player_photo", "current_team",
+  "number",
+  "name",
+  "position",
+  "age",
+  "birth_year",
+  "birthplace",
+  "height",
+  "weight",
+  "shoots",
+  "player_link",
+  "player_photo",
+  "current_team",
 ];
 const DEFAULT_MAX_DROP_FRACTION = 0.35;
 
@@ -14,7 +24,9 @@ function normalizePlayerUrl(value) {
 }
 
 function isNonblank(value) {
-  return typeof value === "string" ? value.trim() !== "" : value !== undefined && value !== null;
+  return typeof value === "string"
+    ? value.trim() !== ""
+    : value !== undefined && value !== null;
 }
 
 function validateRecruitingSnapshot({
@@ -26,7 +38,11 @@ function validateRecruitingSnapshot({
   if (!snapshot || typeof snapshot !== "object" || Array.isArray(snapshot)) {
     throw new Error("Recruiting snapshot must be an object");
   }
-  if (!existingRecruiting || typeof existingRecruiting !== "object" || Array.isArray(existingRecruiting)) {
+  if (
+    !existingRecruiting ||
+    typeof existingRecruiting !== "object" ||
+    Array.isArray(existingRecruiting)
+  ) {
     throw new Error("Existing recruiting data must be an object");
   }
   if (!Array.isArray(seasons) || seasons.length === 0) {
@@ -38,12 +54,17 @@ function validateRecruitingSnapshot({
 
   for (const season of seasons) {
     if (!Object.prototype.hasOwnProperty.call(snapshot, season)) {
-      throw new Error(`Recruiting snapshot is missing configured season ${season}`);
+      throw new Error(
+        `Recruiting snapshot is missing configured season ${season}`,
+      );
     }
     if (!Array.isArray(snapshot[season])) {
       throw new Error(`Recruiting snapshot season ${season} must be an array`);
     }
-    const hasExistingSeason = Object.prototype.hasOwnProperty.call(existingRecruiting, season);
+    const hasExistingSeason = Object.prototype.hasOwnProperty.call(
+      existingRecruiting,
+      season,
+    );
     const existingPlayers = hasExistingSeason ? existingRecruiting[season] : [];
     if (!Array.isArray(existingPlayers)) {
       throw new Error(`Existing recruiting season ${season} must be an array`);
@@ -52,27 +73,37 @@ function validateRecruitingSnapshot({
     const seenUrls = new Set();
     for (const recruit of snapshot[season]) {
       if (!recruit || typeof recruit !== "object" || Array.isArray(recruit)) {
-        throw new Error(`Recruiting snapshot season ${season} contains an invalid player`);
+        throw new Error(
+          `Recruiting snapshot season ${season} contains an invalid player`,
+        );
       }
       for (const field of ["name", "position", "player_link"]) {
         if (!isNonblank(recruit[field])) {
-          throw new Error(`Recruiting snapshot player in ${season} is missing ${field}`);
+          throw new Error(
+            `Recruiting snapshot player in ${season} is missing ${field}`,
+          );
         }
       }
       let identity;
       try {
         identity = normalizePlayerUrl(recruit.player_link);
       } catch {
-        throw new Error(`Recruiting snapshot player in ${season} has an invalid player_link`);
+        throw new Error(
+          `Recruiting snapshot player in ${season} has an invalid player_link`,
+        );
       }
       if (seenUrls.has(identity)) {
-        throw new Error(`Recruiting snapshot season ${season} has duplicate player_link`);
+        throw new Error(
+          `Recruiting snapshot season ${season} has duplicate player_link`,
+        );
       }
       seenUrls.add(identity);
     }
 
     if (existingPlayers.length > 0 && snapshot[season].length === 0) {
-      throw new Error(`Recruiting snapshot season ${season} unexpectedly became empty`);
+      throw new Error(
+        `Recruiting snapshot season ${season} unexpectedly became empty`,
+      );
     }
     scrapedCount += snapshot[season].length;
     existingCount += existingPlayers.length;
@@ -82,9 +113,8 @@ function validateRecruitingSnapshot({
     throw new Error("Recruiting snapshot contains no players");
   }
 
-  const dropFraction = existingCount === 0
-    ? 0
-    : (existingCount - scrapedCount) / existingCount;
+  const dropFraction =
+    existingCount === 0 ? 0 : (existingCount - scrapedCount) / existingCount;
   if (dropFraction > maxDropFraction) {
     throw new Error(
       `Recruiting count dropped ${(dropFraction * 100).toFixed(1)}%; limit is ${maxDropFraction * 100}%`,
@@ -103,19 +133,33 @@ function sortByLastName(left, right) {
     return parts[parts.length - 1].toLowerCase();
   };
   const lastNameOrder = lastNameFor(left).localeCompare(lastNameFor(right));
-  const fullNameOrder = nameFor(left).toLowerCase().localeCompare(nameFor(right).toLowerCase());
-  return lastNameOrder || fullNameOrder
-    || normalizePlayerUrl(left.player_link).localeCompare(normalizePlayerUrl(right.player_link));
+  const fullNameOrder = nameFor(left)
+    .toLowerCase()
+    .localeCompare(nameFor(right).toLowerCase());
+  return (
+    lastNameOrder ||
+    fullNameOrder ||
+    normalizePlayerUrl(left.player_link).localeCompare(
+      normalizePlayerUrl(right.player_link),
+    )
+  );
 }
 
 function recordsDiffer(left, right) {
   const leftKeys = Object.keys(left);
   const rightKeys = Object.keys(right);
-  return leftKeys.length !== rightKeys.length
-    || leftKeys.some((key) => left[key] !== right[key]);
+  return (
+    leftKeys.length !== rightKeys.length ||
+    leftKeys.some((key) => left[key] !== right[key])
+  );
 }
 
-function mergeRecruitingSnapshot({ sourceDocument, snapshot, removalState, seasons }) {
+function mergeRecruitingSnapshot({
+  sourceDocument,
+  snapshot,
+  removalState,
+  seasons,
+}) {
   const sourceRecruiting = sourceDocument.recruiting || {};
   const nextRecruiting = { ...sourceRecruiting };
   const nextMisses = { ...(removalState?.misses || {}) };
@@ -125,7 +169,10 @@ function mergeRecruitingSnapshot({ sourceDocument, snapshot, removalState, seaso
     const scrapedPlayers = snapshot[season] || [];
     const existingPlayers = sourceRecruiting[season] || [];
     const scrapedByUrl = new Map(
-      scrapedPlayers.map((player) => [normalizePlayerUrl(player.player_link), player]),
+      scrapedPlayers.map((player) => [
+        normalizePlayerUrl(player.player_link),
+        player,
+      ]),
     );
     const nextSeason = [];
 
@@ -149,7 +196,8 @@ function mergeRecruitingSnapshot({ sourceDocument, snapshot, removalState, seaso
       delete nextMisses[missKey];
       const mergedPlayer = { ...existingPlayer };
       for (const field of SCRAPER_FIELDS) {
-        if (isNonblank(scrapedPlayer[field])) mergedPlayer[field] = scrapedPlayer[field];
+        if (isNonblank(scrapedPlayer[field]))
+          mergedPlayer[field] = scrapedPlayer[field];
       }
       if (recordsDiffer(existingPlayer, mergedPlayer)) summary.updated += 1;
       nextSeason.push(mergedPlayer);

@@ -42,7 +42,9 @@ async function runRecruitingRefresh({
   });
 
   for (const season of seasons) {
-    console.log(`[refresh-recruiting] ${season}: ${snapshot[season].length} players`);
+    console.log(
+      `[refresh-recruiting] ${season}: ${snapshot[season].length} players`,
+    );
   }
 
   const result = mergeRecruitingSnapshot({

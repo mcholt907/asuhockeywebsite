@@ -29,17 +29,25 @@ const player = (id, overrides = {}) => ({
 
 describe("validateRecruitingSnapshot", () => {
   test("normalizes player URL identity without query, hash, casing, or trailing slash", () => {
-    expect(normalizePlayerUrl(" HTTPS://www.EliteProspects.com/player/1/player-1/?tab=stats#bio ")).toBe(
-      "https://www.eliteprospects.com/player/1/player-1",
-    );
+    expect(
+      normalizePlayerUrl(
+        " HTTPS://www.EliteProspects.com/player/1/player-1/?tab=stats#bio ",
+      ),
+    ).toBe("https://www.eliteprospects.com/player/1/player-1");
   });
 
   test.each([
     ["missing configured season", { "2027-2028": [player(1)] }],
     ["non-array season", { "2027-2028": [player(1)], "2028-2029": {} }],
     ["all seasons empty", { "2027-2028": [], "2028-2029": [] }],
-    ["missing player URL", { "2027-2028": [player(1, { player_link: "" })], "2028-2029": [] }],
-    ["duplicate player URL", { "2027-2028": [player(1), player(1)], "2028-2029": [] }],
+    [
+      "missing player URL",
+      { "2027-2028": [player(1, { player_link: "" })], "2028-2029": [] },
+    ],
+    [
+      "duplicate player URL",
+      { "2027-2028": [player(1), player(1)], "2028-2029": [] },
+    ],
   ])("rejects %s", (_, snapshot) => {
     expect(() =>
       validateRecruitingSnapshot({
@@ -64,11 +72,15 @@ describe("validateRecruitingSnapshot", () => {
     expect(() =>
       validateRecruitingSnapshot({
         snapshot: {
-          "2027-2028": Array.from({ length: 12 }, (_, index) => player(index + 1)),
+          "2027-2028": Array.from({ length: 12 }, (_, index) =>
+            player(index + 1),
+          ),
           "2028-2029": [],
         },
         existingRecruiting: {
-          "2027-2028": Array.from({ length: 20 }, (_, index) => player(index + 1)),
+          "2027-2028": Array.from({ length: 20 }, (_, index) =>
+            player(index + 1),
+          ),
           "2028-2029": [],
         },
         seasons,
@@ -80,11 +92,15 @@ describe("validateRecruitingSnapshot", () => {
     expect(() =>
       validateRecruitingSnapshot({
         snapshot: {
-          "2027-2028": Array.from({ length: 13 }, (_, index) => player(index + 1)),
+          "2027-2028": Array.from({ length: 13 }, (_, index) =>
+            player(index + 1),
+          ),
           "2028-2029": [],
         },
         existingRecruiting: {
-          "2027-2028": Array.from({ length: 20 }, (_, index) => player(index + 1)),
+          "2027-2028": Array.from({ length: 20 }, (_, index) =>
+            player(index + 1),
+          ),
           "2028-2029": [],
         },
         seasons,
@@ -97,15 +113,18 @@ describe("validateRecruitingSnapshot", () => {
     ["false", false],
     ["zero", 0],
     ["an empty string", ""],
-  ])("rejects a present existing season containing %s instead of an array", (_, malformedSeason) => {
-    expect(() =>
-      validateRecruitingSnapshot({
-        snapshot: { "2027-2028": [player(1)], "2028-2029": [player(2)] },
-        existingRecruiting: { "2027-2028": [], "2028-2029": malformedSeason },
-        seasons,
-      }),
-    ).toThrow("Existing recruiting season 2028-2029 must be an array");
-  });
+  ])(
+    "rejects a present existing season containing %s instead of an array",
+    (_, malformedSeason) => {
+      expect(() =>
+        validateRecruitingSnapshot({
+          snapshot: { "2027-2028": [player(1)], "2028-2029": [player(2)] },
+          existingRecruiting: { "2027-2028": [], "2028-2029": malformedSeason },
+          seasons,
+        }),
+      ).toThrow("Existing recruiting season 2028-2029 must be an array");
+    },
+  );
 });
 
 describe("mergeRecruitingSnapshot", () => {
@@ -132,16 +151,29 @@ describe("mergeRecruitingSnapshot", () => {
     });
 
     expect(result.document.recruiting["2027-2028"]).toEqual([player(1)]);
-    expect(result.summary).toEqual({ added: 1, updated: 0, retained: 0, removed: 0 });
+    expect(result.summary).toEqual({
+      added: 1,
+      updated: 0,
+      retained: 0,
+      removed: 0,
+    });
   });
 
   test("updates nonblank scraper fields for a present URL", () => {
     const existing = player(1, { name: "Old Name", current_team: "Old Team" });
-    const sourceDocument = documentWith({ "2027-2028": [existing], "2028-2029": [] });
+    const sourceDocument = documentWith({
+      "2027-2028": [existing],
+      "2028-2029": [],
+    });
 
     const result = mergeRecruitingSnapshot({
       sourceDocument,
-      snapshot: { "2027-2028": [player(1, { name: "New Name", current_team: "New Team" })], "2028-2029": [] },
+      snapshot: {
+        "2027-2028": [
+          player(1, { name: "New Name", current_team: "New Team" }),
+        ],
+        "2028-2029": [],
+      },
       removalState: { version: 1, misses: {} },
       seasons,
     });
@@ -150,18 +182,31 @@ describe("mergeRecruitingSnapshot", () => {
       name: "New Name",
       current_team: "New Team",
     });
-    expect(result.summary).toEqual({ added: 0, updated: 1, retained: 0, removed: 0 });
+    expect(result.summary).toEqual({
+      added: 0,
+      updated: 1,
+      retained: 0,
+      removed: 0,
+    });
   });
 
   test("preserves nonblank photo and team when the scraper returns blanks", () => {
     const sourceDocument = documentWith({
-      "2027-2028": [player(1, { player_photo: "https://photos.example/1.jpg", current_team: "Curated Team" })],
+      "2027-2028": [
+        player(1, {
+          player_photo: "https://photos.example/1.jpg",
+          current_team: "Curated Team",
+        }),
+      ],
       "2028-2029": [],
     });
 
     const result = mergeRecruitingSnapshot({
       sourceDocument,
-      snapshot: { "2027-2028": [player(1, { player_photo: "", current_team: "" })], "2028-2029": [] },
+      snapshot: {
+        "2027-2028": [player(1, { player_photo: "", current_team: "" })],
+        "2028-2029": [],
+      },
       removalState: { version: 1, misses: {} },
       seasons,
     });
@@ -185,7 +230,9 @@ describe("mergeRecruitingSnapshot", () => {
       seasons,
     });
 
-    expect(result.document.recruiting["2027-2028"][0].editor_note).toBe("verified");
+    expect(result.document.recruiting["2027-2028"][0].editor_note).toBe(
+      "verified",
+    );
   });
 
   test("leaves unconfigured seasons and every non-recruiting property unchanged", () => {
@@ -203,27 +250,46 @@ describe("mergeRecruitingSnapshot", () => {
       seasons,
     });
 
-    expect(result.document.recruiting["2029-2030"]).toEqual(original.recruiting["2029-2030"]);
-    expect({ ...result.document, recruiting: undefined }).toEqual({ ...original, recruiting: undefined });
+    expect(result.document.recruiting["2029-2030"]).toEqual(
+      original.recruiting["2029-2030"],
+    );
+    expect({ ...result.document, recruiting: undefined }).toEqual({
+      ...original,
+      recruiting: undefined,
+    });
     expect(sourceDocument).toEqual(original);
   });
 
   test("retains a missing recruit and records its first miss", () => {
     const result = mergeRecruitingSnapshot({
-      sourceDocument: documentWith({ "2027-2028": [player(1)], "2028-2029": [] }),
+      sourceDocument: documentWith({
+        "2027-2028": [player(1)],
+        "2028-2029": [],
+      }),
       snapshot: { "2027-2028": [], "2028-2029": [player(2)] },
       removalState: { version: 1, misses: {} },
       seasons,
     });
 
     expect(result.document.recruiting["2027-2028"]).toEqual([player(1)]);
-    expect(result.removalState).toEqual({ version: 1, misses: { [missKey]: 1 } });
-    expect(result.summary).toEqual({ added: 1, updated: 0, retained: 1, removed: 0 });
+    expect(result.removalState).toEqual({
+      version: 1,
+      misses: { [missKey]: 1 },
+    });
+    expect(result.summary).toEqual({
+      added: 1,
+      updated: 0,
+      retained: 1,
+      removed: 0,
+    });
   });
 
   test("removes a recruit on its second consecutive absence", () => {
     const result = mergeRecruitingSnapshot({
-      sourceDocument: documentWith({ "2027-2028": [player(1)], "2028-2029": [] }),
+      sourceDocument: documentWith({
+        "2027-2028": [player(1)],
+        "2028-2029": [],
+      }),
       snapshot: { "2027-2028": [], "2028-2029": [player(2)] },
       removalState: { version: 1, misses: { [missKey]: 1 } },
       seasons,
@@ -231,13 +297,21 @@ describe("mergeRecruitingSnapshot", () => {
 
     expect(result.document.recruiting["2027-2028"]).toEqual([]);
     expect(result.removalState).toEqual({ version: 1, misses: {} });
-    expect(result.summary).toEqual({ added: 1, updated: 0, retained: 0, removed: 1 });
+    expect(result.summary).toEqual({
+      added: 1,
+      updated: 0,
+      retained: 0,
+      removed: 1,
+    });
   });
 
   test("clears a pending miss when the recruit reappears", () => {
     const removalState = { version: 1, misses: { [missKey]: 1 } };
     const result = mergeRecruitingSnapshot({
-      sourceDocument: documentWith({ "2027-2028": [player(1)], "2028-2029": [] }),
+      sourceDocument: documentWith({
+        "2027-2028": [player(1)],
+        "2028-2029": [],
+      }),
       snapshot: { "2027-2028": [player(1)], "2028-2029": [] },
       removalState,
       seasons,
@@ -245,7 +319,12 @@ describe("mergeRecruitingSnapshot", () => {
 
     expect(result.removalState).toEqual({ version: 1, misses: {} });
     expect(removalState).toEqual({ version: 1, misses: { [missKey]: 1 } });
-    expect(result.summary).toEqual({ added: 0, updated: 0, retained: 0, removed: 0 });
+    expect(result.summary).toEqual({
+      added: 0,
+      updated: 0,
+      retained: 0,
+      removed: 0,
+    });
   });
 
   test("sorts configured seasons by case-insensitive last name then full name", () => {
@@ -263,26 +342,35 @@ describe("mergeRecruitingSnapshot", () => {
       seasons,
     });
 
-    expect(result.document.recruiting["2027-2028"].map(({ name }) => name)).toEqual([
-      "Zoe Adams", "Alice Baker", "Bob Baker",
-    ]);
+    expect(
+      result.document.recruiting["2027-2028"].map(({ name }) => name),
+    ).toEqual(["Zoe Adams", "Alice Baker", "Bob Baker"]);
   });
 
   test("sorts same-name recruits by normalized player URL regardless of snapshot order", () => {
     const first = player(1, { name: "Alex Same" });
     const second = player(2, { name: "Alex Same" });
-    const merge = (players) => mergeRecruitingSnapshot({
-      sourceDocument: documentWith({ "2027-2028": [], "2028-2029": [] }),
-      snapshot: { "2027-2028": players, "2028-2029": [] },
-      removalState: emptyRemovalState(),
-      seasons,
-    });
+    const merge = (players) =>
+      mergeRecruitingSnapshot({
+        sourceDocument: documentWith({ "2027-2028": [], "2028-2029": [] }),
+        snapshot: { "2027-2028": players, "2028-2029": [] },
+        removalState: emptyRemovalState(),
+        seasons,
+      });
 
-    expect(merge([second, first]).document.recruiting["2027-2028"].map(({ player_link }) => player_link)).toEqual([
+    expect(
+      merge([second, first]).document.recruiting["2027-2028"].map(
+        ({ player_link }) => player_link,
+      ),
+    ).toEqual([
       "https://www.eliteprospects.com/player/1/player-1",
       "https://www.eliteprospects.com/player/2/player-2",
     ]);
-    expect(merge([first, second]).document.recruiting["2027-2028"].map(({ player_link }) => player_link)).toEqual([
+    expect(
+      merge([first, second]).document.recruiting["2027-2028"].map(
+        ({ player_link }) => player_link,
+      ),
+    ).toEqual([
       "https://www.eliteprospects.com/player/1/player-1",
       "https://www.eliteprospects.com/player/2/player-2",
     ]);
@@ -310,10 +398,17 @@ describe("writeRecruitingFilesAtomically", () => {
     const document = { recruiting: { "2027-2028": [player(1)] } };
     const removalState = { version: 1, misses: {} };
 
-    writeRecruitingFilesAtomically({ dataFile, stateFile, document, removalState });
+    writeRecruitingFilesAtomically({
+      dataFile,
+      stateFile,
+      document,
+      removalState,
+    });
 
     expect(JSON.parse(fs.readFileSync(dataFile, "utf8"))).toEqual(document);
-    expect(JSON.parse(fs.readFileSync(stateFile, "utf8"))).toEqual(removalState);
+    expect(JSON.parse(fs.readFileSync(stateFile, "utf8"))).toEqual(
+      removalState,
+    );
   });
 
   test("does not change either destination when serialization validation fails", () => {
@@ -342,7 +437,11 @@ describe("writeRecruitingFilesAtomically", () => {
     const fsAdapter = {
       ...fs,
       renameSync(from, to) {
-        if (to === stateFile && !failedSecondReplacement && from.includes(".tmp-")) {
+        if (
+          to === stateFile &&
+          !failedSecondReplacement &&
+          from.includes(".tmp-")
+        ) {
           failedSecondReplacement = true;
           throw new Error("second replacement failed");
         }

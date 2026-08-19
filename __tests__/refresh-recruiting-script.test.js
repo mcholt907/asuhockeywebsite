@@ -33,7 +33,10 @@ describe("runRecruitingRefresh", () => {
     directory = fs.mkdtempSync(path.join(os.tmpdir(), "recruiting-script-"));
     dataFile = path.join(directory, "asu_hockey_data.json");
     stateFile = path.join(directory, "asu_recruiting_refresh_state.json");
-    fs.writeFileSync(dataFile, JSON.stringify({ recruiting: { "2027-2028": [] } }));
+    fs.writeFileSync(
+      dataFile,
+      JSON.stringify({ recruiting: { "2027-2028": [] } }),
+    );
     fs.writeFileSync(stateFile, JSON.stringify({ version: 1, misses: {} }));
   });
 
@@ -50,21 +53,29 @@ describe("runRecruitingRefresh", () => {
     });
 
     expect(summary.added).toBe(1);
-    expect(JSON.parse(fs.readFileSync(dataFile, "utf8")).recruiting["2027-2028"])
-      .toEqual([player(2)]);
+    expect(
+      JSON.parse(fs.readFileSync(dataFile, "utf8")).recruiting["2027-2028"],
+    ).toEqual([player(2)]);
   });
 
   test("leaves both files byte-for-byte unchanged after an invalid snapshot", async () => {
-    fs.writeFileSync(dataFile, JSON.stringify({ recruiting: { "2027-2028": [player(1)] } }));
+    fs.writeFileSync(
+      dataFile,
+      JSON.stringify({ recruiting: { "2027-2028": [player(1)] } }),
+    );
     const originalData = fs.readFileSync(dataFile, "utf8");
     const originalState = fs.readFileSync(stateFile, "utf8");
 
-    await expect(runRecruitingRefresh({
-      dataFile,
-      stateFile,
-      seasons: ["2027-2028"],
-      scrape: async () => ({ "2027-2028": [] }),
-    })).rejects.toThrow("Recruiting snapshot season 2027-2028 unexpectedly became empty");
+    await expect(
+      runRecruitingRefresh({
+        dataFile,
+        stateFile,
+        seasons: ["2027-2028"],
+        scrape: async () => ({ "2027-2028": [] }),
+      }),
+    ).rejects.toThrow(
+      "Recruiting snapshot season 2027-2028 unexpectedly became empty",
+    );
 
     expect(fs.readFileSync(dataFile, "utf8")).toBe(originalData);
     expect(fs.readFileSync(stateFile, "utf8")).toBe(originalState);
