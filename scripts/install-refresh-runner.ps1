@@ -197,14 +197,29 @@ function Get-GitRepositoryIdentity {
       ) `
       -CaptureOutput
   )
+  $workTreeOutput = @(
+    Invoke-NativeCommand `
+      -FilePath 'git' `
+      -ArgumentList @(
+        '-C',
+        $RepositoryPath,
+        'rev-parse',
+        '--path-format=absolute',
+        '--show-toplevel'
+      ) `
+      -CaptureOutput
+  )
 
-  if ($gitDirOutput.Count -ne 1 -or $gitCommonDirOutput.Count -ne 1) {
+  if ($gitDirOutput.Count -ne 1 -or
+      $gitCommonDirOutput.Count -ne 1 -or
+      $workTreeOutput.Count -ne 1) {
     throw "Unable to determine an unambiguous Git repository identity for: $RepositoryPath"
   }
 
   return [PSCustomObject]@{
     GitDir = ConvertTo-NormalizedAbsolutePath -Path $gitDirOutput[0].ToString().Trim()
     GitCommonDir = ConvertTo-NormalizedAbsolutePath -Path $gitCommonDirOutput[0].ToString().Trim()
+    WorkTree = ConvertTo-NormalizedAbsolutePath -Path $workTreeOutput[0].ToString().Trim()
   }
 }
 
@@ -232,9 +247,14 @@ function Assert-ExistingRefreshRunner {
   }
 
   $runnerIdentity = Get-GitRepositoryIdentity -RepositoryPath $RunnerPath
+  $expectedRunnerPath = ConvertTo-NormalizedAbsolutePath -Path $RunnerPath
+  $comparison = [System.StringComparison]::OrdinalIgnoreCase
+  if (-not $runnerIdentity.WorkTree.Equals($expectedRunnerPath, $comparison)) {
+    throw "Existing runner worktree root must equal RunnerPath: $RunnerPath"
+  }
+
   $sourceIdentity = Get-GitRepositoryIdentity -RepositoryPath $SourceRepositoryRoot
   $expectedRunnerGitDirectory = ConvertTo-NormalizedAbsolutePath -Path $runnerGitDirectory
-  $comparison = [System.StringComparison]::OrdinalIgnoreCase
 
   $runnerUsesItsOwnGitDirectory = $runnerIdentity.GitDir.Equals(
     $expectedRunnerGitDirectory,

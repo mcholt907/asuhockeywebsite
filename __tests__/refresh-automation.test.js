@@ -95,10 +95,12 @@ function runInstallerHarness(
   );
   const harnessPath = path.join(directory, "invoke-installer-harness.ps1");
   const environmentFile = path.join(directory, "source.env");
+  const gitGlobalConfig = path.join(directory, "empty.gitconfig");
   const resolvedCandidatePath =
     candidatePath || path.join(directory, "developer-repository-alias");
 
   fs.writeFileSync(environmentFile, "TEST_VALUE=not-printed\n");
+  fs.writeFileSync(gitGlobalConfig, "");
   fs.writeFileSync(
     harnessPath,
     `param(
@@ -116,6 +118,11 @@ if ($Mode -eq 'definition') {
   Get-RefreshTaskDefinition -RunnerPath $CandidatePath -TaskName 'ASU Hockey Data Refresh' |
     ConvertTo-Json -Depth 5 -Compress
   exit 0
+}
+
+if ($Mode -eq 'status') {
+  & git -C $CandidatePath status --porcelain --untracked-files=no
+  exit $LASTEXITCODE
 }
 
 try {
@@ -163,7 +170,18 @@ try {
       repositoryRoot,
       expectedOrigin,
     ],
-    { encoding: "utf8", cwd: directory },
+    {
+      encoding: "utf8",
+      cwd: directory,
+      env: {
+        ...process.env,
+        GIT_CONFIG_GLOBAL: gitGlobalConfig,
+        GIT_CONFIG_NOSYSTEM: "1",
+        GIT_CONFIG_COUNT: "1",
+        GIT_CONFIG_KEY_0: "core.excludesFile",
+        GIT_CONFIG_VALUE_0: "NUL",
+      },
+    },
   );
 
   fs.rmSync(directory, { recursive: true, force: true });
@@ -187,11 +205,16 @@ function createLinkedWorktreeFixture() {
   const source = path.join(directory, "source");
   const linkedRunner = path.join(directory, "linked-runner");
   const sharedCommonDirRunner = path.join(directory, "shared-common-runner");
+  const redirectedWorktreeRunner = path.join(
+    directory,
+    "redirected-worktree-runner",
+  );
   const origin = "https://example.invalid/asu-hockey.git";
 
   runGit(["init", source]);
   runGit(["-C", source, "config", "user.name", "Refresh Test"]);
   runGit(["-C", source, "config", "user.email", "refresh@example.invalid"]);
+  runGit(["-C", source, "config", "core.autocrlf", "false"]);
   fs.writeFileSync(path.join(source, "fixture.txt"), "fixture\n");
   runGit(["-C", source, "add", "fixture.txt"]);
   runGit(["-C", source, "commit", "-m", "fixture"]);
@@ -202,11 +225,24 @@ function createLinkedWorktreeFixture() {
     path.join(sharedCommonDirRunner, ".git", "commondir"),
     `${path.join(source, ".git").replace(/\\/g, "/")}\n`,
   );
+  runGit(["clone", source, redirectedWorktreeRunner]);
+  runGit([
+    "-C",
+    redirectedWorktreeRunner,
+    "remote",
+    "set-url",
+    "origin",
+    origin,
+  ]);
+  runGit(["-C", redirectedWorktreeRunner, "config", "core.autocrlf", "false"]);
+  runGit(["-C", redirectedWorktreeRunner, "config", "core.worktree", source]);
+  runGit(["-C", redirectedWorktreeRunner, "reset", "--hard", "HEAD"]);
 
   return {
     source,
     linkedRunner,
     sharedCommonDirRunner,
+    redirectedWorktreeRunner,
     origin,
     cleanup() {
       runGit(["-C", source, "worktree", "remove", "--force", linkedRunner]);
@@ -367,6 +403,37 @@ describe("isolated refresh runner installer", () => {
 
       expect(result.status).toBe(23);
       expect(result.stderr).toContain("standalone clone");
+    } finally {
+      fixture.cleanup();
+    }
+  });
+
+  windowsTest("rejects core.worktree redirected to the source checkout", () => {
+    const fixture = createLinkedWorktreeFixture();
+    try {
+      const status = runInstallerHarness(
+        "status",
+        fixture.redirectedWorktreeRunner,
+        {
+          repositoryRoot: fixture.source,
+          expectedOrigin: fixture.origin,
+        },
+      );
+      expect(status.status).toBe(0);
+      expect(status.stdout.trim()).toBe("");
+      expect(status.stderr.trim()).toBe("");
+
+      const result = runInstallerHarness(
+        "existing",
+        fixture.redirectedWorktreeRunner,
+        {
+          repositoryRoot: fixture.source,
+          expectedOrigin: fixture.origin,
+        },
+      );
+
+      expect(result.status).toBe(23);
+      expect(result.stderr).toContain("worktree root");
     } finally {
       fixture.cleanup();
     }
