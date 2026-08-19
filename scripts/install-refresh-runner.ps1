@@ -18,6 +18,29 @@ function ConvertTo-NormalizedAbsolutePath {
   return [System.IO.Path]::GetFullPath($Path)
 }
 
+function Assert-PathHasNoReparsePoints {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Path
+  )
+
+  $currentPath = ConvertTo-NormalizedAbsolutePath -Path $Path
+  while ($null -ne $currentPath) {
+    if (Test-Path -LiteralPath $currentPath) {
+      $item = Get-Item -LiteralPath $currentPath -Force
+      $isReparsePoint = (
+        $item.Attributes -band [System.IO.FileAttributes]::ReparsePoint
+      ) -eq [System.IO.FileAttributes]::ReparsePoint
+      if ($isReparsePoint) {
+        throw "RunnerPath must not use a reparse point or junction: $currentPath"
+      }
+    }
+
+    $parent = [System.IO.Directory]::GetParent($currentPath)
+    $currentPath = if ($null -eq $parent) { $null } else { $parent.FullName }
+  }
+}
+
 function Resolve-RefreshInstallerPaths {
   param(
     [Parameter(Mandatory = $true)]
@@ -31,6 +54,8 @@ function Resolve-RefreshInstallerPaths {
   $resolvedRunnerPath = ConvertTo-NormalizedAbsolutePath -Path $RunnerPath
   $resolvedRepositoryRoot = ConvertTo-NormalizedAbsolutePath -Path $RepositoryRoot
   $resolvedEnvironmentFile = ConvertTo-NormalizedAbsolutePath -Path $EnvironmentFile
+
+  Assert-PathHasNoReparsePoints -Path $resolvedRunnerPath
 
   if (-not [System.IO.Path]::IsPathRooted($resolvedRunnerPath) -or
       -not [System.IO.Path]::IsPathRooted($resolvedEnvironmentFile)) {
@@ -142,6 +167,112 @@ function Invoke-NativeCommand {
   }
 }
 
+function Get-GitRepositoryIdentity {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$RepositoryPath
+  )
+
+  $gitDirOutput = @(
+    Invoke-NativeCommand `
+      -FilePath 'git' `
+      -ArgumentList @(
+        '-C',
+        $RepositoryPath,
+        'rev-parse',
+        '--path-format=absolute',
+        '--git-dir'
+      ) `
+      -CaptureOutput
+  )
+  $gitCommonDirOutput = @(
+    Invoke-NativeCommand `
+      -FilePath 'git' `
+      -ArgumentList @(
+        '-C',
+        $RepositoryPath,
+        'rev-parse',
+        '--path-format=absolute',
+        '--git-common-dir'
+      ) `
+      -CaptureOutput
+  )
+
+  if ($gitDirOutput.Count -ne 1 -or $gitCommonDirOutput.Count -ne 1) {
+    throw "Unable to determine an unambiguous Git repository identity for: $RepositoryPath"
+  }
+
+  return [PSCustomObject]@{
+    GitDir = ConvertTo-NormalizedAbsolutePath -Path $gitDirOutput[0].ToString().Trim()
+    GitCommonDir = ConvertTo-NormalizedAbsolutePath -Path $gitCommonDirOutput[0].ToString().Trim()
+  }
+}
+
+function Assert-ExistingRefreshRunner {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$RunnerPath,
+    [Parameter(Mandatory = $true)]
+    [string]$ExpectedOriginUrl,
+    [Parameter(Mandatory = $true)]
+    [string]$SourceRepositoryRoot
+  )
+
+  $runnerGitDirectory = Join-Path $RunnerPath '.git'
+  if (-not (Test-Path -LiteralPath $runnerGitDirectory -PathType Container)) {
+    throw "Existing runner .git must be a real directory, not a file: $runnerGitDirectory"
+  }
+
+  $gitDirectoryItem = Get-Item -LiteralPath $runnerGitDirectory -Force
+  $gitDirectoryIsReparsePoint = (
+    $gitDirectoryItem.Attributes -band [System.IO.FileAttributes]::ReparsePoint
+  ) -eq [System.IO.FileAttributes]::ReparsePoint
+  if ($gitDirectoryIsReparsePoint) {
+    throw "Existing runner .git must be a real directory, not a reparse point: $runnerGitDirectory"
+  }
+
+  $runnerIdentity = Get-GitRepositoryIdentity -RepositoryPath $RunnerPath
+  $sourceIdentity = Get-GitRepositoryIdentity -RepositoryPath $SourceRepositoryRoot
+  $expectedRunnerGitDirectory = ConvertTo-NormalizedAbsolutePath -Path $runnerGitDirectory
+  $comparison = [System.StringComparison]::OrdinalIgnoreCase
+
+  $runnerUsesItsOwnGitDirectory = $runnerIdentity.GitDir.Equals(
+    $expectedRunnerGitDirectory,
+    $comparison
+  )
+  $runnerGitDirectoriesMatch = $runnerIdentity.GitDir.Equals(
+    $runnerIdentity.GitCommonDir,
+    $comparison
+  )
+  if (-not $runnerUsesItsOwnGitDirectory -or -not $runnerGitDirectoriesMatch) {
+    throw "Existing runner must be a standalone clone with its own .git directory: $RunnerPath"
+  }
+
+  if ($runnerIdentity.GitCommonDir.Equals($sourceIdentity.GitCommonDir, $comparison)) {
+    throw "Existing runner must not share Git storage with the source repository: $RunnerPath"
+  }
+
+  $runnerOriginUrl = @(
+    Invoke-NativeCommand `
+      -FilePath 'git' `
+      -ArgumentList @('-C', $RunnerPath, 'remote', 'get-url', 'origin') `
+      -CaptureOutput
+  )[-1].ToString().Trim()
+  if ($runnerOriginUrl -cne $ExpectedOriginUrl) {
+    throw 'Existing runner origin does not match the current repository origin.'
+  }
+
+  $trackedChanges = @(
+    Invoke-NativeCommand `
+      -FilePath 'git' `
+      -ArgumentList @('-C', $RunnerPath, 'status', '--porcelain', '--untracked-files=no') `
+      -CaptureOutput
+  )
+  if ($trackedChanges.Count -gt 0) {
+    throw 'Existing runner has unexpected tracked changes; refusing to overwrite them.'
+  }
+}
+
 function Register-RefreshScheduledTask {
   param(
     [Parameter(Mandatory = $true)]
@@ -216,29 +347,10 @@ function Install-RefreshRunner {
     }
 
     if (Test-Path -LiteralPath $paths.RunnerPath) {
-      if (-not (Test-Path -LiteralPath (Join-Path $paths.RunnerPath '.git'))) {
-        throw "Existing RunnerPath is not a Git repository: $($paths.RunnerPath)"
-      }
-
-      $runnerOriginUrl = @(
-        Invoke-NativeCommand `
-          -FilePath 'git' `
-          -ArgumentList @('-C', $paths.RunnerPath, 'remote', 'get-url', 'origin') `
-          -CaptureOutput
-      )[-1].ToString().Trim()
-      if ($runnerOriginUrl -cne $originUrl) {
-        throw "Existing runner origin does not match the current repository origin."
-      }
-
-      $trackedChanges = @(
-        Invoke-NativeCommand `
-          -FilePath 'git' `
-          -ArgumentList @('-C', $paths.RunnerPath, 'status', '--porcelain', '--untracked-files=no') `
-          -CaptureOutput
-      )
-      if ($trackedChanges.Count -gt 0) {
-        throw "Existing runner has unexpected tracked changes; refusing to overwrite them."
-      }
+      Assert-ExistingRefreshRunner `
+        -RunnerPath $paths.RunnerPath `
+        -ExpectedOriginUrl $originUrl `
+        -SourceRepositoryRoot $paths.RepositoryRoot
     } else {
       Invoke-NativeCommand `
         -FilePath 'git' `

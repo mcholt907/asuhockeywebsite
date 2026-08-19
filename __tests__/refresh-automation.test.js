@@ -82,12 +82,21 @@ try {
   return { ...result, log };
 }
 
-function runInstallerHarness(mode, candidatePath) {
+function runInstallerHarness(
+  mode,
+  candidatePath,
+  {
+    repositoryRoot = path.resolve(__dirname, ".."),
+    expectedOrigin = "https://example.invalid/asu-hockey.git",
+  } = {},
+) {
   const directory = fs.mkdtempSync(
     path.join(os.tmpdir(), "refresh-installer-"),
   );
   const harnessPath = path.join(directory, "invoke-installer-harness.ps1");
   const environmentFile = path.join(directory, "source.env");
+  const resolvedCandidatePath =
+    candidatePath || path.join(directory, "developer-repository-alias");
 
   fs.writeFileSync(environmentFile, "TEST_VALUE=not-printed\n");
   fs.writeFileSync(
@@ -97,7 +106,8 @@ function runInstallerHarness(mode, candidatePath) {
   [string]$Mode,
   [string]$CandidatePath,
   [string]$EnvironmentFile,
-  [string]$RepositoryRoot
+  [string]$RepositoryRoot,
+  [string]$ExpectedOrigin
 )
 
 . $InstallerPath -EnvironmentFile $EnvironmentFile
@@ -109,6 +119,25 @@ if ($Mode -eq 'definition') {
 }
 
 try {
+  if ($Mode -eq 'junction') {
+    New-Item -ItemType Junction -Path $CandidatePath -Target $RepositoryRoot | Out-Null
+    try {
+      Resolve-RefreshInstallerPaths -RunnerPath $CandidatePath -EnvironmentFile $EnvironmentFile -RepositoryRoot $RepositoryRoot |
+        ConvertTo-Json -Depth 3 -Compress
+    } finally {
+      if (Test-Path -LiteralPath $CandidatePath) {
+        [System.IO.Directory]::Delete($CandidatePath)
+      }
+    }
+    exit 0
+  }
+
+  if ($Mode -eq 'existing') {
+    Assert-ExistingRefreshRunner -RunnerPath $CandidatePath -ExpectedOriginUrl $ExpectedOrigin -SourceRepositoryRoot $RepositoryRoot
+    Write-Output 'EXISTING_RUNNER_OK'
+    exit 0
+  }
+
   Resolve-RefreshInstallerPaths -RunnerPath $CandidatePath -EnvironmentFile $EnvironmentFile -RepositoryRoot $RepositoryRoot |
     ConvertTo-Json -Depth 3 -Compress
   exit 0
@@ -129,15 +158,61 @@ try {
       harnessPath,
       installerPath,
       mode,
-      candidatePath,
+      resolvedCandidatePath,
       environmentFile,
-      path.resolve(__dirname, ".."),
+      repositoryRoot,
+      expectedOrigin,
     ],
     { encoding: "utf8", cwd: directory },
   );
 
   fs.rmSync(directory, { recursive: true, force: true });
   return result;
+}
+
+function runGit(args, cwd) {
+  const result = spawnSync("git", args, { cwd, encoding: "utf8" });
+  if (result.status !== 0) {
+    throw new Error(
+      `git ${args.join(" ")} failed: ${result.stdout}\n${result.stderr}`,
+    );
+  }
+  return result;
+}
+
+function createLinkedWorktreeFixture() {
+  const directory = fs.mkdtempSync(
+    path.join(os.tmpdir(), "refresh-linked-worktree-"),
+  );
+  const source = path.join(directory, "source");
+  const linkedRunner = path.join(directory, "linked-runner");
+  const sharedCommonDirRunner = path.join(directory, "shared-common-runner");
+  const origin = "https://example.invalid/asu-hockey.git";
+
+  runGit(["init", source]);
+  runGit(["-C", source, "config", "user.name", "Refresh Test"]);
+  runGit(["-C", source, "config", "user.email", "refresh@example.invalid"]);
+  fs.writeFileSync(path.join(source, "fixture.txt"), "fixture\n");
+  runGit(["-C", source, "add", "fixture.txt"]);
+  runGit(["-C", source, "commit", "-m", "fixture"]);
+  runGit(["-C", source, "remote", "add", "origin", origin]);
+  runGit(["-C", source, "worktree", "add", "--detach", linkedRunner]);
+  runGit(["clone", source, sharedCommonDirRunner]);
+  fs.writeFileSync(
+    path.join(sharedCommonDirRunner, ".git", "commondir"),
+    `${path.join(source, ".git").replace(/\\/g, "/")}\n`,
+  );
+
+  return {
+    source,
+    linkedRunner,
+    sharedCommonDirRunner,
+    origin,
+    cleanup() {
+      runGit(["-C", source, "worktree", "remove", "--force", linkedRunner]);
+      fs.rmSync(directory, { recursive: true, force: true });
+    },
+  };
 }
 
 describe("refresh change allowlist", () => {
@@ -254,6 +329,47 @@ describe("isolated refresh runner installer", () => {
     expect(path.isAbsolute(resolved.RunnerPath)).toBe(true);
     expect(path.isAbsolute(resolved.EnvironmentFile)).toBe(true);
     expect(resolved.RunnerPath).toMatch(/[\\/]daily-runner$/);
+  });
+
+  windowsTest("rejects a junction alias to the developer checkout", () => {
+    const result = runInstallerHarness("junction");
+
+    expect(result.status).toBe(23);
+    expect(result.stderr).toContain("reparse point");
+  });
+
+  windowsTest("rejects a linked worktree as an existing runner", () => {
+    const fixture = createLinkedWorktreeFixture();
+    try {
+      const result = runInstallerHarness("existing", fixture.linkedRunner, {
+        repositoryRoot: fixture.source,
+        expectedOrigin: fixture.origin,
+      });
+
+      expect(result.status).toBe(23);
+      expect(result.stderr).toContain(".git must be a real directory");
+    } finally {
+      fixture.cleanup();
+    }
+  });
+
+  windowsTest("rejects a .git directory that shares source Git storage", () => {
+    const fixture = createLinkedWorktreeFixture();
+    try {
+      const result = runInstallerHarness(
+        "existing",
+        fixture.sharedCommonDirRunner,
+        {
+          repositoryRoot: fixture.source,
+          expectedOrigin: fixture.origin,
+        },
+      );
+
+      expect(result.status).toBe(23);
+      expect(result.stderr).toContain("standalone clone");
+    } finally {
+      fixture.cleanup();
+    }
   });
 
   windowsTest("defines the exact daily task without registering it", () => {
