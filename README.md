@@ -19,6 +19,35 @@ You may also see any lint errors in the console.
 Launches the test runner in the interactive watch mode.\
 See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
+## Daily data refresh
+
+Production fallback and recruiting data are refreshed from a dedicated Windows clone every day at 06:00 local time. Install or replace the scheduled runner once from the primary repository, passing an existing readable environment file:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\install-refresh-runner.ps1 -EnvironmentFile C:\Users\farkh\asuhockeywebsite\.env
+```
+
+The installer requires Git, Node/npm, an authenticated GitHub CLI (`gh auth status`), and permission to register a Scheduled Task. It clones or updates an isolated runner, runs `npm ci`, copies the environment file without displaying its contents, writes the `.refresh-runner` safety marker, and registers `ASU Hockey Data Refresh` with wake, network, and missed-start handling. Never point the runner at the working repository, inside it, or at one of its parent directories.
+
+Each run refreshes recruiting, alumni, and transfer data, then permits commits containing only these four generated files:
+
+- `asu_hockey_data.json`
+- `data/asu_recruiting_refresh_state.json`
+- `data/asu_alumni_fallback.json`
+- `data/asu_transfers_fallback.json`
+
+Recruit removals require absence from two consecutive successful scrapes. A snapshot that would remove more than 35 percent of existing recruits is rejected. When validated data is unchanged, the run exits successfully without a commit or pull request. `npm run refresh-recruiting` is available as a diagnostic override for recruiting-only investigation; the scheduled workflow remains the source of routine refreshes.
+
+Inspect the latest task result with:
+
+```powershell
+Get-ScheduledTaskInfo -TaskName 'ASU Hockey Data Refresh'
+```
+
+Detailed runner output is appended to `.refresh-log.txt`. The Sentry Cron Monitor is the dead-man's switch for successful daily executions, including no-op runs; configure it for daily 06:00 America/Phoenix with an approximately 12-hour grace period using `SENTRY_CRON_MONITOR_URL`.
+
+At season rollover, update `config.FUTURE_SEASONS` in `config/scraper-config.js` so recruiting refreshes query the intended future classes.
+
 ### `npm run build`
 
 Builds the app for production to the `build` folder.\

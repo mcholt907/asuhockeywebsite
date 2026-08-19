@@ -8,6 +8,10 @@ const validatorPath = path.resolve(
   "../scripts/validate-refresh-changes.js",
 );
 const runnerPath = path.resolve(__dirname, "../scripts/refresh-and-push.ps1");
+const installerPath = path.resolve(
+  __dirname,
+  "../scripts/install-refresh-runner.ps1",
+);
 
 const windowsTest = process.platform === "win32" ? test : test.skip;
 
@@ -76,6 +80,64 @@ try {
   fs.rmSync(directory, { recursive: true, force: true });
 
   return { ...result, log };
+}
+
+function runInstallerHarness(mode, candidatePath) {
+  const directory = fs.mkdtempSync(
+    path.join(os.tmpdir(), "refresh-installer-"),
+  );
+  const harnessPath = path.join(directory, "invoke-installer-harness.ps1");
+  const environmentFile = path.join(directory, "source.env");
+
+  fs.writeFileSync(environmentFile, "TEST_VALUE=not-printed\n");
+  fs.writeFileSync(
+    harnessPath,
+    `param(
+  [string]$InstallerPath,
+  [string]$Mode,
+  [string]$CandidatePath,
+  [string]$EnvironmentFile,
+  [string]$RepositoryRoot
+)
+
+. $InstallerPath -EnvironmentFile $EnvironmentFile
+
+if ($Mode -eq 'definition') {
+  Get-RefreshTaskDefinition -RunnerPath $CandidatePath -TaskName 'ASU Hockey Data Refresh' |
+    ConvertTo-Json -Depth 5 -Compress
+  exit 0
+}
+
+try {
+  Resolve-RefreshInstallerPaths -RunnerPath $CandidatePath -EnvironmentFile $EnvironmentFile -RepositoryRoot $RepositoryRoot |
+    ConvertTo-Json -Depth 3 -Compress
+  exit 0
+} catch {
+  [Console]::Error.WriteLine($_.Exception.Message)
+  exit 23
+}
+`,
+  );
+
+  const result = spawnSync(
+    "powershell.exe",
+    [
+      "-NoProfile",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      harnessPath,
+      installerPath,
+      mode,
+      candidatePath,
+      environmentFile,
+      path.resolve(__dirname, ".."),
+    ],
+    { encoding: "utf8", cwd: directory },
+  );
+
+  fs.rmSync(directory, { recursive: true, force: true });
+  return result;
 }
 
 describe("refresh change allowlist", () => {
@@ -165,5 +227,57 @@ describe("PowerShell native command execution", () => {
       "exited with code 7",
     );
     expect(result.log).toContain("native-stderr-failure");
+  });
+});
+
+describe("isolated refresh runner installer", () => {
+  windowsTest("rejects every path that overlaps the live repository", () => {
+    const repositoryRoot = path.resolve(__dirname, "..");
+
+    for (const unsafePath of [
+      repositoryRoot,
+      path.dirname(repositoryRoot),
+      path.join(repositoryRoot, "nested-runner"),
+    ]) {
+      const result = runInstallerHarness("paths", unsafePath);
+
+      expect(result.status).toBe(23);
+      expect(result.stderr).toContain("must not be the repository root");
+    }
+  });
+
+  windowsTest("resolves safe runner and environment paths", () => {
+    const result = runInstallerHarness("paths", ".\\daily-runner");
+
+    expect(result.status).toBe(0);
+    const resolved = JSON.parse(result.stdout.trim());
+    expect(path.isAbsolute(resolved.RunnerPath)).toBe(true);
+    expect(path.isAbsolute(resolved.EnvironmentFile)).toBe(true);
+    expect(resolved.RunnerPath).toMatch(/[\\/]daily-runner$/);
+  });
+
+  windowsTest("defines the exact daily task without registering it", () => {
+    const runner = path.resolve(os.tmpdir(), "asu-refresh-runner-spec");
+    const result = runInstallerHarness("definition", runner);
+
+    expect(result.status).toBe(0);
+    expect(JSON.parse(result.stdout.trim())).toEqual({
+      TaskName: "ASU Hockey Data Refresh",
+      Description: "Daily validated ASU Hockey data refresh and automated PR",
+      Action: {
+        Execute: path.join(runner, "scripts", "refresh-and-push.cmd"),
+        WorkingDirectory: runner,
+      },
+      Trigger: { Frequency: "Daily", At: "06:00" },
+      Settings: {
+        MultipleInstances: "IgnoreNew",
+        AllowStartIfOnBatteries: true,
+        DontStopIfGoingOnBatteries: true,
+        StartWhenAvailable: true,
+        WakeToRun: true,
+        RunOnlyIfNetworkAvailable: true,
+        ExecutionTimeLimitMinutes: 30,
+      },
+    });
   });
 });
