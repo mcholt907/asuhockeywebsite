@@ -19,6 +19,35 @@ You may also see any lint errors in the console.
 Launches the test runner in the interactive watch mode.\
 See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
+## Daily data refresh
+
+Four production fallback datasets are refreshed from a dedicated Windows clone every day at 06:00 local time. Install or replace the scheduled runner once from the primary repository, passing an existing readable environment file:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\install-refresh-runner.ps1 -EnvironmentFile C:\Users\farkh\asuhockeywebsite\.env
+```
+
+The installer requires Git, Node/npm, an authenticated GitHub CLI (`gh auth status`), and permission to register a Scheduled Task. It clones or updates an isolated runner, runs `npm ci`, copies the environment file without displaying its contents, writes the `.refresh-runner` safety marker, and registers `ASU Hockey Data Refresh` with wake, network, and missed-start handling. Never point the runner at the working repository, inside it, or at one of its parent directories.
+
+Each run executes `npm run refresh-data` and permits commits containing exactly these four generated files:
+
+- `data/asu_alumni_fallback.json`
+- `data/asu_transfers_fallback.json`
+- `data/asu_recruiting_fallback.json`
+- `data/nchc_standings_fallback.json`
+
+Each refresh validates its complete snapshot before atomically replacing the previous fallback. Recruiting uses a direct all-season scrape that cannot recover from cache or fallback data, so any failed season makes the run fail without publishing a partial snapshot. When validated data is unchanged, the run exits successfully without a commit or pull request.
+
+Inspect the latest task result with:
+
+```powershell
+Get-ScheduledTaskInfo -TaskName 'ASU Hockey Data Refresh'
+```
+
+Detailed runner output is appended to `.refresh-log.txt`. The Sentry Cron Monitor is the dead-man's switch for successful daily executions, including no-op runs; configure it for daily 06:00 America/Phoenix with an approximately 12-hour grace period using `SENTRY_CRON_MONITOR_URL`.
+
+At season rollover, update `config.FUTURE_SEASONS` in `config/scraper-config.js` so recruiting refreshes query the intended future classes.
+
 ### `npm run build`
 
 Builds the app for production to the `build` folder.\
@@ -77,6 +106,8 @@ Run the following from a local machine to refresh the bundled data:
 
 ```bash
 npm run refresh-data        # all bundled fallbacks
+npm run refresh-alumni      # alumni only
+npm run refresh-transfers   # transfers only
 npm run refresh-recruiting  # projected future team rosters only
 npm run refresh-standings   # latest played-season NCHC table only
 ```
@@ -85,4 +116,4 @@ npm run refresh-standings   # latest played-season NCHC table only
 
 Production serves `data/nchc_standings_fallback.json` when USCHO has no current NCHC table or every overall record is `0-0-0`, and switches after the first completed game by any NCHC member.
 
-`npm run refresh-recruiting` enables the local `RECRUITING_SCRAPE_LIVE=true` override and Puppeteer request fallback by default, allowing a residential machine to retry Elite Prospects 403 responses through headless Chrome. Do not enable that override on Render. The refresh command refuses to run when `NODE_ENV=production` or `IS_PRERENDER=true`, preserving the existing bundled snapshot in those environments.
+`npm run refresh-recruiting` performs a direct, uncached all-season scrape and enables Puppeteer request fallback by default, allowing a residential machine to retry Elite Prospects 403 responses through headless Chrome. It never treats cached or bundled data as a successful live refresh. The command refuses to run when `NODE_ENV=production` or `IS_PRERENDER=true`, preserving the existing bundled snapshot in those environments.

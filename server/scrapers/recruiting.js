@@ -1,6 +1,6 @@
 // recruiting.js — EliteProspects future-season roster scrape (recruiting
-// tracker). fetchRecruitingData feeds local curation scripts; the live
-// /api/recruits endpoint reads asu_hockey_data.json directly.
+// tracker). The direct all-season entry point feeds the automated local
+// refresh, while /api/recruits uses the cached/bundled-snapshot path.
 const cheerio = require("cheerio");
 const fs = require("fs");
 const path = require("path");
@@ -15,6 +15,10 @@ const {
   validateRecruitingSnapshot,
   readRecruitingSnapshot,
 } = require("../services/recruiting-snapshot");
+const {
+  assertAutomatedRecruitingSnapshot,
+  normalizeRecruitingPosition,
+} = require("../services/recruiting-refresh-health");
 
 const CACHE_TTL = 24 * 60 * 60 * 1000;
 const FALLBACK_FILE = path.join(
@@ -49,10 +53,7 @@ function getFallbackRecruitingData() {
     if (fallbackCache.value && fallbackCache.mtimeMs === stat.mtimeMs) {
       return fallbackCache.value;
     }
-    const value = readRecruitingSnapshot(
-      FALLBACK_FILE,
-      config.FUTURE_SEASONS,
-    );
+    const value = readRecruitingSnapshot(FALLBACK_FILE, config.FUTURE_SEASONS);
     if (value) fallbackCache = { mtimeMs: stat.mtimeMs, value };
     return value;
   } catch (error) {
@@ -62,7 +63,9 @@ function getFallbackRecruitingData() {
 }
 
 function shouldUseFallbackOnly() {
-  return process.env.NODE_ENV === "production" || process.env.IS_PRERENDER === "true";
+  return (
+    process.env.NODE_ENV === "production" || process.env.IS_PRERENDER === "true"
+  );
 }
 
 /**
@@ -70,13 +73,22 @@ function shouldUseFallbackOnly() {
  * @param {string} playerLink - Full URL to player's Elite Prospects profile
  * @returns {{ player_photo: string, current_team: string }}
  */
-async function scrapePlayerProfile(playerLink) {
+async function scrapePlayerProfile(playerLink, { strict = false } = {}) {
   if (!playerLink) return { player_photo: "", current_team: "" };
 
   try {
     console.log(`[Profile Scraper] Fetching profile from: ${playerLink}`);
     const { data } = await requestWithRetry(playerLink);
     const $ = cheerio.load(data);
+    const profileRoot = $(
+      '[class*="ProfileHeader"], [class*="PlayerHeader"]',
+    ).first();
+    if (profileRoot.length === 0) {
+      throw new Error("Unable to identify player profile structure");
+    }
+    const profileRegions = profileRoot.add(
+      profileRoot.find('[class*="PlayerInfo"]'),
+    );
 
     // --- Photo ---
     let player_photo = "";
@@ -84,18 +96,25 @@ async function scrapePlayerProfile(playerLink) {
     // (ProfileImage_*) rotate on redeploys and have broken before.
     // Scope to the profile header region when possible so a "related
     // players" widget can't supply the wrong player's image.
-    const photoEl =
-      $(
-        '[class*="ProfileHeader"], [class*="PlayerHeader"], [class*="PlayerInfo"]',
-      )
-        .find('img[src*="files.eliteprospects.com/layout/players"]')
-        .first()
-        .attr("src") ||
-      $('img[src*="files.eliteprospects.com/layout/players"]')
-        .first()
-        .attr("src") ||
-      $(".ProfileImage_profileImage__JLd31").attr("src") ||
-      $('img[alt*="player"]').first().attr("src");
+    const photoEl = profileRegions
+      .find("img[src]")
+      .toArray()
+      .map((image) => $(image).attr("src"))
+      .find((source) => {
+        try {
+          const imageUrl = new URL(source, "https://www.eliteprospects.com");
+          if (imageUrl.protocol !== "https:") return false;
+          if (imageUrl.hostname === "files.eliteprospects.com") {
+            return imageUrl.pathname.startsWith("/layout/players/");
+          }
+          return (
+            imageUrl.hostname === "cdn.eliteprospects-assets.com" &&
+            /(?:^|[-_/])players?(?:[-_/.]|$)/i.test(imageUrl.pathname)
+          );
+        } catch {
+          return false;
+        }
+      });
     if (photoEl) {
       player_photo = photoEl.startsWith("http")
         ? photoEl
@@ -108,19 +127,9 @@ async function scrapePlayerProfile(playerLink) {
     // e.g. "#31 Bismarck Bobcats / NAHL - 25/26"
     let current_team = "";
     // Primary: team link inside the PlayerInfo section
-    const infoTeamLink = $('[class*="PlayerInfo"] a[href*="/team/"]').first();
+    const infoTeamLink = profileRegions.find('a[href*="/team/"]').first();
     if (infoTeamLink.length) {
       current_team = infoTeamLink.text().trim();
-    }
-    // Fallback: first team link anywhere on the page
-    if (!current_team) {
-      $('a[href*="/team/"]').each((_, el) => {
-        const text = $(el).text().trim();
-        if (text.length > 2) {
-          current_team = text;
-          return false; // break
-        }
-      });
     }
     if (current_team) {
       console.log(`[Profile Scraper] Found current team: ${current_team}`);
@@ -132,6 +141,7 @@ async function scrapePlayerProfile(playerLink) {
       `[Profile Scraper] Error scraping ${playerLink}:`,
       error.message,
     );
+    if (strict) throw error;
     return { player_photo: "", current_team: "" };
   }
 }
@@ -154,7 +164,11 @@ async function scrapePlayerPhoto(playerLink) {
  * @returns {Array} Array of player objects with recruiting information
  */
 function normalizeRosterHeader(text) {
-  return text.toLowerCase().replace(/\s+/g, " ").trim();
+  return text
+    .toLowerCase()
+    .replace(/[\u2010-\u2015]/g, "-")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function getRosterHeaderKey(text) {
@@ -193,8 +207,8 @@ function getRosterHeaderMap($, table) {
     : null;
 }
 
-function isRosterCardForSeason($, card, season) {
-  const heading = normalizeRosterHeader($(card).find("h2").first().text());
+function isRosterHeadingForSeason($, headingElement, season) {
+  const heading = normalizeRosterHeader($(headingElement).text());
   const headingSeasons = heading.match(/\b20\d{2}-20\d{2}\b/g) || [];
   return (
     headingSeasons.length === 1 &&
@@ -204,8 +218,37 @@ function isRosterCardForSeason($, card, season) {
   );
 }
 
-async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
+function findRosterTables($, season) {
+  const tableElements = new Set();
+
+  $("h1, h2, h3")
+    .filter((_, heading) => isRosterHeadingForSeason($, heading, season))
+    .each((_, heading) => {
+      let container = $(heading).parent();
+      while (container.length && !container.is("body, html")) {
+        if (
+          container.is("section, article, div") &&
+          container.find("table").length > 0
+        ) {
+          container.find("table").each((__, table) => tableElements.add(table));
+          break;
+        }
+        container = container.parent();
+      }
+    });
+
+  return $(Array.from(tableElements)).filter(
+    (_, table) => getRosterHeaderMap($, table) !== null,
+  );
+}
+
+async function scrapeEliteProspectsRecruiting(
+  season,
+  includePhotos = false,
+  { strictProfiles = false } = {},
+) {
   const url = `https://www.eliteprospects.com/team/18066/arizona-state-univ/${season}`;
+  const startedAt = Date.now();
   console.log(
     `[EP Recruiting Scraper] Fetching recruiting data for ${season} from: ${url}`,
   );
@@ -215,16 +258,10 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
     const $ = cheerio.load(data);
     const players = [];
 
-    // Scope tables to EP's roster card for the requested season before
-    // checking semantic headers. This prevents a redirected older-season
-    // page from being accepted as the requested snapshot. The CSS-module
-    // hash rotates, so match only the stable LineupCard_wrapper prefix.
-    const rosterTables = $(
-      'div[class^="LineupCard_wrapper"], div[class*=" LineupCard_wrapper"]',
-    )
-      .filter((_, card) => isRosterCardForSeason($, card, season))
-      .find("table")
-      .filter((_, table) => getRosterHeaderMap($, table) !== null);
+    // Anchor discovery to a semantically verified h1-h3 season/roster
+    // heading, then use only roster-shaped tables in its nearest container.
+    // This tolerates CSS-module renames without accepting unrelated tables.
+    const rosterTables = findRosterTables($, season);
     if (rosterTables.length === 0) {
       throw new Error(
         `[EP Recruiting Scraper] Unable to identify roster table for ${season}`,
@@ -258,9 +295,10 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
             ? $(cells[headerMap.number]).text().trim()
             : "";
         const hasPlayerLink = $(row).find('a[href*="/player/"]').length > 0;
-        const isKnownSection = /^(forwards|defensemen|goaltenders|goalies|skaters)$/i.test(
-          playerCellText,
-        );
+        const isKnownSection =
+          /^(forwards|defensemen|goaltenders|goalies|skaters)$/i.test(
+            playerCellText,
+          );
         const isKnownSummary = /^(ncaa|total)/i.test(numberCellText);
         if (
           hasPlayerLink ||
@@ -318,10 +356,12 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
         // Extract position from name (e.g., "John Doe (F)" -> position: "F", name: "John Doe")
         let name = fullNameWithPos;
         let position = "";
-        const posMatch = fullNameWithPos.match(/^(.+?)\s*\(([A-Z/]+)\)$/);
+        const posMatch = fullNameWithPos.match(
+          /^(.+?)\s*\(\s*([A-Za-z]+(?:\s*\/\s*[A-Za-z]+)*)\s*\)$/,
+        );
         if (posMatch) {
           name = posMatch[1].trim();
-          position = posMatch[2];
+          position = normalizeRecruitingPosition(posMatch[2]);
         }
 
         if (!name || !isNaN(name)) {
@@ -372,7 +412,9 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
         let player_photo = "";
         let current_team = "";
         if (includePhotos && fullPlayerLink) {
-          const profile = await scrapePlayerProfile(fullPlayerLink);
+          const profile = await scrapePlayerProfile(fullPlayerLink, {
+            strict: strictProfiles,
+          });
           player_photo = profile.player_photo;
           current_team = profile.current_team;
           // Add delay after each profile request to be respectful
@@ -407,8 +449,12 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
       }
     }
 
+    assertAutomatedRecruitingSnapshot({ [season]: players }, [season]);
+    const profilesWithPhotos = players.filter(
+      (player) => player.player_photo,
+    ).length;
     console.log(
-      `[EP Recruiting Scraper] Successfully scraped ${players.length} players for ${season}`,
+      `[EP Recruiting Scraper] Season complete: season=${season} players=${players.length} profiles=${includePhotos ? players.length : 0} photos=${profilesWithPhotos} durationMs=${Date.now() - startedAt}`,
     );
     return players;
   } catch (error) {
@@ -425,26 +471,35 @@ async function scrapeEliteProspectsRecruiting(season, includePhotos = false) {
  * @param {{includePhotos?: boolean}} args
  * @returns {Object} Object with season keys and player arrays as values
  */
-async function scrapeAllSeasons({ includePhotos = false } = {}) {
+async function scrapeAllRecruitingSeasons({ includePhotos = false } = {}) {
+  const startedAt = Date.now();
   const recruitingData = {};
 
-  for (const season of config.FUTURE_SEASONS || [
-    "2026-2027",
-    "2027-2028",
-    "2028-2029",
-  ]) {
+  for (const season of config.FUTURE_SEASONS) {
     console.log(
       `[Recruiting] Scraping season: ${season}${includePhotos ? " with photos" : ""}`,
     );
     recruitingData[season] = await scrapeEliteProspectsRecruiting(
       season,
       includePhotos,
+      { strictProfiles: includePhotos },
     );
 
     // Add delay between requests to be respectful
     await delayBetweenRequests();
   }
 
+  const health = assertAutomatedRecruitingSnapshot(
+    recruitingData,
+    config.FUTURE_SEASONS,
+  );
+  const totalPlayers = Object.values(health.counts).reduce(
+    (sum, count) => sum + count,
+    0,
+  );
+  console.log(
+    `[Recruiting] Batch complete: seasons=${config.FUTURE_SEASONS.length} players=${totalPlayers} profiles=${includePhotos} durationMs=${Date.now() - startedAt}`,
+  );
   return recruitingData;
 }
 
@@ -469,7 +524,7 @@ const fetchRecruiting = createCachedScraper({
   cacheKey: "asu_hockey_recruiting",
   ttl: CACHE_TTL,
   swr: false,
-  scrape: scrapeAllSeasons,
+  scrape: scrapeAllRecruitingSeasons,
   validate: (data) => {
     const valid = isValidRecruitingSnapshot(data);
     const totalPlayers = valid
@@ -529,6 +584,7 @@ async function fetchRecruitingData(includePhotos = false, options = {}) {
 
 module.exports = {
   fetchRecruitingData,
+  scrapeAllRecruitingSeasons,
   scrapeEliteProspectsRecruiting,
   scrapePlayerProfile,
   scrapePlayerPhoto,

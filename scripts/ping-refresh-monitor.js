@@ -1,11 +1,11 @@
-// Dead-man's-switch check-in for the weekly data refresh task
+// Dead-man's-switch check-in for the daily all-data refresh task
 // (scripts/refresh-and-push.cmd). Pings a Sentry Cron Monitor so a run
-// that never happens (machine asleep Sunday 06:00) or fails part-way
-// raises an alert within the monitor's grace period, instead of silently
-// serving stale fallback JSON until the 21-day threshold in data-status.js.
+// that never happens (for example, the machine is asleep at 06:00) or fails
+// part-way raises an alert within the monitor's grace period, instead of
+// silently serving stale fallback JSON until data-status.js marks it stale.
 //
 // Setup (one-time): in Sentry, create a Cron Monitor (Crons → Add Monitor,
-// schedule: weekly on Sunday 06:00 America/Phoenix, grace period ~12h),
+// schedule: daily at 06:00 America/Phoenix, grace period approximately 12h),
 // then copy its HTTP check-in URL into .env as SENTRY_CRON_MONITOR_URL.
 // Unset URL = check-ins are skipped, so the refresh flow still works
 // without Sentry configured.

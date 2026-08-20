@@ -36,10 +36,16 @@ jest.mock("../config/scraper-config", () => ({
 
 const snapshotData = {
   "2026-2027": [
-    { name: "Jane Smith", player_link: "https://www.eliteprospects.com/player/111/x" },
+    {
+      name: "Jane Smith",
+      player_link: "https://www.eliteprospects.com/player/111/x",
+    },
   ],
   "2027-2028": [
-    { name: "Bob Jones", player_link: "https://www.eliteprospects.com/player/222/x" },
+    {
+      name: "Bob Jones",
+      player_link: "https://www.eliteprospects.com/player/222/x",
+    },
   ],
 };
 
@@ -51,10 +57,14 @@ jest.mock("../server/services/recruiting-snapshot", () => ({
 const fs = require("fs");
 const { getFromCache, saveToCache } = require("../server/cache/caching-system");
 const { requestWithRetry } = require("../server/lib/request-helper");
-const { readRecruitingSnapshot } = require("../server/services/recruiting-snapshot");
+const {
+  readRecruitingSnapshot,
+} = require("../server/services/recruiting-snapshot");
 const {
   fetchRecruitingData,
+  scrapeAllRecruitingSeasons,
   scrapeEliteProspectsRecruiting,
+  scrapePlayerProfile,
   shouldUseFallbackOnly,
 } = require("../server/scrapers/recruiting");
 
@@ -67,7 +77,7 @@ const originalEnvironment = {
 beforeEach(() => {
   jest.clearAllMocks();
   saveToCache.mockReturnValue(undefined);
-  requestWithRetry.mockResolvedValue({ data: "<html></html>" });
+  requestWithRetry.mockReset().mockResolvedValue({ data: "<html></html>" });
 });
 
 afterEach(() => {
@@ -99,7 +109,9 @@ describe("fetchRecruitingData â€” SWR caching", () => {
 
   test("ignores a partial cached snapshot in favor of the bundled fallback", async () => {
     getFromCache.mockReturnValue({
-      "2026-2027": [{ name: "Jane Smith", player_link: "https://example.test/1" }],
+      "2026-2027": [
+        { name: "Jane Smith", player_link: "https://example.test/1" },
+      ],
     });
     jest.spyOn(fs, "statSync").mockReturnValue({ mtimeMs: 1 });
 
@@ -163,6 +175,29 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
       `${season} Arizona State Univ. Roster`,
     );
 
+  const singlePlayerFixtureForSeason = (
+    season,
+    row = rosterRow(
+      "17",
+      "Jane Smith",
+      "F",
+      "111",
+      "18",
+      "2008",
+      "Phoenix, AZ",
+      "180 cm",
+      "172 lbs",
+      "L",
+    ),
+  ) => `
+    <section>
+      <h3>${season.replace("-", "–")} Arizona State Univ. Roster</h3>
+      <table>
+        <thead><tr><th></th><th>#</th><th></th><th>Player</th><th>Age</th><th>Born</th><th>Birthplace</th><th>Height</th><th>Weight</th><th>Shoots</th></tr></thead>
+        <tbody>${row}</tbody>
+      </table>
+    </section>`;
+
   const truncatedPlayerFixture = fixtureHtml.replace(
     /<tr>\s*<td><\/td><td>30<\/td>[\s\S]*?<\/tr>/,
     `
@@ -192,6 +227,36 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
     );
   });
 
+  test("direct all-season scrape requests every configured season without cache or fallback recovery", async () => {
+    requestWithRetry
+      .mockResolvedValueOnce({ data: fixtureForSeason("2026-2027") })
+      .mockResolvedValueOnce({ data: fixtureForSeason("2027-2028") });
+
+    const result = await scrapeAllRecruitingSeasons({ includePhotos: false });
+
+    expect(Object.keys(result)).toEqual(["2026-2027", "2027-2028"]);
+    expect(requestWithRetry.mock.calls.map(([url]) => url)).toEqual([
+      "https://www.eliteprospects.com/team/18066/arizona-state-univ/2026-2027",
+      "https://www.eliteprospects.com/team/18066/arizona-state-univ/2027-2028",
+    ]);
+    expect(getFromCache).not.toHaveBeenCalled();
+    expect(readRecruitingSnapshot).not.toHaveBeenCalled();
+    expect(saveToCache).not.toHaveBeenCalled();
+  });
+
+  test("direct all-season scrape rejects when a later configured season fails", async () => {
+    requestWithRetry
+      .mockResolvedValueOnce({ data: fixtureForSeason("2026-2027") })
+      .mockRejectedValueOnce(new Error("later season unavailable"));
+
+    await expect(
+      scrapeAllRecruitingSeasons({ includePhotos: false }),
+    ).rejects.toThrow("later season unavailable");
+    expect(getFromCache).not.toHaveBeenCalled();
+    expect(readRecruitingSnapshot).not.toHaveBeenCalled();
+    expect(saveToCache).not.toHaveBeenCalled();
+  });
+
   test("parses roster rows by position, skips decoy stats tables, summary rows, and duplicates", async () => {
     requestWithRetry.mockResolvedValue({ data: fixtureHtml });
 
@@ -211,6 +276,207 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
     expect(jane.player_link).toBe(
       "https://www.eliteprospects.com/player/111/x",
     );
+  });
+
+  test("discovers a semantically headed classless roster with an en dash season", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: singlePlayerFixtureForSeason("2026-2027"),
+    });
+
+    await expect(
+      scrapeEliteProspectsRecruiting("2026-2027", false),
+    ).resolves.toEqual([
+      expect.objectContaining({
+        name: "Jane Smith",
+        position: "F",
+      }),
+    ]);
+  });
+
+  test.each([
+    ["F", "F"],
+    ["C", "C"],
+    ["LW", "LW"],
+    ["RW", "RW"],
+    ["W", "W"],
+    ["D", "D"],
+    ["LD", "LD"],
+    ["RD", "RD"],
+    ["G", "G"],
+    ["C/RW", "C/RW"],
+    ["LW/RW", "LW/RW"],
+    ["LD/RD", "LD/RD"],
+    [" c / rw ", "C/RW"],
+    ["lw", "LW"],
+  ])(
+    "preserves and normalizes source hockey position %s",
+    async (source, expected) => {
+      requestWithRetry.mockResolvedValue({
+        data: singlePlayerFixtureForSeason(
+          "2026-2027",
+          rosterRow(
+            "17",
+            "Jane Smith",
+            source,
+            "111",
+            "18",
+            "2008",
+            "Phoenix, AZ",
+            "180 cm",
+            "172 lbs",
+            "L",
+          ),
+        ),
+      });
+
+      const [player] = await scrapeEliteProspectsRecruiting("2026-2027", false);
+
+      expect(player.position).toBe(expected);
+    },
+  );
+
+  test.each([
+    [
+      "an unsupported player position",
+      rosterRow(
+        "17",
+        "Jane Smith",
+        "X",
+        "111",
+        "18",
+        "2008",
+        "Phoenix, AZ",
+        "180 cm",
+        "172 lbs",
+        "L",
+      ),
+    ],
+    [
+      "a player link outside Elite Prospects",
+      rosterRow(
+        "17",
+        "Jane Smith",
+        "F",
+        "111",
+        "18",
+        "2008",
+        "Phoenix, AZ",
+        "180 cm",
+        "172 lbs",
+        "L",
+      ).replace(
+        'href="/player/111/x"',
+        'href="https://example.com/player/111/x"',
+      ),
+    ],
+    [
+      "duplicate normalized player links",
+      `${rosterRow(
+        "17",
+        "Jane Smith",
+        "F",
+        "111",
+        "18",
+        "2008",
+        "Phoenix, AZ",
+        "180 cm",
+        "172 lbs",
+        "L",
+      )}${rosterRow(
+        "18",
+        "Duplicate Jane",
+        "F",
+        "111/x/?source=duplicate",
+        "18",
+        "2008",
+        "Phoenix, AZ",
+        "180 cm",
+        "172 lbs",
+        "L",
+      )}`,
+    ],
+  ])("rejects direct scrape output with %s", async (_, row) => {
+    requestWithRetry.mockResolvedValue({
+      data: singlePlayerFixtureForSeason("2026-2027", row),
+    });
+
+    await expect(
+      scrapeEliteProspectsRecruiting("2026-2027", false),
+    ).rejects.toThrow("automated health validation failed");
+  });
+
+  test("does not take profile fields from unrelated page-global content", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: `
+        <main>
+          <section class="PlayerHeader_root__hash">
+            <h1>Jane Smith</h1>
+            <img src="https://files.eliteprospects.com/layout/teams/unrelated-logo.png" />
+          </section>
+          <aside class="PlayerInfo_related__hash">
+            <img alt="player promotion" src="https://files.eliteprospects.com/layout/players/unrelated.jpg" />
+            <a href="/team/999/unrelated">Unrelated Team</a>
+          </aside>
+        </main>`,
+    });
+
+    await expect(
+      scrapePlayerProfile(
+        "https://www.eliteprospects.com/player/111/jane-smith",
+      ),
+    ).resolves.toEqual({ player_photo: "", current_team: "" });
+  });
+
+  test("direct automated profile enrichment propagates a profile request failure", async () => {
+    requestWithRetry.mockImplementation(async (url) => {
+      if (url.includes("/team/18066/")) {
+        const season = url.match(/(20\d{2}-20\d{2})$/)[1];
+        return { data: fixtureForSeason(season) };
+      }
+      throw new Error("profile unavailable");
+    });
+
+    await expect(
+      scrapeAllRecruitingSeasons({ includePhotos: true }),
+    ).rejects.toThrow("profile unavailable");
+  });
+
+  test("direct automated profile enrichment rejects an unrecognized profile page", async () => {
+    requestWithRetry.mockImplementation(async (url) => {
+      if (url.includes("/team/18066/")) {
+        const season = url.match(/(20\d{2}-20\d{2})$/)[1];
+        return { data: fixtureForSeason(season) };
+      }
+      return { data: "<html><body><div>not a profile</div></body></html>" };
+    });
+
+    await expect(
+      scrapeAllRecruitingSeasons({ includePhotos: true }),
+    ).rejects.toThrow("Unable to identify player profile");
+  });
+
+  test("direct automated enrichment accepts a recognized profile with no photo", async () => {
+    requestWithRetry.mockImplementation(async (url) => {
+      if (url.includes("/team/18066/")) {
+        const season = url.match(/(20\d{2}-20\d{2})$/)[1];
+        return { data: fixtureForSeason(season) };
+      }
+      return {
+        data: `
+          <section class="PlayerHeader_root__hash">
+            <div class="PlayerInfo_details__hash">
+              <a href="/team/1/recognized-team">Recognized Team</a>
+            </div>
+          </section>`,
+      };
+    });
+
+    const result = await scrapeAllRecruitingSeasons({ includePhotos: true });
+
+    expect(result["2026-2027"][0]).toMatchObject({
+      player_photo: "",
+      current_team: "Recognized Team",
+    });
   });
 
   test("parses the live abbreviated roster headers without accepting the stats decoy", async () => {
@@ -428,9 +694,11 @@ describe("fallback-only mode", () => {
 
     const result = await fetchRecruitingData();
 
-    expect(result).toEqual(expect.objectContaining({
-      "2027-2028": expect.any(Array),
-    }));
+    expect(result).toEqual(
+      expect.objectContaining({
+        "2027-2028": expect.any(Array),
+      }),
+    );
     expect(requestWithRetry).not.toHaveBeenCalled();
   });
 
