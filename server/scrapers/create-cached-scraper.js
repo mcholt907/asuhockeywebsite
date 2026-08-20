@@ -18,6 +18,7 @@ function createCachedScraper({
   fallbackOnly = () => false,
   swr = true,
   normalizeCached = (data) => data,
+  validateCached = () => true,
   onScrapeError = null,
 }) {
   // Coalescing: one in-flight scrape per scraper, shared by concurrent callers.
@@ -26,11 +27,28 @@ function createCachedScraper({
   const resolveKey = () =>
     typeof cacheKey === "function" ? cacheKey() : cacheKey;
 
+  function normalizeCacheCandidate(cached) {
+    try {
+      const normalized = normalizeCached(cached);
+      if (!validateCached(normalized)) {
+        console.warn(`[${name}] Cached data failed validation; ignoring`);
+        return { usable: false };
+      }
+      return { usable: true, data: normalized };
+    } catch (error) {
+      console.error(`[${name}] Cached data normalization failed:`, error.message);
+      return { usable: false };
+    }
+  }
+
   function recoverWithStaleOrFallback(key) {
     const stale = getFromCache(key, true);
     if (stale) {
-      console.log(`[${name}] Recovering with stale cache`);
-      return normalizeCached(stale);
+      const candidate = normalizeCacheCandidate(stale);
+      if (candidate.usable) {
+        console.log(`[${name}] Recovering with stale cache`);
+        return candidate.data;
+      }
     }
     const bundled = fallback && fallback();
     if (bundled) {
@@ -87,8 +105,11 @@ function createCachedScraper({
         try {
           const fresh = getFromCache(key);
           if (fresh) {
-            console.log(`[${name}] Returning fresh cached data`);
-            return normalizeCached(fresh);
+            const candidate = normalizeCacheCandidate(fresh);
+            if (candidate.usable) {
+              console.log(`[${name}] Returning fresh cached data`);
+              return candidate.data;
+            }
           }
         } catch (error) {
           console.error(`[${name}] Cache read failed:`, error.message);
@@ -108,16 +129,19 @@ function createCachedScraper({
         try {
           const stale = getFromCache(key, true);
           if (stale) {
-            console.log(
-              `[${name}] Serving stale cache; refreshing in background`,
-            );
-            startCoalescedScrape(key, scrapeArgs).catch((error) =>
-              console.error(
-                `[${name}] Background refresh failed:`,
-                error.message,
-              ),
-            );
-            return normalizeCached(stale);
+            const candidate = normalizeCacheCandidate(stale);
+            if (candidate.usable) {
+              console.log(
+                `[${name}] Serving stale cache; refreshing in background`,
+              );
+              startCoalescedScrape(key, scrapeArgs).catch((error) =>
+                console.error(
+                  `[${name}] Background refresh failed:`,
+                  error.message,
+                ),
+              );
+              return candidate.data;
+            }
           }
         } catch (error) {
           console.error(`[${name}] Stale cache read failed:`, error.message);

@@ -28,7 +28,7 @@ This is a **monorepo** combining a React frontend (Vite) and an Express backend 
 5. `src/services/api.ts` — frontend axios wrapper that calls the backend via `/api/*` (proxied via Vite `server.proxy` in dev)
 6. `src/pages/` — React pages, fetching via the React Query hooks in `src/hooks/queries/` (which call `src/services/api.ts`)
 
-**Key architectural decision:** The `/api/roster` endpoint merges data from two sources — `asu_hockey_data.json` (static file with photos and curated data) and a live CHN scrape — via `server/services/roster-service.js` at request time. `roster-service.js` also contains `determineNationality()`, which infers player country from hometown strings. Recruiting data reads directly from `asu_hockey_data.json`. Request coalescing lives inside `createCachedScraper` (no module-level promise variables anymore).
+**Key architectural decision:** The `/api/roster` endpoint merges data from two sources — `asu_hockey_data.json` (static file with photos and curated data) and a live CHN scrape — via `server/services/roster-service.js` at request time. `roster-service.js` also contains `determineNationality()`, which infers player country from hometown strings. `/api/recruits` serves the validated `data/asu_recruiting_fallback.json` snapshot; `asu_hockey_data.json.recruiting` remains available only for current-roster profile enrichment. Request coalescing lives inside `createCachedScraper` (no module-level promise variables anymore).
 
 **Scraper config is centralized** in `config/scraper-config.js` — all URLs, cache durations, retry settings, and season constants live there. Update `CURRENT_SEASON` there when the season changes.
 
@@ -75,7 +75,7 @@ Copy `.env.example` to `.env`. Required for local dev:
 
 Production env vars (`NODE_ENV`, `PORT`, `CORS_ORIGINS`) are set in Render dashboard. `VITE_SENTRY_DSN` enables browser-side Sentry error tracking. `SITE_BASE_URL` overrides the production origin used by the sitemap (`server.js`) and prerender (`scripts/prerender.js`); defaults to `https://forksuppucks.com`.
 
-To override the active season locally (defaults to `2025-2026`), set `CURRENT_SEASON` in `.env`. The canonical place to update it for production is `config/scraper-config.js`.
+To override the active season locally (defaults to `2026-2027`), set `CURRENT_SEASON` in `.env`. The canonical place to update it for production is `config/scraper-config.js`.
 
 ## Deployment
 
@@ -83,7 +83,7 @@ Deployed on **Render.com** (`render.yaml`). Build: `npm install && npx puppeteer
 
 ## Static Data File
 
-`asu_hockey_data.json` is the source of truth for roster photos, curated player data, recruiting info, and `manual_news` entries (hand-written news stories that appear in the news feed). It's hand-maintained and read directly by the server.
+`asu_hockey_data.json` is the source of truth for roster photos, curated player data, current-roster recruiting enrichment, and `manual_news` entries (hand-written news stories that appear in the news feed). Future-team recruiting pages use `data/asu_recruiting_fallback.json` instead.
 
 Root utility scripts for editing this file:
 
@@ -95,23 +95,24 @@ Root utility scripts for editing this file:
 ## Data Refresh Workflow
 
 Recruiting, alumni, and transfer data are scraped from EliteProspects, which
-403s cloud-hosted IPs (Render). A dedicated residential Windows clone performs
-the live refresh every day at 06:00 local time; production serves the committed
-recruiting data and bundled fallback JSON from `data/`.
+403s cloud-hosted IPs (Render); standings come from USCHO. A dedicated
+residential Windows clone performs the live refresh every day at 06:00 local
+time, and production serves the four committed fallback JSON files in `data/`.
 
 To refresh manually:
 
 ```bash
-npm run refresh-data        # recruiting, alumni, and transfers
-npm run refresh-recruiting  # diagnostic recruiting-only override
+npm run refresh-data        # recruiting, alumni, transfers, and standings
+npm run refresh-recruiting  # recruiting fallback only
 npm run refresh-alumni      # alumni only
 npm run refresh-transfers   # transfers only
+npm run refresh-standings   # standings only
 ```
 
-The refresh scripts validate result shape + non-emptiness; an empty or
-malformed scrape will exit non-zero and leave the existing JSON untouched.
-Recruit removals require absence from two consecutive successful scrapes, and
-a recruiting snapshot that drops more than 35 percent is rejected.
+The refresh scripts validate result shape and completeness before atomically
+replacing a fallback; an empty, malformed, or partial scrape exits non-zero and
+leaves the existing JSON untouched. Recruiting calls the direct all-season
+scraper, which never reads or recovers from cache/fallback data.
 
 EliteProspects 403s the plain-axios TLS fingerprint even from residential
 IPs; the refresh scripts enable `SCRAPER_PUPPETEER_FALLBACK` by default so
@@ -131,14 +132,14 @@ runner, installs dependencies, copies the environment file, writes the
 wake, network, and missed-start handling. Never point the runner at the working
 repository, inside it, or at one of its parent directories.
 
-Each run pulls `main`, refreshes all three datasets, and opens or updates an
+Each run pulls `main`, refreshes all four datasets, and opens or updates an
 auto-merging PR from `auto/data-refresh`. Commits are restricted to exactly
 these four generated files:
 
-- `asu_hockey_data.json`
-- `data/asu_recruiting_refresh_state.json`
 - `data/asu_alumni_fallback.json`
 - `data/asu_transfers_fallback.json`
+- `data/asu_recruiting_fallback.json`
+- `data/nchc_standings_fallback.json`
 
 When validated data is unchanged, the run exits successfully without a commit
 or pull request. Failures and detailed runner output are logged to

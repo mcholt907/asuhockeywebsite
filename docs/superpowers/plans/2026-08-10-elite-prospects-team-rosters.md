@@ -58,7 +58,7 @@ const {
   readRecruitingSnapshot,
 } = require("../server/services/recruiting-snapshot");
 
-const seasons = ["2027-2028", "2028-2029", "2029-2030"];
+const seasons = ["2026-2027", "2027-2028", "2028-2029"];
 const player = (name) => ({
   name,
   player_link: `https://www.eliteprospects.com/player/1/${name.toLowerCase()}`,
@@ -66,16 +66,16 @@ const player = (name) => ({
 
 test("accepts all configured seasons and a legitimately empty far-future roster", () => {
   expect(validateRecruitingSnapshot({
+    "2026-2027": [],
     "2027-2028": [player("Shared Player")],
     "2028-2029": [player("Shared Player")],
-    "2029-2030": [],
   }, seasons)).toBe(true);
 });
 
 test.each([
-  [{ "2027-2028": [player("A")], "2028-2029": [] }],
-  [{ "2027-2028": [], "2028-2029": [], "2029-2030": [] }],
-  [{ "2027-2028": [{ name: "No Link" }], "2028-2029": [], "2029-2030": [] }],
+  [{ "2026-2027": [player("A")], "2027-2028": [] }],
+  [{ "2026-2027": [], "2027-2028": [], "2028-2029": [] }],
+  [{ "2026-2027": [{ name: "No Link" }], "2027-2028": [], "2028-2029": [] }],
 ])("rejects an incomplete, all-empty, or malformed snapshot", (candidate) => {
   expect(validateRecruitingSnapshot(candidate, seasons)).toBe(false);
 });
@@ -84,9 +84,9 @@ test("reads a valid snapshot and rejects an invalid file", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "recruiting-snapshot-"));
   const file = path.join(dir, "snapshot.json");
   const valid = {
+    "2026-2027": [],
     "2027-2028": [player("One")],
     "2028-2029": [],
-    "2029-2030": [],
   };
   fs.writeFileSync(file, JSON.stringify(valid));
   expect(readRecruitingSnapshot(file, seasons)).toEqual(valid);
@@ -337,9 +337,9 @@ const path = require("path");
 const { refreshRecruitingSnapshot } = require("../scripts/refresh-recruiting");
 
 const valid = {
+  "2026-2027": [],
   "2027-2028": [{ name: "Jane", player_link: "https://www.eliteprospects.com/player/1/jane" }],
   "2028-2029": [],
-  "2029-2030": [],
 };
 
 test("writes a complete valid snapshot", async () => {
@@ -412,7 +412,7 @@ Expected: PASS, including byte-for-byte preservation after invalid data.
 
 Run: `npm run refresh-recruiting`
 
-Expected: exit code 0 and `data/asu_recruiting_fallback.json` containing keys `2027-2028`, `2028-2029`, and `2029-2030`. Verify the 2027-2028 names against the current Elite Prospects page and confirm that repeated players remain in every season in which EP lists them.
+Expected: exit code 0 and `data/asu_recruiting_fallback.json` containing keys `2026-2027`, `2027-2028`, and `2028-2029`. Verify the 2027-2028 names against the current Elite Prospects page and confirm that repeated players remain in every season in which EP lists them.
 
 - [ ] **Step 6: Commit the refresh command and snapshot**
 
@@ -453,7 +453,7 @@ Strengthen the Playwright API assertion:
 
 ```ts
 const data = await response.json();
-for (const season of ["2027-2028", "2028-2029", "2029-2030"]) {
+for (const season of ["2026-2027", "2027-2028", "2028-2029"]) {
   expect(Array.isArray(data[season])).toBeTruthy();
 }
 expect(data["2027-2028"].length).toBeGreaterThan(0);

@@ -1,0 +1,15 @@
+{
+  "season": "2025-2026",
+  "lastUpdated": "2026-07-17T20:09:00.364Z",
+  "teams": [
+    { "rank": "1", "team": "North Dakota", "pts": "55", "confRecord": "17-6-1", "overallRecord": "29-10-1", "isASU": false },
+    { "rank": "2", "team": "Denver", "pts": "52", "confRecord": "17-6-1", "overallRecord": "29-11-3", "isASU": false },
+    { "rank": "3", "team": "Western Michigan", "pts": "48", "confRecord": "16-7-1", "overallRecord": "27-11-1", "isASU": false },
+    { "rank": "4", "team": "Minnesota Duluth", "pts": "36", "confRecord": "11-12-1", "overallRecord": "24-15-1", "isASU": false },
+    { "rank": "5", "team": "St. Cloud State", "pts": "30", "confRecord": "9-14-1", "overallRecord": "16-19-1", "isASU": false },
+    { "rank": "6", "team": "Colorado College", "pts": "29", "confRecord": "7-11-6", "overallRecord": "13-17-6", "isASU": false },
+    { "rank": "7", "team": "Miami", "pts": "28", "confRecord": "9-13-2", "overallRecord": "18-16-2", "isASU": false },
+    { "rank": "8", "team": "Omaha", "pts": "24", "confRecord": "8-16-0", "overallRecord": "12-24-0", "isASU": false },
+    { "rank": "9", "team": "Arizona State", "pts": "22", "confRecord": "7-16-1", "overallRecord": "14-21-1", "isASU": true }
+  ]
+}

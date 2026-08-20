@@ -4,10 +4,10 @@ $ErrorActionPreference = 'Stop'
 $RepositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $LogPath = Join-Path $RepositoryRoot '.refresh-log.txt'
 $AllowedPaths = @(
-  'asu_hockey_data.json'
-  'data/asu_recruiting_refresh_state.json'
   'data/asu_alumni_fallback.json'
   'data/asu_transfers_fallback.json'
+  'data/asu_recruiting_fallback.json'
+  'data/nchc_standings_fallback.json'
 )
 
 function Write-RefreshLog([string]$Message) {
@@ -47,6 +47,18 @@ function Assert-AllowedChanges([string[]]$Paths) {
   Invoke-Native 'node.exe' $arguments | Out-Null
 }
 
+function Assert-GeneratedJsonFiles([string]$Root = $RepositoryRoot) {
+  foreach ($relativePath in $AllowedPaths) {
+    $filePath = Join-Path $Root $relativePath
+    try {
+      Get-Content -Raw -LiteralPath $filePath |
+        ConvertFrom-Json -ErrorAction Stop | Out-Null
+    } catch {
+      throw "Generated JSON file is invalid: $relativePath ($($_.Exception.Message))"
+    }
+  }
+}
+
 function Send-MonitorStatus(
   [ValidateSet('ok', 'error')]
   [string]$Status
@@ -73,6 +85,49 @@ function Get-StagedPaths {
     Invoke-Native 'git.exe' @('diff', '--cached', '--name-only', '--') |
       Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
   )
+}
+
+function Sync-RemoteRefreshBranch {
+  $branchRef = 'refs/heads/auto/data-refresh'
+  $trackingRef = 'refs/remotes/origin/auto/data-refresh'
+  $remoteLines = @(
+    Invoke-Native 'git.exe' @(
+      'ls-remote'
+      '--refs'
+      'origin'
+      $branchRef
+    ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+  )
+
+  if ($remoteLines.Count -eq 0) {
+    Invoke-Native 'git.exe' @('update-ref', '-d', $trackingRef) | Out-Null
+    return ''
+  }
+
+  $remoteMatch = [regex]::Match(
+    $remoteLines[0],
+    '^(?<oid>[0-9a-fA-F]{40,64})\s+refs/heads/auto/data-refresh$'
+  )
+  if (-not $remoteMatch.Success) {
+    throw "Unable to parse remote refresh branch: $($remoteLines[0])"
+  }
+
+  Invoke-Native 'git.exe' @(
+    'fetch'
+    '--prune'
+    'origin'
+    "+${branchRef}:${trackingRef}"
+  ) | Out-Null
+
+  $fetchedOid = @(
+    Invoke-Native 'git.exe' @('rev-parse', '--verify', $trackingRef) |
+      Where-Object { $_ -match '^[0-9a-fA-F]{40,64}$' }
+  ) | Select-Object -Last 1
+  if ([string]::IsNullOrWhiteSpace($fetchedOid)) {
+    throw "Unable to resolve fetched refresh branch: $trackingRef"
+  }
+
+  return $fetchedOid
 }
 
 if ($MyInvocation.InvocationName -eq '.') {
@@ -109,6 +164,7 @@ try {
   }
 
   Invoke-Native 'git.exe' @('fetch', 'origin') | Out-Null
+  $expectedRefreshOid = Sync-RemoteRefreshBranch
   Invoke-Native 'git.exe' @(
     'switch'
     '--force-create'
@@ -116,6 +172,7 @@ try {
     'origin/main'
   ) | Out-Null
 
+  Invoke-Native 'npm.cmd' @('ci') | Out-Null
   Invoke-Native 'npm.cmd' @('run', 'refresh-data') | Out-Null
 
   Invoke-Native 'npx.cmd' @(
@@ -123,8 +180,8 @@ try {
     '--config'
     'jest.server.config.js'
     '__tests__/recruiting-scraper.test.js'
-    '__tests__/recruiting-refresh-service.test.js'
-    '__tests__/refresh-recruiting-script.test.js'
+    '__tests__/refresh-recruiting.test.js'
+    '__tests__/refresh-standings.test.js'
     '--runInBand'
   ) | Out-Null
   Invoke-Native 'npx.cmd' @(
@@ -134,10 +191,7 @@ try {
     '--runInBand'
   ) | Out-Null
 
-  Get-Content -Raw -LiteralPath 'asu_hockey_data.json' |
-    ConvertFrom-Json | Out-Null
-  Get-Content -Raw -LiteralPath 'data/asu_recruiting_refresh_state.json' |
-    ConvertFrom-Json | Out-Null
+  Assert-GeneratedJsonFiles
   Write-RefreshLog 'Generated JSON files parsed successfully'
 
   $workingPaths = @(Get-TrackedWorkingPaths)
@@ -165,7 +219,7 @@ try {
   ) | Out-Null
   Invoke-Native 'git.exe' @(
     'push'
-    '--force-with-lease=auto/data-refresh'
+    "--force-with-lease=refs/heads/auto/data-refresh:$expectedRefreshOid"
     'origin'
     'auto/data-refresh:auto/data-refresh'
   ) | Out-Null

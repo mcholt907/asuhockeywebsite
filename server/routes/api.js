@@ -7,10 +7,14 @@ const {
   scrapeNCHCStandings,
   scrapeTransferData,
   scrapeAlumniData,
+  fetchRecruitingData,
 } = require("../scrapers");
 const { getRoster } = require("../services/roster-service");
 const { getStaticData } = require("../services/static-data");
+const { validateRecruitingSnapshot } = require("../services/recruiting-snapshot");
+const { validateStandingsSnapshot } = require("../services/standings-snapshot");
 const { getDataStatus, getCooldownStatus } = require("../cache/data-status");
+const config = require("../../config/scraper-config");
 
 const router = express.Router();
 
@@ -94,9 +98,20 @@ router.get("/schedule", async (req, res) => {
   }
 });
 
-// Recruiting — reads directly from static JSON (source of truth)
-router.get("/recruits", (req, res) => {
-  res.json(getStaticData().recruiting || {});
+// Recruiting — serves the cached/bundled Elite Prospects season map.
+router.get("/recruits", async (req, res) => {
+  try {
+    const recruiting = await fetchRecruitingData();
+    if (!validateRecruitingSnapshot(recruiting, config.FUTURE_SEASONS)) {
+      return res.status(500).json({ error: "Recruiting roster data unavailable." });
+    }
+    return res.json(recruiting);
+  } catch (error) {
+    console.error("Error in /api/recruits:", error);
+    return res.status(500).json({
+      error: "Internal server error while fetching recruiting rosters.",
+    });
+  }
 });
 
 // Transfers (incoming/outgoing)
@@ -180,8 +195,13 @@ router.get("/stats", async (req, res) => {
 router.get("/standings", async (req, res) => {
   try {
     const standings = await scrapeNCHCStandings();
-    if (standings && standings.length > 0) {
-      res.json({ data: standings, timestamp: new Date().toISOString() });
+    if (validateStandingsSnapshot(standings)) {
+      res.json({
+        data: standings.teams,
+        season: standings.season,
+        isPriorSeason: standings.season !== config.CURRENT_SEASON,
+        timestamp: new Date().toISOString(),
+      });
     } else {
       res.status(500).json({ error: "Failed to fetch standings data." });
     }

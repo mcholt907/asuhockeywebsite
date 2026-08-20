@@ -58,6 +58,14 @@ describe('pruneCache', () => {
     expect(fs.existsSync(path.join(tmpDir, 'asu_hockey_roster'))).toBe(true);
   });
 
+  test('never prunes the configured-season standings cache', () => {
+    const config = require('../config/scraper-config');
+    const key = `nchc_standings_${config.CURRENT_SEASON}`;
+    writeCacheEntry(key, 30 * DAY_MS);
+    expect(maintenance.pruneCache()).toEqual([]);
+    expect(fs.existsSync(path.join(tmpDir, key))).toBe(true);
+  });
+
   test('removes abandoned keys older than 3x their TTL (old season schedules)', () => {
     writeCacheEntry('asu_hockey_schedule_2023', 30 * DAY_MS, 2 * HOUR_MS);
     const removed = maintenance.pruneCache();
@@ -127,7 +135,7 @@ describe('checkDataStaleness', () => {
     expect(alerts.find((a) => a.name === 'roster')).toBeUndefined();
   });
 
-  test('never alerts for non-alerting (hand-maintained) datasets', () => {
+  test('does not alert while the bundled recruiting fallback is fresh', () => {
     const alerts = maintenance.checkDataStaleness();
     expect(alerts.find((a) => a.name === 'recruiting')).toBeUndefined();
   });

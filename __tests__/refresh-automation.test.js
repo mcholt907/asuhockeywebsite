@@ -82,6 +82,55 @@ try {
   return { ...result, log };
 }
 
+function runGeneratedJsonHarness({ invalidPath } = {}) {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "refresh-json-"));
+  const harnessPath = path.join(directory, "generated-json-harness.ps1");
+  const generatedPaths = [
+    "data/asu_alumni_fallback.json",
+    "data/asu_transfers_fallback.json",
+    "data/asu_recruiting_fallback.json",
+    "data/nchc_standings_fallback.json",
+  ];
+
+  for (const relativePath of generatedPaths) {
+    const file = path.join(directory, ...relativePath.split("/"));
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, relativePath === invalidPath ? "{" : "{}");
+  }
+
+  fs.writeFileSync(
+    harnessPath,
+    `param([string]$RunnerPath, [string]$FixtureRoot)
+. $RunnerPath
+try {
+  Assert-GeneratedJsonFiles -Root $FixtureRoot
+  Write-Output 'HARNESS_OK'
+  exit 0
+} catch {
+  [Console]::Error.WriteLine($_.Exception.Message)
+  exit 23
+}
+`,
+  );
+
+  const result = spawnSync(
+    "powershell.exe",
+    [
+      "-NoProfile",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      harnessPath,
+      runnerPath,
+      directory,
+    ],
+    { encoding: "utf8" },
+  );
+
+  fs.rmSync(directory, { recursive: true, force: true });
+  return result;
+}
+
 function runInstallerHarness(
   mode,
   candidatePath,
@@ -269,6 +318,150 @@ function runGit(args, cwd) {
   return result;
 }
 
+function expectRunnerSuccess(result) {
+  if (result.status !== 0) {
+    throw new Error(
+      `refresh runner exited ${result.status}\nSTDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}`,
+    );
+  }
+}
+
+function createRefreshRunnerFixture() {
+  const directory = fs.mkdtempSync(
+    path.join(os.tmpdir(), "refresh-runner-integration-"),
+  );
+  const remote = path.join(directory, "remote.git");
+  const runner = path.join(directory, "runner");
+  const shims = path.join(directory, "shims");
+  const tracePath = path.join(directory, "npm-trace.txt");
+  const statePath = path.join(directory, "refresh-count.txt");
+  const gitGlobalConfig = path.join(directory, "empty.gitconfig");
+  const repositoryRoot = path.resolve(__dirname, "..");
+
+  runGit(["-c", "safe.directory=*", "clone", "--bare", repositoryRoot, remote]);
+  const sourceHead = runGit(
+    ["rev-parse", "HEAD"],
+    repositoryRoot,
+  ).stdout.trim();
+  runGit(["--git-dir", remote, "update-ref", "refs/heads/main", sourceHead]);
+  runGit(["--git-dir", remote, "symbolic-ref", "HEAD", "refs/heads/main"]);
+  runGit([
+    "--git-dir",
+    remote,
+    "update-ref",
+    "-d",
+    "refs/heads/auto/data-refresh",
+  ]);
+  runGit(["clone", "--single-branch", "--branch", "main", remote, runner]);
+  runGit(["config", "user.name", "Refresh Test"], runner);
+  runGit(["config", "user.email", "refresh@example.invalid"], runner);
+  runGit(["config", "core.autocrlf", "false"], runner);
+  runGit(["reset", "--hard", "HEAD"], runner);
+  fs.copyFileSync(
+    runnerPath,
+    path.join(runner, "scripts", "refresh-and-push.ps1"),
+  );
+  runGit(["add", "scripts/refresh-and-push.ps1"], runner);
+  const runnerChanged = spawnSync(
+    "git",
+    ["diff", "--cached", "--quiet", "--exit-code"],
+    { cwd: runner, encoding: "utf8" },
+  );
+  if (runnerChanged.status === 1) {
+    runGit(["commit", "-m", "test runner script"], runner);
+    runGit(["push", "origin", "main"], runner);
+  } else if (runnerChanged.status !== 0) {
+    throw new Error(
+      `unable to inspect runner fixture: ${runnerChanged.stderr}`,
+    );
+  }
+  fs.writeFileSync(path.join(runner, ".refresh-runner"), "test runner\n");
+  fs.writeFileSync(gitGlobalConfig, "");
+
+  fs.mkdirSync(shims);
+  const npmShimPath = path.join(shims, "npm-shim.js");
+  fs.writeFileSync(
+    npmShimPath,
+    `const fs = require("fs");
+const path = require("path");
+const args = process.argv.slice(2);
+fs.appendFileSync(process.env.REFRESH_TEST_TRACE, args.join(" ") + "\\n");
+if (args[0] === "run" && args[1] === "refresh-data") {
+  const statePath = process.env.REFRESH_TEST_STATE;
+  const count = fs.existsSync(statePath)
+    ? Number(fs.readFileSync(statePath, "utf8")) + 1
+    : 1;
+  fs.writeFileSync(statePath, String(count));
+  fs.writeFileSync(
+    path.join(process.cwd(), "data", "nchc_standings_fallback.json"),
+    JSON.stringify({ refresh_test_run: count }, null, 2),
+  );
+}
+`,
+  );
+  fs.writeFileSync(
+    path.join(shims, "npm.cmd"),
+    `@echo off\r\n"${process.execPath}" "${npmShimPath}" %*\r\nexit /b %errorlevel%\r\n`,
+  );
+  fs.writeFileSync(path.join(shims, "npx.cmd"), "@echo off\r\nexit /b 0\r\n");
+
+  const systemPowerShell = path.join(
+    process.env.SystemRoot,
+    "System32",
+    "WindowsPowerShell",
+    "v1.0",
+    "powershell.exe",
+  );
+  fs.copyFileSync(systemPowerShell, path.join(shims, "gh.exe"));
+  fs.writeFileSync(
+    path.join(shims, "pr.ps1"),
+    "if ($args[0] -eq 'list') { Write-Output 'https://example.invalid/pr/1' }\nexit 0\n",
+  );
+
+  const environment = {
+    ...process.env,
+    PATH: `${shims};${process.env.PATH}`,
+    REFRESH_TEST_TRACE: tracePath,
+    REFRESH_TEST_STATE: statePath,
+    SENTRY_CRON_MONITOR_URL: "",
+    GIT_CONFIG_GLOBAL: gitGlobalConfig,
+    GIT_CONFIG_NOSYSTEM: "1",
+    GIT_CONFIG_COUNT: "1",
+    GIT_CONFIG_KEY_0: "core.excludesFile",
+    GIT_CONFIG_VALUE_0: "NUL",
+  };
+
+  return {
+    remote,
+    runner,
+    tracePath,
+    run() {
+      return spawnSync(
+        "powershell.exe",
+        [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          path.join(runner, "scripts", "refresh-and-push.ps1"),
+        ],
+        { cwd: runner, encoding: "utf8", env: environment },
+      );
+    },
+    remoteRefreshOid() {
+      return runGit([
+        "--git-dir",
+        remote,
+        "rev-parse",
+        "refs/heads/auto/data-refresh",
+      ]).stdout.trim();
+    },
+    cleanup() {
+      fs.rmSync(directory, { recursive: true, force: true });
+    },
+  };
+}
+
 function createLinkedWorktreeFixture() {
   const directory = fs.mkdtempSync(
     path.join(os.tmpdir(), "refresh-linked-worktree-"),
@@ -328,16 +521,16 @@ describe("refresh change allowlist", () => {
 
     expect(
       validateRefreshChanges([
-        "asu_hockey_data.json",
-        "data\\asu_recruiting_refresh_state.json",
         "data/asu_alumni_fallback.json",
         "data\\asu_transfers_fallback.json",
+        "data/asu_recruiting_fallback.json",
+        "data\\nchc_standings_fallback.json",
       ]),
     ).toEqual([
-      "asu_hockey_data.json",
-      "data/asu_recruiting_refresh_state.json",
       "data/asu_alumni_fallback.json",
       "data/asu_transfers_fallback.json",
+      "data/asu_recruiting_fallback.json",
+      "data/nchc_standings_fallback.json",
     ]);
   });
 
@@ -346,11 +539,12 @@ describe("refresh change allowlist", () => {
 
     expect(() =>
       validateRefreshChanges([
+        "asu_hockey_data.json",
+        "data/asu_recruiting_refresh_state.json",
         "data/asu_alumni_fallback.json.bak",
-        "src/App.js",
       ]),
     ).toThrow(
-      "Refresh automation rejected unexpected paths: data/asu_alumni_fallback.json.bak, src/App.js",
+      "Refresh automation rejected unexpected paths: asu_hockey_data.json, data/asu_recruiting_refresh_state.json, data/asu_alumni_fallback.json.bak",
     );
   });
 
@@ -359,8 +553,8 @@ describe("refresh change allowlist", () => {
       process.execPath,
       [
         validatorPath,
-        "asu_hockey_data.json",
-        "data\\asu_recruiting_refresh_state.json",
+        "data/asu_recruiting_fallback.json",
+        "data\\nchc_standings_fallback.json",
       ],
       { encoding: "utf8" },
     );
@@ -380,6 +574,25 @@ describe("refresh change allowlist", () => {
     expect(result.stderr).toContain(
       "Refresh automation rejected unexpected path: package.json",
     );
+  });
+});
+
+describe("generated fallback parsing", () => {
+  windowsTest("parses all four generated fallback documents", () => {
+    const result = runGeneratedJsonHarness();
+
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain("HARNESS_OK");
+    expect(result.stderr).toBe("");
+  });
+
+  windowsTest("rejects a malformed recruiting fallback document", () => {
+    const result = runGeneratedJsonHarness({
+      invalidPath: "data/asu_recruiting_fallback.json",
+    });
+
+    expect(result.status).toBe(23);
+    expect(result.stderr).toContain("asu_recruiting_fallback.json");
   });
 });
 
@@ -410,6 +623,43 @@ describe("PowerShell native command execution", () => {
     );
     expect(result.log).toContain("native-stderr-failure");
   });
+});
+
+describe("daily refresh runner integration", () => {
+  windowsTest(
+    "installs lockfile dependencies before refreshing after updating main",
+    () => {
+      const fixture = createRefreshRunnerFixture();
+      try {
+        const result = fixture.run();
+
+        expectRunnerSuccess(result);
+        expect(
+          fs.readFileSync(fixture.tracePath, "utf8").trim().split(/\r?\n/),
+        ).toEqual(["ci", "run refresh-data"]);
+      } finally {
+        fixture.cleanup();
+      }
+    },
+  );
+
+  windowsTest(
+    "publishes two successive refreshes from a single-branch clone with a lease",
+    () => {
+      const fixture = createRefreshRunnerFixture();
+      try {
+        const firstRun = fixture.run();
+        expectRunnerSuccess(firstRun);
+        const firstOid = fixture.remoteRefreshOid();
+
+        const secondRun = fixture.run();
+        expectRunnerSuccess(secondRun);
+        expect(fixture.remoteRefreshOid()).not.toBe(firstOid);
+      } finally {
+        fixture.cleanup();
+      }
+    },
+  );
 });
 
 describe("isolated refresh runner installer", () => {

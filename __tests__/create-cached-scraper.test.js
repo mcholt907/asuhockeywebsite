@@ -48,6 +48,20 @@ describe("createCachedScraper", () => {
     await expect(fetchData()).resolves.toEqual(["wrapped"]);
   });
 
+  test("ignores normalized cache candidates rejected by an opt-in cache validator", async () => {
+    getFromCache.mockReturnValue({ data: [] });
+    const scrape = jest.fn().mockRejectedValue(new Error("live failed"));
+    const fetchData = makeScraper({
+      scrape,
+      normalizeCached: (cached) => cached.data,
+      validateCached: (normalized) => normalized.length > 0,
+      fallback: () => ["fallback"],
+    });
+
+    await expect(fetchData()).resolves.toEqual(["fallback"]);
+    expect(scrape).toHaveBeenCalledTimes(1);
+  });
+
   test("SWR: serves stale immediately and refreshes in background", async () => {
     const scrape = jest.fn().mockResolvedValue(["new"]);
     // 1st call: fresh miss; 2nd call: stale hit

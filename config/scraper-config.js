@@ -2,7 +2,7 @@
 // Centralized configuration for all scraper functions
 
 const CURRENT_SEASON = process.env.CURRENT_SEASON || "2026-2027";
-const FUTURE_SEASONS = ["2027-2028", "2028-2029", "2029-2030"];
+const FUTURE_SEASONS = ["2027-2028", "2028-2029"];
 
 module.exports = {
   // Season constants

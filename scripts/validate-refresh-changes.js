@@ -1,8 +1,8 @@
 const ALLOWED_REFRESH_PATHS = new Set([
-  "asu_hockey_data.json",
-  "data/asu_recruiting_refresh_state.json",
   "data/asu_alumni_fallback.json",
   "data/asu_transfers_fallback.json",
+  "data/asu_recruiting_fallback.json",
+  "data/nchc_standings_fallback.json",
 ]);
 
 function validateRefreshChanges(paths) {

@@ -21,7 +21,7 @@ See the section about [running tests](https://facebook.github.io/create-react-ap
 
 ## Daily data refresh
 
-Production fallback and recruiting data are refreshed from a dedicated Windows clone every day at 06:00 local time. Install or replace the scheduled runner once from the primary repository, passing an existing readable environment file:
+Four production fallback datasets are refreshed from a dedicated Windows clone every day at 06:00 local time. Install or replace the scheduled runner once from the primary repository, passing an existing readable environment file:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\install-refresh-runner.ps1 -EnvironmentFile C:\Users\farkh\asuhockeywebsite\.env
@@ -29,14 +29,14 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\install-refresh-
 
 The installer requires Git, Node/npm, an authenticated GitHub CLI (`gh auth status`), and permission to register a Scheduled Task. It clones or updates an isolated runner, runs `npm ci`, copies the environment file without displaying its contents, writes the `.refresh-runner` safety marker, and registers `ASU Hockey Data Refresh` with wake, network, and missed-start handling. Never point the runner at the working repository, inside it, or at one of its parent directories.
 
-Each run refreshes recruiting, alumni, and transfer data, then permits commits containing only these four generated files:
+Each run executes `npm run refresh-data` and permits commits containing exactly these four generated files:
 
-- `asu_hockey_data.json`
-- `data/asu_recruiting_refresh_state.json`
 - `data/asu_alumni_fallback.json`
 - `data/asu_transfers_fallback.json`
+- `data/asu_recruiting_fallback.json`
+- `data/nchc_standings_fallback.json`
 
-Recruit removals require absence from two consecutive successful scrapes. A snapshot that would remove more than 35 percent of existing recruits is rejected. When validated data is unchanged, the run exits successfully without a commit or pull request. `npm run refresh-recruiting` is available as a diagnostic override for recruiting-only investigation; the scheduled workflow remains the source of routine refreshes.
+Each refresh validates its complete snapshot before atomically replacing the previous fallback. Recruiting uses a direct all-season scrape that cannot recover from cache or fallback data, so any failed season makes the run fail without publishing a partial snapshot. When validated data is unchanged, the run exits successfully without a commit or pull request.
 
 Inspect the latest task result with:
 
@@ -97,3 +97,23 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+## Data Refresh
+
+Elite Prospects data for alumni, transfers, and projected future teams is bundled in the repository as fallback JSON. Production and prerendering read these bundled files instead of making Elite Prospects requests. The projected Arizona State future-team seasons currently tracked are `2027-28` and `2028-29`.
+
+Run the following from a local machine to refresh the bundled data:
+
+```bash
+npm run refresh-data        # all bundled fallbacks
+npm run refresh-alumni      # alumni only
+npm run refresh-transfers   # transfers only
+npm run refresh-recruiting  # projected future team rosters only
+npm run refresh-standings   # latest played-season NCHC table only
+```
+
+`/api/recruits` reads `data/asu_recruiting_fallback.json`. `asu_hockey_data.json.recruiting` remains available only for current-roster profile enrichment; it is not the source for that API response.
+
+Production serves `data/nchc_standings_fallback.json` when USCHO has no current NCHC table or every overall record is `0-0-0`, and switches after the first completed game by any NCHC member.
+
+`npm run refresh-recruiting` performs a direct, uncached all-season scrape and enables Puppeteer request fallback by default, allowing a residential machine to retry Elite Prospects 403 responses through headless Chrome. It never treats cached or bundled data as a successful live refresh. The command refuses to run when `NODE_ENV=production` or `IS_PRERENDER=true`, preserving the existing bundled snapshot in those environments.
