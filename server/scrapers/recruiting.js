@@ -269,23 +269,21 @@ function extractSemanticProfile($, expectedPlayerId, expectedPlayerName) {
     .filter(Boolean);
   const profileHeadings = $("header h1");
   const expectedName = normalizePlayerName(expectedPlayerName);
-  const headingNames = new Set(
-    profileHeadings
-      .toArray()
-      .map((heading) => normalizePlayerName($(heading).text()))
-      .filter(Boolean),
+  const matchingHeadings = profileHeadings.filter(
+    (_, heading) => normalizePlayerName($(heading).text()) === expectedName,
   );
   if (
     canonicalIds.length !== 1 ||
     canonicalIds[0] !== expectedPlayerId ||
     !expectedName ||
-    headingNames.size !== 1 ||
-    !headingNames.has(expectedName)
+    profileHeadings.length !== 1 ||
+    matchingHeadings.length !== 1
   ) {
     return null;
   }
 
-  const header = profileHeadings.closest("header");
+  const header = matchingHeadings.first().closest("header");
+  if (header.length !== 1) return null;
   const photos = uniqueCandidates(
     header
       .find("img[src]")
@@ -418,10 +416,13 @@ async function scrapePlayerProfile(
 /**
  * Backwards-compatible wrapper — returns only the photo URL
  * @param {string} playerLink
+ * @param {string} [expectedPlayerName]
  * @returns {string}
  */
-async function scrapePlayerPhoto(playerLink) {
-  const { player_photo } = await scrapePlayerProfile(playerLink);
+async function scrapePlayerPhoto(playerLink, expectedPlayerName) {
+  const { player_photo } = await scrapePlayerProfile(playerLink, {
+    expectedPlayerName,
+  });
   return player_photo;
 }
 

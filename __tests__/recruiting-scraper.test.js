@@ -563,6 +563,24 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
     ).resolves.toEqual({ player_photo: "", current_team: "" });
   });
 
+  test("rejects semantic enrichment when two headers repeat the matching player heading", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: readFixture("recruiting-profile-marko-semantic.html").replace(
+        "</body>",
+        `<header class="Profile_root__duplicateHash">
+           <h1>Marko Bilic</h1>
+         </header></body>`,
+      ),
+    });
+
+    await expect(
+      scrapePlayerProfile(
+        "https://www.eliteprospects.com/player/709864/marko-bilic",
+        { expectedPlayerName: "Marko Bilic" },
+      ),
+    ).resolves.toEqual({ player_photo: "", current_team: "" });
+  });
+
   test("leaves ambiguous identity-compatible semantic candidates blank", async () => {
     requestWithRetry.mockResolvedValue({
       data: readFixture("recruiting-profile-marko-semantic.html")
