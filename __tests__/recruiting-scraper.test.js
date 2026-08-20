@@ -1008,6 +1008,31 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
     });
   });
 
+  test("classifies an exact-ID profile with no optional fields as missing optional fields", async () => {
+    const warning = jest.spyOn(console, "warn").mockImplementation(() => {});
+    const classifications = [];
+    requestWithRetry.mockResolvedValue({
+      data: `<script type="application/ld+json">
+        ${JSON.stringify({
+          "@type": "Person",
+          "@id": "https://www.eliteprospects.com/player/111/jane-smith",
+          name: "Jane Smith",
+        })}
+      </script>`,
+    });
+
+    await expect(
+      scrapePlayerProfile(
+        "https://www.eliteprospects.com/player/111/jane-smith",
+        { onWarning: (classification) => classifications.push(classification) },
+      ),
+    ).resolves.toEqual({ player_photo: "", current_team: "" });
+    expect(classifications).toEqual(["missing_optional_fields"]);
+    expect(warning.mock.calls.flat().join(" ")).not.toContain(
+      "classification=identity_mismatch",
+    );
+  });
+
   test("keeps identity-matched fields while classifying a missing optional photo", async () => {
     const warning = jest.spyOn(console, "warn").mockImplementation(() => {});
     requestWithRetry.mockResolvedValue({

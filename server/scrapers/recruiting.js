@@ -367,13 +367,15 @@ function emptyProfile() {
 
 function mergeProfileSources(...sources) {
   const profile = emptyProfile();
+  let recognized = false;
   for (const source of sources) {
-    if (!source) continue;
+    if (source == null) continue;
+    recognized = true;
     for (const field of ["player_photo", "current_team"]) {
       if (!profile[field] && source[field]) profile[field] = source[field];
     }
   }
-  return profile.player_photo || profile.current_team ? profile : null;
+  return recognized ? profile : null;
 }
 
 function emitProfileWarning(playerId, classification, onWarning) {
