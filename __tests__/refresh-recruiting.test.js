@@ -232,6 +232,54 @@ test("preserves every prior profile when all new enrichment is blank", async () 
   }
 });
 
+test("preserves complementary profile fields from every prior occurrence of a player", async () => {
+  const { directory, file } = createTemporarySnapshotFile();
+  const previous = {
+    "2027-2028": [
+      {
+        ...valid["2027-2028"][0],
+        player_photo:
+          "https://files.eliteprospects.com/layout/players/jane.jpg",
+        current_team: "",
+      },
+    ],
+    "2028-2029": [
+      {
+        ...valid["2027-2028"][0],
+        player_link:
+          "https://www.eliteprospects.com/player/1/jane/?season=2028",
+        player_photo: "",
+        current_team: "Jane's Previous Team",
+      },
+    ],
+  };
+  const refreshed = {
+    ...valid,
+    "2027-2028": [
+      {
+        ...valid["2027-2028"][0],
+        player_photo: "",
+        current_team: "",
+      },
+    ],
+  };
+  fs.writeFileSync(file, JSON.stringify(previous));
+
+  try {
+    const published = await refreshRecruitingSnapshot({
+      fetchData: async () => refreshed,
+      fallbackFile: file,
+    });
+
+    expect(published["2027-2028"][0]).toMatchObject({
+      player_photo: "https://files.eliteprospects.com/layout/players/jane.jpg",
+      current_team: "Jane's Previous Team",
+    });
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
+
 test("health-validates the final merged payload before starting the atomic write", async () => {
   const { directory, file } = createTemporarySnapshotFile();
   const previousContents = JSON.stringify(valid);

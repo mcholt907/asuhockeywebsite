@@ -68,21 +68,42 @@ function shouldUseFallbackOnly() {
   );
 }
 
-function getEliteProspectsPlayerId(value) {
+function parseEliteProspectsPlayerUrl(value) {
+  if (typeof value !== "string") return null;
   try {
-    const url = new URL(value, "https://www.eliteprospects.com");
+    const authority = value.match(/^https:\/\/([^/?#]+)/i)?.[1];
+    if (!authority || authority.includes("@") || authority.includes(":")) {
+      return null;
+    }
+
+    const url = new URL(value);
     if (
       url.protocol !== "https:" ||
+      url.username ||
+      url.password ||
+      url.port ||
+      url.search ||
+      url.hash ||
       !["eliteprospects.com", "www.eliteprospects.com"].includes(
         url.hostname.toLowerCase(),
       )
     ) {
       return null;
     }
-    return url.pathname.match(/^\/player\/(\d+)(?:\/|$)/)?.[1] || null;
+    const match = url.pathname.match(/^\/player\/(\d+)\/([a-z0-9-]+)\/?$/i);
+    if (!match) return null;
+
+    return {
+      playerId: match[1],
+      canonicalUrl: `https://www.eliteprospects.com/player/${match[1]}/${match[2]}`,
+    };
   } catch {
     return null;
   }
+}
+
+function getEliteProspectsPlayerId(value) {
+  return parseEliteProspectsPlayerUrl(value)?.playerId || null;
 }
 
 function getApprovedPlayerPhoto(source) {
@@ -120,14 +141,23 @@ function getEntityPhoto(entity) {
 }
 
 function getEntityTeam(entity) {
-  const team =
-    entity?.memberOf ||
-    entity?.affiliation ||
-    entity?.worksFor ||
-    entity?.currentTeam ||
-    entity?.team;
-  if (typeof team === "string") return team.trim();
-  return typeof team?.name === "string" ? team.name.trim() : "";
+  const currentTeam = entity?.currentTeam;
+  const currentTeamName =
+    typeof currentTeam === "string"
+      ? currentTeam.trim()
+      : typeof currentTeam?.name === "string"
+        ? currentTeam.name.trim()
+        : "";
+  if (currentTeamName) return currentTeamName;
+
+  const sportsTeams = [entity?.memberOf]
+    .flat()
+    .filter((team) =>
+      [team?.["@type"]].flat().some((type) => type === "SportsTeam"),
+    )
+    .map((team) => (typeof team?.name === "string" ? team.name.trim() : ""))
+    .filter(Boolean);
+  return sportsTeams.length === 1 ? sportsTeams[0] : "";
 }
 
 function hasMatchingPlayerUrl(entity, expectedPlayerId) {
@@ -166,41 +196,22 @@ function extractJsonLdProfile($, expectedPlayerId) {
     : null;
 }
 
-function getNamedPlayerObjects(value) {
-  if (Array.isArray(value)) return value.flatMap(getNamedPlayerObjects);
-  if (!value || typeof value !== "object") return [];
-
-  const players = [];
-  for (const [key, nestedValue] of Object.entries(value)) {
-    if (
-      key.toLowerCase() === "player" &&
-      nestedValue &&
-      typeof nestedValue === "object" &&
-      !Array.isArray(nestedValue)
-    ) {
-      players.push(nestedValue);
-    }
-    players.push(...getNamedPlayerObjects(nestedValue));
-  }
-  return players;
-}
-
 function extractNextDataProfile($, expectedPlayerId) {
   const script = $("#__NEXT_DATA__").first();
   if (!script.length) return null;
 
   try {
     const nextData = JSON.parse(script.text());
-    const player = getNamedPlayerObjects(nextData).find((candidate) => {
-      const candidateId =
-        candidate.id ?? candidate.playerId ?? candidate.player_id;
-      return (
-        String(candidateId) === expectedPlayerId &&
-        typeof candidate.name === "string" &&
-        candidate.name.trim()
-      );
-    });
-    return player
+    const player = nextData?.props?.pageProps?.player;
+    const candidateId = player?.id ?? player?.playerId ?? player?.player_id;
+    const isAuthoritativePlayer =
+      player &&
+      typeof player === "object" &&
+      !Array.isArray(player) &&
+      String(candidateId) === expectedPlayerId &&
+      typeof player.name === "string" &&
+      player.name.trim();
+    return isAuthoritativePlayer
       ? {
           player_photo: getEntityPhoto(player),
           current_team: getEntityTeam(player),
@@ -211,36 +222,104 @@ function extractNextDataProfile($, expectedPlayerId) {
   }
 }
 
-function extractSemanticProfile($, expectedPlayerId) {
+function normalizePlayerName(value) {
+  return typeof value === "string"
+    ? value.normalize("NFKC").replace(/\s+/g, " ").trim().toLowerCase()
+    : "";
+}
+
+function getApprovedTeamCandidate($, link) {
+  const href = $(link).attr("href");
+  if (typeof href !== "string") return null;
+  try {
+    const url = new URL(href, "https://www.eliteprospects.com");
+    if (
+      url.protocol !== "https:" ||
+      !["eliteprospects.com", "www.eliteprospects.com"].includes(
+        url.hostname.toLowerCase(),
+      ) ||
+      url.username ||
+      url.password ||
+      url.port ||
+      url.search ||
+      url.hash ||
+      !/^\/team\/\d+\/[a-z0-9-]+\/?$/i.test(url.pathname)
+    ) {
+      return null;
+    }
+    const name = $(link).text().replace(/\s+/g, " ").trim();
+    return name ? { key: `${url.pathname}|${name}`, name } : null;
+  } catch {
+    return null;
+  }
+}
+
+function uniqueCandidates(candidates) {
+  return [
+    ...new Map(
+      candidates.map((candidate) => [candidate.key, candidate]),
+    ).values(),
+  ];
+}
+
+function extractSemanticProfile($, expectedPlayerId, expectedPlayerName) {
   const canonicalIds = $('link[rel~="canonical"][href]')
     .toArray()
     .map((link) => getEliteProspectsPlayerId($(link).attr("href")))
     .filter(Boolean);
   const profileHeadings = $("header h1");
+  const expectedName = normalizePlayerName(expectedPlayerName);
+  const headingNames = new Set(
+    profileHeadings
+      .toArray()
+      .map((heading) => normalizePlayerName($(heading).text()))
+      .filter(Boolean),
+  );
   if (
     canonicalIds.length !== 1 ||
     canonicalIds[0] !== expectedPlayerId ||
-    profileHeadings.length !== 1
+    !expectedName ||
+    headingNames.size !== 1 ||
+    !headingNames.has(expectedName)
   ) {
     return null;
   }
 
-  const header = profileHeadings.first().closest("header");
-  const player_photo = header
-    .find("img[src]")
-    .toArray()
-    .map((image) => getApprovedPlayerPhoto($(image).attr("src")))
-    .find(Boolean);
-  const current_team = header.find('a[href*="/team/"]').first().text().trim();
-  return { player_photo: player_photo || "", current_team };
+  const header = profileHeadings.closest("header");
+  const photos = uniqueCandidates(
+    header
+      .find("img[src]")
+      .toArray()
+      .filter(
+        (image) => normalizePlayerName($(image).attr("alt")) === expectedName,
+      )
+      .map((image) => getApprovedPlayerPhoto($(image).attr("src")))
+      .filter(Boolean)
+      .map((url) => ({ key: url, url })),
+  );
+  const teams = uniqueCandidates(
+    header
+      .find("a[href]")
+      .toArray()
+      .map((link) => getApprovedTeamCandidate($, link))
+      .filter(Boolean),
+  );
+  return {
+    player_photo: photos.length === 1 ? photos[0].url : "",
+    current_team: teams.length === 1 ? teams[0].name : "",
+  };
 }
 
 function isChallengePage($) {
   const title = $("title").text().toLowerCase();
-  const bodyText = $("body").text().replace(/\s+/g, " ").trim().toLowerCase();
+  const visibleBody = $("body").clone();
+  visibleBody.find("script, style, noscript").remove();
+  const bodyText = visibleBody.text().replace(/\s+/g, " ").trim().toLowerCase();
   return (
     /just a moment|access denied|verify you are human|captcha/.test(title) ||
-    /just a moment|access denied|verify you are human|captcha/.test(bodyText) ||
+    /verify you are human|checking your browser|enable javascript and cookies to continue/.test(
+      bodyText,
+    ) ||
     $("#challenge-form, .cf-challenge, [data-sitekey]").length > 0
   );
 }
@@ -278,17 +357,23 @@ function emitProfileWarning(playerId, classification, onWarning) {
  * @param {string} playerLink - Full URL to player's Elite Prospects profile
  * @returns {{ player_photo: string, current_team: string }}
  */
-async function scrapePlayerProfile(playerLink, { onWarning } = {}) {
-  const expectedPlayerId = getEliteProspectsPlayerId(playerLink);
-  if (!expectedPlayerId) {
+async function scrapePlayerProfile(
+  playerLink,
+  { onWarning, expectedPlayerName } = {},
+) {
+  const parsedPlayerUrl = parseEliteProspectsPlayerUrl(playerLink);
+  if (!parsedPlayerUrl) {
     emitProfileWarning(null, "invalid_player_url", onWarning);
     return emptyProfile();
   }
+  const { playerId: expectedPlayerId, canonicalUrl } = parsedPlayerUrl;
 
   let data;
   try {
-    console.log(`[Profile Scraper] Fetching profile from: ${playerLink}`);
-    ({ data } = await requestWithRetry(playerLink));
+    console.log(
+      `[Profile Scraper] Fetching profile: playerId=${expectedPlayerId}`,
+    );
+    ({ data } = await requestWithRetry(canonicalUrl));
   } catch {
     emitProfileWarning(expectedPlayerId, "request_error", onWarning);
     return emptyProfile();
@@ -304,7 +389,7 @@ async function scrapePlayerProfile(playerLink, { onWarning } = {}) {
     const profile =
       extractJsonLdProfile($, expectedPlayerId) ||
       extractNextDataProfile($, expectedPlayerId) ||
-      extractSemanticProfile($, expectedPlayerId);
+      extractSemanticProfile($, expectedPlayerId, expectedPlayerName);
     if (!profile) {
       emitProfileWarning(
         expectedPlayerId,
@@ -598,6 +683,7 @@ async function scrapeEliteProspectsRecruiting(
         if (includePhotos && fullPlayerLink) {
           if (enrichmentStats) enrichmentStats.attempted += 1;
           const profile = await scrapePlayerProfile(fullPlayerLink, {
+            expectedPlayerName: name,
             onWarning: (classification) => {
               if (!enrichmentStats) return;
               enrichmentStats.failures += 1;
