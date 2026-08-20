@@ -109,8 +109,22 @@ function getEliteProspectsPlayerId(value) {
 function getApprovedPlayerPhoto(source) {
   if (typeof source !== "string" || !source.trim()) return "";
   try {
-    const imageUrl = new URL(source, "https://www.eliteprospects.com");
-    if (imageUrl.protocol !== "https:") return "";
+    const authority = source.match(/^https:\/\/([^/?#]+)/i)?.[1];
+    if (!authority || authority.includes("@") || authority.includes(":")) {
+      return "";
+    }
+
+    const imageUrl = new URL(source);
+    if (
+      imageUrl.protocol !== "https:" ||
+      imageUrl.username ||
+      imageUrl.password ||
+      imageUrl.port ||
+      imageUrl.search ||
+      imageUrl.hash
+    ) {
+      return "";
+    }
     if (
       imageUrl.hostname === "files.eliteprospects.com" &&
       imageUrl.pathname.startsWith("/layout/players/")
@@ -140,14 +154,18 @@ function getEntityPhoto(entity) {
   );
 }
 
+function normalizeOptionalText(value) {
+  return typeof value === "string"
+    ? value.normalize("NFKC").replace(/\s+/g, " ").trim()
+    : "";
+}
+
 function getEntityTeam(entity) {
   const currentTeam = entity?.currentTeam;
   const currentTeamName =
     typeof currentTeam === "string"
-      ? currentTeam.trim()
-      : typeof currentTeam?.name === "string"
-        ? currentTeam.name.trim()
-        : "";
+      ? normalizeOptionalText(currentTeam)
+      : normalizeOptionalText(currentTeam?.name);
   if (currentTeamName) return currentTeamName;
 
   const sportsTeams = [entity?.memberOf]
@@ -155,7 +173,7 @@ function getEntityTeam(entity) {
     .filter((team) =>
       [team?.["@type"]].flat().some((type) => type === "SportsTeam"),
     )
-    .map((team) => (typeof team?.name === "string" ? team.name.trim() : ""))
+    .map((team) => normalizeOptionalText(team?.name))
     .filter(Boolean);
   return sportsTeams.length === 1 ? sportsTeams[0] : "";
 }
@@ -185,15 +203,19 @@ function extractJsonLdProfile($, expectedPlayerId) {
     }
   });
 
-  const person = people.find((candidate) =>
+  const exactPeople = people.filter((candidate) =>
     hasMatchingPlayerUrl(candidate, expectedPlayerId),
   );
-  return person
-    ? {
-        player_photo: getEntityPhoto(person),
-        current_team: getEntityTeam(person),
-      }
-    : null;
+  if (!exactPeople.length) return null;
+
+  const uniqueField = (getValue) => {
+    const candidates = [...new Set(exactPeople.map(getValue).filter(Boolean))];
+    return candidates.length === 1 ? candidates[0] : "";
+  };
+  return {
+    player_photo: uniqueField(getEntityPhoto),
+    current_team: uniqueField(getEntityTeam),
+  };
 }
 
 function extractNextDataProfile($, expectedPlayerId) {
@@ -343,6 +365,17 @@ function emptyProfile() {
   return { player_photo: "", current_team: "" };
 }
 
+function mergeProfileSources(...sources) {
+  const profile = emptyProfile();
+  for (const source of sources) {
+    if (!source) continue;
+    for (const field of ["player_photo", "current_team"]) {
+      if (!profile[field] && source[field]) profile[field] = source[field];
+    }
+  }
+  return profile.player_photo || profile.current_team ? profile : null;
+}
+
 function emitProfileWarning(playerId, classification, onWarning) {
   console.warn(
     `[Recruiting Profile] playerId=${playerId || "unknown"} classification=${classification}`,
@@ -384,10 +417,11 @@ async function scrapePlayerProfile(
       return emptyProfile();
     }
 
-    const profile =
-      extractJsonLdProfile($, expectedPlayerId) ||
-      extractNextDataProfile($, expectedPlayerId) ||
-      extractSemanticProfile($, expectedPlayerId, expectedPlayerName);
+    const profile = mergeProfileSources(
+      extractJsonLdProfile($, expectedPlayerId),
+      extractNextDataProfile($, expectedPlayerId),
+      extractSemanticProfile($, expectedPlayerId, expectedPlayerName),
+    );
     if (!profile) {
       emitProfileWarning(
         expectedPlayerId,

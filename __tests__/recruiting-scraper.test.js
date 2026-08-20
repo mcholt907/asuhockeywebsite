@@ -494,6 +494,88 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
     ]);
   });
 
+  test.each([
+    [
+      "a username",
+      "https://userinfo-secret@files.eliteprospects.com/layout/players/jane.jpg",
+      "userinfo-secret",
+    ],
+    [
+      "a password",
+      "https://user:password-secret@files.eliteprospects.com/layout/players/jane.jpg",
+      "password-secret",
+    ],
+    [
+      "an explicit port",
+      "https://files.eliteprospects.com:443/layout/players/jane.jpg",
+      ":443",
+    ],
+    [
+      "a query",
+      "https://files.eliteprospects.com/layout/players/jane.jpg?token=query-secret",
+      "query-secret",
+    ],
+    [
+      "a fragment",
+      "https://files.eliteprospects.com/layout/players/jane.jpg#fragment-secret",
+      "fragment-secret",
+    ],
+  ])(
+    "rejects a player image URL containing %s without logging it",
+    async (_, unsafeImage, secret) => {
+      const log = jest.spyOn(console, "log").mockImplementation(() => {});
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+      const error = jest.spyOn(console, "error").mockImplementation(() => {});
+      requestWithRetry.mockResolvedValue({
+        data: `<script type="application/ld+json">
+        ${JSON.stringify({
+          "@type": "Person",
+          "@id": "https://www.eliteprospects.com/player/111/jane-smith",
+          name: "Jane Smith",
+          image: unsafeImage,
+          currentTeam: { name: "Moorhead Spuds" },
+        })}
+      </script>`,
+      });
+
+      await expect(
+        scrapePlayerProfile(
+          "https://www.eliteprospects.com/player/111/jane-smith",
+        ),
+      ).resolves.toEqual({
+        player_photo: "",
+        current_team: "Moorhead Spuds",
+      });
+      const allLogs = [log, warn, error]
+        .flatMap((spy) => spy.mock.calls.flat())
+        .join(" ");
+      expect(allLogs).not.toContain(secret);
+    },
+  );
+
+  test("canonicalizes an accepted HTTPS Elite Prospects player image URL", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: `<script type="application/ld+json">
+        ${JSON.stringify({
+          "@type": "Person",
+          "@id": "https://www.eliteprospects.com/player/111/jane-smith",
+          name: "Jane Smith",
+          image: "HTTPS://FILES.ELITEPROSPECTS.COM/layout/players/./jane.jpg",
+          currentTeam: { name: "Moorhead Spuds" },
+        })}
+      </script>`,
+    });
+
+    await expect(
+      scrapePlayerProfile(
+        "https://www.eliteprospects.com/player/111/jane-smith",
+      ),
+    ).resolves.toEqual({
+      player_photo: "https://files.eliteprospects.com/layout/players/jane.jpg",
+      current_team: "Moorhead Spuds",
+    });
+  });
+
   test("extracts identity-scoped enrichment from current semantic Profile markup", async () => {
     requestWithRetry.mockResolvedValue({
       data: readFixture("recruiting-profile-marko-semantic.html"),
@@ -619,6 +701,89 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
     ).resolves.toEqual({
       player_photo:
         "https://cdn.eliteprospects-assets.com/players/jane-smith.webp",
+      current_team: "Moorhead Spuds",
+    });
+  });
+
+  test("falls through conflicting same-ID JSON-LD People to the next safe profile source", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: `
+        <script type="application/ld+json">
+          ${JSON.stringify([
+            {
+              "@type": "Person",
+              "@id": "https://www.eliteprospects.com/player/111/jane-smith",
+              name: "Jane Smith",
+              image:
+                "https://files.eliteprospects.com/layout/players/first-wrong.jpg",
+              currentTeam: { name: "First Wrong Team" },
+            },
+            {
+              "@type": "Person",
+              "@id": "https://www.eliteprospects.com/player/111/jane-smith",
+              name: "Jane Smith",
+              image:
+                "https://files.eliteprospects.com/layout/players/second-wrong.jpg",
+              currentTeam: { name: "Second Wrong Team" },
+            },
+          ])}
+        </script>
+        <script id="__NEXT_DATA__" type="application/json">
+          ${JSON.stringify({
+            props: {
+              pageProps: {
+                player: {
+                  id: 111,
+                  name: "Jane Smith",
+                  imageUrl:
+                    "https://files.eliteprospects.com/layout/players/next-safe.jpg",
+                  currentTeam: { name: "Next Safe Team" },
+                },
+              },
+            },
+          })}
+        </script>`,
+    });
+
+    await expect(
+      scrapePlayerProfile(
+        "https://www.eliteprospects.com/player/111/jane-smith",
+      ),
+    ).resolves.toEqual({
+      player_photo:
+        "https://files.eliteprospects.com/layout/players/next-safe.jpg",
+      current_team: "Next Safe Team",
+    });
+  });
+
+  test("normalizes equivalent nonblank fields across same-ID JSON-LD People", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: `<script type="application/ld+json">
+        ${JSON.stringify([
+          {
+            "@type": "Person",
+            "@id": "https://www.eliteprospects.com/player/111/jane-smith",
+            name: "Jane Smith",
+            image: "HTTPS://FILES.ELITEPROSPECTS.COM/layout/players/./jane.jpg",
+            currentTeam: { name: " Moorhead   Spuds " },
+          },
+          {
+            "@type": "Person",
+            "@id": "https://www.eliteprospects.com/player/111/jane-smith",
+            name: "Jane Smith",
+            image: "https://files.eliteprospects.com/layout/players/jane.jpg",
+            currentTeam: { name: "Moorhead Spuds" },
+          },
+        ])}
+      </script>`,
+    });
+
+    await expect(
+      scrapePlayerProfile(
+        "https://www.eliteprospects.com/player/111/jane-smith",
+      ),
+    ).resolves.toEqual({
+      player_photo: "https://files.eliteprospects.com/layout/players/jane.jpg",
       current_team: "Moorhead Spuds",
     });
   });
