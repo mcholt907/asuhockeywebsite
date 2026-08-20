@@ -23,11 +23,12 @@ async function addCurrentTeamToRecruits() {
           `[${i + 1}/${data.recruiting[season].length}] Scraping profile for ${player.name}...`,
         );
 
-        const profile = await scrapePlayerProfile(player.player_link);
-
-        player.current_team = profile.current_team || "";
+        const profile = await scrapePlayerProfile(player.player_link, {
+          expectedPlayerName: player.name,
+        });
 
         if (profile.current_team) {
+          player.current_team = profile.current_team;
           found++;
           console.log(`  ✓ Current team: ${profile.current_team}`);
         } else {
@@ -39,7 +40,6 @@ async function addCurrentTeamToRecruits() {
         console.log(
           `[${i + 1}/${data.recruiting[season].length}] ${player.name} - No player link`,
         );
-        player.current_team = "";
       }
     }
   }

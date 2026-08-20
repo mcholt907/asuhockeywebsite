@@ -174,6 +174,149 @@ test("preserves prior profile fields by normalized player link when enrichment i
   }
 });
 
+test("preserves every prior profile when all new enrichment is blank", async () => {
+  const { directory, file } = createTemporarySnapshotFile();
+  const previous = {
+    ...valid,
+    "2027-2028": [
+      {
+        ...valid["2027-2028"][0],
+        player_photo:
+          "https://files.eliteprospects.com/layout/players/jane.jpg",
+        current_team: "Jane's Previous Team",
+      },
+      {
+        name: "Bob",
+        position: "G",
+        player_link: "https://www.eliteprospects.com/player/2/bob",
+        player_photo: "https://files.eliteprospects.com/layout/players/bob.jpg",
+        current_team: "Bob's Previous Team",
+      },
+    ],
+  };
+  const refreshed = {
+    ...valid,
+    "2027-2028": previous["2027-2028"].map((player) => ({
+      ...player,
+      player_link: `${player.player_link}/?source=refresh`,
+      player_photo: "",
+      current_team: "",
+    })),
+  };
+  fs.writeFileSync(file, JSON.stringify(previous));
+
+  try {
+    const published = await refreshRecruitingSnapshot({
+      fetchData: async () => refreshed,
+      fallbackFile: file,
+    });
+
+    expect(
+      published["2027-2028"].map(({ player_photo, current_team }) => ({
+        player_photo,
+        current_team,
+      })),
+    ).toEqual([
+      {
+        player_photo:
+          "https://files.eliteprospects.com/layout/players/jane.jpg",
+        current_team: "Jane's Previous Team",
+      },
+      {
+        player_photo: "https://files.eliteprospects.com/layout/players/bob.jpg",
+        current_team: "Bob's Previous Team",
+      },
+    ]);
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("preserves complementary profile fields from every prior occurrence of a player", async () => {
+  const { directory, file } = createTemporarySnapshotFile();
+  const previous = {
+    "2027-2028": [
+      {
+        ...valid["2027-2028"][0],
+        player_photo:
+          "https://files.eliteprospects.com/layout/players/jane.jpg",
+        current_team: "",
+      },
+    ],
+    "2028-2029": [
+      {
+        ...valid["2027-2028"][0],
+        player_link:
+          "https://www.eliteprospects.com/player/1/jane/?season=2028",
+        player_photo: "",
+        current_team: "Jane's Previous Team",
+      },
+    ],
+  };
+  const refreshed = {
+    ...valid,
+    "2027-2028": [
+      {
+        ...valid["2027-2028"][0],
+        player_photo: "",
+        current_team: "",
+      },
+    ],
+  };
+  fs.writeFileSync(file, JSON.stringify(previous));
+
+  try {
+    const published = await refreshRecruitingSnapshot({
+      fetchData: async () => refreshed,
+      fallbackFile: file,
+    });
+
+    expect(published["2027-2028"][0]).toMatchObject({
+      player_photo: "https://files.eliteprospects.com/layout/players/jane.jpg",
+      current_team: "Jane's Previous Team",
+    });
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("health-validates the final merged payload before starting the atomic write", async () => {
+  const { directory, file } = createTemporarySnapshotFile();
+  const previousContents = JSON.stringify(valid);
+  fs.writeFileSync(file, previousContents);
+  let positionReads = 0;
+  const changingPlayer = {
+    ...valid["2027-2028"][0],
+    player_photo: "",
+    current_team: "",
+  };
+  Object.defineProperty(changingPlayer, "position", {
+    enumerable: true,
+    get() {
+      positionReads += 1;
+      return positionReads === 1 ? "F" : "X";
+    },
+  });
+  const changingSnapshot = {
+    ...valid,
+    "2027-2028": [changingPlayer],
+  };
+
+  try {
+    await expect(
+      refreshRecruitingSnapshot({
+        fetchData: async () => changingSnapshot,
+        fallbackFile: file,
+      }),
+    ).rejects.toThrow("automated health validation failed");
+
+    expect(fs.readFileSync(file, "utf8")).toBe(previousContents);
+    expect(fs.readdirSync(directory)).toEqual(["fallback.json"]);
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
+
 test("allows a formerly nonempty far-future season to become empty when the overall snapshot remains valid", async () => {
   const { directory, file } = createTemporarySnapshotFile();
   const previous = {

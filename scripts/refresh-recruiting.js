@@ -52,7 +52,20 @@ function preserveProfileMetadata(data, previousData) {
     if (!Array.isArray(roster)) continue;
     for (const player of roster) {
       const normalizedLink = normalizeRecruitingPlayerLink(player?.player_link);
-      if (normalizedLink) previousByLink.set(normalizedLink, player);
+      if (!normalizedLink) continue;
+
+      const previous = previousByLink.get(normalizedLink) || {};
+      const aggregated = { ...previous };
+      for (const field of ["player_photo", "current_team"]) {
+        if (
+          (!aggregated[field] || !aggregated[field].trim()) &&
+          typeof player[field] === "string" &&
+          player[field].trim()
+        ) {
+          aggregated[field] = player[field];
+        }
+      }
+      previousByLink.set(normalizedLink, aggregated);
     }
   }
 
@@ -105,6 +118,12 @@ async function refreshRecruitingSnapshot({
   }
   assertAutomatedRecruitingSnapshot(data, config.FUTURE_SEASONS);
   const publishData = preserveProfileMetadata(data, previousData);
+  if (!validateRecruitingSnapshot(publishData, config.FUTURE_SEASONS)) {
+    throw new Error(
+      "[refresh-recruiting] validation failed; fallback preserved",
+    );
+  }
+  assertAutomatedRecruitingSnapshot(publishData, config.FUTURE_SEASONS);
 
   const fallbackDirectory = path.dirname(fallbackFile);
   const tempFile = path.join(

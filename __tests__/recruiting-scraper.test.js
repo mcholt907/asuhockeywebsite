@@ -55,6 +55,7 @@ jest.mock("../server/services/recruiting-snapshot", () => ({
 }));
 
 const fs = require("fs");
+const path = require("path");
 const { getFromCache, saveToCache } = require("../server/cache/caching-system");
 const { requestWithRetry } = require("../server/lib/request-helper");
 const {
@@ -120,6 +121,9 @@ describe("fetchRecruitingData â€” SWR caching", () => {
 });
 
 describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
+  const readFixture = (name) =>
+    fs.readFileSync(path.join(__dirname, "fixtures", name), "utf8");
+
   // Defines the semantic roster headers and the corresponding row values.
   const rosterRow = (num, name, pos, playerId, age, born, place, h, w, s) => `
     <tr>
@@ -427,21 +431,531 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
     ).resolves.toEqual({ player_photo: "", current_team: "" });
   });
 
-  test("direct automated profile enrichment propagates a profile request failure", async () => {
+  test.each([
+    [
+      "credentials",
+      "https://user:credential-secret@www.eliteprospects.com/player/111/jane-smith",
+      "credential-secret",
+    ],
+    [
+      "a port",
+      "https://www.eliteprospects.com:443/player/111/jane-smith",
+      ":443",
+    ],
+    [
+      "a query",
+      "https://www.eliteprospects.com/player/111/jane-smith?token=query-secret",
+      "query-secret",
+    ],
+    [
+      "a fragment",
+      "https://www.eliteprospects.com/player/111/jane-smith#fragment-secret",
+      "fragment-secret",
+    ],
+    [
+      "a noncanonical player path",
+      "https://www.eliteprospects.com/player/111",
+      "/player/111",
+    ],
+  ])(
+    "rejects a profile URL containing %s before logging or requesting it",
+    async (_, unsafeUrl, secret) => {
+      const log = jest.spyOn(console, "log").mockImplementation(() => {});
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+      const error = jest.spyOn(console, "error").mockImplementation(() => {});
+
+      await expect(scrapePlayerProfile(unsafeUrl)).resolves.toEqual({
+        player_photo: "",
+        current_team: "",
+      });
+
+      expect(requestWithRetry).not.toHaveBeenCalled();
+      const allLogs = [log, warn, error]
+        .flatMap((spy) => spy.mock.calls.flat())
+        .join(" ");
+      expect(allLogs).not.toContain(secret);
+    },
+  );
+
+  test("fetches a canonical profile URL and logs only its player ID", async () => {
+    const log = jest.spyOn(console, "log").mockImplementation(() => {});
+    jest.spyOn(console, "warn").mockImplementation(() => {});
+    requestWithRetry.mockResolvedValue({ data: "<html><body></body></html>" });
+
+    await scrapePlayerProfile(
+      "https://eliteprospects.com/player/111/jane-smith/",
+    );
+
+    expect(requestWithRetry).toHaveBeenCalledWith(
+      "https://www.eliteprospects.com/player/111/jane-smith",
+    );
+    expect(log.mock.calls).toEqual([
+      ["[Profile Scraper] Fetching profile: playerId=111"],
+    ]);
+  });
+
+  test.each([
+    [
+      "a username",
+      "https://userinfo-secret@files.eliteprospects.com/layout/players/jane.jpg",
+      "userinfo-secret",
+    ],
+    [
+      "a password",
+      "https://user:password-secret@files.eliteprospects.com/layout/players/jane.jpg",
+      "password-secret",
+    ],
+    [
+      "an explicit port",
+      "https://files.eliteprospects.com:443/layout/players/jane.jpg",
+      ":443",
+    ],
+    [
+      "a query",
+      "https://files.eliteprospects.com/layout/players/jane.jpg?token=query-secret",
+      "query-secret",
+    ],
+    [
+      "a fragment",
+      "https://files.eliteprospects.com/layout/players/jane.jpg#fragment-secret",
+      "fragment-secret",
+    ],
+  ])(
+    "rejects a player image URL containing %s without logging it",
+    async (_, unsafeImage, secret) => {
+      const log = jest.spyOn(console, "log").mockImplementation(() => {});
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+      const error = jest.spyOn(console, "error").mockImplementation(() => {});
+      requestWithRetry.mockResolvedValue({
+        data: `<script type="application/ld+json">
+        ${JSON.stringify({
+          "@type": "Person",
+          "@id": "https://www.eliteprospects.com/player/111/jane-smith",
+          name: "Jane Smith",
+          image: unsafeImage,
+          currentTeam: { name: "Moorhead Spuds" },
+        })}
+      </script>`,
+      });
+
+      await expect(
+        scrapePlayerProfile(
+          "https://www.eliteprospects.com/player/111/jane-smith",
+        ),
+      ).resolves.toEqual({
+        player_photo: "",
+        current_team: "Moorhead Spuds",
+      });
+      const allLogs = [log, warn, error]
+        .flatMap((spy) => spy.mock.calls.flat())
+        .join(" ");
+      expect(allLogs).not.toContain(secret);
+    },
+  );
+
+  test("canonicalizes an accepted HTTPS Elite Prospects player image URL", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: `<script type="application/ld+json">
+        ${JSON.stringify({
+          "@type": "Person",
+          "@id": "https://www.eliteprospects.com/player/111/jane-smith",
+          name: "Jane Smith",
+          image: "HTTPS://FILES.ELITEPROSPECTS.COM/layout/players/./jane.jpg",
+          currentTeam: { name: "Moorhead Spuds" },
+        })}
+      </script>`,
+    });
+
+    await expect(
+      scrapePlayerProfile(
+        "https://www.eliteprospects.com/player/111/jane-smith",
+      ),
+    ).resolves.toEqual({
+      player_photo: "https://files.eliteprospects.com/layout/players/jane.jpg",
+      current_team: "Moorhead Spuds",
+    });
+  });
+
+  test("extracts identity-scoped enrichment from current semantic Profile markup", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: readFixture("recruiting-profile-marko-semantic.html"),
+    });
+
+    await expect(
+      scrapePlayerProfile(
+        "https://www.eliteprospects.com/player/709864/marko-bilic",
+        { expectedPlayerName: "  MARKO   BILIC " },
+      ),
+    ).resolves.toEqual({
+      player_photo:
+        "https://files.eliteprospects.com/layout/players/marko-bilic.jpg",
+      current_team: "Chicago Steel",
+    });
+  });
+
+  test("passes the roster player name into semantic profile identity checks", async () => {
+    const roster = singlePlayerFixtureForSeason(
+      "2026-2027",
+      rosterRow(
+        "18",
+        "Jane Smith",
+        "F",
+        "111",
+        "18",
+        "2008",
+        "Phoenix, AZ",
+        "180 cm",
+        "172 lbs",
+        "L",
+      ),
+    );
+    const profile = readFixture("recruiting-profile-marko-semantic.html")
+      .replaceAll("709864", "111")
+      .replaceAll("marko-bilic", "jane-smith")
+      .replaceAll("Marko Bilic", "Jane Smith");
+    requestWithRetry.mockImplementation(async (url) => ({
+      data: url.includes("/team/18066/") ? roster : profile,
+    }));
+
+    await expect(
+      scrapeEliteProspectsRecruiting("2026-2027", true),
+    ).resolves.toEqual([
+      expect.objectContaining({
+        name: "Jane Smith",
+        player_photo:
+          "https://files.eliteprospects.com/layout/players/jane-smith.jpg",
+        current_team: "Chicago Steel",
+      }),
+    ]);
+  });
+
+  test("rejects semantic enrichment when the unique profile heading is another player", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: readFixture("recruiting-profile-marko-semantic.html").replace(
+        "<h1>Marko Bilic</h1>",
+        "<h1>Wrong Player</h1>",
+      ),
+    });
+
+    await expect(
+      scrapePlayerProfile(
+        "https://www.eliteprospects.com/player/709864/marko-bilic",
+        { expectedPlayerName: "Marko Bilic" },
+      ),
+    ).resolves.toEqual({ player_photo: "", current_team: "" });
+  });
+
+  test("rejects semantic enrichment when two headers repeat the matching player heading", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: readFixture("recruiting-profile-marko-semantic.html").replace(
+        "</body>",
+        `<header class="Profile_root__duplicateHash">
+           <h1>Marko Bilic</h1>
+         </header></body>`,
+      ),
+    });
+
+    await expect(
+      scrapePlayerProfile(
+        "https://www.eliteprospects.com/player/709864/marko-bilic",
+        { expectedPlayerName: "Marko Bilic" },
+      ),
+    ).resolves.toEqual({ player_photo: "", current_team: "" });
+  });
+
+  test("leaves ambiguous identity-compatible semantic candidates blank", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: readFixture("recruiting-profile-marko-semantic.html")
+        .replace(
+          '<div class="ProfileImage_root__currentHash">',
+          `<img
+             src="https://files.eliteprospects.com/layout/players/marko-second.jpg"
+             alt="Marko Bilic"
+           />
+           <div class="ProfileImage_root__currentHash">`,
+        )
+        .replace(
+          '<a href="/team/3559/chicago-steel">',
+          `<a href="/team/1234/another-valid-team">Another Valid Team</a>
+           <a href="/team/3559/chicago-steel">`,
+        ),
+    });
+
+    await expect(
+      scrapePlayerProfile(
+        "https://www.eliteprospects.com/player/709864/marko-bilic",
+        { expectedPlayerName: "Marko Bilic" },
+      ),
+    ).resolves.toEqual({ player_photo: "", current_team: "" });
+  });
+
+  test("prefers explicit JSON-LD currentTeam over conflicting relationship fields", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: readFixture("recruiting-profile-jsonld.html"),
+    });
+
+    await expect(
+      scrapePlayerProfile(
+        "https://www.eliteprospects.com/player/111/jane-smith",
+      ),
+    ).resolves.toEqual({
+      player_photo:
+        "https://cdn.eliteprospects-assets.com/players/jane-smith.webp",
+      current_team: "Moorhead Spuds",
+    });
+  });
+
+  test("falls through conflicting same-ID JSON-LD People to the next safe profile source", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: `
+        <script type="application/ld+json">
+          ${JSON.stringify([
+            {
+              "@type": "Person",
+              "@id": "https://www.eliteprospects.com/player/111/jane-smith",
+              name: "Jane Smith",
+              image:
+                "https://files.eliteprospects.com/layout/players/first-wrong.jpg",
+              currentTeam: { name: "First Wrong Team" },
+            },
+            {
+              "@type": "Person",
+              "@id": "https://www.eliteprospects.com/player/111/jane-smith",
+              name: "Jane Smith",
+              image:
+                "https://files.eliteprospects.com/layout/players/second-wrong.jpg",
+              currentTeam: { name: "Second Wrong Team" },
+            },
+          ])}
+        </script>
+        <script id="__NEXT_DATA__" type="application/json">
+          ${JSON.stringify({
+            props: {
+              pageProps: {
+                player: {
+                  id: 111,
+                  name: "Jane Smith",
+                  imageUrl:
+                    "https://files.eliteprospects.com/layout/players/next-safe.jpg",
+                  currentTeam: { name: "Next Safe Team" },
+                },
+              },
+            },
+          })}
+        </script>`,
+    });
+
+    await expect(
+      scrapePlayerProfile(
+        "https://www.eliteprospects.com/player/111/jane-smith",
+      ),
+    ).resolves.toEqual({
+      player_photo:
+        "https://files.eliteprospects.com/layout/players/next-safe.jpg",
+      current_team: "Next Safe Team",
+    });
+  });
+
+  test("normalizes equivalent nonblank fields across same-ID JSON-LD People", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: `<script type="application/ld+json">
+        ${JSON.stringify([
+          {
+            "@type": "Person",
+            "@id": "https://www.eliteprospects.com/player/111/jane-smith",
+            name: "Jane Smith",
+            image: "HTTPS://FILES.ELITEPROSPECTS.COM/layout/players/./jane.jpg",
+            currentTeam: { name: " Moorhead   Spuds " },
+          },
+          {
+            "@type": "Person",
+            "@id": "https://www.eliteprospects.com/player/111/jane-smith",
+            name: "Jane Smith",
+            image: "https://files.eliteprospects.com/layout/players/jane.jpg",
+            currentTeam: { name: "Moorhead Spuds" },
+          },
+        ])}
+      </script>`,
+    });
+
+    await expect(
+      scrapePlayerProfile(
+        "https://www.eliteprospects.com/player/111/jane-smith",
+      ),
+    ).resolves.toEqual({
+      player_photo: "https://files.eliteprospects.com/layout/players/jane.jpg",
+      current_team: "Moorhead Spuds",
+    });
+  });
+
+  test("accepts memberOf only when it contains one typed SportsTeam", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: `<script type="application/ld+json">
+        ${JSON.stringify({
+          "@type": "Person",
+          "@id": "https://www.eliteprospects.com/player/111/jane-smith",
+          name: "Jane Smith",
+          memberOf: [
+            { "@type": "Organization", name: "Generic Organization" },
+            { "@type": "SportsTeam", name: "Moorhead Spuds" },
+          ],
+        })}
+      </script>`,
+    });
+
+    await expect(
+      scrapePlayerProfile(
+        "https://www.eliteprospects.com/player/111/jane-smith",
+      ),
+    ).resolves.toEqual({ player_photo: "", current_team: "Moorhead Spuds" });
+  });
+
+  test.each([
+    [
+      "multiple typed memberOf teams",
+      {
+        memberOf: [
+          { "@type": "SportsTeam", name: "First Team" },
+          { "@type": "SportsTeam", name: "First Team" },
+        ],
+      },
+    ],
+    [
+      "a generic affiliation",
+      { affiliation: { "@type": "Organization", name: "Generic Org" } },
+    ],
+    [
+      "a worksFor relationship",
+      { worksFor: { "@type": "Organization", name: "Employer" } },
+    ],
+  ])("rejects JSON-LD team enrichment from %s", async (_, relationship) => {
+    requestWithRetry.mockResolvedValue({
+      data: `<script type="application/ld+json">
+        ${JSON.stringify({
+          "@type": "Person",
+          "@id": "https://www.eliteprospects.com/player/111/jane-smith",
+          name: "Jane Smith",
+          ...relationship,
+        })}
+      </script>`,
+    });
+
+    await expect(
+      scrapePlayerProfile(
+        "https://www.eliteprospects.com/player/111/jane-smith",
+      ),
+    ).resolves.toEqual({ player_photo: "", current_team: "" });
+  });
+
+  test("rejects schema.org Person enrichment with a mismatched player ID", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: readFixture("recruiting-profile-jsonld.html")
+        .replace("/player/111/jane-smith", "/player/999/other-player")
+        .replace(
+          "</body>",
+          `<section class="PlayerHeader_root__legacyHash">
+             <img src="https://files.eliteprospects.com/layout/players/wrong-player.jpg" />
+             <a href="/team/999/wrong-team">Wrong Team</a>
+           </section></body>`,
+        ),
+    });
+
+    await expect(
+      scrapePlayerProfile(
+        "https://www.eliteprospects.com/player/111/jane-smith",
+      ),
+    ).resolves.toEqual({ player_photo: "", current_team: "" });
+  });
+
+  test("uses the authoritative __NEXT_DATA__ page player instead of a preceding historical same-ID player", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: readFixture("recruiting-profile-next-data.html"),
+    });
+
+    await expect(
+      scrapePlayerProfile(
+        "https://www.eliteprospects.com/player/222/bob-jones",
+      ),
+    ).resolves.toEqual({
+      player_photo:
+        "https://files.eliteprospects.com/layout/players/bob-jones.jpg",
+      current_team: "Calgary Hitmen",
+    });
+  });
+
+  test("rejects __NEXT_DATA__ enrichment with a mismatched player ID", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: readFixture("recruiting-profile-next-data.html").replace(
+        '"id": 222,\n              "name": "Bob Jones"',
+        '"id": 999,\n              "name": "Bob Jones"',
+      ),
+    });
+
+    await expect(
+      scrapePlayerProfile(
+        "https://www.eliteprospects.com/player/222/bob-jones",
+      ),
+    ).resolves.toEqual({ player_photo: "", current_team: "" });
+  });
+
+  test("continues the full roster after one classified profile request failure", async () => {
+    const log = jest.spyOn(console, "log").mockImplementation(() => {});
+    const warning = jest.spyOn(console, "warn").mockImplementation(() => {});
+    const error = jest.spyOn(console, "error").mockImplementation(() => {});
+    let failedFirstProfile = false;
     requestWithRetry.mockImplementation(async (url) => {
       if (url.includes("/team/18066/")) {
         const season = url.match(/(20\d{2}-20\d{2})$/)[1];
         return { data: fixtureForSeason(season) };
       }
-      throw new Error("profile unavailable");
+      if (url.includes("/player/111/") && !failedFirstProfile) {
+        failedFirstProfile = true;
+        throw new Error("profile unavailable secret-response-body");
+      }
+      return {
+        data: url.includes("/player/111/")
+          ? readFixture("recruiting-profile-jsonld.html")
+          : readFixture("recruiting-profile-next-data.html"),
+      };
     });
 
-    await expect(
-      scrapeAllRecruitingSeasons({ includePhotos: true }),
-    ).rejects.toThrow("profile unavailable");
+    const result = await scrapeAllRecruitingSeasons({ includePhotos: true });
+
+    expect(result["2026-2027"].map(({ name }) => name)).toEqual([
+      "Jane Smith",
+      "Bob Jones",
+    ]);
+    expect(result["2027-2028"].map(({ name }) => name)).toEqual([
+      "Jane Smith",
+      "Bob Jones",
+    ]);
+    expect(result["2026-2027"][1]).toMatchObject({
+      player_photo:
+        "https://files.eliteprospects.com/layout/players/bob-jones.jpg",
+      current_team: "Calgary Hitmen",
+    });
+    expect(result["2027-2028"][0]).toMatchObject({
+      player_photo:
+        "https://cdn.eliteprospects-assets.com/players/jane-smith.webp",
+      current_team: "Moorhead Spuds",
+    });
+    const warningText = warning.mock.calls.flat().join(" ");
+    const summary = warning.mock.calls
+      .map((call) => call.join(" "))
+      .find((message) => message.includes("Profile enrichment summary"));
+    const enrichmentFailureCount = Number(
+      summary?.match(/(?:^|\s)enrichmentFailures=(\d+)(?:\s|$)/)?.[1],
+    );
+    expect(warningText).toContain("classification=request_error");
+    expect(enrichmentFailureCount).toBe(1);
+    const allLogs = [log, warning, error]
+      .flatMap((spy) => spy.mock.calls.flat())
+      .join(" ");
+    expect(allLogs).not.toContain("secret-response-body");
   });
 
-  test("direct automated profile enrichment rejects an unrecognized profile page", async () => {
+  test("classifies unrecognized profile pages and keeps the roster", async () => {
+    const warning = jest.spyOn(console, "warn").mockImplementation(() => {});
     requestWithRetry.mockImplementation(async (url) => {
       if (url.includes("/team/18066/")) {
         const season = url.match(/(20\d{2}-20\d{2})$/)[1];
@@ -450,33 +964,96 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
       return { data: "<html><body><div>not a profile</div></body></html>" };
     });
 
-    await expect(
-      scrapeAllRecruitingSeasons({ includePhotos: true }),
-    ).rejects.toThrow("Unable to identify player profile");
-  });
-
-  test("direct automated enrichment accepts a recognized profile with no photo", async () => {
-    requestWithRetry.mockImplementation(async (url) => {
-      if (url.includes("/team/18066/")) {
-        const season = url.match(/(20\d{2}-20\d{2})$/)[1];
-        return { data: fixtureForSeason(season) };
-      }
-      return {
-        data: `
-          <section class="PlayerHeader_root__hash">
-            <div class="PlayerInfo_details__hash">
-              <a href="/team/1/recognized-team">Recognized Team</a>
-            </div>
-          </section>`,
-      };
-    });
-
     const result = await scrapeAllRecruitingSeasons({ includePhotos: true });
 
-    expect(result["2026-2027"][0]).toMatchObject({
-      player_photo: "",
-      current_team: "Recognized Team",
+    expect(result["2026-2027"]).toHaveLength(2);
+    expect(result["2027-2028"]).toHaveLength(2);
+    expect(warning.mock.calls.flat().join(" ")).toContain(
+      "classification=unrecognized_layout",
+    );
+  });
+
+  test("classifies a challenge page as a soft profile failure", async () => {
+    const warning = jest.spyOn(console, "warn").mockImplementation(() => {});
+    requestWithRetry.mockResolvedValue({
+      data: "<html><head><title>Just a moment...</title></head><body>Verify you are human</body></html>",
     });
+
+    await expect(
+      scrapePlayerProfile(
+        "https://www.eliteprospects.com/player/111/jane-smith",
+      ),
+    ).resolves.toEqual({ player_photo: "", current_team: "" });
+    expect(warning.mock.calls.flat().join(" ")).toContain(
+      "classification=challenge_page",
+    );
+  });
+
+  test("does not classify incidental captcha text in a script as a challenge page", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: readFixture("recruiting-profile-jsonld.html").replace(
+        "</body>",
+        '<script>window.telemetryLabel = "captcha";</script></body>',
+      ),
+    });
+
+    await expect(
+      scrapePlayerProfile(
+        "https://www.eliteprospects.com/player/111/jane-smith",
+      ),
+    ).resolves.toEqual({
+      player_photo:
+        "https://cdn.eliteprospects-assets.com/players/jane-smith.webp",
+      current_team: "Moorhead Spuds",
+    });
+  });
+
+  test("classifies an exact-ID profile with no optional fields as missing optional fields", async () => {
+    const warning = jest.spyOn(console, "warn").mockImplementation(() => {});
+    const classifications = [];
+    requestWithRetry.mockResolvedValue({
+      data: `<script type="application/ld+json">
+        ${JSON.stringify({
+          "@type": "Person",
+          "@id": "https://www.eliteprospects.com/player/111/jane-smith",
+          name: "Jane Smith",
+        })}
+      </script>`,
+    });
+
+    await expect(
+      scrapePlayerProfile(
+        "https://www.eliteprospects.com/player/111/jane-smith",
+        { onWarning: (classification) => classifications.push(classification) },
+      ),
+    ).resolves.toEqual({ player_photo: "", current_team: "" });
+    expect(classifications).toEqual(["missing_optional_fields"]);
+    expect(warning.mock.calls.flat().join(" ")).not.toContain(
+      "classification=identity_mismatch",
+    );
+  });
+
+  test("keeps identity-matched fields while classifying a missing optional photo", async () => {
+    const warning = jest.spyOn(console, "warn").mockImplementation(() => {});
+    requestWithRetry.mockResolvedValue({
+      data: readFixture("recruiting-profile-marko-semantic.html").replace(
+        /<div class="ProfileImage[\s\S]*?<\/div>/,
+        "",
+      ),
+    });
+
+    await expect(
+      scrapePlayerProfile(
+        "https://www.eliteprospects.com/player/709864/marko-bilic",
+        { expectedPlayerName: "Marko Bilic" },
+      ),
+    ).resolves.toEqual({
+      player_photo: "",
+      current_team: "Chicago Steel",
+    });
+    expect(warning.mock.calls.flat().join(" ")).toContain(
+      "classification=missing_optional_fields",
+    );
   });
 
   test("parses the live abbreviated roster headers without accepting the stats decoy", async () => {

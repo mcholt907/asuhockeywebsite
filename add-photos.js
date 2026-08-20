@@ -26,14 +26,16 @@ async function addPhotosToRecruits() {
         );
 
         // Scrape the photo
-        const photoUrl = await scrapePlayerPhoto(player.player_link);
+        const photoUrl = await scrapePlayerPhoto(
+          player.player_link,
+          player.name,
+        );
 
         if (photoUrl) {
           player.player_photo = photoUrl;
           totalPhotos++;
           console.log(`  ✓ Found photo: ${photoUrl.substring(0, 60)}...`);
         } else {
-          player.player_photo = "";
           console.log(`  ✗ No photo found`);
         }
 
@@ -43,7 +45,6 @@ async function addPhotosToRecruits() {
         console.log(
           `[${i + 1}/${data.recruiting[season].length}] ${player.name} - No player link`,
         );
-        player.player_photo = "";
       }
     }
   }
