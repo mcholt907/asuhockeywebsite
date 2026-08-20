@@ -68,81 +68,265 @@ function shouldUseFallbackOnly() {
   );
 }
 
+function getEliteProspectsPlayerId(value) {
+  try {
+    const url = new URL(value, "https://www.eliteprospects.com");
+    if (
+      url.protocol !== "https:" ||
+      !["eliteprospects.com", "www.eliteprospects.com"].includes(
+        url.hostname.toLowerCase(),
+      )
+    ) {
+      return null;
+    }
+    return url.pathname.match(/^\/player\/(\d+)(?:\/|$)/)?.[1] || null;
+  } catch {
+    return null;
+  }
+}
+
+function getApprovedPlayerPhoto(source) {
+  if (typeof source !== "string" || !source.trim()) return "";
+  try {
+    const imageUrl = new URL(source, "https://www.eliteprospects.com");
+    if (imageUrl.protocol !== "https:") return "";
+    if (
+      imageUrl.hostname === "files.eliteprospects.com" &&
+      imageUrl.pathname.startsWith("/layout/players/")
+    ) {
+      return imageUrl.href;
+    }
+    if (
+      imageUrl.hostname === "cdn.eliteprospects-assets.com" &&
+      /(?:^|[-_/])players?(?:[-_/.]|$)/i.test(imageUrl.pathname)
+    ) {
+      return imageUrl.href;
+    }
+  } catch {
+    // Invalid optional image URLs are ignored.
+  }
+  return "";
+}
+
+function getEntityPhoto(entity) {
+  const image = entity?.image;
+  if (typeof image === "string") return getApprovedPlayerPhoto(image);
+  if (image && typeof image === "object") {
+    return getApprovedPlayerPhoto(image.url || image.contentUrl);
+  }
+  return getApprovedPlayerPhoto(
+    entity?.player_photo || entity?.photo || entity?.imageUrl,
+  );
+}
+
+function getEntityTeam(entity) {
+  const team =
+    entity?.memberOf ||
+    entity?.affiliation ||
+    entity?.worksFor ||
+    entity?.currentTeam ||
+    entity?.team;
+  if (typeof team === "string") return team.trim();
+  return typeof team?.name === "string" ? team.name.trim() : "";
+}
+
+function hasMatchingPlayerUrl(entity, expectedPlayerId) {
+  return [entity?.url, entity?.["@id"], entity?.sameAs]
+    .flat()
+    .some((value) => getEliteProspectsPlayerId(value) === expectedPlayerId);
+}
+
+function getJsonLdNodes(value) {
+  if (Array.isArray(value)) return value.flatMap(getJsonLdNodes);
+  if (!value || typeof value !== "object") return [];
+  return [value, ...getJsonLdNodes(value["@graph"] || [])];
+}
+
+function extractJsonLdProfile($, expectedPlayerId) {
+  const people = [];
+  $('script[type="application/ld+json"]').each((_, script) => {
+    try {
+      for (const node of getJsonLdNodes(JSON.parse($(script).text()))) {
+        const types = [node?.["@type"]].flat();
+        if (types.includes("Person")) people.push(node);
+      }
+    } catch {
+      // A malformed optional metadata block is not authoritative.
+    }
+  });
+
+  const person = people.find((candidate) =>
+    hasMatchingPlayerUrl(candidate, expectedPlayerId),
+  );
+  return person
+    ? {
+        player_photo: getEntityPhoto(person),
+        current_team: getEntityTeam(person),
+      }
+    : null;
+}
+
+function getNamedPlayerObjects(value) {
+  if (Array.isArray(value)) return value.flatMap(getNamedPlayerObjects);
+  if (!value || typeof value !== "object") return [];
+
+  const players = [];
+  for (const [key, nestedValue] of Object.entries(value)) {
+    if (
+      key.toLowerCase() === "player" &&
+      nestedValue &&
+      typeof nestedValue === "object" &&
+      !Array.isArray(nestedValue)
+    ) {
+      players.push(nestedValue);
+    }
+    players.push(...getNamedPlayerObjects(nestedValue));
+  }
+  return players;
+}
+
+function extractNextDataProfile($, expectedPlayerId) {
+  const script = $("#__NEXT_DATA__").first();
+  if (!script.length) return null;
+
+  try {
+    const nextData = JSON.parse(script.text());
+    const player = getNamedPlayerObjects(nextData).find((candidate) => {
+      const candidateId =
+        candidate.id ?? candidate.playerId ?? candidate.player_id;
+      return (
+        String(candidateId) === expectedPlayerId &&
+        typeof candidate.name === "string" &&
+        candidate.name.trim()
+      );
+    });
+    return player
+      ? {
+          player_photo: getEntityPhoto(player),
+          current_team: getEntityTeam(player),
+        }
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function extractSemanticProfile($, expectedPlayerId) {
+  const canonicalIds = $('link[rel~="canonical"][href]')
+    .toArray()
+    .map((link) => getEliteProspectsPlayerId($(link).attr("href")))
+    .filter(Boolean);
+  const profileHeadings = $("header h1");
+  if (
+    canonicalIds.length !== 1 ||
+    canonicalIds[0] !== expectedPlayerId ||
+    profileHeadings.length !== 1
+  ) {
+    return null;
+  }
+
+  const header = profileHeadings.first().closest("header");
+  const player_photo = header
+    .find("img[src]")
+    .toArray()
+    .map((image) => getApprovedPlayerPhoto($(image).attr("src")))
+    .find(Boolean);
+  const current_team = header.find('a[href*="/team/"]').first().text().trim();
+  return { player_photo: player_photo || "", current_team };
+}
+
+function isChallengePage($) {
+  const title = $("title").text().toLowerCase();
+  const bodyText = $("body").text().replace(/\s+/g, " ").trim().toLowerCase();
+  return (
+    /just a moment|access denied|verify you are human|captcha/.test(title) ||
+    /just a moment|access denied|verify you are human|captcha/.test(bodyText) ||
+    $("#challenge-form, .cf-challenge, [data-sitekey]").length > 0
+  );
+}
+
+function hasProfileIdentitySignals($) {
+  if ($('link[rel~="canonical"][href*="/player/"]').length) return true;
+  if ($("#__NEXT_DATA__").length) return true;
+
+  let hasPerson = false;
+  $('script[type="application/ld+json"]').each((_, script) => {
+    try {
+      hasPerson ||= getJsonLdNodes(JSON.parse($(script).text())).some((node) =>
+        [node?.["@type"]].flat().includes("Person"),
+      );
+    } catch {
+      // Ignore malformed optional metadata while classifying the page.
+    }
+  });
+  return hasPerson;
+}
+
+function emptyProfile() {
+  return { player_photo: "", current_team: "" };
+}
+
+function emitProfileWarning(playerId, classification, onWarning) {
+  console.warn(
+    `[Recruiting Profile] playerId=${playerId || "unknown"} classification=${classification}`,
+  );
+  if (typeof onWarning === "function") onWarning(classification);
+}
+
 /**
  * Scrapes player photo and current team from a single Elite Prospects profile page visit
  * @param {string} playerLink - Full URL to player's Elite Prospects profile
  * @returns {{ player_photo: string, current_team: string }}
  */
-async function scrapePlayerProfile(playerLink, { strict = false } = {}) {
-  if (!playerLink) return { player_photo: "", current_team: "" };
+async function scrapePlayerProfile(playerLink, { onWarning } = {}) {
+  const expectedPlayerId = getEliteProspectsPlayerId(playerLink);
+  if (!expectedPlayerId) {
+    emitProfileWarning(null, "invalid_player_url", onWarning);
+    return emptyProfile();
+  }
 
+  let data;
   try {
     console.log(`[Profile Scraper] Fetching profile from: ${playerLink}`);
-    const { data } = await requestWithRetry(playerLink);
+    ({ data } = await requestWithRetry(playerLink));
+  } catch {
+    emitProfileWarning(expectedPlayerId, "request_error", onWarning);
+    return emptyProfile();
+  }
+
+  try {
     const $ = cheerio.load(data);
-    const profileRoot = $(
-      '[class*="ProfileHeader"], [class*="PlayerHeader"]',
-    ).first();
-    if (profileRoot.length === 0) {
-      throw new Error("Unable to identify player profile structure");
-    }
-    const profileRegions = profileRoot.add(
-      profileRoot.find('[class*="PlayerInfo"]'),
-    );
-
-    // --- Photo ---
-    let player_photo = "";
-    // Structural selectors first — EP's hashed CSS-module classes
-    // (ProfileImage_*) rotate on redeploys and have broken before.
-    // Scope to the profile header region when possible so a "related
-    // players" widget can't supply the wrong player's image.
-    const photoEl = profileRegions
-      .find("img[src]")
-      .toArray()
-      .map((image) => $(image).attr("src"))
-      .find((source) => {
-        try {
-          const imageUrl = new URL(source, "https://www.eliteprospects.com");
-          if (imageUrl.protocol !== "https:") return false;
-          if (imageUrl.hostname === "files.eliteprospects.com") {
-            return imageUrl.pathname.startsWith("/layout/players/");
-          }
-          return (
-            imageUrl.hostname === "cdn.eliteprospects-assets.com" &&
-            /(?:^|[-_/])players?(?:[-_/.]|$)/i.test(imageUrl.pathname)
-          );
-        } catch {
-          return false;
-        }
-      });
-    if (photoEl) {
-      player_photo = photoEl.startsWith("http")
-        ? photoEl
-        : `https://www.eliteprospects.com${photoEl}`;
-      console.log(`[Profile Scraper] Found photo: ${player_photo}`);
+    if (isChallengePage($)) {
+      emitProfileWarning(expectedPlayerId, "challenge_page", onWarning);
+      return emptyProfile();
     }
 
-    // --- Current Team ---
-    // EP shows current team as a link in the player info header
-    // e.g. "#31 Bismarck Bobcats / NAHL - 25/26"
-    let current_team = "";
-    // Primary: team link inside the PlayerInfo section
-    const infoTeamLink = profileRegions.find('a[href*="/team/"]').first();
-    if (infoTeamLink.length) {
-      current_team = infoTeamLink.text().trim();
-    }
-    if (current_team) {
-      console.log(`[Profile Scraper] Found current team: ${current_team}`);
+    const profile =
+      extractJsonLdProfile($, expectedPlayerId) ||
+      extractNextDataProfile($, expectedPlayerId) ||
+      extractSemanticProfile($, expectedPlayerId);
+    if (!profile) {
+      emitProfileWarning(
+        expectedPlayerId,
+        hasProfileIdentitySignals($)
+          ? "identity_mismatch"
+          : "unrecognized_layout",
+        onWarning,
+      );
+      return emptyProfile();
     }
 
-    return { player_photo, current_team };
-  } catch (error) {
-    console.error(
-      `[Profile Scraper] Error scraping ${playerLink}:`,
-      error.message,
-    );
-    if (strict) throw error;
-    return { player_photo: "", current_team: "" };
+    if (!profile.player_photo || !profile.current_team) {
+      emitProfileWarning(
+        expectedPlayerId,
+        "missing_optional_fields",
+        onWarning,
+      );
+    }
+    return profile;
+  } catch {
+    emitProfileWarning(expectedPlayerId, "unrecognized_layout", onWarning);
+    return emptyProfile();
   }
 }
 
@@ -245,7 +429,7 @@ function findRosterTables($, season) {
 async function scrapeEliteProspectsRecruiting(
   season,
   includePhotos = false,
-  { strictProfiles = false } = {},
+  { enrichmentStats = null } = {},
 ) {
   const url = `https://www.eliteprospects.com/team/18066/arizona-state-univ/${season}`;
   const startedAt = Date.now();
@@ -412,8 +596,14 @@ async function scrapeEliteProspectsRecruiting(
         let player_photo = "";
         let current_team = "";
         if (includePhotos && fullPlayerLink) {
+          if (enrichmentStats) enrichmentStats.attempted += 1;
           const profile = await scrapePlayerProfile(fullPlayerLink, {
-            strict: strictProfiles,
+            onWarning: (classification) => {
+              if (!enrichmentStats) return;
+              enrichmentStats.failures += 1;
+              enrichmentStats.byClassification[classification] =
+                (enrichmentStats.byClassification[classification] || 0) + 1;
+            },
           });
           player_photo = profile.player_photo;
           current_team = profile.current_team;
@@ -474,6 +664,11 @@ async function scrapeEliteProspectsRecruiting(
 async function scrapeAllRecruitingSeasons({ includePhotos = false } = {}) {
   const startedAt = Date.now();
   const recruitingData = {};
+  const enrichmentStats = {
+    attempted: 0,
+    failures: 0,
+    byClassification: {},
+  };
 
   for (const season of config.FUTURE_SEASONS) {
     console.log(
@@ -482,7 +677,7 @@ async function scrapeAllRecruitingSeasons({ includePhotos = false } = {}) {
     recruitingData[season] = await scrapeEliteProspectsRecruiting(
       season,
       includePhotos,
-      { strictProfiles: includePhotos },
+      { enrichmentStats },
     );
 
     // Add delay between requests to be respectful
@@ -500,6 +695,14 @@ async function scrapeAllRecruitingSeasons({ includePhotos = false } = {}) {
   console.log(
     `[Recruiting] Batch complete: seasons=${config.FUTURE_SEASONS.length} players=${totalPlayers} profiles=${includePhotos} durationMs=${Date.now() - startedAt}`,
   );
+  if (enrichmentStats.failures > 0) {
+    const classifications = Object.entries(enrichmentStats.byClassification)
+      .map(([classification, count]) => `${classification}:${count}`)
+      .join(",");
+    console.warn(
+      `[Recruiting] Profile enrichment summary: attempts=${enrichmentStats.attempted} enrichmentFailures=${enrichmentStats.failures} classifications=${classifications}`,
+    );
+  }
   return recruitingData;
 }
 

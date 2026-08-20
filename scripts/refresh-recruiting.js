@@ -105,6 +105,12 @@ async function refreshRecruitingSnapshot({
   }
   assertAutomatedRecruitingSnapshot(data, config.FUTURE_SEASONS);
   const publishData = preserveProfileMetadata(data, previousData);
+  if (!validateRecruitingSnapshot(publishData, config.FUTURE_SEASONS)) {
+    throw new Error(
+      "[refresh-recruiting] validation failed; fallback preserved",
+    );
+  }
+  assertAutomatedRecruitingSnapshot(publishData, config.FUTURE_SEASONS);
 
   const fallbackDirectory = path.dirname(fallbackFile);
   const tempFile = path.join(
