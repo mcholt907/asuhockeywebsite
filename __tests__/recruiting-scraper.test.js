@@ -884,10 +884,20 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
   });
 
   test("rejects __NEXT_DATA__ enrichment with a mismatched player ID", async () => {
+    const profileFixture = readFixture("recruiting-profile-next-data.html");
+    const nextDataScript = profileFixture.match(
+      /<script\b[^>]*\bid=(["'])__NEXT_DATA__\1[^>]*>([\s\S]*?)<\/script>/i,
+    );
+    const nextData = JSON.parse(nextDataScript[2]);
+    const authoritativePlayer = nextData.props.pageProps.player;
+
+    expect(authoritativePlayer.name).toBe("Bob Jones");
+    authoritativePlayer.id = 999;
+
     requestWithRetry.mockResolvedValue({
-      data: readFixture("recruiting-profile-next-data.html").replace(
-        '"id": 222,\n              "name": "Bob Jones"',
-        '"id": 999,\n              "name": "Bob Jones"',
+      data: profileFixture.replace(
+        nextDataScript[0],
+        nextDataScript[0].replace(nextDataScript[2], JSON.stringify(nextData)),
       ),
     });
 
