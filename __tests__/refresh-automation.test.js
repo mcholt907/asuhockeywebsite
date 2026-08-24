@@ -32,11 +32,30 @@ function runNativeHarness(mode, childSource) {
 
 . $RunnerPath
 $LogPath = $TestLogPath
+$script:CapturePaths = @()
+
+if ($Mode -eq 'read-failure') {
+  function Get-Content {
+    [CmdletBinding()]
+    param(
+      [Parameter(Mandatory = $true)]
+      [string]$LiteralPath
+    )
+
+    $script:CapturePaths += $LiteralPath
+    if ($script:CapturePaths.Count -eq 2) {
+      Write-Error 'simulated capture read failure'
+      return
+    }
+
+    Microsoft.PowerShell.Management\\Get-Content -LiteralPath $LiteralPath
+  }
+}
 
 if ($Mode -eq 'success') {
   $captured = @(Invoke-Native $NodePath @('-e', $ChildSource))
-  if ($captured -notcontains 'native-stderr-success') {
-    throw 'Invoke-Native did not return the native stderr line'
+  if ($captured.Count -ne 0) {
+    throw "Invoke-Native returned native stderr: $($captured -join '|')"
   }
   if ($ErrorActionPreference -ne 'Stop') {
     throw 'Invoke-Native did not restore ErrorActionPreference'
@@ -53,6 +72,12 @@ try {
   if ($ErrorActionPreference -ne 'Stop') {
     [Console]::Error.WriteLine('Invoke-Native did not restore ErrorActionPreference')
     exit 24
+  }
+  foreach ($capturePath in $script:CapturePaths) {
+    if (Test-Path -LiteralPath $capturePath) {
+      [Console]::Error.WriteLine("Invoke-Native left a capture file behind: $capturePath")
+      exit 25
+    }
   }
   [Console]::Error.WriteLine("CAUGHT: $($_.Exception.Message)")
   exit 23
@@ -75,6 +100,67 @@ try {
       childSource,
     ],
     { encoding: "utf8" },
+  );
+  const log = fs.existsSync(logPath) ? fs.readFileSync(logPath, "utf8") : "";
+  fs.rmSync(directory, { recursive: true, force: true });
+
+  return { ...result, log };
+}
+
+function runNativeStdoutSeparationHarness() {
+  const directory = fs.mkdtempSync(
+    path.join(os.tmpdir(), "refresh-native-stdout-"),
+  );
+  const harnessPath = path.join(directory, "native-stdout-harness.ps1");
+  const nativeShimPath = path.join(directory, "native-path-shim.cmd");
+  const logPath = path.join(directory, "refresh.log");
+
+  fs.writeFileSync(
+    nativeShimPath,
+    "@echo off\r\necho data/asu_alumni_fallback.json\r\necho warning: unable to access global Git ignore 1>&2\r\nexit /b 0\r\n",
+  );
+  fs.writeFileSync(
+    harnessPath,
+    `param(
+  [string]$RunnerPath,
+  [string]$TestLogPath,
+  [string]$NativeShimPath
+)
+
+. $RunnerPath
+$LogPath = $TestLogPath
+
+try {
+  $captured = @(Invoke-Native $NativeShimPath @())
+  Assert-AllowedChanges $captured
+  if ($captured.Count -ne 1 -or $captured[0] -ne 'data/asu_alumni_fallback.json') {
+    throw "Unexpected captured native output: $($captured -join '|')"
+  }
+  if ($ErrorActionPreference -ne 'Stop') {
+    throw 'Invoke-Native did not restore ErrorActionPreference'
+  }
+  Write-Output 'HARNESS_OK'
+  exit 0
+} catch {
+  [Console]::Error.WriteLine($_.Exception.Message)
+  exit 23
+}
+`,
+  );
+
+  const result = spawnSync(
+    "powershell.exe",
+    [
+      "-NoProfile",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      harnessPath,
+      runnerPath,
+      logPath,
+      nativeShimPath,
+    ],
+    { encoding: "utf8", cwd: path.resolve(__dirname, "..") },
   );
   const log = fs.existsSync(logPath) ? fs.readFileSync(logPath, "utf8") : "";
   fs.rmSync(directory, { recursive: true, force: true });
@@ -387,6 +473,14 @@ const path = require("path");
 const args = process.argv.slice(2);
 fs.appendFileSync(process.env.REFRESH_TEST_TRACE, args.join(" ") + "\\n");
 if (args[0] === "run" && args[1] === "refresh-data") {
+  for (const fallbackPath of [
+    "data/asu_alumni_fallback.json",
+    "data/asu_transfers_fallback.json",
+  ]) {
+    if (fs.readFileSync(path.join(process.cwd(), fallbackPath), "utf8").includes('"leftover"')) {
+      throw new Error("allowlisted leftover reached refresh-data: " + fallbackPath);
+    }
+  }
   const statePath = process.env.REFRESH_TEST_STATE;
   const count = fs.existsSync(statePath)
     ? Number(fs.readFileSync(statePath, "utf8")) + 1
@@ -598,7 +692,21 @@ describe("generated fallback parsing", () => {
 
 describe("PowerShell native command execution", () => {
   windowsTest(
-    "captures and logs stderr when the native command succeeds",
+    "passes only native stdout to the exact refresh-change allowlist while logging stderr",
+    () => {
+      const result = runNativeStdoutSeparationHarness();
+
+      expect(result.status).toBe(0);
+      expect(result.stdout).toContain("HARNESS_OK");
+      expect(result.log).toContain("data/asu_alumni_fallback.json");
+      expect(result.log).toContain(
+        "warning: unable to access global Git ignore",
+      );
+    },
+  );
+
+  windowsTest(
+    "logs stderr without returning it when the native command succeeds",
     () => {
       const result = runNativeHarness(
         "success",
@@ -623,6 +731,36 @@ describe("PowerShell native command execution", () => {
     );
     expect(result.log).toContain("native-stderr-failure");
   });
+
+  windowsTest(
+    "fails closed and removes both captures when reading a stream fails",
+    () => {
+      const result = runNativeHarness(
+        "read-failure",
+        "process.stdout.write('native-stdout-before-read-failure\\n');process.stderr.write('native-stderr-before-read-failure\\n');process.exit(0)",
+      );
+
+      expect(result.status).toBe(23);
+      expect(`${result.stdout}\n${result.stderr}`).toContain(
+        "simulated capture read failure",
+      );
+    },
+  );
+
+  windowsTest(
+    "preserves a native exit failure when reading a capture also fails",
+    () => {
+      const result = runNativeHarness(
+        "read-failure",
+        "process.stdout.write('native-stdout-before-read-failure\\n');process.stderr.write('native-stderr-before-read-failure\\n');process.exit(7)",
+      );
+
+      expect(result.status).toBe(23);
+      expect(`${result.stdout}\n${result.stderr}`).toContain(
+        "exited with code 7",
+      );
+    },
+  );
 });
 
 describe("daily refresh runner integration", () => {
@@ -652,8 +790,33 @@ describe("daily refresh runner integration", () => {
         expectRunnerSuccess(firstRun);
         const firstOid = fixture.remoteRefreshOid();
 
+        fs.writeFileSync(
+          path.join(fixture.runner, "data", "asu_alumni_fallback.json"),
+          '{"leftover":"working-tree"}\n',
+        );
+        fs.writeFileSync(
+          path.join(fixture.runner, "data", "asu_transfers_fallback.json"),
+          '{"leftover":"staged"}\n',
+        );
+        runGit(["add", "data/asu_transfers_fallback.json"], fixture.runner);
+
         const secondRun = fixture.run();
         expectRunnerSuccess(secondRun);
+        expect(secondRun.stdout).toContain(
+          "Restoring allowlisted leftovers from a prior failed run",
+        );
+        expect(
+          runGit(
+            ["status", "--short", "--", "data/asu_alumni_fallback.json"],
+            fixture.runner,
+          ).stdout,
+        ).toBe("");
+        expect(
+          runGit(
+            ["status", "--short", "--", "data/asu_transfers_fallback.json"],
+            fixture.runner,
+          ).stdout,
+        ).toBe("");
         expect(fixture.remoteRefreshOid()).not.toBe(firstOid);
       } finally {
         fixture.cleanup();
