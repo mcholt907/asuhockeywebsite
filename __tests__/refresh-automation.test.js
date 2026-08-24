@@ -35,8 +35,8 @@ $LogPath = $TestLogPath
 
 if ($Mode -eq 'success') {
   $captured = @(Invoke-Native $NodePath @('-e', $ChildSource))
-  if ($captured -notcontains 'native-stderr-success') {
-    throw 'Invoke-Native did not return the native stderr line'
+  if ($captured.Count -ne 0) {
+    throw "Invoke-Native returned native stderr: $($captured -join '|')"
   }
   if ($ErrorActionPreference -ne 'Stop') {
     throw 'Invoke-Native did not restore ErrorActionPreference'
@@ -75,6 +75,67 @@ try {
       childSource,
     ],
     { encoding: "utf8" },
+  );
+  const log = fs.existsSync(logPath) ? fs.readFileSync(logPath, "utf8") : "";
+  fs.rmSync(directory, { recursive: true, force: true });
+
+  return { ...result, log };
+}
+
+function runNativeStdoutSeparationHarness() {
+  const directory = fs.mkdtempSync(
+    path.join(os.tmpdir(), "refresh-native-stdout-"),
+  );
+  const harnessPath = path.join(directory, "native-stdout-harness.ps1");
+  const nativeShimPath = path.join(directory, "native-path-shim.cmd");
+  const logPath = path.join(directory, "refresh.log");
+
+  fs.writeFileSync(
+    nativeShimPath,
+    "@echo off\r\necho data/asu_alumni_fallback.json\r\necho warning: unable to access global Git ignore 1>&2\r\nexit /b 0\r\n",
+  );
+  fs.writeFileSync(
+    harnessPath,
+    `param(
+  [string]$RunnerPath,
+  [string]$TestLogPath,
+  [string]$NativeShimPath
+)
+
+. $RunnerPath
+$LogPath = $TestLogPath
+
+try {
+  $captured = @(Invoke-Native $NativeShimPath @())
+  Assert-AllowedChanges $captured
+  if ($captured.Count -ne 1 -or $captured[0] -ne 'data/asu_alumni_fallback.json') {
+    throw "Unexpected captured native output: $($captured -join '|')"
+  }
+  if ($ErrorActionPreference -ne 'Stop') {
+    throw 'Invoke-Native did not restore ErrorActionPreference'
+  }
+  Write-Output 'HARNESS_OK'
+  exit 0
+} catch {
+  [Console]::Error.WriteLine($_.Exception.Message)
+  exit 23
+}
+`,
+  );
+
+  const result = spawnSync(
+    "powershell.exe",
+    [
+      "-NoProfile",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      harnessPath,
+      runnerPath,
+      logPath,
+      nativeShimPath,
+    ],
+    { encoding: "utf8", cwd: path.resolve(__dirname, "..") },
   );
   const log = fs.existsSync(logPath) ? fs.readFileSync(logPath, "utf8") : "";
   fs.rmSync(directory, { recursive: true, force: true });
@@ -598,7 +659,21 @@ describe("generated fallback parsing", () => {
 
 describe("PowerShell native command execution", () => {
   windowsTest(
-    "captures and logs stderr when the native command succeeds",
+    "passes only native stdout to the exact refresh-change allowlist while logging stderr",
+    () => {
+      const result = runNativeStdoutSeparationHarness();
+
+      expect(result.status).toBe(0);
+      expect(result.stdout).toContain("HARNESS_OK");
+      expect(result.log).toContain("data/asu_alumni_fallback.json");
+      expect(result.log).toContain(
+        "warning: unable to access global Git ignore",
+      );
+    },
+  );
+
+  windowsTest(
+    "logs stderr without returning it when the native command succeeds",
     () => {
       const result = runNativeHarness(
         "success",

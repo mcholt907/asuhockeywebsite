@@ -20,18 +20,24 @@ function Invoke-Native([string]$FilePath, [string[]]$Arguments) {
   Write-RefreshLog ("Running: {0} {1}" -f $FilePath, ($Arguments -join ' '))
   Get-Command -Name $FilePath -ErrorAction Stop | Out-Null
   $previousErrorActionPreference = $ErrorActionPreference
+  $outputLines = @()
+  $errorLines = @()
+  $stdoutPath = [System.IO.Path]::GetTempFileName()
+  $stderrPath = [System.IO.Path]::GetTempFileName()
 
   try {
     $ErrorActionPreference = 'Continue'
-    $output = & $FilePath @Arguments 2>&1
+    & $FilePath @Arguments 1> $stdoutPath 2> $stderrPath
     $exitCode = $LASTEXITCODE
+    $outputLines = @(Get-Content -LiteralPath $stdoutPath)
+    $errorLines = @(Get-Content -LiteralPath $stderrPath)
   } finally {
     $ErrorActionPreference = $previousErrorActionPreference
+    [System.IO.File]::Delete($stdoutPath)
+    [System.IO.File]::Delete($stderrPath)
   }
 
-  $outputLines = @($output | ForEach-Object { "$_" })
-
-  foreach ($line in $outputLines) {
+  foreach ($line in @($outputLines) + @($errorLines)) {
     Write-RefreshLog $line
   }
 
