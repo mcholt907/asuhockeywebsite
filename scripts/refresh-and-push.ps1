@@ -22,27 +22,68 @@ function Invoke-Native([string]$FilePath, [string[]]$Arguments) {
   $previousErrorActionPreference = $ErrorActionPreference
   $outputLines = @()
   $errorLines = @()
-  $stdoutPath = [System.IO.Path]::GetTempFileName()
-  $stderrPath = [System.IO.Path]::GetTempFileName()
+  $stdoutPath = $null
+  $stderrPath = $null
+  $primaryError = $null
+  $cleanupError = $null
+  $nativeFailureMessage = $null
 
   try {
+    $stdoutPath = [System.IO.Path]::GetTempFileName()
+    $stderrPath = [System.IO.Path]::GetTempFileName()
     $ErrorActionPreference = 'Continue'
     & $FilePath @Arguments 1> $stdoutPath 2> $stderrPath
     $exitCode = $LASTEXITCODE
-    $outputLines = @(Get-Content -LiteralPath $stdoutPath)
-    $errorLines = @(Get-Content -LiteralPath $stderrPath)
+    if ($exitCode -ne 0) {
+      $nativeFailureMessage = "$FilePath exited with code $exitCode"
+    }
+
+    try {
+      $outputLines = @(Get-Content -LiteralPath $stdoutPath -ErrorAction Stop)
+    } catch {
+      $primaryError = $_
+    }
+
+    try {
+      $errorLines = @(Get-Content -LiteralPath $stderrPath -ErrorAction Stop)
+    } catch {
+      if ($null -eq $primaryError) {
+        $primaryError = $_
+      }
+    }
+  } catch {
+    $primaryError = $_
   } finally {
     $ErrorActionPreference = $previousErrorActionPreference
-    [System.IO.File]::Delete($stdoutPath)
-    [System.IO.File]::Delete($stderrPath)
+    foreach ($capturePath in @($stdoutPath, $stderrPath)) {
+      if ($null -eq $capturePath) {
+        continue
+      }
+
+      try {
+        [System.IO.File]::Delete($capturePath)
+      } catch {
+        if ($null -eq $cleanupError) {
+          $cleanupError = $_
+        }
+      }
+    }
   }
 
   foreach ($line in @($outputLines) + @($errorLines)) {
     Write-RefreshLog $line
   }
 
-  if ($exitCode -ne 0) {
-    throw "$FilePath exited with code $exitCode"
+  if ($null -ne $nativeFailureMessage) {
+    throw $nativeFailureMessage
+  }
+
+  if ($null -ne $primaryError) {
+    throw $primaryError
+  }
+
+  if ($null -ne $cleanupError) {
+    throw $cleanupError
   }
 
   return $outputLines

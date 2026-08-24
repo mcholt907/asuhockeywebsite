@@ -32,6 +32,25 @@ function runNativeHarness(mode, childSource) {
 
 . $RunnerPath
 $LogPath = $TestLogPath
+$script:CapturePaths = @()
+
+if ($Mode -eq 'read-failure') {
+  function Get-Content {
+    [CmdletBinding()]
+    param(
+      [Parameter(Mandatory = $true)]
+      [string]$LiteralPath
+    )
+
+    $script:CapturePaths += $LiteralPath
+    if ($script:CapturePaths.Count -eq 2) {
+      Write-Error 'simulated capture read failure'
+      return
+    }
+
+    Microsoft.PowerShell.Management\\Get-Content -LiteralPath $LiteralPath
+  }
+}
 
 if ($Mode -eq 'success') {
   $captured = @(Invoke-Native $NodePath @('-e', $ChildSource))
@@ -53,6 +72,12 @@ try {
   if ($ErrorActionPreference -ne 'Stop') {
     [Console]::Error.WriteLine('Invoke-Native did not restore ErrorActionPreference')
     exit 24
+  }
+  foreach ($capturePath in $script:CapturePaths) {
+    if (Test-Path -LiteralPath $capturePath) {
+      [Console]::Error.WriteLine("Invoke-Native left a capture file behind: $capturePath")
+      exit 25
+    }
   }
   [Console]::Error.WriteLine("CAUGHT: $($_.Exception.Message)")
   exit 23
@@ -448,6 +473,14 @@ const path = require("path");
 const args = process.argv.slice(2);
 fs.appendFileSync(process.env.REFRESH_TEST_TRACE, args.join(" ") + "\\n");
 if (args[0] === "run" && args[1] === "refresh-data") {
+  for (const fallbackPath of [
+    "data/asu_alumni_fallback.json",
+    "data/asu_transfers_fallback.json",
+  ]) {
+    if (fs.readFileSync(path.join(process.cwd(), fallbackPath), "utf8").includes('"leftover"')) {
+      throw new Error("allowlisted leftover reached refresh-data: " + fallbackPath);
+    }
+  }
   const statePath = process.env.REFRESH_TEST_STATE;
   const count = fs.existsSync(statePath)
     ? Number(fs.readFileSync(statePath, "utf8")) + 1
@@ -698,6 +731,36 @@ describe("PowerShell native command execution", () => {
     );
     expect(result.log).toContain("native-stderr-failure");
   });
+
+  windowsTest(
+    "fails closed and removes both captures when reading a stream fails",
+    () => {
+      const result = runNativeHarness(
+        "read-failure",
+        "process.stdout.write('native-stdout-before-read-failure\\n');process.stderr.write('native-stderr-before-read-failure\\n');process.exit(0)",
+      );
+
+      expect(result.status).toBe(23);
+      expect(`${result.stdout}\n${result.stderr}`).toContain(
+        "simulated capture read failure",
+      );
+    },
+  );
+
+  windowsTest(
+    "preserves a native exit failure when reading a capture also fails",
+    () => {
+      const result = runNativeHarness(
+        "read-failure",
+        "process.stdout.write('native-stdout-before-read-failure\\n');process.stderr.write('native-stderr-before-read-failure\\n');process.exit(7)",
+      );
+
+      expect(result.status).toBe(23);
+      expect(`${result.stdout}\n${result.stderr}`).toContain(
+        "exited with code 7",
+      );
+    },
+  );
 });
 
 describe("daily refresh runner integration", () => {
@@ -727,8 +790,33 @@ describe("daily refresh runner integration", () => {
         expectRunnerSuccess(firstRun);
         const firstOid = fixture.remoteRefreshOid();
 
+        fs.writeFileSync(
+          path.join(fixture.runner, "data", "asu_alumni_fallback.json"),
+          '{"leftover":"working-tree"}\n',
+        );
+        fs.writeFileSync(
+          path.join(fixture.runner, "data", "asu_transfers_fallback.json"),
+          '{"leftover":"staged"}\n',
+        );
+        runGit(["add", "data/asu_transfers_fallback.json"], fixture.runner);
+
         const secondRun = fixture.run();
         expectRunnerSuccess(secondRun);
+        expect(secondRun.stdout).toContain(
+          "Restoring allowlisted leftovers from a prior failed run",
+        );
+        expect(
+          runGit(
+            ["status", "--short", "--", "data/asu_alumni_fallback.json"],
+            fixture.runner,
+          ).stdout,
+        ).toBe("");
+        expect(
+          runGit(
+            ["status", "--short", "--", "data/asu_transfers_fallback.json"],
+            fixture.runner,
+          ).stdout,
+        ).toBe("");
         expect(fixture.remoteRefreshOid()).not.toBe(firstOid);
       } finally {
         fixture.cleanup();
