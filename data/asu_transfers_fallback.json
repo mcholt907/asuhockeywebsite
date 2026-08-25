@@ -1,6 +1,16 @@
 {
   "incoming": [
     {
+      "playerName": "Cade Nystrom",
+      "position": "G",
+      "playerUrl": "https://www.eliteprospects.com/player/690044/cade-nystrom",
+      "playerId": "690044",
+      "team": "Shattuck St. Mary's 16U AAA",
+      "teamUrl": "https://www.eliteprospects.com/team/10705/shattuck-st-mary-s-16u-aaa",
+      "transferDate": "2026-08-17",
+      "direction": "incoming"
+    },
+    {
       "playerName": "Jack O'Brien",
       "position": "F",
       "playerUrl": "https://www.eliteprospects.com/player/538376/jack-o-brien",
@@ -293,5 +303,5 @@
       "direction": "outgoing"
     }
   ],
-  "lastUpdated": "2026-07-09T14:41:09.130Z"
+  "lastUpdated": "2026-08-25T14:22:48.992Z"
 }
