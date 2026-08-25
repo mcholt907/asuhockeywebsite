@@ -134,7 +134,9 @@ describe('getDataStatus', () => {
 
   test('prefers the fresher of cache vs fallback', () => {
     // Cache much fresher than the committed fallback's lastUpdated.
-    writeCacheEntry('asu_transfers', 1 * HOUR_MS);
+    // Keep the synthetic cache newer than a fallback generated immediately
+    // before this validation suite runs.
+    writeCacheEntry('asu_transfers', 0);
     const transfers = datasetByName('transfers');
     expect(transfers.source).toBe('cache');
     expect(transfers.status).toBe('ok');
