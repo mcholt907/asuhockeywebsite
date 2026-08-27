@@ -671,6 +671,22 @@
       "a": "-",
       "tp": "-",
       "pim": "-"
+    },
+    {
+      "name": "Wade Murphy",
+      "position": "RW/LW",
+      "playerUrl": "https://www.eliteprospects.com/player/48368/wade-murphy",
+      "playerId": "48368",
+      "team": "Wichita Thunder",
+      "teamUrl": "https://www.eliteprospects.com/team/836/wichita-thunder",
+      "league": "ECHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
+      "isTotals": false,
+      "gp": "-",
+      "g": "-",
+      "a": "-",
+      "tp": "-",
+      "pim": "-"
     }
   ],
   "goalies": [
@@ -745,5 +761,5 @@
       "svPct": "-"
     }
   ],
-  "lastUpdated": "2026-08-25T14:22:45.414Z"
+  "lastUpdated": "2026-08-27T13:01:54.080Z"
 }
