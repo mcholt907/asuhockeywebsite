@@ -687,6 +687,54 @@
       "a": "-",
       "tp": "-",
       "pim": "-"
+    },
+    {
+      "name": "Blake Dangos",
+      "position": "D",
+      "playerUrl": "https://www.eliteprospects.com/player/526365/blake-dangos",
+      "playerId": "526365",
+      "team": "Savannah Ghost Pirates",
+      "teamUrl": "https://www.eliteprospects.com/team/34592/savannah-ghost-pirates",
+      "league": "ECHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
+      "isTotals": false,
+      "gp": "-",
+      "g": "-",
+      "a": "-",
+      "tp": "-",
+      "pim": "-"
+    },
+    {
+      "name": "Lukas Sillinger",
+      "position": "W/C",
+      "playerUrl": "https://www.eliteprospects.com/player/287466/lukas-sillinger",
+      "playerId": "287466",
+      "team": "Allen Americans",
+      "teamUrl": "https://www.eliteprospects.com/team/4558/allen-americans",
+      "league": "ECHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
+      "isTotals": false,
+      "gp": "-",
+      "g": "-",
+      "a": "-",
+      "tp": "-",
+      "pim": "-"
+    },
+    {
+      "name": "Cole Gordon",
+      "position": "F",
+      "playerUrl": "https://www.eliteprospects.com/player/558586/cole-gordon",
+      "playerId": "558586",
+      "team": "Canisius Univ.",
+      "teamUrl": "https://www.eliteprospects.com/team/1583/canisius-univ",
+      "league": "NCAA",
+      "leagueUrl": "https://www.eliteprospects.com/league/ncaa/stats",
+      "isTotals": false,
+      "gp": "-",
+      "g": "-",
+      "a": "-",
+      "tp": "-",
+      "pim": "-"
     }
   ],
   "goalies": [
@@ -761,5 +809,5 @@
       "svPct": "-"
     }
   ],
-  "lastUpdated": "2026-08-27T13:01:54.080Z"
+  "lastUpdated": "2026-08-31T13:15:56.129Z"
 }
