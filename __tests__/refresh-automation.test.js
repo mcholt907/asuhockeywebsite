@@ -12,6 +12,14 @@ const installerPath = path.resolve(
   __dirname,
   "../scripts/install-refresh-runner.ps1",
 );
+const runtimeFixturePaths = [
+  ".node-version",
+  ".nvmrc",
+  "package.json",
+  "render.yaml",
+  ".github/workflows/ci.yml",
+  "scripts/verify-node-runtime.js",
+];
 
 const windowsTest = process.platform === "win32" ? test : test.skip;
 
@@ -447,7 +455,15 @@ function createRefreshRunnerFixture() {
     runnerPath,
     path.join(runner, "scripts", "refresh-and-push.ps1"),
   );
-  runGit(["add", "scripts/refresh-and-push.ps1"], runner);
+  for (const relativePath of runtimeFixturePaths) {
+    const destination = path.join(runner, ...relativePath.split("/"));
+    fs.mkdirSync(path.dirname(destination), { recursive: true });
+    fs.copyFileSync(path.resolve(__dirname, "..", relativePath), destination);
+  }
+  runGit(
+    ["add", "scripts/refresh-and-push.ps1", ...runtimeFixturePaths],
+    runner,
+  );
   const runnerChanged = spawnSync(
     "git",
     ["diff", "--cached", "--quiet", "--exit-code"],

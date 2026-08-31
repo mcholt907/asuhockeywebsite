@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": "20.x"
+    "node": "24.x"
   },
   "dependencies": {
     "@sentry/node": "^10.66.0",
@@ -40,6 +40,7 @@
     "svgo": "3.3.2"
   },
   "scripts": {
+    "preinstall": "node scripts/verify-node-runtime.js",
     "postinstall": "npx puppeteer browsers install chrome",
     "start": "vite",
     "build": "vite build",

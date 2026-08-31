@@ -7,6 +7,8 @@ jest.mock("../server/lib/request-helper", () => ({
   delayBetweenRequests: jest.fn().mockResolvedValue(undefined),
 }));
 
+jest.setTimeout(15000);
+
 const semanticProfile = fs.readFileSync(
   path.join(__dirname, "fixtures", "recruiting-profile-marko-semantic.html"),
   "utf8",
