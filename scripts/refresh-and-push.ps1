@@ -219,6 +219,7 @@ try {
     'origin/main'
   ) | Out-Null
 
+  Invoke-Native 'node.exe' @('scripts/verify-node-runtime.js') | Out-Null
   Invoke-Native 'npm.cmd' @('ci') | Out-Null
   Invoke-Native 'npm.cmd' @('run', 'refresh-data') | Out-Null
 
