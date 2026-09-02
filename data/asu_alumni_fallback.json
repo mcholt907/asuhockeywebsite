@@ -1,6 +1,22 @@
 {
   "skaters": [
     {
+      "name": "Filips Buncis",
+      "position": "C",
+      "playerUrl": "https://www.eliteprospects.com/player/214275/filips-buncis",
+      "playerId": "214275",
+      "team": "Rungsted Seier Capital",
+      "teamUrl": "https://www.eliteprospects.com/team/140/rungsted-seier-capital",
+      "league": "Denmark",
+      "leagueUrl": "https://www.eliteprospects.com/league/denmark/stats",
+      "isTotals": false,
+      "gp": "2",
+      "g": "0",
+      "a": "0",
+      "tp": "0",
+      "pim": "0"
+    },
+    {
       "name": "Justin Cloutier",
       "position": "RW",
       "playerUrl": "https://www.eliteprospects.com/player/649101/justin-cloutier",
@@ -561,22 +577,6 @@
       "pim": "-"
     },
     {
-      "name": "Filips Buncis",
-      "position": "C",
-      "playerUrl": "https://www.eliteprospects.com/player/214275/filips-buncis",
-      "playerId": "214275",
-      "team": "Rungsted Seier Capital",
-      "teamUrl": "https://www.eliteprospects.com/team/140/rungsted-seier-capital",
-      "league": "Denmark",
-      "leagueUrl": "https://www.eliteprospects.com/league/denmark/stats",
-      "isTotals": false,
-      "gp": "-",
-      "g": "-",
-      "a": "-",
-      "tp": "-",
-      "pim": "-"
-    },
-    {
       "name": "Tucker Ness",
       "position": "D",
       "playerUrl": "https://www.eliteprospects.com/player/645494/tucker-ness",
@@ -809,5 +809,5 @@
       "svPct": "-"
     }
   ],
-  "lastUpdated": "2026-08-31T13:15:56.129Z"
+  "lastUpdated": "2026-09-02T13:15:30.785Z"
 }
