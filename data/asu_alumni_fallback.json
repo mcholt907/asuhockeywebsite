@@ -1,6 +1,38 @@
 {
   "skaters": [
     {
+      "name": "Timothy Lovell",
+      "position": "D",
+      "playerUrl": "https://www.eliteprospects.com/player/483774/timothy-lovell",
+      "playerId": "483774",
+      "team": "Neftekhimik Nizhnekamsk",
+      "teamUrl": "https://www.eliteprospects.com/team/196/neftekhimik-nizhnekamsk",
+      "league": "KHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/khl/stats",
+      "isTotals": false,
+      "gp": "1",
+      "g": "0",
+      "a": "0",
+      "tp": "0",
+      "pim": "0"
+    },
+    {
+      "name": "Matt Kopperud",
+      "position": "C/LW",
+      "playerUrl": "https://www.eliteprospects.com/player/324180/matt-kopperud",
+      "playerId": "324180",
+      "team": "Rødovre Mighty Bulls",
+      "teamUrl": "https://www.eliteprospects.com/team/4571/rodovre-mighty-bulls",
+      "league": "Denmark",
+      "leagueUrl": "https://www.eliteprospects.com/league/denmark/stats",
+      "isTotals": false,
+      "gp": "1",
+      "g": "0",
+      "a": "0",
+      "tp": "0",
+      "pim": "2"
+    },
+    {
       "name": "Filips Buncis",
       "position": "C",
       "playerUrl": "https://www.eliteprospects.com/player/214275/filips-buncis",
@@ -481,38 +513,6 @@
       "pim": "-"
     },
     {
-      "name": "Timothy Lovell",
-      "position": "D",
-      "playerUrl": "https://www.eliteprospects.com/player/483774/timothy-lovell",
-      "playerId": "483774",
-      "team": "Neftekhimik Nizhnekamsk",
-      "teamUrl": "https://www.eliteprospects.com/team/196/neftekhimik-nizhnekamsk",
-      "league": "KHL",
-      "leagueUrl": "https://www.eliteprospects.com/league/khl/stats",
-      "isTotals": false,
-      "gp": "-",
-      "g": "-",
-      "a": "-",
-      "tp": "-",
-      "pim": "-"
-    },
-    {
-      "name": "Matt Kopperud",
-      "position": "C/LW",
-      "playerUrl": "https://www.eliteprospects.com/player/324180/matt-kopperud",
-      "playerId": "324180",
-      "team": "Rødovre Mighty Bulls",
-      "teamUrl": "https://www.eliteprospects.com/team/4571/rodovre-mighty-bulls",
-      "league": "Denmark",
-      "leagueUrl": "https://www.eliteprospects.com/league/denmark/stats",
-      "isTotals": false,
-      "gp": "-",
-      "g": "-",
-      "a": "-",
-      "tp": "-",
-      "pim": "-"
-    },
-    {
       "name": "Joshua Niedermayer",
       "position": "D",
       "playerUrl": "https://www.eliteprospects.com/player/505291/joshua-niedermayer",
@@ -807,7 +807,21 @@
       "gp": "-",
       "gaa": "-",
       "svPct": "-"
+    },
+    {
+      "name": "Zakari Brice",
+      "position": "G",
+      "playerUrl": "https://www.eliteprospects.com/player/538377/zakari-brice",
+      "playerId": "538377",
+      "team": "Univ. of Alaska-Fairbanks",
+      "teamUrl": "https://www.eliteprospects.com/team/2071/univ-of-alaska-fairbanks",
+      "league": "NCAA",
+      "leagueUrl": "https://www.eliteprospects.com/league/ncaa/stats",
+      "isTotals": false,
+      "gp": "-",
+      "gaa": "-",
+      "svPct": "-"
     }
   ],
-  "lastUpdated": "2026-09-08T13:40:14.710Z"
+  "lastUpdated": "2026-09-10T14:00:01.761Z"
 }
