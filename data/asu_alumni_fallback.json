@@ -1,22 +1,6 @@
 {
   "skaters": [
     {
-      "name": "Timothy Lovell",
-      "position": "D",
-      "playerUrl": "https://www.eliteprospects.com/player/483774/timothy-lovell",
-      "playerId": "483774",
-      "team": "Neftekhimik Nizhnekamsk",
-      "teamUrl": "https://www.eliteprospects.com/team/196/neftekhimik-nizhnekamsk",
-      "league": "KHL",
-      "leagueUrl": "https://www.eliteprospects.com/league/khl/stats",
-      "isTotals": false,
-      "gp": "1",
-      "g": "0",
-      "a": "0",
-      "tp": "0",
-      "pim": "0"
-    },
-    {
       "name": "Matt Kopperud",
       "position": "C/LW",
       "playerUrl": "https://www.eliteprospects.com/player/324180/matt-kopperud",
@@ -26,10 +10,10 @@
       "league": "Denmark",
       "leagueUrl": "https://www.eliteprospects.com/league/denmark/stats",
       "isTotals": false,
-      "gp": "1",
-      "g": "0",
+      "gp": "2",
+      "g": "1",
       "a": "0",
-      "tp": "0",
+      "tp": "1",
       "pim": "2"
     },
     {
@@ -41,6 +25,22 @@
       "teamUrl": "https://www.eliteprospects.com/team/140/rungsted-seier-capital",
       "league": "Denmark",
       "leagueUrl": "https://www.eliteprospects.com/league/denmark/stats",
+      "isTotals": false,
+      "gp": "3",
+      "g": "0",
+      "a": "1",
+      "tp": "1",
+      "pim": "0"
+    },
+    {
+      "name": "Timothy Lovell",
+      "position": "D",
+      "playerUrl": "https://www.eliteprospects.com/player/483774/timothy-lovell",
+      "playerId": "483774",
+      "team": "Neftekhimik Nizhnekamsk",
+      "teamUrl": "https://www.eliteprospects.com/team/196/neftekhimik-nizhnekamsk",
+      "league": "KHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/khl/stats",
       "isTotals": false,
       "gp": "2",
       "g": "0",
@@ -823,5 +823,5 @@
       "svPct": "-"
     }
   ],
-  "lastUpdated": "2026-09-10T14:00:01.761Z"
+  "lastUpdated": "2026-09-12T14:07:54.048Z"
 }
