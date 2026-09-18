@@ -10,10 +10,10 @@
       "league": "Denmark",
       "leagueUrl": "https://www.eliteprospects.com/league/denmark/stats",
       "isTotals": false,
-      "gp": "2",
+      "gp": "3",
       "g": "1",
-      "a": "0",
-      "tp": "1",
+      "a": "1",
+      "tp": "2",
       "pim": "2"
     },
     {
@@ -42,7 +42,7 @@
       "league": "KHL",
       "leagueUrl": "https://www.eliteprospects.com/league/khl/stats",
       "isTotals": false,
-      "gp": "3",
+      "gp": "4",
       "g": "0",
       "a": "0",
       "tp": "0",
@@ -823,5 +823,5 @@
       "svPct": "-"
     }
   ],
-  "lastUpdated": "2026-09-16T13:16:17.871Z"
+  "lastUpdated": "2026-09-18T13:01:58.970Z"
 }
