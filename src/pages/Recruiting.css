@@ -6,20 +6,20 @@
   --surface-card: #0f0105;
   --surface-container-high: #150207;
   --surface-container-lowest: #0a0003;
-  
+
   --color-maroon: #8c1d40;
   --color-maroon-dark: #660028;
   --color-maroon-glow: rgba(140, 29, 64, 0.4);
   --color-gold: #ffc627;
   --color-gold-glow: rgba(255, 198, 39, 0.3);
-  
+
   --color-silver: #a1a1aa;
   --color-silver-glow: rgba(161, 161, 170, 0.25);
-  
+
   --text-primary: #e5e2e1;
   --text-secondary: #ddbfc3;
   --text-muted: #a48a8e;
-  
+
   background-color: var(--bg-dark);
   color: var(--text-primary);
   min-height: 100vh;
@@ -33,25 +33,33 @@
 
 /* Background Glow Effects */
 .recruiting-page::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 10%;
   left: 20%;
   width: 600px;
   height: 600px;
-  background: radial-gradient(circle, var(--color-maroon-glow) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    var(--color-maroon-glow) 0%,
+    transparent 70%
+  );
   z-index: 0;
   pointer-events: none;
 }
 
 .recruiting-page::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 20%;
   right: 10%;
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle, var(--color-gold-glow) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    var(--color-gold-glow) 0%,
+    transparent 70%
+  );
   z-index: 0;
   pointer-events: none;
 }
@@ -102,7 +110,7 @@
   background: linear-gradient(to bottom, #ffffff 0%, #d3d3d3 50%, #a9a9a9 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
 }
 
 .recruiting-header .subtitle {
@@ -117,7 +125,12 @@
 /* --- Section Dividers --- */
 .section-divider {
   height: 1px;
-  background: linear-gradient(to right, transparent, var(--color-gold), transparent);
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--color-gold),
+    transparent
+  );
   margin: 40px auto;
   width: 80%;
   max-width: 600px;
@@ -125,7 +138,7 @@
 }
 
 .section-divider::after {
-  content: '';
+  content: "";
   position: absolute;
   top: -3px;
   left: 50%;
@@ -304,13 +317,18 @@
 }
 
 .holo-shine::after {
-  content: '';
+  content: "";
   position: absolute;
   top: -50%;
   left: -50%;
   width: 200%;
   height: 200%;
-  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0) 100%);
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
   transform: rotate(30deg);
   transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
   opacity: 0;
@@ -401,8 +419,6 @@
   box-shadow: 0 4px 12px rgba(140, 29, 64, 0.4);
 }
 
-
-
 /* Position Filter Pills */
 .pos-filter-group {
   display: flex;
@@ -412,7 +428,9 @@
   border: 1px solid rgba(164, 138, 142, 0.15);
 }
 
-.filter-btn {
+/* Scoped to .pos-filter-group: News.css also styles .filter-btn, and page CSS
+   chunks stay loaded after client-side navigation. */
+.pos-filter-group .filter-btn {
   background: transparent;
   border: none;
   color: var(--text-muted);
@@ -426,11 +444,11 @@
   transition: all 0.2s ease;
 }
 
-.filter-btn:hover {
+.pos-filter-group .filter-btn:hover {
   color: var(--text-primary);
 }
 
-.filter-btn.active {
+.pos-filter-group .filter-btn.active {
   background: var(--surface-container-high);
   color: var(--color-gold);
 }
@@ -504,7 +522,9 @@
 .recruit-card-glass:hover {
   transform: translateY(-5px);
   border-color: var(--color-gold);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 198, 39, 0.15);
+  box-shadow:
+    0 15px 30px rgba(0, 0, 0, 0.5),
+    0 0 15px rgba(255, 198, 39, 0.15);
 }
 
 .card-scouting-body {
@@ -636,7 +656,8 @@
 
 /* Pulse animation */
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -681,7 +702,7 @@
 
   /* Swipe affordance under each carousel */
   .transfer-sub-section::after {
-    content: '← swipe →';
+    content: "← swipe →";
     display: block;
     text-align: center;
     font-size: 0.7rem;

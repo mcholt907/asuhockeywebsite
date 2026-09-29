@@ -37,7 +37,12 @@
 
 .news-header-rule {
   height: 2px;
-  background: linear-gradient(to right, var(--asu-gold) 0%, rgba(232, 168, 51, 0.3) 40%, transparent 80%);
+  background: linear-gradient(
+    to right,
+    var(--asu-gold) 0%,
+    rgba(232, 168, 51, 0.3) 40%,
+    transparent 80%
+  );
 }
 
 /* --- Filters --- */
@@ -48,7 +53,10 @@
   flex-wrap: wrap;
 }
 
-.filter-btn {
+/* Scoped to .news-filters: Recruiting.css also styles .filter-btn, and page
+   CSS chunks stay loaded after client-side navigation, so an unscoped rule
+   from whichever page loaded last would win. */
+.news-filters .filter-btn {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: rgba(255, 255, 255, 0.55);
@@ -61,12 +69,12 @@
   transition: all 0.2s ease;
 }
 
-.filter-btn:hover {
+.news-filters .filter-btn:hover {
   border-color: rgba(255, 255, 255, 0.45);
   color: rgba(255, 255, 255, 0.85);
 }
 
-.filter-btn.active {
+.news-filters .filter-btn.active {
   background-color: var(--asu-gold);
   border-color: var(--asu-gold);
   color: var(--asu-maroon);
@@ -100,7 +108,9 @@
 }
 
 .hero-card:hover {
-  box-shadow: var(--shadow-2xl), 0 0 0 1px rgba(232, 168, 51, 0.15);
+  box-shadow:
+    var(--shadow-2xl),
+    0 0 0 1px rgba(232, 168, 51, 0.15);
 }
 
 .hero-content {
@@ -346,13 +356,19 @@
   flex-direction: column;
   gap: 8px;
   padding: 16px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.03) 100%);
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
   border-radius: var(--border-radius-sm);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-top: 2px solid rgba(232, 168, 51, 0.5);
   text-decoration: none;
   color: white;
-  transition: border-top-color 0.15s, background 0.15s;
+  transition:
+    border-top-color 0.15s,
+    background 0.15s;
 }
 
 .news-card:hover {
