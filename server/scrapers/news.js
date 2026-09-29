@@ -59,6 +59,28 @@ async function scrapeSunDevilsNewsList() {
   }
 }
 
+// CHN's team news list shows "Sep. 28" with no year, which new Date() reads as
+// 2001 — sorting every CHN story below everything else. The article URL
+// carries the full date (/news/2026/09/28_...), so use that; otherwise infer
+// the year from the list text, rolling back a year for dates in the future.
+function chnArticleDate(link, dateText) {
+  const fromUrl = /\/news\/(\d{4})\/(\d{2})\/(\d{2})_/.exec(link || "");
+  if (fromUrl) {
+    const [, year, month, day] = fromUrl;
+    return formatArticleDate(`${year}-${month}-${day}T12:00:00Z`);
+  }
+
+  const now = new Date();
+  const withYear = (year) =>
+    new Date(`${dateText.replace(/\./g, "")} ${year} 12:00 UTC`);
+  let parsed = withYear(now.getUTCFullYear());
+  if (isNaN(parsed)) return dateText;
+  if (parsed - now > 24 * 60 * 60 * 1000) {
+    parsed = withYear(now.getUTCFullYear() - 1);
+  }
+  return formatArticleDate(parsed.toISOString());
+}
+
 async function scrapeCHN() {
   const url = config.urls.chnNews;
   console.log(`[CHN Scraper] Attempting to fetch CHN news from: ${url}`);
@@ -103,7 +125,7 @@ async function scrapeCHN() {
         articles.push({
           title,
           link,
-          date: dateText || "Date not found",
+          date: chnArticleDate(link, dateText),
           source: "CollegeHockeyNews.com",
         });
       } else {
