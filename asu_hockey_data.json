@@ -503,20 +503,6 @@
         "player_link": "https://www.eliteprospects.com/player/785511/lukas-sawchyn",
         "player_photo": "https://files.eliteprospects.com/layout/players/ee5e0-d383fa7d-40d6-4dc4-8cc4-72f169df1cac.jpg",
         "current_team": "Edmonton Oil Kings"
-      },
-      {
-        "number": "",
-        "name": "Casey Brown",
-        "position": "RW",
-        "age": "",
-        "birth_year": "2006",
-        "birthplace": "Regina, SK, CAN",
-        "height": "5'11\"",
-        "weight": "183",
-        "shoots": "R",
-        "player_link": "https://www.eliteprospects.com/player/715229/casey-brown",
-        "player_photo": "https://files.eliteprospects.com/layout/players/91-brown,-casey-(38)-ep.jpg",
-        "current_team": "Moose Jaw Warriors"
       }
     ],
     "2027-2028": [
@@ -717,6 +703,20 @@
         "player_link": "https://www.eliteprospects.com/player/951201/rian-marquardt",
         "player_photo": "https://files.eliteprospects.com/layout/players/b3f2e-63bf3b9c-614a-4a5f-bac8-484f9fa32435.jpg",
         "current_team": "Team The Base"
+      },
+      {
+        "number": "",
+        "name": "Cade Nystrom",
+        "position": "G",
+        "age": "",
+        "birth_year": "2009",
+        "birthplace": "Chanhassen, MN, USA",
+        "height": "5'11\"",
+        "weight": "154",
+        "shoots": "L",
+        "player_link": "https://www.eliteprospects.com/player/690044/cade-nystrom",
+        "player_photo": "https://files.eliteprospects.com/layout/players/30-nystrom,-cade-(29)-ep.jpg",
+        "current_team": "Shattuck St. Mary's 18U Prep"
       }
     ]
   },
