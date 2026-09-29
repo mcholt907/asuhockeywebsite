@@ -24,10 +24,7 @@ function uschoHtml(rows) {
 const fallbackSnapshot = require("../data/nchc_standings_fallback.json");
 const config = require("../config/scraper-config");
 const { requestWithRetry } = require("../server/lib/request-helper");
-const {
-  getFromCache,
-  saveToCache,
-} = require("../server/cache/caching-system");
+const { getFromCache, saveToCache } = require("../server/cache/caching-system");
 const {
   readStandingsFallback,
 } = require("../server/services/standings-snapshot");
@@ -37,9 +34,16 @@ const {
   scrapeNCHCStandings,
 } = require("../server/scrapers/standings");
 
+// The bundled fallback is the 9-team 2025-26 table; St. Thomas joined the
+// NCHC for 2026-27, so current-season fixtures carry a 10th team.
+const currentSeasonTeamNames = [
+  ...fallbackSnapshot.teams.map((team) => team.team),
+  "St. Thomas",
+];
+
 function validRows(overallRecord = "1-0-0") {
-  return fallbackSnapshot.teams.map((team) => ({
-    team: team.team,
+  return currentSeasonTeamNames.map((team) => ({
+    team,
     pts: 3,
     "conf-w-l-t": "1-0-0",
     "w-l-t": overallRecord,
@@ -50,10 +54,13 @@ function currentSeasonSnapshot(overallRecord = "1-0-0") {
   return {
     season: config.CURRENT_SEASON,
     lastUpdated: "2026-10-01T00:00:00.000Z",
-    teams: fallbackSnapshot.teams.map((team) => ({
-      ...team,
+    teams: currentSeasonTeamNames.map((team, index) => ({
+      rank: String(index + 1),
+      team,
+      pts: "3",
       confRecord: overallRecord,
       overallRecord,
+      isASU: team === "Arizona State",
     })),
   };
 }
@@ -106,7 +113,7 @@ beforeEach(() => {
 
 test("parses a complete NCHC table without treating all-zero rows as played", () => {
   const teams = parseUSCHOStandings(uschoHtml(validRows("0-0-0")));
-  expect(teams).toHaveLength(9);
+  expect(teams).toHaveLength(10);
   expect(teams[8]).toEqual(
     expect.objectContaining({
       team: "Arizona State",
@@ -140,13 +147,18 @@ test.each([
   "duplicate normalized team",
   "missing ASU row",
   "duplicate ASU row",
-])("does not cache an incomplete live %s and recovers the fallback", async (kind) => {
-  requestWithRetry.mockResolvedValue({ data: uschoHtml(invalidLiveRows(kind)) });
+])(
+  "does not cache an incomplete live %s and recovers the fallback",
+  async (kind) => {
+    requestWithRetry.mockResolvedValue({
+      data: uschoHtml(invalidLiveRows(kind)),
+    });
 
-  await expect(scrapeNCHCStandings()).resolves.toEqual(fallbackSnapshot);
-  expect(saveToCache).not.toHaveBeenCalled();
-  expect(readStandingsFallback).toHaveBeenCalledTimes(1);
-});
+    await expect(scrapeNCHCStandings()).resolves.toEqual(fallbackSnapshot);
+    expect(saveToCache).not.toHaveBeenCalled();
+    expect(readStandingsFallback).toHaveBeenCalledTimes(1);
+  },
+);
 
 test("caches a season-tagged snapshot after the first current-season game", async () => {
   requestWithRetry.mockResolvedValue({ data: uschoHtml(validRows()) });
@@ -181,16 +193,19 @@ test.each([
   "duplicate rank",
   "missing ASU row",
   "duplicate ASU row",
-])("ignores a fresh cache with a %s and recovers the fallback", async (kind) => {
-  getFromCache
-    .mockReturnValueOnce(invalidCacheSnapshot(kind))
-    .mockReturnValue(null);
-  requestWithRetry.mockRejectedValue(new Error("network down"));
+])(
+  "ignores a fresh cache with a %s and recovers the fallback",
+  async (kind) => {
+    getFromCache
+      .mockReturnValueOnce(invalidCacheSnapshot(kind))
+      .mockReturnValue(null);
+    requestWithRetry.mockRejectedValue(new Error("network down"));
 
-  await expect(scrapeNCHCStandings()).resolves.toEqual(fallbackSnapshot);
-  expect(requestWithRetry).toHaveBeenCalledTimes(1);
-  expect(readStandingsFallback).toHaveBeenCalledTimes(1);
-});
+    await expect(scrapeNCHCStandings()).resolves.toEqual(fallbackSnapshot);
+    expect(requestWithRetry).toHaveBeenCalledTimes(1);
+    expect(readStandingsFallback).toHaveBeenCalledTimes(1);
+  },
+);
 
 test.each(["malformed", "all-zero", "season-mismatched"])(
   "ignores a %s stale cache candidate and recovers the fallback after live failure",

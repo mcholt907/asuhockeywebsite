@@ -7,8 +7,12 @@ jest.mock("../server/scrapers", () => ({
   scrapeAlumniData: jest.fn(),
   fetchRecruitingData: jest.fn(),
 }));
-jest.mock("../server/services/roster-service", () => ({ getRoster: jest.fn() }));
-jest.mock("../server/services/static-data", () => ({ getStaticData: jest.fn() }));
+jest.mock("../server/services/roster-service", () => ({
+  getRoster: jest.fn(),
+}));
+jest.mock("../server/services/static-data", () => ({
+  getStaticData: jest.fn(),
+}));
 jest.mock("../server/cache/data-status", () => ({
   getDataStatus: jest.fn(),
   getCooldownStatus: jest.fn(),
@@ -37,6 +41,18 @@ function responseRecorder() {
 }
 
 const teams = require("../data/nchc_standings_fallback.json").teams;
+// St. Thomas joined the NCHC for 2026-27, so the current season has 10 teams.
+const currentSeasonTeams = [
+  ...teams,
+  {
+    rank: "10",
+    team: "St. Thomas",
+    pts: "0",
+    confRecord: "0-0-0",
+    overallRecord: "1-0-0",
+    isASU: false,
+  },
+];
 
 describe("/api/standings", () => {
   beforeEach(() => {
@@ -72,7 +88,7 @@ describe("/api/standings", () => {
     scrapeNCHCStandings.mockResolvedValue({
       season: "2026-2027",
       lastUpdated: "2026-08-12T18:00:00.000Z",
-      teams,
+      teams: currentSeasonTeams,
     });
     const res = responseRecorder();
 
@@ -81,7 +97,7 @@ describe("/api/standings", () => {
     expect(res.statusCode).toBe(200);
     expect(res.payload).toEqual(
       expect.objectContaining({
-        data: teams,
+        data: currentSeasonTeams,
         season: "2026-2027",
         isPriorSeason: false,
       }),

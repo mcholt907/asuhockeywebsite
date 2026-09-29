@@ -81,8 +81,48 @@ test.each([
   expect(validateStandingsSnapshot(invalidSnapshot(kind))).toBe(false);
 });
 
+// St. Thomas joined the NCHC for 2026-27, taking it from 9 teams to 10.
+function tenTeamSnapshot(overallRecord = "1-0-0") {
+  const teams = [...TEAM_NAMES, "St. Thomas"].map((team, index) => ({
+    rank: String(index + 1),
+    team,
+    pts: "3",
+    confRecord: "1-0-0",
+    overallRecord,
+    isASU: team === "Arizona State",
+  }));
+  return {
+    season: "2026-2027",
+    lastUpdated: "2026-09-29T14:01:10.268Z",
+    teams,
+  };
+}
+
+test("accepts the 10-team NCHC table from 2026-27 on", () => {
+  expect(validateStandingsSnapshot(tenTeamSnapshot())).toBe(true);
+  expect(
+    validateStandingsSnapshot(tenTeamSnapshot("0-0-0"), {
+      requirePlayedGame: false,
+    }),
+  ).toBe(true);
+});
+
+test("still rejects a truncated table for the 10-team seasons", () => {
+  const truncated = tenTeamSnapshot();
+  truncated.teams.pop();
+  expect(validateStandingsSnapshot(truncated)).toBe(false);
+});
+
+test("rejects a 10-team table for a 9-team season", () => {
+  expect(
+    validateStandingsSnapshot({ ...tenTeamSnapshot(), season: "2025-2026" }),
+  ).toBe(false);
+});
+
 test("loads a valid fallback and throws for invalid bytes", () => {
-  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "standings-snapshot-"));
+  const directory = fs.mkdtempSync(
+    path.join(os.tmpdir(), "standings-snapshot-"),
+  );
   const fallbackFile = path.join(directory, "fallback.json");
   fs.writeFileSync(fallbackFile, JSON.stringify(snapshot()));
   expect(readStandingsFallback({ fallbackFile })).toEqual(snapshot());
