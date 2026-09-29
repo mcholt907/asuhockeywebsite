@@ -13,6 +13,7 @@ const TEAM_NAMES = [
   "Miami",
   "Omaha",
   "Arizona State",
+  "St. Thomas", // joined the NCHC for 2026-27
 ];
 
 function completeTeams(overallRecord = "1-0-0") {
@@ -48,7 +49,9 @@ function invalidSnapshot(kind) {
 }
 
 function createTemporarySnapshotFile() {
-  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "refresh-standings-"));
+  const directory = fs.mkdtempSync(
+    path.join(os.tmpdir(), "refresh-standings-"),
+  );
   return { directory, file: path.join(directory, "fallback.json") };
 }
 
@@ -98,7 +101,10 @@ test("preserves the previous snapshot when standings are not published", async (
 
   try {
     await expect(
-      refreshStandingsSnapshot({ fetchData: async () => null, fallbackFile: file }),
+      refreshStandingsSnapshot({
+        fetchData: async () => null,
+        fallbackFile: file,
+      }),
     ).resolves.toBeNull();
 
     expect(fs.readFileSync(file, "utf8")).toBe(previousContents);
@@ -137,7 +143,10 @@ test("preserves the previous snapshot when standings validation fails", async ()
   try {
     await expect(
       refreshStandingsSnapshot({
-        fetchData: async () => ({ ...validSnapshot, teams: [{ broken: true }] }),
+        fetchData: async () => ({
+          ...validSnapshot,
+          teams: [{ broken: true }],
+        }),
         fallbackFile: file,
       }),
     ).rejects.toThrow("validation failed; fallback preserved");
@@ -190,7 +199,11 @@ test("preserves the previous snapshot and cleans the temp file when writing fail
 
   try {
     await expect(
-      refreshStandingsSnapshot({ fetchData: async () => validSnapshot, fallbackFile: file, fileSystem }),
+      refreshStandingsSnapshot({
+        fetchData: async () => validSnapshot,
+        fallbackFile: file,
+        fileSystem,
+      }),
     ).rejects.toThrow("simulated write failure");
 
     expect(fs.readFileSync(file, "utf8")).toBe(previousContents);
@@ -219,7 +232,11 @@ test("preserves the previous snapshot and cleans the temp file when renaming fai
 
   try {
     await expect(
-      refreshStandingsSnapshot({ fetchData: async () => validSnapshot, fallbackFile: file, fileSystem }),
+      refreshStandingsSnapshot({
+        fetchData: async () => validSnapshot,
+        fallbackFile: file,
+        fileSystem,
+      }),
     ).rejects.toThrow("simulated rename failure");
 
     expect(path.dirname(renameSource)).toBe(directory);
@@ -234,25 +251,30 @@ test("preserves the previous snapshot and cleans the temp file when renaming fai
 test.each([
   ["production", { NODE_ENV: "production" }],
   ["prerender", { NODE_ENV: "test", IS_PRERENDER: "true" }],
-])("rejects a %s refresh before fetching or writing", async (_, environment) => {
-  const { directory, file } = createTemporarySnapshotFile();
-  const previousContents = JSON.stringify(validSnapshot);
-  fs.writeFileSync(file, previousContents);
+])(
+  "rejects a %s refresh before fetching or writing",
+  async (_, environment) => {
+    const { directory, file } = createTemporarySnapshotFile();
+    const previousContents = JSON.stringify(validSnapshot);
+    fs.writeFileSync(file, previousContents);
 
-  try {
-    await expect(
-      refreshStandingsSnapshot({
-        environment,
-        fallbackFile: file,
-        fetchData: async () => {
-          throw new Error("fetch was attempted");
-        },
-      }),
-    ).rejects.toThrow("live refresh is disabled in production and prerender environments");
+    try {
+      await expect(
+        refreshStandingsSnapshot({
+          environment,
+          fallbackFile: file,
+          fetchData: async () => {
+            throw new Error("fetch was attempted");
+          },
+        }),
+      ).rejects.toThrow(
+        "live refresh is disabled in production and prerender environments",
+      );
 
-    expect(fs.readFileSync(file, "utf8")).toBe(previousContents);
-    expect(fs.readdirSync(directory)).toEqual(["fallback.json"]);
-  } finally {
-    fs.rmSync(directory, { recursive: true, force: true });
-  }
-});
+      expect(fs.readFileSync(file, "utf8")).toBe(previousContents);
+      expect(fs.readdirSync(directory)).toEqual(["fallback.json"]);
+    } finally {
+      fs.rmSync(directory, { recursive: true, force: true });
+    }
+  },
+);
