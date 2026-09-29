@@ -10,6 +10,8 @@ const {
 } = require("../scrapers");
 const { getRoster } = require("../services/roster-service");
 const { getStaticData } = require("../services/static-data");
+const { upcomingRecruitingClasses } = require("../services/recruits-service");
+const { CURRENT_SEASON } = require("../../config/scraper-config");
 const { getDataStatus, getCooldownStatus } = require("../cache/data-status");
 
 const router = express.Router();
@@ -94,9 +96,12 @@ router.get("/schedule", async (req, res) => {
   }
 });
 
-// Recruiting — reads directly from static JSON (source of truth)
+// Recruiting — reads directly from static JSON (source of truth), hiding
+// classes that have already enrolled for the current season
 router.get("/recruits", (req, res) => {
-  res.json(getStaticData().recruiting || {});
+  res.json(
+    upcomingRecruitingClasses(getStaticData().recruiting, CURRENT_SEASON),
+  );
 });
 
 // Transfers (incoming/outgoing)
