@@ -11,7 +11,19 @@ async function scrapeRoster() {
   const $ = cheerio.load(data);
   const players = [];
 
-  $("table").each((i, table) => {
+  // The page lists the current roster in table#players, followed by a
+  // "Recruits" table of future commits (no jersey numbers). Only the former is
+  // the active roster; if the id ever disappears, fall back to every table but
+  // still skip anything under a Recruits heading.
+  const rosterTable = $("table#players");
+  const tables = rosterTable.length
+    ? rosterTable
+    : $("table").filter(
+        (i, table) =>
+          !/recruit/i.test($(table).prevAll("h1,h2,h3,h4").first().text()),
+      );
+
+  tables.each((i, table) => {
     const headers = [];
     $(table)
       .find("thead th")
