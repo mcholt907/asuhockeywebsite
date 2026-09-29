@@ -75,7 +75,7 @@ Copy `.env.example` to `.env`. Required for local dev:
 
 Production env vars (`NODE_ENV`, `PORT`, `CORS_ORIGINS`) are set in Render dashboard. `VITE_SENTRY_DSN` enables browser-side Sentry error tracking. `SITE_BASE_URL` overrides the production origin used by the sitemap (`server.js`) and prerender (`scripts/prerender.js`); defaults to `https://forksuppucks.com`.
 
-To override the active season locally (defaults to `2025-2026`), set `CURRENT_SEASON` in `.env`. The canonical place to update it for production is `config/scraper-config.js`.
+To override the active season locally (defaults to `2026-2027`), set `CURRENT_SEASON` in `.env`. The canonical place to update it for production is `config/scraper-config.js`; keep the display strings in `src/config/season.js` in sync. Season rollover checklist: bump both files (plus `seasons.current`/`seasons.stats` and `FUTURE_SEASONS`), and move any recruits CHN lists as deferred to their new class in `asu_hockey_data.json` — `/api/recruits` automatically hides classes whose season has started.
 
 ## Deployment
 
