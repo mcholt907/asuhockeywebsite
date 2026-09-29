@@ -95,6 +95,47 @@ describe("scrapeCHNRoster â€” SWR caching", () => {
     // Must return stale data, not wait for the background live scrape
     expect(result).toEqual(staleRoster);
   });
+
+  test("scrapes only the current roster table, not the Recruits table below it", async () => {
+    const html = [
+      '<table id="players" class="data full notstats roster sortable">',
+      "  <thead><tr><th></th><th>No.</th><th>Name</th><th>Yr.</th><th>Pos</th><th>Ht.</th><th>Wt.</th><th>DOB</th><th>Hometown</th></tr></thead>",
+      "  <tbody>",
+      '    <tr><td colspan="9">Defensemen</td></tr>',
+      "    <tr><td></td><td>44</td><td>Woo, Jonas</td><td>Fr</td><td>D</td><td>5-10</td><td>180</td><td>11/19/2006</td><td>Winnipeg, Man.</td></tr>",
+      "  </tbody>",
+      "</table>",
+      "<h3>Recruits</h3>",
+      '<table class="data notstats">',
+      "  <thead><tr><th>Name</th><th>Pos.</th><th>Ht.</th><th>Wt.</th><th>DOB</th><th>Hometown</th></tr></thead>",
+      "  <tbody>",
+      '    <tr><td colspan="6">2027</td></tr>',
+      "    <tr><td>Egan, Jimmy</td><td>F</td><td>6-2</td><td>183</td><td>2008-03-19</td><td>Mahtomedi, Minn.</td></tr>",
+      "  </tbody>",
+      "</table>",
+    ].join("\n");
+    requestWithRetry.mockResolvedValue({ data: html });
+    getFromCache.mockReturnValue(null);
+
+    const result = await scrapeCHNRoster();
+
+    expect(result.map((p) => p.Player)).toEqual(["Jonas Woo"]);
+    expect(result[0]["#"]).toBe("44");
+  });
+
+  test("falls back to heading-based filtering when table#players is missing", async () => {
+    const table = (name) =>
+      `<table><thead><tr><th>Name</th><th>Pos</th><th>Ht.</th><th>Wt.</th><th>DOB</th></tr></thead>` +
+      `<tbody><tr><td>${name}</td><td>F</td><td>6-0</td><td>180</td><td>1/1/2006</td></tr></tbody></table>`;
+    requestWithRetry.mockResolvedValue({
+      data: `<h3>Roster</h3>${table("Woo, Jonas")}<h3>Recruits</h3>${table("Egan, Jimmy")}`,
+    });
+    getFromCache.mockReturnValue(null);
+
+    const result = await scrapeCHNRoster();
+
+    expect(result.map((p) => p.Player)).toEqual(["Jonas Woo"]);
+  });
 });
 
 describe("scrapeCHNScheduleLinks", () => {
