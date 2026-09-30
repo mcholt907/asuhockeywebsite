@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNews } from '../hooks/queries/useNews';
+import { getSourceLabel } from '../utils/newsSource';
 import './News.css';
 
 function News() {
@@ -10,16 +11,9 @@ function News() {
 
   const [filter, setFilter] = useState('All');
 
-  const getSourceType = (source) => {
-    if (source.includes('TheSunDevils')) return 'Official';
-    if (source.includes('CollegeHockeyNews')) return 'CHN';
-    if (source.includes('USCHO')) return 'USCHO';
-    return source; // show actual source name for manual/other articles
-  };
-
   const filteredArticles = filter === 'All'
     ? articles
-    : articles.filter(a => getSourceType(a.source) === filter);
+    : articles.filter(a => getSourceLabel(a.source) === filter);
 
   const heroArticle    = filteredArticles[0];
   const wideCard       = filteredArticles[1];
@@ -97,7 +91,7 @@ function News() {
                     <span className="hero-eyebrow">Featured Story</span>
                     <h2>{heroArticle.title}</h2>
                     <div className="hero-footer">
-                      <span className="hero-source">{getSourceType(heroArticle.source)}</span>
+                      <span className="hero-source">{getSourceLabel(heroArticle.source)}</span>
                       <span className="meta-sep">·</span>
                       <span className="hero-date">{heroArticle.date}</span>
                       <span className="read-more">Read Full Story →</span>
@@ -114,7 +108,7 @@ function News() {
                 {/* Asymmetric magazine row */}
                 <div className="magazine-row">
                   <a href={wideCard.link} target="_blank" rel="noopener noreferrer" className="news-card news-card-wide" style={{ backgroundImage: `linear-gradient(to bottom, rgba(15,1,5,0.42) 0%, rgba(15,1,5,0.10) 25%, rgba(15,1,5,0.10) 65%, rgba(15,1,5,0.82) 100%), url(/images/Ice-hockey-hero.webp)` }}>
-                    <span className="news-card-source">{getSourceType(wideCard.source)}</span>
+                    <span className="news-card-source">{getSourceLabel(wideCard.source)}</span>
                     <h3 className="news-card-title news-card-title-wide">{wideCard.title}</h3>
                     <span className="news-card-date">{wideCard.date}</span>
                   </a>
@@ -122,7 +116,7 @@ function News() {
                     <div className="stacked-cards">
                       {stackedCards.map((article) => (
                         <a key={article.link} href={article.link} target="_blank" rel="noopener noreferrer" className="news-card news-card-compact">
-                          <span className="news-card-source">{getSourceType(article.source)}</span>
+                          <span className="news-card-source">{getSourceLabel(article.source)}</span>
                           <h3 className="news-card-title">{article.title}</h3>
                           <span className="news-card-date">{article.date}</span>
                         </a>
@@ -136,7 +130,7 @@ function News() {
                   <div className="compact-grid">
                     {gridCards.map((article) => (
                       <a key={article.link} href={article.link} target="_blank" rel="noopener noreferrer" className="news-card news-card-compact">
-                        <span className="news-card-source">{getSourceType(article.source)}</span>
+                        <span className="news-card-source">{getSourceLabel(article.source)}</span>
                         <h3 className="news-card-title">{article.title}</h3>
                         <span className="news-card-date">{article.date}</span>
                       </a>
@@ -159,7 +153,7 @@ function News() {
                       <span className="feed-date">{article.date}</span>
                       <span className="feed-divider" aria-hidden="true" />
                       <span className="feed-title">{article.title}</span>
-                      <span className="feed-source">{getSourceType(article.source)}</span>
+                      <span className="feed-source">{getSourceLabel(article.source)}</span>
                     </a>
                   ))}
                 </div>

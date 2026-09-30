@@ -6,6 +6,7 @@ import UpcomingGames from "../components/UpcomingGames";
 import { useSchedule } from "../hooks/queries/useSchedule";
 import { useNews } from "../hooks/queries/useNews";
 import { useStandings } from "../hooks/queries/useStandings";
+import { getSourceLabel } from "../utils/newsSource";
 import "./Home.css";
 
 const formatSeason = (season) => {
@@ -279,7 +280,7 @@ function Home() {
                       className="right-news-card"
                     >
                       <span className="right-news-source">
-                        {article.source}
+                        {getSourceLabel(article.source)}
                       </span>
                       <span className="right-news-title">{article.title}</span>
                     </a>
