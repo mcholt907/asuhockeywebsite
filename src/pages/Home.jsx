@@ -143,7 +143,7 @@ function Home() {
               sizes="(max-width: 900px) 100vw, 60vw"
               alt=""
               aria-hidden="true"
-              fetchpriority="high"
+              fetchPriority="high"
               className="hero-left-bg"
             />
             <div className="hero-overlay" />
