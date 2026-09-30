@@ -54,27 +54,30 @@ const navItems = [
 
 function MobileBottomNav() {
     const location = useLocation();
-    const [showScrollHint, setShowScrollHint] = React.useState(true);
+    const [showScrollHint, setShowScrollHint] = React.useState(false);
     const scrollRef = React.useRef(null);
 
-    const handleScroll = (e) => {
-        const { scrollLeft, scrollWidth, clientWidth } = e.target;
-        // Hide hint once user scrolls even a little
-        if (scrollLeft > 10) {
-            setShowScrollHint(false);
-        }
-        // Show hint again if scrolled back to start and there's more content
-        if (scrollLeft === 0 && scrollWidth > clientWidth) {
-            setShowScrollHint(true);
-        }
-    };
+    // Items share the strip's width, so they normally all fit. Only hint at
+    // hidden items when the strip really overflows (very narrow screens), and
+    // hide the hint once the user has scrolled.
+    const updateScrollHint = React.useCallback(() => {
+        const el = scrollRef.current;
+        if (!el) return;
+        setShowScrollHint(el.scrollLeft <= 10 && el.scrollWidth > el.clientWidth + 1);
+    }, []);
+
+    React.useEffect(() => {
+        updateScrollHint();
+        window.addEventListener('resize', updateScrollHint);
+        return () => window.removeEventListener('resize', updateScrollHint);
+    }, [updateScrollHint]);
 
     return (
         <nav className="mobile-bottom-nav">
             <div
                 className="bottom-nav-scroll"
                 ref={scrollRef}
-                onScroll={handleScroll}
+                onScroll={updateScrollHint}
             >
                 {navItems.map((item) => (
                     <NavLink

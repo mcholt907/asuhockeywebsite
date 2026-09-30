@@ -83,6 +83,17 @@ describe("Recruiting page", () => {
     expect(screen.queryByText("Rian Marquardt")).not.toBeInTheDocument();
   });
 
+  it("lists team tabs nearest season first", async () => {
+    renderRecruiting();
+
+    await screen.findByRole("button", { name: "2027-2028 Team" });
+    const teamTabs = screen
+      .getAllByRole("button", { name: /^\d{4}-\d{4} Team$/ })
+      .map((button) => button.textContent);
+
+    expect(teamTabs).toEqual(["2027-2028 Team", "2028-2029 Team"]);
+  });
+
   it("shows only the selected 2028-2029 team roster", async () => {
     renderRecruiting();
 

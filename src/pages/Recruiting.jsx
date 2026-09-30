@@ -49,7 +49,8 @@ function Recruiting() {
   }, [recruitsData]);
 
   const sortedSeasons = useMemo(
-    () => Object.keys(recruitsBySeason).sort().reverse(),
+    // Nearest class first, so the default (first) tab reads left to right
+    () => Object.keys(recruitsBySeason).sort(),
     [recruitsBySeason]
   );
 
@@ -59,7 +60,7 @@ function Recruiting() {
 
   useEffect(() => {
     if (!activeSeason && sortedSeasons.length > 0) {
-      setActiveSeason(sortedSeasons[sortedSeasons.length - 1]);
+      setActiveSeason(sortedSeasons[0]);
     }
   }, [activeSeason, sortedSeasons]);
 
