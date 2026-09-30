@@ -176,4 +176,39 @@ describe('Schedule Page', () => {
       expect(screen.queryByText('NCHC')).not.toBeInTheDocument();
     });
   });
+
+  // USCHO shows last season's final until it resets for the new season; after
+  // the reset the record reads 0-0 before the opener and is this season's.
+  const unplayedSchedule = (overall) => ({
+    data: [
+      { date: '2026-10-02', opponent: 'Lindenwood', status: 'Away', time: '5:00 PM', location: 'Centene Community Ice Center' }
+    ],
+    team_record: {
+      overall,
+      conf: { wins: 0, losses: 0, ties: 0 },
+      home: { wins: 0, losses: 0, ties: 0 },
+      away: { wins: 0, losses: 0, ties: 0 },
+    },
+    source: 'api',
+    timestamp: '2026-09-30T00:00:00Z',
+  });
+
+  it('labels a 0-0 record before the opener as the current season, not last season\'s final', async () => {
+    getSchedule.mockResolvedValue(unplayedSchedule({ wins: 0, losses: 0, ties: 0 }));
+    renderSchedule();
+
+    await waitFor(() => {
+      expect(screen.getByText('Team Record')).toBeInTheDocument();
+    });
+    expect(screen.queryByText(/Final\)/)).not.toBeInTheDocument();
+  });
+
+  it('labels a non-empty record before the opener as last season\'s final', async () => {
+    getSchedule.mockResolvedValue(unplayedSchedule({ wins: 14, losses: 21, ties: 1 }));
+    renderSchedule();
+
+    await waitFor(() => {
+      expect(screen.getByText(/Team Record \(\d{4}-\d{2} Final\)/)).toBeInTheDocument();
+    });
+  });
 });

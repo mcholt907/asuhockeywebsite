@@ -17,8 +17,16 @@ function Schedule() {
   }, [data]);
 
   const teamRecord = data?.team_record || null;
-  // Until a game has a result, the scraped record is last season's final.
+  // Until a game has a result, a non-empty scraped record is last season's
+  // final. Once USCHO resets for the new season it reads 0-0 and is current.
   const seasonStarted = games.some((game) => game.result);
+  const recordHasGames =
+    teamRecord?.overall &&
+    teamRecord.overall.wins +
+      teamRecord.overall.losses +
+      teamRecord.overall.ties >
+      0;
+  const showingPriorSeason = recordHasGames && !seasonStarted;
   const error = isError
     ? "Failed to load schedule data. Please try again later."
     : null;
@@ -203,7 +211,7 @@ function Schedule() {
       <div className="team-record">
         <div className="record-card">
           <div className="record-label">
-            {teamRecord && !seasonStarted
+            {showingPriorSeason
               ? `Team Record (${PRIOR_SEASON_SHORT} Final)`
               : "Team Record"}
           </div>
