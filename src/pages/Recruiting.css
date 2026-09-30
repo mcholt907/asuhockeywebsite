@@ -536,7 +536,8 @@
 /* Watermark position character */
 .position-watermark {
   position: absolute;
-  top: 8px;
+  /* Bottom-right: at top-right it sat on the position badge */
+  bottom: 8px;
   right: 12px;
   font-family: var(--font-display);
   font-size: 3.6rem;
