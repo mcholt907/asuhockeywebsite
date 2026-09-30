@@ -11,7 +11,11 @@ process.env.NODE_ENV = 'production';
 process.env.IS_PRERENDER = 'true';
 
 const baseUrl = `http://localhost:${PORT}`;
-const routes = ['/', '/news', '/schedule', '/roster', '/stats', '/recruiting', '/alumni'];
+// '/' goes last: it overwrites build/index.html, which the server also uses as
+// the SPA fallback template for routes not yet written. Rendering it first
+// made every later route start from Home's prerendered <head> (e.g. its hero
+// image preload leaked onto every page).
+const routes = ['/news', '/schedule', '/roster', '/stats', '/recruiting', '/alumni', '/'];
 const buildDir = path.join(__dirname, '..', 'build');
 
 async function prerender() {

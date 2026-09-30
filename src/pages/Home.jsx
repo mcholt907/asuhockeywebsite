@@ -1,5 +1,6 @@
 // src/pages/Home.jsx
 import React, { useMemo } from "react";
+import { preload } from "react-dom";
 import { Helmet } from "react-helmet-async";
 import UpcomingGames from "../components/UpcomingGames";
 import { useSchedule } from "../hooks/queries/useSchedule";
@@ -12,7 +13,23 @@ const formatSeason = (season) => {
   return match ? `${match[1]}-${match[3]}` : season;
 };
 
+const HERO_SRC = "/assets/hero-arena-opt.webp";
+const HERO_SRCSET =
+  "/assets/hero-arena-mobile-opt.webp 600w, /assets/hero-arena-opt.webp 1400w";
+const HERO_SIZES = "(max-width: 900px) 100vw, 60vw";
+
 function Home() {
+  // Preload the hero from Home only (it used to sit in index.html, so every
+  // page downloaded it). Called before the loading early-return so the
+  // download starts while data is still in flight; the prerendered Home HTML
+  // keeps the <link rel="preload"> in its head.
+  preload(HERO_SRC, {
+    as: "image",
+    imageSrcSet: HERO_SRCSET,
+    imageSizes: HERO_SIZES,
+    fetchPriority: "high",
+  });
+
   const { data: scheduleResponse, isLoading: scheduleLoading } = useSchedule();
   const { data: newsResponse, isLoading: newsLoading } = useNews();
   const { data: standingsResponse, isLoading: standingsLoading } =
@@ -138,9 +155,9 @@ function Home() {
           {/* Left Panel — action photo + matchup text */}
           <div className="hero-left">
             <img
-              src="/assets/hero-arena-opt.webp"
-              srcSet="/assets/hero-arena-mobile-opt.webp 600w, /assets/hero-arena-opt.webp 1400w"
-              sizes="(max-width: 900px) 100vw, 60vw"
+              src={HERO_SRC}
+              srcSet={HERO_SRCSET}
+              sizes={HERO_SIZES}
               alt=""
               aria-hidden="true"
               fetchPriority="high"
