@@ -55,7 +55,7 @@
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--asu-maroon);
-  opacity: 0.6;
+  opacity: 0.75; /* 0.6 measured 4.28:1 */
   margin-bottom: 16px;
 }
 
@@ -195,7 +195,7 @@
 
 .game-venue-tag.away {
   background: rgba(232, 168, 51, 0.18);
-  color: #8B6F00;
+  color: #7A6100; /* #8B6F00 measured 4.04:1 */
 }
 
 /* Date & Time Column */
@@ -288,7 +288,7 @@
 
 .result-badge-t {
   background: rgba(232, 168, 51, 0.18);
-  color: #8B6F00;
+  color: #7A6100;
 }
 
 .result-badge-letter {

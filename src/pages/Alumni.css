@@ -181,7 +181,7 @@
 }
 
 .totals-label {
-    color: var(--text-light);
+    color: var(--text-secondary); /* --text-light (#999) measured 2.61:1 */
     font-style: italic;
     font-size: 0.85rem;
 }
@@ -265,7 +265,7 @@
 
 .last-updated p {
     font-size: 0.85rem;
-    color: var(--text-light);
+    color: var(--text-secondary); /* --text-light (#999) measured 2.7:1 */
 }
 
 /* Loading / Error (base in App.css) */

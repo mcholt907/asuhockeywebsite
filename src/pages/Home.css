@@ -323,7 +323,7 @@
 }
 
 .right-upcoming-games .game-location-display {
-  color: rgba(232, 224, 226, 0.5);
+  color: rgba(232, 224, 226, 0.6); /* 0.5 measured 4.33:1 */
   font-size: 0.76rem;
 }
 
@@ -411,7 +411,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(232, 224, 226, 0.45);
+  color: rgba(232, 224, 226, 0.6); /* 0.45 measured 3.69:1 */
 }
 
 .right-record-sep {
@@ -467,7 +467,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: rgba(232, 224, 226, 0.4);
+  color: rgba(232, 224, 226, 0.6); /* 0.4 measured 3.12:1 */
   white-space: nowrap;
 }
 

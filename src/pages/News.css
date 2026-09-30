@@ -242,7 +242,7 @@
 .feed-date {
   font-size: 0.7rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.55); /* 0.45 measured 4.45:1, just under AA */
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   transition: color 0.15s;
@@ -423,8 +423,14 @@
 .news-card-date {
   font-size: 0.68rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.38);
+  color: rgba(255, 255, 255, 0.55); /* 0.38 measured 3.44:1, below AA */
   margin-top: auto;
+}
+
+/* The wide card's date sits on a photo, so match its title's shadow */
+.news-card-wide .news-card-date {
+  color: rgba(255, 255, 255, 0.8);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
 }
 
 .news-card:hover .news-card-title {
