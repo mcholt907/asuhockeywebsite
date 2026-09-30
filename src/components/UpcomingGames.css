@@ -51,10 +51,12 @@
   }
 } */
 
-.loading-message,
-.error-message,
+/* Compact widget states (base in App.css) */
+.upcoming-games-widget .loading-message,
+.upcoming-games-widget .error-message,
 .no-games {
+  text-align: left;
   padding: 10px 0;
   color: var(--text-secondary, #666);
   font-style: italic;
-} 
+}

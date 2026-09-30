@@ -286,9 +286,9 @@
   opacity: 0.85;
 }
 
-/* --- State Messages --- */
-.loading-message,
-.error-message,
+/* --- State Messages (base in App.css) --- */
+.news-content .loading-message,
+.news-content .error-message,
 .no-news-message {
   text-align: center;
   padding: 60px 20px;

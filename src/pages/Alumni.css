@@ -268,20 +268,11 @@
     color: var(--text-light);
 }
 
-/* Loading / Error */
-.loading-message,
-.error-message {
-    text-align: center;
+/* Loading / Error (base in App.css) */
+.alumni-page .loading-message,
+.alumni-page .error-message {
     padding: 80px 20px;
     font-size: 1.1rem;
-}
-
-.loading-message {
-    color: var(--text-secondary);
-}
-
-.error-message {
-    color: #D32F2F;
 }
 
 /* Mobile / Responsive */

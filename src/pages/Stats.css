@@ -327,21 +327,17 @@
   color: var(--asu-maroon);
 }
 
-/* Loading/Error States */
-.loading-message,
-.error-message {
-  text-align: center;
-  padding: 60px 20px;
+/* Loading/Error States (base in App.css) */
+.stats-page .loading-message,
+.stats-page .error-message {
   font-size: 1.1rem;
 }
 
-.loading-message {
-  color: var(--text-secondary);
+.stats-page .loading-message {
   font-style: italic;
 }
 
-.error-message {
-  color: #D32F2F;
+.stats-page .error-message {
   font-weight: 600;
 }
 
