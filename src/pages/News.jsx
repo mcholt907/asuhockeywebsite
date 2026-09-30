@@ -67,7 +67,7 @@ function News() {
         </div>
 
         {/* SEO Original Content Block */}
-        <div className="news-intro-text" style={{ maxWidth: '800px', margin: '0 auto 2rem auto', color: 'var(--text-secondary)', lineHeight: '1.6', fontSize: '1.05rem', textAlign: 'center', padding: '0 1rem' }}>
+        <div className="news-intro-text" style={{ maxWidth: '800px', margin: '0 auto 2rem auto', color: 'rgba(255, 255, 255, 0.7)', lineHeight: '1.6', fontSize: '1.05rem', textAlign: 'center', padding: '0 1rem' }}>
           Welcome to the premier source for all Arizona State University hockey updates. Whether you're tracking the latest game recaps, discovering insights on new recruits, or following the Sun Devils' journey in the NCHC, Forks Up Pucks aggregates the top headlines from official sources and leading journalists to bring you comprehensive coverage of ASU Men's Ice Hockey.
         </div>
 

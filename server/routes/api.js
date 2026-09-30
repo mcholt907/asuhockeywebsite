@@ -10,8 +10,11 @@ const {
   fetchRecruitingData,
 } = require("../scrapers");
 const { getRoster } = require("../services/roster-service");
+const { excludeCommittedRecruits } = require("../services/alumni-service");
 const { getStaticData } = require("../services/static-data");
-const { validateRecruitingSnapshot } = require("../services/recruiting-snapshot");
+const {
+  validateRecruitingSnapshot,
+} = require("../services/recruiting-snapshot");
 const { validateStandingsSnapshot } = require("../services/standings-snapshot");
 const { getDataStatus, getCooldownStatus } = require("../cache/data-status");
 const config = require("../../config/scraper-config");
@@ -103,7 +106,9 @@ router.get("/recruits", async (req, res) => {
   try {
     const recruiting = await fetchRecruitingData();
     if (!validateRecruitingSnapshot(recruiting, config.FUTURE_SEASONS)) {
-      return res.status(500).json({ error: "Recruiting roster data unavailable." });
+      return res
+        .status(500)
+        .json({ error: "Recruiting roster data unavailable." });
     }
     return res.json(recruiting);
   } catch (error) {
@@ -136,7 +141,16 @@ router.get("/transfers", async (req, res) => {
 router.get("/alumni", async (req, res) => {
   try {
     console.log("[API /alumni] Fetching alumni data...");
-    const alumniData = await scrapeAlumniData();
+    let alumniData = await scrapeAlumniData();
+    try {
+      alumniData = excludeCommittedRecruits(
+        alumniData,
+        await fetchRecruitingData(),
+      );
+    } catch (error) {
+      // Recruiting data is only a filter here; serve alumni unfiltered.
+      console.error("[API /alumni] Recruit filter skipped:", error.message);
+    }
     console.log(
       `[API /alumni] Returning ${alumniData.skaters?.length || 0} skaters, ${alumniData.goalies?.length || 0} goalies`,
     );

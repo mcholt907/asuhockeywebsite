@@ -242,14 +242,6 @@
   transform: scale(1.1);
 }
 
-/* Loading/Error */
-.loading-message,
-.error-message {
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--text-secondary);
-}
-
 /* Source attribution */
 .roster-source {
   text-align: center;

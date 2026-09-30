@@ -77,13 +77,13 @@ function Stats() {
 
   if (loading)
     return (
-      <div className="page-container">
+      <div className="page-container stats-page">
         <p className="loading-message">Loading Player Stats...</p>
       </div>
     );
   if (error)
     return (
-      <div className="page-container">
+      <div className="page-container stats-page">
         <p className="error-message">{error}</p>
       </div>
     );

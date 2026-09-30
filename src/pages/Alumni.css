@@ -181,7 +181,7 @@
 }
 
 .totals-label {
-    color: var(--text-light);
+    color: var(--text-secondary); /* --text-light (#999) measured 2.61:1 */
     font-style: italic;
     font-size: 0.85rem;
 }
@@ -265,23 +265,14 @@
 
 .last-updated p {
     font-size: 0.85rem;
-    color: var(--text-light);
+    color: var(--text-secondary); /* --text-light (#999) measured 2.7:1 */
 }
 
-/* Loading / Error */
-.loading-message,
-.error-message {
-    text-align: center;
+/* Loading / Error (base in App.css) */
+.alumni-page .loading-message,
+.alumni-page .error-message {
     padding: 80px 20px;
     font-size: 1.1rem;
-}
-
-.loading-message {
-    color: var(--text-secondary);
-}
-
-.error-message {
-    color: #D32F2F;
 }
 
 /* Mobile / Responsive */

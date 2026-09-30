@@ -367,7 +367,11 @@ footer {
   }
 }
 
+/* Shared loading/error states. Pages adjust these only under their own
+   wrapper class: page CSS chunks stay loaded after client-side navigation,
+   so an unscoped override would restyle every other page too. */
 .loading,
+.loading-message,
 .error-message,
 .no-data {
   text-align: center;
