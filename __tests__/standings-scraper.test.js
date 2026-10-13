@@ -21,7 +21,7 @@ function uschoHtml(rows) {
   return `<div id="app" data-page="${encoded}"></div>`;
 }
 
-const fallbackSnapshot = require("../data/nchc_standings_fallback.json");
+const fallbackSnapshot = require("./fixtures/nchc-standings-2025-2026.json");
 const config = require("../config/scraper-config");
 const { requestWithRetry } = require("../server/lib/request-helper");
 const { getFromCache, saveToCache } = require("../server/cache/caching-system");
@@ -34,7 +34,7 @@ const {
   scrapeNCHCStandings,
 } = require("../server/scrapers/standings");
 
-// The bundled fallback is the 9-team 2025-26 table; St. Thomas joined the
+// This fixed historical fixture is the 9-team 2025-26 table; St. Thomas joined the
 // NCHC for 2026-27, so current-season fixtures carry a 10th team.
 const currentSeasonTeamNames = [
   ...fallbackSnapshot.teams.map((team) => team.team),

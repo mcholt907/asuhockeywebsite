@@ -584,7 +584,8 @@ async function scrapeEliteProspectsRecruiting(
       const $row = $(row);
       // children() not find(): a nested table inside a cell must not
       // pollute the positional index space.
-      const cells = $row.children("td");
+      // EP uses a <th scope="row"> for the player cell in its roster.
+      const cells = $row.children("td, th");
       const headerMap = getRosterHeaderMap($, $row.closest("table").get(0));
       const requiredCellIndex = Math.max(...Object.values(headerMap));
 
