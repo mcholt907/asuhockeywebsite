@@ -76,7 +76,7 @@ jobs:
         run: npx playwright install-deps chromium
 
       - name: Playwright tests
-        run: npx playwright test --project=chromium
+        run: npx playwright test --project=api --project=chromium
 
       - name: Upload Playwright report
         if: failure()

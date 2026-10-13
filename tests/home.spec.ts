@@ -5,63 +5,28 @@ test.describe("Home Page", () => {
     await page.goto("/");
   });
 
-  test("should load the home page", async ({ page }) => {
-    // Check that the page title contains expected text
+  test("shows the home page with news, upcoming games, and standings", async ({ page }) => {
     await expect(page).toHaveTitle(/ASU Hockey|Forks Up Pucks/i);
-  });
-
-  test("should display navigation links", async ({ page }) => {
-    // Check main navigation links exist (use first() for multiple matches)
-    await expect(
-      page
-        .locator("nav a, header a")
-        .filter({ hasText: /roster/i })
-        .first(),
-    ).toBeVisible();
-    await expect(
-      page
-        .locator("nav a, header a")
-        .filter({ hasText: /schedule/i })
-        .first(),
-    ).toBeVisible();
-  });
-
-  test("should navigate to roster page", async ({ page }) => {
-    await page
-      .locator("nav a, header a")
-      .filter({ hasText: /roster/i })
-      .first()
-      .click();
-    await expect(page).toHaveURL(/.*roster/);
-  });
-
-  test("should navigate to schedule page", async ({ page }) => {
-    await page
-      .locator("nav a, header a")
-      .filter({ hasText: /schedule/i })
-      .first()
-      .click();
-    await expect(page).toHaveURL(/.*schedule/);
-  });
-
-  test("should display news section", async ({ page }) => {
-    // Check for the Trending News section
-    const newsSection = page.locator("text=Trending News").first();
-    await expect(newsSection).toBeVisible();
-  });
-
-  test("should display upcoming games section", async ({ page }) => {
+    await expect(page.getByRole("heading", { name: "Trending News" })).toBeVisible();
     // The widget renders either a list of upcoming games or the explicit
     // "no upcoming games" empty state; the error state has neither.
     const widget = page.locator(".upcoming-games-widget").first();
     await expect(widget).toBeVisible();
     await expect(widget.locator("ul li, p.no-games").first()).toBeVisible();
-  });
-
-  test("should display season-labelled NCHC standings", async ({ page }) => {
     await expect(page.getByRole("heading", {
       name: /^\d{4}-\d{2} NCHC Standings$/,
     })).toBeVisible();
     await expect(page.locator(".standings-widget-table tbody tr").first()).toBeVisible();
+  });
+
+  test("navigates to roster and schedule through the visible navigation", async ({ page }) => {
+    const navigationLinks = page.locator("nav a:visible, header a:visible");
+    await navigationLinks.filter({ hasText: /^roster$/i }).first().click();
+    await expect(page).toHaveURL(/\/roster\/?$/);
+    await expect(page.getByRole("heading", { name: /ASU Hockey Roster/i })).toBeVisible();
+
+    await navigationLinks.filter({ hasText: /^schedule$/i }).first().click();
+    await expect(page).toHaveURL(/\/schedule\/?$/);
+    await expect(page.getByRole("heading", { name: /ASU Hockey Schedule/i })).toBeVisible();
   });
 });

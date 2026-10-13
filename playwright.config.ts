@@ -41,17 +41,25 @@ export default defineConfig({
     // Configure projects for different browsers
     projects: [
         {
+            // HTTP endpoint checks do not need to repeat for every browser.
+            name: 'api',
+            testMatch: '**/api.spec.ts',
+        },
+        {
             name: 'chromium',
+            testIgnore: '**/api.spec.ts',
             use: { ...devices['Desktop Chrome'] },
         },
 
         {
             name: 'firefox',
+            testIgnore: '**/api.spec.ts',
             use: { ...devices['Desktop Firefox'] },
         },
 
         {
             name: 'Mobile Chrome',
+            testIgnore: '**/api.spec.ts',
             use: { ...devices['Pixel 5'] },
         },
     ],
