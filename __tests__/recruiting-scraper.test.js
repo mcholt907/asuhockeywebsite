@@ -1203,6 +1203,57 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
     ).rejects.toThrow("truncated player-like row");
   });
 
+  test("parses player row headers and ignores position rowgroup headings", async () => {
+    const rowHeaderHtml = singlePlayerFixtureForSeason(
+      "2026-2027",
+      `<tr><th colspan="10" scope="rowgroup">GOALTENDERS</th></tr>` +
+        rosterRow(
+          "30",
+          "Bob Jones",
+          "G",
+          "222",
+          "19",
+          "2007",
+          "Calgary, AB",
+          "188 cm",
+          "190 lbs",
+          "L",
+        )
+          .replace("<td><div><a", '<th scope="row" data-stat="player"><div><a')
+          .replace("</a></div></td>", "</a></div></th>"),
+    );
+    requestWithRetry.mockResolvedValue({ data: rowHeaderHtml });
+
+    const players = await scrapeEliteProspectsRecruiting("2026-2027", false);
+
+    expect(players).toHaveLength(1);
+    expect(players[0]).toMatchObject({
+      name: "Bob Jones",
+      position: "G",
+      player_link: "https://www.eliteprospects.com/player/222/x",
+      age: "19",
+      birth_year: "2007",
+      birthplace: "Calgary, AB",
+      height: "188 cm",
+      weight: "190 lbs",
+      shoots: "L",
+    });
+  });
+
+  test("rejects a truncated player row even when its player cell is a row header", async () => {
+    requestWithRetry.mockResolvedValue({
+      data: singlePlayerFixtureForSeason(
+        "2026-2027",
+        `<tr><td></td><td>30</td><td></td>
+          <th scope="row"><a href="/player/222/x">Bob Jones (G)</a></th><td>19</td></tr>`,
+      ),
+    });
+
+    await expect(
+      scrapeEliteProspectsRecruiting("2026-2027", false),
+    ).rejects.toThrow("truncated player-like row");
+  });
+
   test("rejects a full-width row when its player link moved outside the Player cell", async () => {
     requestWithRetry.mockResolvedValue({ data: movedPlayerLinkFixture });
 

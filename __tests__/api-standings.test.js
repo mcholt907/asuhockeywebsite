@@ -40,7 +40,8 @@ function responseRecorder() {
   };
 }
 
-const teams = require("../data/nchc_standings_fallback.json").teams;
+// Historical tests must not change when the automated refresh updates data/.
+const teams = require("./fixtures/nchc-standings-2025-2026.json").teams;
 // St. Thomas joined the NCHC for 2026-27, so the current season has 10 teams.
 const currentSeasonTeams = [
   ...teams,
