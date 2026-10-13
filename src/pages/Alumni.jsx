@@ -205,7 +205,7 @@ function Alumni() {
             {/* Last Updated */}
             {data?.lastUpdated && (
                 <div className="last-updated">
-                    <p>Data from Elite Prospects • Last updated: {new Date(data.lastUpdated).toLocaleDateString()}</p>
+                    <p>Data from <a href="https://www.eliteprospects.com/team/18066/arizona-state-univ/where-are-they-now" target="_blank" rel="noopener noreferrer">Elite Prospects</a> • Last updated: {new Date(data.lastUpdated).toLocaleDateString()}</p>
                 </div>
             )}
         </div>
