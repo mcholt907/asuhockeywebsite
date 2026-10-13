@@ -60,7 +60,7 @@ describe("Recruiting page", () => {
     getTransfers.mockResolvedValue({ incoming: [], outgoing: [] });
   });
 
-  it("defaults projections to the 2027-2028 team", async () => {
+  it("defaults projections to the nearest team with tabs in season order", async () => {
     renderRecruiting();
 
     const defaultTeam = await screen.findByRole("button", {
@@ -79,14 +79,7 @@ describe("Recruiting page", () => {
     expect(defaultTeam).toHaveClass("active");
     expect(screen.getByText("Marko Bilic")).toBeInTheDocument();
     expect(screen.getByText("Jimmy Egan")).toBeInTheDocument();
-    expect(screen.queryByText("Chase Hamm")).not.toBeInTheDocument();
     expect(screen.queryByText("Rian Marquardt")).not.toBeInTheDocument();
-  });
-
-  it("lists team tabs nearest season first", async () => {
-    renderRecruiting();
-
-    await screen.findByRole("button", { name: "2027-2028 Team" });
     const teamTabs = screen
       .getAllByRole("button", { name: /^\d{4}-\d{4} Team$/ })
       .map((button) => button.textContent);

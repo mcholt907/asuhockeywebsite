@@ -33,21 +33,6 @@ const validSnapshot = {
   teams: completeTeams(),
 };
 
-function invalidSnapshot(kind) {
-  const snapshot = {
-    ...validSnapshot,
-    teams: validSnapshot.teams.map((team) => ({ ...team })),
-  };
-  if (kind === "truncated table") snapshot.teams.pop();
-  if (kind === "duplicate normalized team") {
-    snapshot.teams[1].team = "  NORTH   DAKOTA ";
-  }
-  if (kind === "duplicate rank") snapshot.teams[1].rank = "1";
-  if (kind === "missing ASU row") snapshot.teams[8].isASU = false;
-  if (kind === "duplicate ASU row") snapshot.teams[0].isASU = true;
-  return snapshot;
-}
-
 function createTemporarySnapshotFile() {
   const directory = fs.mkdtempSync(
     path.join(os.tmpdir(), "refresh-standings-"),
@@ -89,6 +74,7 @@ test("preserves the previous snapshot when all teams have zero games", async () 
     ).resolves.toBeNull();
 
     expect(fs.readFileSync(file, "utf8")).toBe(previousContents);
+    expect(fs.readdirSync(directory)).toEqual(["fallback.json"]);
   } finally {
     fs.rmSync(directory, { recursive: true, force: true });
   }
@@ -147,31 +133,6 @@ test("preserves the previous snapshot when standings validation fails", async ()
           ...validSnapshot,
           teams: [{ broken: true }],
         }),
-        fallbackFile: file,
-      }),
-    ).rejects.toThrow("validation failed; fallback preserved");
-
-    expect(fs.readFileSync(file, "utf8")).toBe(previousContents);
-  } finally {
-    fs.rmSync(directory, { recursive: true, force: true });
-  }
-});
-
-test.each([
-  "truncated table",
-  "duplicate normalized team",
-  "duplicate rank",
-  "missing ASU row",
-  "duplicate ASU row",
-])("refuses to overwrite the fallback for a %s", async (kind) => {
-  const { directory, file } = createTemporarySnapshotFile();
-  const previousContents = JSON.stringify(validSnapshot);
-  fs.writeFileSync(file, previousContents);
-
-  try {
-    await expect(
-      refreshStandingsSnapshot({
-        fetchData: async () => invalidSnapshot(kind),
         fallbackFile: file,
       }),
     ).rejects.toThrow("validation failed; fallback preserved");

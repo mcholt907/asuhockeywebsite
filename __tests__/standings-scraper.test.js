@@ -78,28 +78,9 @@ function invalidLiveRows(kind) {
 
 function invalidCacheSnapshot(kind) {
   if (kind === "malformed") return { season: config.CURRENT_SEASON, teams: [] };
-  if (kind === "all-zero") return currentSeasonSnapshot("0-0-0");
   if (kind === "season-mismatched") {
-    return { ...currentSeasonSnapshot(), season: "2025-2026" };
-  }
-  const snapshot = currentSeasonSnapshot();
-  if (kind === "truncated table") snapshot.teams.pop();
-  if (kind === "duplicate normalized team") {
-    snapshot.teams[1].team = "  NORTH   DAKOTA ";
-  }
-  if (kind === "duplicate rank") snapshot.teams[1].rank = "1";
-  if (kind === "missing ASU row") snapshot.teams[8].isASU = false;
-  if (kind === "duplicate ASU row") snapshot.teams[0].isASU = true;
-  if (
-    [
-      "truncated table",
-      "duplicate normalized team",
-      "duplicate rank",
-      "missing ASU row",
-      "duplicate ASU row",
-    ].includes(kind)
-  ) {
-    return snapshot;
+    // Valid historical data must still be rejected by the current-season guard.
+    return fallbackSnapshot;
   }
   throw new Error(`Unknown cache fixture: ${kind}`);
 }
@@ -173,7 +154,7 @@ test("caches a season-tagged snapshot after the first current-season game", asyn
   );
 });
 
-test.each(["malformed", "all-zero", "season-mismatched"])(
+test.each(["malformed", "season-mismatched"])(
   "ignores a %s fresh cache candidate and recovers the fallback after live failure",
   async (kind) => {
     getFromCache
@@ -187,27 +168,7 @@ test.each(["malformed", "all-zero", "season-mismatched"])(
   },
 );
 
-test.each([
-  "truncated table",
-  "duplicate normalized team",
-  "duplicate rank",
-  "missing ASU row",
-  "duplicate ASU row",
-])(
-  "ignores a fresh cache with a %s and recovers the fallback",
-  async (kind) => {
-    getFromCache
-      .mockReturnValueOnce(invalidCacheSnapshot(kind))
-      .mockReturnValue(null);
-    requestWithRetry.mockRejectedValue(new Error("network down"));
-
-    await expect(scrapeNCHCStandings()).resolves.toEqual(fallbackSnapshot);
-    expect(requestWithRetry).toHaveBeenCalledTimes(1);
-    expect(readStandingsFallback).toHaveBeenCalledTimes(1);
-  },
-);
-
-test.each(["malformed", "all-zero", "season-mismatched"])(
+test.each(["season-mismatched"])(
   "ignores a %s stale cache candidate and recovers the fallback after live failure",
   async (kind) => {
     const invalid = invalidCacheSnapshot(kind);

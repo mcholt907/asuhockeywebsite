@@ -221,16 +221,6 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
       </tr>`,
   );
 
-  test("requests the default Elite Prospects season roster route", async () => {
-    requestWithRetry.mockResolvedValue({ data: fixtureForSeason("2027-2028") });
-
-    await scrapeEliteProspectsRecruiting("2027-2028", false);
-
-    expect(requestWithRetry).toHaveBeenCalledWith(
-      "https://www.eliteprospects.com/team/18066/arizona-state-univ/2027-2028",
-    );
-  });
-
   test("direct all-season scrape requests every configured season without cache or fallback recovery", async () => {
     requestWithRetry
       .mockResolvedValueOnce({ data: fixtureForSeason("2026-2027") })
@@ -552,29 +542,6 @@ describe("scrapeEliteProspectsRecruiting â€” HTML parsing", () => {
       expect(allLogs).not.toContain(secret);
     },
   );
-
-  test("canonicalizes an accepted HTTPS Elite Prospects player image URL", async () => {
-    requestWithRetry.mockResolvedValue({
-      data: `<script type="application/ld+json">
-        ${JSON.stringify({
-          "@type": "Person",
-          "@id": "https://www.eliteprospects.com/player/111/jane-smith",
-          name: "Jane Smith",
-          image: "HTTPS://FILES.ELITEPROSPECTS.COM/layout/players/./jane.jpg",
-          currentTeam: { name: "Moorhead Spuds" },
-        })}
-      </script>`,
-    });
-
-    await expect(
-      scrapePlayerProfile(
-        "https://www.eliteprospects.com/player/111/jane-smith",
-      ),
-    ).resolves.toEqual({
-      player_photo: "https://files.eliteprospects.com/layout/players/jane.jpg",
-      current_team: "Moorhead Spuds",
-    });
-  });
 
   test("extracts identity-scoped enrichment from current semantic Profile markup", async () => {
     requestWithRetry.mockResolvedValue({

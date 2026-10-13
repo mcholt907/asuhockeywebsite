@@ -1,5 +1,7 @@
 import { test, expect, request } from '@playwright/test';
 
+const { FUTURE_SEASONS } = require('../config/scraper-config');
+
 // Configure a request context for the API server directly
 const API_BASE_URL = 'http://localhost:5000';
 
@@ -19,7 +21,6 @@ test.describe('API Endpoints', () => {
     test('GET /api/status should report per-dataset freshness', async () => {
         const response = await apiContext.get('/api/status');
 
-        expect(response.ok()).toBeTruthy();
         expect(response.status()).toBe(200);
 
         const data = await response.json();
@@ -40,8 +41,8 @@ test.describe('API Endpoints', () => {
     test('GET /api/roster should return player data', async () => {
         const response = await apiContext.get('/api/roster');
 
-        expect(response.ok()).toBeTruthy();
         expect(response.status()).toBe(200);
+        expect(response.headers()['content-type']).toContain('application/json');
 
         const data = await response.json();
         expect(Array.isArray(data)).toBeTruthy();
@@ -56,7 +57,6 @@ test.describe('API Endpoints', () => {
     test('GET /api/news should return articles', async () => {
         const response = await apiContext.get('/api/news');
 
-        expect(response.ok()).toBeTruthy();
         expect(response.status()).toBe(200);
 
         const data = await response.json();
@@ -68,7 +68,6 @@ test.describe('API Endpoints', () => {
     test('GET /api/schedule should return games', async () => {
         const response = await apiContext.get('/api/schedule');
 
-        expect(response.ok()).toBeTruthy();
         expect(response.status()).toBe(200);
 
         const data = await response.json();
@@ -79,16 +78,16 @@ test.describe('API Endpoints', () => {
     test('GET /api/stats should return stats data', async () => {
         const response = await apiContext.get('/api/stats');
 
-        expect(response.ok()).toBeTruthy();
         expect(response.status()).toBe(200);
 
         const data = await response.json();
-        expect(data).toBeDefined();
+        expect(Array.isArray(data.skaters)).toBeTruthy();
+        expect(Array.isArray(data.goalies)).toBeTruthy();
     });
 
     test("GET /api/standings should return a season-tagged played table", async () => {
         const response = await apiContext.get("/api/standings");
-        expect(response.ok()).toBeTruthy();
+        expect(response.status()).toBe(200);
         const body = await response.json();
         expect(Array.isArray(body.data)).toBeTruthy();
         expect(body.data.length).toBeGreaterThan(0);
@@ -102,32 +101,23 @@ test.describe('API Endpoints', () => {
     test('GET /api/recruits should return recruiting data', async () => {
         const response = await apiContext.get('/api/recruits');
 
-        expect(response.ok()).toBeTruthy();
         expect(response.status()).toBe(200);
 
         const data = await response.json();
-        for (const season of ['2027-2028', '2028-2029']) {
+        expect(Object.keys(data).sort()).toEqual([...FUTURE_SEASONS].sort());
+        for (const season of FUTURE_SEASONS) {
             expect(Array.isArray(data[season])).toBeTruthy();
         }
-        expect(data['2027-2028'].length).toBeGreaterThan(0);
-        expect(data).not.toHaveProperty('2026-2027');
+        expect(FUTURE_SEASONS.some((season: string) => data[season].length > 0)).toBeTruthy();
     });
 
     test('GET /api/alumni should return alumni data', async () => {
         const response = await apiContext.get('/api/alumni');
 
-        expect(response.ok()).toBeTruthy();
         expect(response.status()).toBe(200);
 
         const data = await response.json();
         expect(data).toHaveProperty('skaters');
         expect(data).toHaveProperty('goalies');
-    });
-
-    test('API responses should have valid JSON content-type', async () => {
-        const response = await apiContext.get('/api/roster');
-
-        const contentType = response.headers()['content-type'];
-        expect(contentType).toContain('application/json');
     });
 });

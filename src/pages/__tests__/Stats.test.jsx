@@ -35,8 +35,13 @@ describe('Stats Page', () => {
     expect(screen.getByText(/loading player stats/i)).toBeInTheDocument();
   });
 
-  it('should render stats tables when data is loaded', async () => {
-    getStats.mockResolvedValue({ skaters: mockSkaters, goalies: [] });
+  it('renders current-season stats tables without a prior-season note', async () => {
+    getStats.mockResolvedValue({
+      skaters: mockSkaters,
+      goalies: [],
+      season: '2026-27',
+      isPriorSeason: false,
+    });
 
     renderStats();
 
@@ -47,6 +52,7 @@ describe('Stats Page', () => {
     expect(screen.getAllByText('Jane Doe').length).toBeGreaterThan(0);
     expect(screen.getByRole('button', { name: /skaters/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /goalies/i })).toBeInTheDocument();
+    expect(screen.queryByText(/final stats from the/i)).not.toBeInTheDocument();
   });
 
   it('should show an empty-state message instead of blank tables when no stats exist', async () => {
@@ -85,23 +91,6 @@ describe('Stats Page', () => {
     });
 
     expect(screen.getAllByText('Jane Doe').length).toBeGreaterThan(0);
-  });
-
-  it('should not show the prior-season note for current-season stats', async () => {
-    getStats.mockResolvedValue({
-      skaters: mockSkaters,
-      goalies: [],
-      season: '2026-27',
-      isPriorSeason: false,
-    });
-
-    renderStats();
-
-    await waitFor(() => {
-      expect(screen.getByText('ASU Hockey Player Stats')).toBeInTheDocument();
-    });
-
-    expect(screen.queryByText(/final stats from the/i)).not.toBeInTheDocument();
   });
 
   it('should render error state when the request fails', async () => {

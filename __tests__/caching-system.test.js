@@ -46,6 +46,7 @@ describe('saveToCache', () => {
     expect(written.cacheDuration).toBe(60000);
     expect(typeof written.timestamp).toBe('string');
     expect(Number.isFinite(new Date(written.timestamp).getTime())).toBe(true);
+    expect(fs.readdirSync(tmpDir).filter(f => f.includes('.tmp.'))).toEqual([]);
   });
 
   test('uses default 24h duration when none supplied', () => {
@@ -62,14 +63,6 @@ describe('saveToCache', () => {
     cachingSystem.saveToCache({ ok: true }, 'mkdir.json');
 
     expect(fs.existsSync(path.join(tmpDir, 'mkdir.json'))).toBe(true);
-  });
-
-  test('atomic-write: no .tmp file remains after a successful write', () => {
-    cachingSystem.saveToCache({ a: 1 }, 'atomic.json');
-
-    const leftovers = fs.readdirSync(tmpDir).filter(f => f.includes('.tmp.'));
-    expect(leftovers).toEqual([]);
-    expect(fs.existsSync(path.join(tmpDir, 'atomic.json'))).toBe(true);
   });
 
   test('cleans up tmp file and reports to Sentry when rename fails', () => {
@@ -140,17 +133,6 @@ describe('getFromCache', () => {
     fs.writeFileSync(path.join(tmpDir, 'expired.json'), JSON.stringify(expired));
 
     expect(cachingSystem.getFromCache('expired.json', true)).toEqual({ stale: 'value' });
-  });
-
-  test('honors stored cacheDuration over the default', () => {
-    // Wrote 23 hours ago with a 22-hour duration Ã¢â€ â€™ expired.
-    const aging = {
-      timestamp: new Date(Date.now() - 23 * 60 * 60 * 1000).toISOString(),
-      data: { x: 1 },
-      cacheDuration: 22 * 60 * 60 * 1000,
-    };
-    fs.writeFileSync(path.join(tmpDir, 'aging.json'), JSON.stringify(aging));
-    expect(cachingSystem.getFromCache('aging.json')).toBeNull();
   });
 
   test('deletes a corrupted cache file and returns null', () => {

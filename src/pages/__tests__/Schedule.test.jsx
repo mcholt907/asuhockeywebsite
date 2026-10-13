@@ -30,7 +30,7 @@ describe('Schedule Page', () => {
     expect(screen.getByText(/loading schedule/i)).toBeInTheDocument();
   });
 
-  it('should render schedule games when data is loaded', async () => {
+  it('renders games with the calculated overall-only record and no absent optional links', async () => {
     const mockScheduleData = {
       data: [
         { 
@@ -38,7 +38,8 @@ describe('Schedule Page', () => {
           opponent: 'University of Arizona', 
           status: 'Home',
           time: '7:00 PM',
-          location: 'Mullett Arena'
+          location: 'Mullett Arena',
+          result: 'W 3-1'
         },
         { 
           date: '2024-01-20', 
@@ -61,6 +62,11 @@ describe('Schedule Page', () => {
       expect(screen.getByText(/University of Arizona/i)).toBeInTheDocument();
       expect(screen.getByText(/Boston University/i)).toBeInTheDocument();
     });
+    expect(screen.getByText('Overall')).toBeInTheDocument();
+    expect(screen.getByText('1-0')).toBeInTheDocument();
+    expect(screen.queryByText('NCHC')).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /box/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /metrics/i })).not.toBeInTheDocument();
   });
 
   it('should render error message when API call fails', async () => {
@@ -104,31 +110,6 @@ describe('Schedule Page', () => {
     });
   });
 
-  it('should not render Box/Metrics links when fields are absent', async () => {
-    const mockScheduleData = {
-      data: [
-        {
-          date: '2024-02-01',
-          opponent: 'Denver',
-          status: 'Away',
-          time: '7:00 PM',
-          location: 'Magness Arena',
-          result: 'L 1-3',
-        },
-      ],
-      source: 'api',
-      timestamp: '2024-02-01T00:00:00Z',
-    };
-
-    getSchedule.mockResolvedValue(mockScheduleData);
-    renderSchedule();
-
-    await waitFor(() => {
-      expect(screen.queryByRole('link', { name: /box/i })).not.toBeInTheDocument();
-      expect(screen.queryByRole('link', { name: /metrics/i })).not.toBeInTheDocument();
-    });
-  });
-
   it('should render 4-row record widget when team_record is provided', async () => {
     const mockScheduleData = {
       data: [
@@ -156,24 +137,6 @@ describe('Schedule Page', () => {
       expect(screen.getByText('7-14-1')).toBeInTheDocument();
       expect(screen.getByText('9-10-1')).toBeInTheDocument();
       expect(screen.getByText('5-9')).toBeInTheDocument(); // ties=0 omitted
-    });
-  });
-
-  it('should render single-row overall record fallback when team_record is absent', async () => {
-    const mockScheduleData = {
-      data: [
-        { date: '2024-01-15', opponent: 'Denver', status: 'Home', time: '7:00 PM', location: 'Mullett Arena', result: 'W 3-1' }
-      ],
-      source: 'api',
-      timestamp: '2024-01-15T00:00:00Z',
-    };
-
-    getSchedule.mockResolvedValue(mockScheduleData);
-    renderSchedule();
-
-    await waitFor(() => {
-      expect(screen.getByText('Overall')).toBeInTheDocument();
-      expect(screen.queryByText('NCHC')).not.toBeInTheDocument();
     });
   });
 

@@ -1,3 +1,5 @@
+/** @jest-environment node */
+
 import { getSourceLabel } from "../newsSource";
 
 describe("getSourceLabel", () => {

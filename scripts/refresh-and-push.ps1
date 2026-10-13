@@ -227,15 +227,6 @@ try {
     'jest'
     '--config'
     'jest.server.config.js'
-    '__tests__/recruiting-scraper.test.js'
-    '__tests__/refresh-recruiting.test.js'
-    '__tests__/refresh-standings.test.js'
-    '--runInBand'
-  ) | Out-Null
-  Invoke-Native 'npx.cmd' @(
-    'jest'
-    '--config'
-    'jest.server.config.js'
     '--runInBand'
   ) | Out-Null
 

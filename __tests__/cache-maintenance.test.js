@@ -50,20 +50,16 @@ afterEach(() => {
 
 describe('pruneCache', () => {
   test('never removes current dataset keys, even when long expired', () => {
+    const config = require('../config/scraper-config');
+    const standingsKey = `nchc_standings_${config.CURRENT_SEASON}`;
     writeCacheEntry('asu_hockey_news', 30 * DAY_MS);
     writeCacheEntry('asu_hockey_roster', 30 * DAY_MS);
+    writeCacheEntry(standingsKey, 30 * DAY_MS);
     const removed = maintenance.pruneCache();
     expect(removed).toEqual([]);
     expect(fs.existsSync(path.join(tmpDir, 'asu_hockey_news'))).toBe(true);
     expect(fs.existsSync(path.join(tmpDir, 'asu_hockey_roster'))).toBe(true);
-  });
-
-  test('never prunes the configured-season standings cache', () => {
-    const config = require('../config/scraper-config');
-    const key = `nchc_standings_${config.CURRENT_SEASON}`;
-    writeCacheEntry(key, 30 * DAY_MS);
-    expect(maintenance.pruneCache()).toEqual([]);
-    expect(fs.existsSync(path.join(tmpDir, key))).toBe(true);
+    expect(fs.existsSync(path.join(tmpDir, standingsKey))).toBe(true);
   });
 
   test('removes abandoned keys older than 3x their TTL (old season schedules)', () => {

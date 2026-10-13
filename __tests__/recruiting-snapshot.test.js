@@ -5,16 +5,10 @@ const {
   validateRecruitingSnapshot,
   readRecruitingSnapshot,
 } = require("../server/services/recruiting-snapshot");
-const { FUTURE_SEASONS } = require("../config/scraper-config");
-
 const seasons = ["2027-2028", "2028-2029"];
 const player = (name) => ({
   name,
   player_link: `https://www.eliteprospects.com/player/1/${name.toLowerCase()}`,
-});
-
-test("tracks only projected 2027-28 and 2028-29 seasons", () => {
-  expect(FUTURE_SEASONS).toEqual(["2027-2028", "2028-2029"]);
 });
 
 test("accepts both tracked seasons when one projected roster is empty", () => {
