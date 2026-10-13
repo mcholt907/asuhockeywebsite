@@ -425,58 +425,42 @@ function createRefreshRunnerFixture() {
     path.join(os.tmpdir(), "refresh-runner-integration-"),
   );
   const remote = path.join(directory, "remote.git");
+  const seed = path.join(directory, "seed");
   const runner = path.join(directory, "runner");
   const shims = path.join(directory, "shims");
   const tracePath = path.join(directory, "npm-trace.txt");
   const statePath = path.join(directory, "refresh-count.txt");
   const gitGlobalConfig = path.join(directory, "empty.gitconfig");
-  const repositoryRoot = path.resolve(__dirname, "..");
-
-  runGit(["-c", "safe.directory=*", "clone", "--bare", repositoryRoot, remote]);
-  const sourceHead = runGit(
-    ["rev-parse", "HEAD"],
-    repositoryRoot,
-  ).stdout.trim();
-  runGit(["--git-dir", remote, "update-ref", "refs/heads/main", sourceHead]);
-  runGit(["--git-dir", remote, "symbolic-ref", "HEAD", "refs/heads/main"]);
-  runGit([
-    "--git-dir",
-    remote,
-    "update-ref",
-    "-d",
-    "refs/heads/auto/data-refresh",
-  ]);
+  // A real remote and single-branch clone exercise publication and leases;
+  // copying the website and its entire Git history adds no coverage here.
+  fs.mkdirSync(seed);
+  for (const relativePath of [
+    ...runtimeFixturePaths,
+    "scripts/refresh-and-push.ps1",
+    "scripts/refresh-and-push.cmd",
+    "scripts/validate-refresh-changes.js",
+    "scripts/ping-refresh-monitor.js",
+    "data/asu_alumni_fallback.json",
+    "data/asu_transfers_fallback.json",
+    "data/asu_recruiting_fallback.json",
+    "data/nchc_standings_fallback.json",
+  ]) {
+    const destination = path.join(seed, ...relativePath.split("/"));
+    fs.mkdirSync(path.dirname(destination), { recursive: true });
+    fs.copyFileSync(path.resolve(__dirname, "..", relativePath), destination);
+  }
+  runGit(["init", "--initial-branch=main", seed]);
+  runGit(["config", "user.name", "Refresh Test"], seed);
+  runGit(["config", "user.email", "refresh@example.invalid"], seed);
+  runGit(["config", "core.autocrlf", "false"], seed);
+  runGit(["add", "."], seed);
+  runGit(["commit", "-m", "refresh fixture"], seed);
+  runGit(["clone", "--bare", seed, remote]);
   runGit(["clone", "--single-branch", "--branch", "main", remote, runner]);
   runGit(["config", "user.name", "Refresh Test"], runner);
   runGit(["config", "user.email", "refresh@example.invalid"], runner);
   runGit(["config", "core.autocrlf", "false"], runner);
   runGit(["reset", "--hard", "HEAD"], runner);
-  fs.copyFileSync(
-    runnerPath,
-    path.join(runner, "scripts", "refresh-and-push.ps1"),
-  );
-  for (const relativePath of runtimeFixturePaths) {
-    const destination = path.join(runner, ...relativePath.split("/"));
-    fs.mkdirSync(path.dirname(destination), { recursive: true });
-    fs.copyFileSync(path.resolve(__dirname, "..", relativePath), destination);
-  }
-  runGit(
-    ["add", "scripts/refresh-and-push.ps1", ...runtimeFixturePaths],
-    runner,
-  );
-  const runnerChanged = spawnSync(
-    "git",
-    ["diff", "--cached", "--quiet", "--exit-code"],
-    { cwd: runner, encoding: "utf8" },
-  );
-  if (runnerChanged.status === 1) {
-    runGit(["commit", "-m", "test runner script"], runner);
-    runGit(["push", "origin", "main"], runner);
-  } else if (runnerChanged.status !== 0) {
-    throw new Error(
-      `unable to inspect runner fixture: ${runnerChanged.stderr}`,
-    );
-  }
   fs.writeFileSync(path.join(runner, ".refresh-runner"), "test runner\n");
   fs.writeFileSync(gitGlobalConfig, "");
 
@@ -513,7 +497,10 @@ if (args[0] === "run" && args[1] === "refresh-data") {
     path.join(shims, "npm.cmd"),
     `@echo off\r\n"${process.execPath}" "${npmShimPath}" %*\r\nexit /b %errorlevel%\r\n`,
   );
-  fs.writeFileSync(path.join(shims, "npx.cmd"), "@echo off\r\nexit /b 0\r\n");
+  fs.writeFileSync(
+    path.join(shims, "npx.cmd"),
+    `@echo off\r\n"${process.execPath}" "${npmShimPath}" %*\r\nexit /b %errorlevel%\r\n`,
+  );
 
   const systemPowerShell = path.join(
     process.env.SystemRoot,
@@ -781,24 +768,7 @@ describe("PowerShell native command execution", () => {
 
 describe("daily refresh runner integration", () => {
   windowsTest(
-    "installs lockfile dependencies before refreshing after updating main",
-    () => {
-      const fixture = createRefreshRunnerFixture();
-      try {
-        const result = fixture.run();
-
-        expectRunnerSuccess(result);
-        expect(
-          fs.readFileSync(fixture.tracePath, "utf8").trim().split(/\r?\n/),
-        ).toEqual(["ci", "run refresh-data"]);
-      } finally {
-        fixture.cleanup();
-      }
-    },
-  );
-
-  windowsTest(
-    "publishes two successive refreshes from a single-branch clone with a lease",
+    "publishes successive refreshes after installing dependencies and testing once",
     () => {
       const fixture = createRefreshRunnerFixture();
       try {
@@ -834,6 +804,16 @@ describe("daily refresh runner integration", () => {
           ).stdout,
         ).toBe("");
         expect(fixture.remoteRefreshOid()).not.toBe(firstOid);
+        expect(
+          fs.readFileSync(fixture.tracePath, "utf8").trim().split(/\r?\n/),
+        ).toEqual([
+          "ci",
+          "run refresh-data",
+          "jest --config jest.server.config.js --runInBand",
+          "ci",
+          "run refresh-data",
+          "jest --config jest.server.config.js --runInBand",
+        ]);
       } finally {
         fixture.cleanup();
       }
@@ -842,6 +822,16 @@ describe("daily refresh runner integration", () => {
 });
 
 describe("isolated refresh runner installer", () => {
+  // These guards only inspect Git metadata, so one immutable fixture is
+  // sufficient for the three different unsafe checkout configurations.
+  let gitIsolationFixture;
+  beforeAll(() => {
+    if (process.platform === "win32") {
+      gitIsolationFixture = createLinkedWorktreeFixture();
+    }
+  });
+  afterAll(() => gitIsolationFixture?.cleanup());
+
   windowsTest(
     "keeps successful native stdout parseable while preserving stderr diagnostics",
     () => {
@@ -904,68 +894,56 @@ describe("isolated refresh runner installer", () => {
   });
 
   windowsTest("rejects a linked worktree as an existing runner", () => {
-    const fixture = createLinkedWorktreeFixture();
-    try {
-      const result = runInstallerHarness("existing", fixture.linkedRunner, {
-        repositoryRoot: fixture.source,
-        expectedOrigin: fixture.origin,
-      });
+    const fixture = gitIsolationFixture;
+    const result = runInstallerHarness("existing", fixture.linkedRunner, {
+      repositoryRoot: fixture.source,
+      expectedOrigin: fixture.origin,
+    });
 
-      expect(result.status).toBe(23);
-      expect(result.stderr).toContain(".git must be a real directory");
-    } finally {
-      fixture.cleanup();
-    }
+    expect(result.status).toBe(23);
+    expect(result.stderr).toContain(".git must be a real directory");
   });
 
   windowsTest("rejects a .git directory that shares source Git storage", () => {
-    const fixture = createLinkedWorktreeFixture();
-    try {
-      const result = runInstallerHarness(
-        "existing",
-        fixture.sharedCommonDirRunner,
-        {
-          repositoryRoot: fixture.source,
-          expectedOrigin: fixture.origin,
-        },
-      );
+    const fixture = gitIsolationFixture;
+    const result = runInstallerHarness(
+      "existing",
+      fixture.sharedCommonDirRunner,
+      {
+        repositoryRoot: fixture.source,
+        expectedOrigin: fixture.origin,
+      },
+    );
 
-      expect(result.status).toBe(23);
-      expect(result.stderr).toContain("standalone clone");
-    } finally {
-      fixture.cleanup();
-    }
+    expect(result.status).toBe(23);
+    expect(result.stderr).toContain("standalone clone");
   });
 
   windowsTest("rejects core.worktree redirected to the source checkout", () => {
-    const fixture = createLinkedWorktreeFixture();
-    try {
-      const status = runInstallerHarness(
-        "status",
-        fixture.redirectedWorktreeRunner,
-        {
-          repositoryRoot: fixture.source,
-          expectedOrigin: fixture.origin,
-        },
-      );
-      expect(status.status).toBe(0);
-      expect(status.stdout.trim()).toBe("");
-      expect(status.stderr.trim()).toBe("");
+    const fixture = gitIsolationFixture;
+    const status = runInstallerHarness(
+      "status",
+      fixture.redirectedWorktreeRunner,
+      {
+        repositoryRoot: fixture.source,
+        expectedOrigin: fixture.origin,
+      },
+    );
+    expect(status.status).toBe(0);
+    expect(status.stdout.trim()).toBe("");
+    expect(status.stderr.trim()).toBe("");
 
-      const result = runInstallerHarness(
-        "existing",
-        fixture.redirectedWorktreeRunner,
-        {
-          repositoryRoot: fixture.source,
-          expectedOrigin: fixture.origin,
-        },
-      );
+    const result = runInstallerHarness(
+      "existing",
+      fixture.redirectedWorktreeRunner,
+      {
+        repositoryRoot: fixture.source,
+        expectedOrigin: fixture.origin,
+      },
+    );
 
-      expect(result.status).toBe(23);
-      expect(result.stderr).toContain("worktree root");
-    } finally {
-      fixture.cleanup();
-    }
+    expect(result.status).toBe(23);
+    expect(result.stderr).toContain("worktree root");
   });
 
   windowsTest("defines the exact daily task without registering it", () => {

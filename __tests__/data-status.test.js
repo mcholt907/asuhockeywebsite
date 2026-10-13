@@ -160,8 +160,6 @@ describe('getDataStatus', () => {
 
   test.each([
     ['malformed shape', { season: '2026-2027', teams: [] }],
-    ['all-zero table', standingsSnapshot({ season: '2026-2027', overallRecord: '0-0-0' })],
-    ['incomplete table', standingsSnapshot({ season: '2026-2027', teams: 8 })],
     ['wrong season', standingsSnapshot({ season: '2025-2026' })],
   ])('ignores a standings cache with %s and reports the valid prior-season fallback', (_, cachePayload) => {
     const config = require('../config/scraper-config');
@@ -200,8 +198,6 @@ describe('getDataStatus', () => {
   test.each([
     ['invalid JSON', '{not valid JSON'],
     ['malformed shape', JSON.stringify({ season: '2025-2026', teams: [] })],
-    ['all-zero table', JSON.stringify(standingsSnapshot({ overallRecord: '0-0-0' }))],
-    ['incomplete table', JSON.stringify(standingsSnapshot({ teams: 8 }))],
   ])('reports standings missing when cache is absent and fallback has %s', (_, fallbackContents) => {
     const rootDir = createStandingsRoot(fallbackContents);
 

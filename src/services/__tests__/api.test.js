@@ -1,177 +1,51 @@
-// Use the manual mock from __mocks__ directory
+/** @jest-environment node */
+
 jest.mock('axios');
-
-// Suppress console.error in tests (expected when testing error cases)
-const originalError = console.error;
-beforeAll(() => {
-  console.error = jest.fn();
-});
-
-afterAll(() => {
-  console.error = originalError;
-});
 
 import axios from 'axios';
 import { getNews, getRoster, getRecruits, getSchedule, getStandings, getTransfers, getAlumni, getStats } from '../api';
 
+const endpoints = [
+  ['getNews', getNews, '/api/news', {
+    data: [{ title: 'Test', link: 'http://t.com', source: 'X', date: '2024-01-01' }],
+    source: 'api', timestamp: '2024-01-01T00:00:00Z',
+  }],
+  ['getRoster', getRoster, '/api/roster', [{ name: 'Player 1', position: 'F', number: '1' }]],
+  ['getRecruits', getRecruits, '/api/recruits', { '2024-2025': [{ name: 'R1', position: 'F' }] }],
+  ['getTransfers', getTransfers, '/api/transfers', { incoming: [], outgoing: [], lastUpdated: '2024-01-01' }],
+  ['getSchedule', getSchedule, '/api/schedule', {
+    data: [{ date: '2024-01-01', opponent: 'Team A', status: 'Home' }],
+    source: 'api', timestamp: '2024-01-01T00:00:00Z',
+  }],
+  ['getStandings', getStandings, '/api/standings', { data: [{ team: 'ASU', rank: 1 }] }],
+  ['getAlumni', getAlumni, '/api/alumni', { skaters: [], goalies: [], lastUpdated: '2024-01-01' }],
+  ['getStats', getStats, '/api/stats', { skaters: [], goalies: [] }],
+];
+
 describe('API Service', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+  beforeEach(() => jest.clearAllMocks());
 
-  describe('getNews', () => {
-    it('returns news data when API call succeeds', async () => {
-      const mockData = {
-        data: {
-          data: [{ title: 'Test', link: 'http://t.com', source: 'X', date: '2024-01-01' }],
-          source: 'api',
-          timestamp: '2024-01-01T00:00:00Z'
-        }
-      };
-      axios.get.mockResolvedValue(mockData);
+  describe.each(endpoints)('%s', (_name, getData, url, data) => {
+    it('returns the response data from its endpoint', async () => {
+      axios.get.mockResolvedValue({ data });
 
-      const result = await getNews();
-
-      expect(result).toEqual(mockData.data);
-      expect(axios.get).toHaveBeenCalledWith(expect.stringContaining('/news'));
+      expect(await getData()).toEqual(data);
+      expect(axios.get).toHaveBeenCalledWith(url);
     });
 
-    it('throws when the network call fails', async () => {
+    it('propagates network failures', async () => {
       axios.get.mockRejectedValue(new Error('Network error'));
-      await expect(getNews()).rejects.toThrow('Network error');
-    });
 
-    it('throws when the response shape is invalid', async () => {
-      axios.get.mockResolvedValue({ data: { invalid: 'format' } });
-      await expect(getNews()).rejects.toThrow(/Invalid data format/i);
+      await expect(getData()).rejects.toThrow('Network error');
     });
   });
 
-  describe('getRoster', () => {
-    it('returns roster data on success', async () => {
-      const mockRoster = [
-        { name: 'Player 1', position: 'F', number: '1' },
-      ];
-      axios.get.mockResolvedValue({ data: mockRoster });
+  it.each([
+    ['getNews', getNews],
+    ['getSchedule', getSchedule],
+  ])('%s rejects an invalid response shape', async (_name, getData) => {
+    axios.get.mockResolvedValue({ data: { invalid: 'format' } });
 
-      const result = await getRoster();
-
-      expect(result).toEqual(mockRoster);
-      expect(axios.get).toHaveBeenCalledWith(expect.stringContaining('/roster'));
-    });
-
-    it('throws when the network call fails', async () => {
-      axios.get.mockRejectedValue(new Error('Network error'));
-      await expect(getRoster()).rejects.toThrow('Network error');
-    });
-  });
-
-  describe('getRecruits', () => {
-    it('returns recruits data on success', async () => {
-      const mock = { '2024-2025': [{ name: 'R1', position: 'F' }] };
-      axios.get.mockResolvedValue({ data: mock });
-      const result = await getRecruits();
-      expect(result).toEqual(mock);
-      expect(axios.get).toHaveBeenCalledWith(expect.stringContaining('/recruits'));
-    });
-
-    it('throws when the network call fails', async () => {
-      axios.get.mockRejectedValue(new Error('Network error'));
-      await expect(getRecruits()).rejects.toThrow('Network error');
-    });
-  });
-
-  describe('getTransfers', () => {
-    it('returns transfer data on success', async () => {
-      const mock = { incoming: [], outgoing: [], lastUpdated: '2024-01-01' };
-      axios.get.mockResolvedValue({ data: mock });
-      const result = await getTransfers();
-      expect(result).toEqual(mock);
-    });
-
-    it('throws when the network call fails', async () => {
-      axios.get.mockRejectedValue(new Error('Network error'));
-      await expect(getTransfers()).rejects.toThrow('Network error');
-    });
-  });
-
-  describe('getSchedule', () => {
-    it('should return schedule data when API call succeeds', async () => {
-      const mockSchedule = {
-        data: {
-          data: [
-            { date: '2024-01-01', opponent: 'Team A', status: 'Home' }
-          ],
-          source: 'api',
-          timestamp: '2024-01-01T00:00:00Z'
-        }
-      };
-
-      axios.get.mockResolvedValue(mockSchedule);
-
-      const result = await getSchedule();
-
-      expect(result).toEqual(mockSchedule.data);
-      expect(axios.get).toHaveBeenCalledWith(expect.stringContaining('/schedule'));
-    });
-
-    it('should throw when the network call fails', async () => {
-      axios.get.mockRejectedValue(new Error('Network error'));
-
-      await expect(getSchedule()).rejects.toThrow('Network error');
-    });
-
-    it('should throw when the response shape is invalid', async () => {
-      axios.get.mockResolvedValue({ data: { invalid: 'format' } });
-
-      await expect(getSchedule()).rejects.toThrow(/Invalid data format/i);
-    });
-  });
-
-  describe('getStandings', () => {
-    it('returns standings data on success', async () => {
-      const mock = { data: [{ team: 'ASU', rank: 1 }] };
-      axios.get.mockResolvedValue({ data: mock });
-
-      const result = await getStandings();
-
-      expect(result).toEqual(mock);
-      expect(axios.get).toHaveBeenCalledWith(expect.stringContaining('/standings'));
-    });
-
-    it('throws when the network call fails', async () => {
-      axios.get.mockRejectedValue(new Error('Network error'));
-      await expect(getStandings()).rejects.toThrow('Network error');
-    });
-  });
-
-  describe('getAlumni', () => {
-    it('returns alumni data on success', async () => {
-      const mock = { skaters: [], goalies: [], lastUpdated: '2024-01-01' };
-      axios.get.mockResolvedValue({ data: mock });
-      const result = await getAlumni();
-      expect(result).toEqual(mock);
-    });
-
-    it('throws when the network call fails', async () => {
-      axios.get.mockRejectedValue(new Error('Network error'));
-      await expect(getAlumni()).rejects.toThrow('Network error');
-    });
-  });
-
-  describe('getStats', () => {
-    it('returns stats data on success', async () => {
-      const mock = { skaters: [], goalies: [] };
-      axios.get.mockResolvedValue({ data: mock });
-      const result = await getStats();
-      expect(result).toEqual(mock);
-      expect(axios.get).toHaveBeenCalledWith(expect.stringContaining('/stats'));
-    });
-
-    it('throws when the network call fails', async () => {
-      axios.get.mockRejectedValue(new Error('Network error'));
-      await expect(getStats()).rejects.toThrow('Network error');
-    });
+    await expect(getData()).rejects.toThrow(/Invalid data format/i);
   });
 });
-

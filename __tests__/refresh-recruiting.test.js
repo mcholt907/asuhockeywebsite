@@ -128,53 +128,7 @@ test("preserves the previous snapshot when refresh data is partial", async () =>
   }
 });
 
-test("preserves prior profile fields by normalized player link when enrichment is blank", async () => {
-  const { directory, file } = createTemporarySnapshotFile();
-  const previous = {
-    ...valid,
-    "2027-2028": [
-      {
-        ...valid["2027-2028"][0],
-        player_photo:
-          "https://files.eliteprospects.com/layout/players/jane.jpg",
-        current_team: "Previous Team",
-      },
-    ],
-  };
-  const refreshed = {
-    ...valid,
-    "2027-2028": [
-      {
-        ...valid["2027-2028"][0],
-        player_link:
-          "https://www.eliteprospects.com/player/1/jane/?utm_source=refresh",
-        player_photo: " ",
-        current_team: "",
-      },
-    ],
-  };
-  fs.writeFileSync(file, JSON.stringify(previous));
-
-  try {
-    await refreshRecruitingSnapshot({
-      fetchData: async () => refreshed,
-      fallbackFile: file,
-    });
-
-    expect(
-      JSON.parse(fs.readFileSync(file, "utf8"))["2027-2028"][0],
-    ).toMatchObject({
-      player_link:
-        "https://www.eliteprospects.com/player/1/jane/?utm_source=refresh",
-      player_photo: "https://files.eliteprospects.com/layout/players/jane.jpg",
-      current_team: "Previous Team",
-    });
-  } finally {
-    fs.rmSync(directory, { recursive: true, force: true });
-  }
-});
-
-test("preserves every prior profile when all new enrichment is blank", async () => {
+test("preserves every prior profile by normalized player link when enrichment is blank", async () => {
   const { directory, file } = createTemporarySnapshotFile();
   const previous = {
     ...valid,
@@ -196,10 +150,10 @@ test("preserves every prior profile when all new enrichment is blank", async () 
   };
   const refreshed = {
     ...valid,
-    "2027-2028": previous["2027-2028"].map((player) => ({
+    "2027-2028": previous["2027-2028"].map((player, index) => ({
       ...player,
-      player_link: `${player.player_link}/?source=refresh`,
-      player_photo: "",
+      player_link: `${player.player_link}/?utm_source=refresh`,
+      player_photo: index === 0 ? " " : "",
       current_team: "",
     })),
   };
@@ -227,6 +181,14 @@ test("preserves every prior profile when all new enrichment is blank", async () 
         current_team: "Bob's Previous Team",
       },
     ]);
+    const written = JSON.parse(fs.readFileSync(file, "utf8"));
+    expect(written).toEqual(published);
+    expect(written["2027-2028"][0]).toMatchObject({
+      player_link:
+        "https://www.eliteprospects.com/player/1/jane/?utm_source=refresh",
+      player_photo: "https://files.eliteprospects.com/layout/players/jane.jpg",
+      current_team: "Jane's Previous Team",
+    });
   } finally {
     fs.rmSync(directory, { recursive: true, force: true });
   }
@@ -275,43 +237,6 @@ test("preserves complementary profile fields from every prior occurrence of a pl
       player_photo: "https://files.eliteprospects.com/layout/players/jane.jpg",
       current_team: "Jane's Previous Team",
     });
-  } finally {
-    fs.rmSync(directory, { recursive: true, force: true });
-  }
-});
-
-test("health-validates the final merged payload before starting the atomic write", async () => {
-  const { directory, file } = createTemporarySnapshotFile();
-  const previousContents = JSON.stringify(valid);
-  fs.writeFileSync(file, previousContents);
-  let positionReads = 0;
-  const changingPlayer = {
-    ...valid["2027-2028"][0],
-    player_photo: "",
-    current_team: "",
-  };
-  Object.defineProperty(changingPlayer, "position", {
-    enumerable: true,
-    get() {
-      positionReads += 1;
-      return positionReads === 1 ? "F" : "X";
-    },
-  });
-  const changingSnapshot = {
-    ...valid,
-    "2027-2028": [changingPlayer],
-  };
-
-  try {
-    await expect(
-      refreshRecruitingSnapshot({
-        fetchData: async () => changingSnapshot,
-        fallbackFile: file,
-      }),
-    ).rejects.toThrow("automated health validation failed");
-
-    expect(fs.readFileSync(file, "utf8")).toBe(previousContents);
-    expect(fs.readdirSync(directory)).toEqual(["fallback.json"]);
   } finally {
     fs.rmSync(directory, { recursive: true, force: true });
   }

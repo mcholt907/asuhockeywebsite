@@ -5,6 +5,15 @@ import { __setMockPathname } from 'react-router-dom';
 
 // Use manual mock from __mocks__ directory
 jest.mock('react-router-dom');
+// The router mock renders every Route. Shell tests only need the layout,
+// so avoid mounting all seven lazy pages and their queries.
+jest.mock('./pages/Home', () => () => null);
+jest.mock('./pages/News', () => () => null);
+jest.mock('./pages/Roster', () => () => null);
+jest.mock('./pages/Schedule', () => () => null);
+jest.mock('./pages/Recruiting', () => () => null);
+jest.mock('./pages/Stats', () => () => null);
+jest.mock('./pages/Alumni', () => () => null);
 
 import App from './App';
 
@@ -23,17 +32,12 @@ describe('App Component', () => {
     __setMockPathname('/');
   });
 
-  it('should render the header with logo', async () => {
+  it('renders the home header and navigation without a footer', async () => {
     renderApp();
     // findAllBy* awaits — gives lazy route chunks time to resolve, avoiding act warnings.
     const logos = await screen.findAllByAltText('ASU Hockey');
     expect(logos.length).toBeGreaterThan(0);
     expect(logos[0]).toBeInTheDocument();
-  });
-
-  it('should render navigation links', async () => {
-    renderApp();
-
     const homeLinks = await screen.findAllByText('Home');
     const newsLinks = screen.getAllByText('News');
     const rosterLinks = screen.getAllByText('Roster');
@@ -49,18 +53,14 @@ describe('App Component', () => {
     expect(recruitingLinks.length).toBeGreaterThan(0);
     expect(statsLinks.length).toBeGreaterThan(0);
     expect(alumniLinks.length).toBeGreaterThan(0);
+    expect(screen.queryByRole('contentinfo')).not.toBeInTheDocument();
   });
 
-  it('should render footer with copyright', async () => {
+  it('renders copyright and social destinations in the non-home footer', async () => {
     __setMockPathname('/news');
     renderApp();
     const currentYear = new Date().getFullYear();
     expect(await screen.findByText(new RegExp(`© ${currentYear} ASU Hockey Fan Site`))).toBeInTheDocument();
-  });
-
-  it('should render social media links in footer', async () => {
-    __setMockPathname('/news');
-    renderApp();
     // Social media links don't have accessible text (just icons), so query by href
     const allLinks = await screen.findAllByRole('link');
     const twitter = allLinks.find(link => link.getAttribute('href') === 'https://twitter.com/SunDevilHockey');

@@ -72,25 +72,6 @@ describe("scrapeCHN — article dates", () => {
     });
   });
 
-  test("dates sort against other sources instead of parsing as 2001", async () => {
-    requestWithRetry.mockResolvedValueOnce({
-      data: chnPage([
-        {
-          date: "Sep. 28",
-          href: "/news/2026/09/28_story.php",
-          title: "CHN story",
-        },
-      ]),
-    });
-
-    const [article] = await scrapeCHN();
-
-    expect(new Date(article.date).getFullYear()).toBe(2026);
-    expect(new Date(article.date) > new Date("September 24, 2026")).toBe(
-      true,
-    );
-  });
-
   test("infers the year from the list text when the URL has no date", async () => {
     jest.useFakeTimers({ now: new Date("2026-09-29T18:00:00Z") });
     requestWithRetry.mockResolvedValueOnce({

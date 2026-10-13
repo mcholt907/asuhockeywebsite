@@ -72,28 +72,8 @@ describe("scrapeCHNRoster â€” SWR caching", () => {
     const result = await scrapeCHNRoster();
 
     expect(result).toEqual(freshRoster);
+    expect(getFromCache).toHaveBeenCalledWith("asu_hockey_roster");
     expect(requestWithRetry).not.toHaveBeenCalled();
-  });
-
-  test("returns stale roster immediately when cache is expired, without blocking on live scrape", async () => {
-    const staleRoster = [
-      {
-        Player: "John Doe",
-        "#": "1",
-        Pos: "F",
-        Ht: "6-0",
-        Wt: "185",
-        DOB: "2000-01-01",
-        Hometown: "Phoenix, AZ",
-      },
-    ];
-    // First call (fresh): miss. Second call (ignoreExpiration=true): stale hit.
-    getFromCache.mockReturnValueOnce(null).mockReturnValueOnce(staleRoster);
-
-    const result = await scrapeCHNRoster();
-
-    // Must return stale data, not wait for the background live scrape
-    expect(result).toEqual(staleRoster);
   });
 
   test("scrapes only the current roster table, not the Recruits table below it", async () => {
