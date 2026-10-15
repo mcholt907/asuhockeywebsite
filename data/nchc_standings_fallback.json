@@ -1,25 +1,9 @@
 {
   "season": "2026-2027",
-  "lastUpdated": "2026-10-14T13:02:43.332Z",
+  "lastUpdated": "2026-10-15T13:04:10.976Z",
   "teams": [
     {
       "rank": "1",
-      "team": "Denver",
-      "pts": "0",
-      "confRecord": "0-0-0",
-      "overallRecord": "2-0-0",
-      "isASU": false
-    },
-    {
-      "rank": "2",
-      "team": "St. Cloud State",
-      "pts": "0",
-      "confRecord": "0-0-0",
-      "overallRecord": "1-2-0",
-      "isASU": false
-    },
-    {
-      "rank": "3",
       "team": "Minnesota Duluth",
       "pts": "0",
       "confRecord": "0-0-0",
@@ -27,23 +11,7 @@
       "isASU": false
     },
     {
-      "rank": "4",
-      "team": "Arizona State",
-      "pts": "0",
-      "confRecord": "0-0-0",
-      "overallRecord": "2-2-0",
-      "isASU": true
-    },
-    {
-      "rank": "5",
-      "team": "Miami",
-      "pts": "0",
-      "confRecord": "0-0-0",
-      "overallRecord": "1-1-0",
-      "isASU": false
-    },
-    {
-      "rank": "6",
+      "rank": "2",
       "team": "St. Thomas",
       "pts": "0",
       "confRecord": "0-0-0",
@@ -51,15 +19,7 @@
       "isASU": false
     },
     {
-      "rank": "7",
-      "team": "North Dakota",
-      "pts": "0",
-      "confRecord": "0-0-0",
-      "overallRecord": "2-0-0",
-      "isASU": false
-    },
-    {
-      "rank": "8",
+      "rank": "3",
       "team": "Western Michigan",
       "pts": "0",
       "confRecord": "0-0-0",
@@ -67,8 +27,48 @@
       "isASU": false
     },
     {
+      "rank": "4",
+      "team": "Miami",
+      "pts": "0",
+      "confRecord": "0-0-0",
+      "overallRecord": "1-1-0",
+      "isASU": false
+    },
+    {
+      "rank": "5",
+      "team": "Omaha",
+      "pts": "0",
+      "confRecord": "0-0-0",
+      "overallRecord": "0-0-0",
+      "isASU": false
+    },
+    {
+      "rank": "6",
+      "team": "Denver",
+      "pts": "0",
+      "confRecord": "0-0-0",
+      "overallRecord": "2-0-0",
+      "isASU": false
+    },
+    {
+      "rank": "7",
+      "team": "St. Cloud State",
+      "pts": "0",
+      "confRecord": "0-0-0",
+      "overallRecord": "1-2-0",
+      "isASU": false
+    },
+    {
+      "rank": "8",
+      "team": "Arizona State",
+      "pts": "0",
+      "confRecord": "0-0-0",
+      "overallRecord": "2-2-0",
+      "isASU": true
+    },
+    {
       "rank": "9",
-      "team": "Colorado College",
+      "team": "North Dakota",
       "pts": "0",
       "confRecord": "0-0-0",
       "overallRecord": "2-0-0",
@@ -76,10 +76,10 @@
     },
     {
       "rank": "10",
-      "team": "Omaha",
+      "team": "Colorado College",
       "pts": "0",
       "confRecord": "0-0-0",
-      "overallRecord": "0-0-0",
+      "overallRecord": "2-0-0",
       "isASU": false
     }
   ]
