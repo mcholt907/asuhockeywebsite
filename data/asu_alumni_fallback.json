@@ -1,22 +1,6 @@
 {
   "skaters": [
     {
-      "name": "Ty Jackson",
-      "position": "C",
-      "playerUrl": "https://www.eliteprospects.com/player/418527/ty-jackson",
-      "playerId": "418527",
-      "team": "Deggendorfer SC",
-      "teamUrl": "https://www.eliteprospects.com/team/703/deggendorfer-sc",
-      "league": "Germany3",
-      "leagueUrl": "https://www.eliteprospects.com/league/germany3/stats",
-      "isTotals": false,
-      "gp": "8",
-      "g": "6",
-      "a": "10",
-      "tp": "16",
-      "pim": "0"
-    },
-    {
       "name": "Dylan Jackson",
       "position": "RW",
       "playerUrl": "https://www.eliteprospects.com/player/418528/dylan-jackson",
@@ -26,11 +10,27 @@
       "league": "Germany3",
       "leagueUrl": "https://www.eliteprospects.com/league/germany3/stats",
       "isTotals": false,
-      "gp": "8",
-      "g": "5",
-      "a": "11",
-      "tp": "16",
-      "pim": "2"
+      "gp": "9",
+      "g": "6",
+      "a": "13",
+      "tp": "19",
+      "pim": "4"
+    },
+    {
+      "name": "Ty Jackson",
+      "position": "C",
+      "playerUrl": "https://www.eliteprospects.com/player/418527/ty-jackson",
+      "playerId": "418527",
+      "team": "Deggendorfer SC",
+      "teamUrl": "https://www.eliteprospects.com/team/703/deggendorfer-sc",
+      "league": "Germany3",
+      "leagueUrl": "https://www.eliteprospects.com/league/germany3/stats",
+      "isTotals": false,
+      "gp": "9",
+      "g": "8",
+      "a": "10",
+      "tp": "18",
+      "pim": "0"
     },
     {
       "name": "Tim Theocharidis",
@@ -42,7 +42,7 @@
       "league": "HockeyAllsvenskan",
       "leagueUrl": "https://www.eliteprospects.com/league/hockeyallsvenskan/stats",
       "isTotals": false,
-      "gp": "10",
+      "gp": "11",
       "g": "1",
       "a": "12",
       "tp": "13",
@@ -138,7 +138,7 @@
       "league": "Germany3",
       "leagueUrl": "https://www.eliteprospects.com/league/germany3/stats",
       "isTotals": false,
-      "gp": "8",
+      "gp": "9",
       "g": "1",
       "a": "2",
       "tp": "3",
@@ -257,6 +257,22 @@
       "pim": "2"
     },
     {
+      "name": "Tyler Busch",
+      "position": "C",
+      "playerUrl": "https://www.eliteprospects.com/player/83629/tyler-busch",
+      "playerId": "83629",
+      "team": "Guildford Flames",
+      "teamUrl": "https://www.eliteprospects.com/team/1106/guildford-flames",
+      "league": "EIHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/eihl/stats",
+      "isTotals": false,
+      "gp": "3",
+      "g": "0",
+      "a": "2",
+      "tp": "2",
+      "pim": "0"
+    },
+    {
       "name": "Artem Shlaine",
       "position": "C/LW",
       "playerUrl": "https://www.eliteprospects.com/player/498107/artem-shlaine",
@@ -298,11 +314,27 @@
       "league": "AHL",
       "leagueUrl": "https://www.eliteprospects.com/league/ahl/stats",
       "isTotals": false,
-      "gp": "2",
+      "gp": "3",
       "g": "1",
       "a": "0",
       "tp": "1",
       "pim": "0"
+    },
+    {
+      "name": "Noah Powell",
+      "position": "RW",
+      "playerUrl": "https://www.eliteprospects.com/player/674718/noah-powell",
+      "playerId": "674718",
+      "team": "Lehigh Valley Phantoms",
+      "teamUrl": "https://www.eliteprospects.com/team/17333/lehigh-valley-phantoms",
+      "league": "AHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/ahl/stats",
+      "isTotals": false,
+      "gp": "3",
+      "g": "1",
+      "a": "0",
+      "tp": "1",
+      "pim": "15"
     },
     {
       "name": "Josh Doan",
@@ -314,7 +346,7 @@
       "league": "NHL",
       "leagueUrl": "https://www.eliteprospects.com/league/nhl/stats",
       "isTotals": false,
-      "gp": "6",
+      "gp": "7",
       "g": "1",
       "a": "0",
       "tp": "1",
@@ -385,22 +417,6 @@
       "pim": "2"
     },
     {
-      "name": "Tyler Busch",
-      "position": "C",
-      "playerUrl": "https://www.eliteprospects.com/player/83629/tyler-busch",
-      "playerId": "83629",
-      "team": "Guildford Flames",
-      "teamUrl": "https://www.eliteprospects.com/team/1106/guildford-flames",
-      "league": "EIHL",
-      "leagueUrl": "https://www.eliteprospects.com/league/eihl/stats",
-      "isTotals": false,
-      "gp": "3",
-      "g": "0",
-      "a": "1",
-      "tp": "1",
-      "pim": "0"
-    },
-    {
       "name": "Bennett Schimek",
       "position": "F",
       "playerUrl": "https://www.eliteprospects.com/player/512109/bennett-schimek",
@@ -415,6 +431,22 @@
       "a": "1",
       "tp": "1",
       "pim": "0"
+    },
+    {
+      "name": "Ty Murchison",
+      "position": "D",
+      "playerUrl": "https://www.eliteprospects.com/player/512190/ty-murchison",
+      "playerId": "512190",
+      "team": "Lehigh Valley Phantoms",
+      "teamUrl": "https://www.eliteprospects.com/team/17333/lehigh-valley-phantoms",
+      "league": "AHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/ahl/stats",
+      "isTotals": false,
+      "gp": "4",
+      "g": "0",
+      "a": "1",
+      "tp": "1",
+      "pim": "6"
     },
     {
       "name": "Max Balinson",
@@ -549,6 +581,22 @@
       "position": "D",
       "playerUrl": "https://www.eliteprospects.com/player/279767/jackson-niedermayer",
       "playerId": "279767",
+      "team": "",
+      "teamUrl": "",
+      "league": "totals",
+      "leagueUrl": "",
+      "isTotals": true,
+      "gp": "2",
+      "g": "0",
+      "a": "0",
+      "tp": "0",
+      "pim": "0"
+    },
+    {
+      "name": "Jackson Niedermayer",
+      "position": "D",
+      "playerUrl": "https://www.eliteprospects.com/player/279767/jackson-niedermayer",
+      "playerId": "279767",
       "team": "San Diego Gulls",
       "teamUrl": "https://www.eliteprospects.com/team/8516/san-diego-gulls",
       "league": "AHL",
@@ -561,20 +609,20 @@
       "pim": "0"
     },
     {
-      "name": "Noah Powell",
-      "position": "RW",
-      "playerUrl": "https://www.eliteprospects.com/player/674718/noah-powell",
-      "playerId": "674718",
-      "team": "Lehigh Valley Phantoms",
-      "teamUrl": "https://www.eliteprospects.com/team/17333/lehigh-valley-phantoms",
-      "league": "AHL",
-      "leagueUrl": "https://www.eliteprospects.com/league/ahl/stats",
+      "name": "Jackson Niedermayer",
+      "position": "D",
+      "playerUrl": "https://www.eliteprospects.com/player/279767/jackson-niedermayer",
+      "playerId": "279767",
+      "team": "Tulsa Oilers",
+      "teamUrl": "https://www.eliteprospects.com/team/721/tulsa-oilers",
+      "league": "ECHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
       "isTotals": false,
-      "gp": "2",
-      "g": "0",
-      "a": "0",
-      "tp": "0",
-      "pim": "15"
+      "gp": "-",
+      "g": "-",
+      "a": "-",
+      "tp": "-",
+      "pim": "-"
     },
     {
       "name": "Austin Zemlak",
@@ -591,22 +639,6 @@
       "a": "0",
       "tp": "0",
       "pim": "2"
-    },
-    {
-      "name": "Ty Murchison",
-      "position": "D",
-      "playerUrl": "https://www.eliteprospects.com/player/512190/ty-murchison",
-      "playerId": "512190",
-      "team": "Lehigh Valley Phantoms",
-      "teamUrl": "https://www.eliteprospects.com/team/17333/lehigh-valley-phantoms",
-      "league": "AHL",
-      "leagueUrl": "https://www.eliteprospects.com/league/ahl/stats",
-      "isTotals": false,
-      "gp": "3",
-      "g": "0",
-      "a": "0",
-      "tp": "0",
-      "pim": "4"
     },
     {
       "name": "Jack Becker",
@@ -947,5 +979,5 @@
       "svPct": "-"
     }
   ],
-  "lastUpdated": "2026-10-13T13:01:55.132Z"
+  "lastUpdated": "2026-10-15T13:03:01.013Z"
 }
