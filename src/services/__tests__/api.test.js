@@ -32,12 +32,13 @@ describe('API Service', () => {
       expect(await getData()).toEqual(data);
       expect(axios.get).toHaveBeenCalledWith(url);
     });
+  });
 
-    it('propagates network failures', async () => {
-      axios.get.mockRejectedValue(new Error('Network error'));
+  // The wrappers share axios rejection behavior; exercise it once here.
+  it('propagates network failures', async () => {
+    axios.get.mockRejectedValue(new Error('Network error'));
 
-      await expect(getData()).rejects.toThrow('Network error');
-    });
+    await expect(getNews()).rejects.toThrow('Network error');
   });
 
   it.each([

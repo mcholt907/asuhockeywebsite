@@ -7,20 +7,15 @@ jest.mock('../../../services/api');
 import * as api from '../../../services/api';
 import { useAlumni } from '../useAlumni';
 import { useTransfers } from '../useTransfers';
-import { useStats } from '../useStats';
-import { useStandings } from '../useStandings';
-import { useSchedule } from '../useSchedule';
 import { useRoster } from '../useRoster';
-import { useRecruits } from '../useRecruits';
 
+// Other hooks are exercised through page tests with the real hooks and mocked API.
+// Keep direct wiring coverage for pages without that component-level coverage.
+// Recruiting page tests use empty transfers, so retain populated transfer coverage.
 const cases = [
   ['useAlumni', useAlumni, api.getAlumni, { skaters: [{ name: 'Alumnus' }], goalies: [] }],
   ['useTransfers', useTransfers, api.getTransfers, { incoming: [{ name: 'Transfer' }], outgoing: [], lastUpdated: null }],
-  ['useStats', useStats, api.getStats, { skaters: [{ Player: 'Skater', G: '10' }], goalies: [] }],
-  ['useStandings', useStandings, api.getStandings, { data: [{ team: 'ASU' }] }],
-  ['useSchedule', useSchedule, api.getSchedule, { data: [{ date: '2024-01-01', opponent: 'Team A' }], source: 'api' }],
   ['useRoster', useRoster, api.getRoster, [{ name: 'Roster Player' }]],
-  ['useRecruits', useRecruits, api.getRecruits, { '2026-2027': [{ name: 'Recruit' }] }],
 ];
 
 describe('query hook API wiring', () => {
