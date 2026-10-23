@@ -1,6 +1,19 @@
-# Getting Started with Create React App
+# ASU Hockey Website
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+React frontend built with Vite 8 and an Express backend, running on Node.js 24.22.1.
+
+## Render deployment
+
+Use `npm ci && npm run build` as the Render build command and `node server.js`
+as the start command. The committed lockfile makes dependency installation
+repeatable. The `postinstall` script installs Puppeteer's matching Chrome once;
+the build then prerenders all seven routes into `build/` for Express to serve.
+If Render's dashboard overrides the Blueprint, set the same build command there.
+
+Vite keeps route bundles separate and caches Sentry in its own bundle while
+initializing error tracking at startup. `npm audit --audit-level=moderate` runs
+in CI. The `qs` override keeps Express's pinned query parser on a patched
+6.x release until Express updates its own dependency.
 
 ## Available Scripts
 

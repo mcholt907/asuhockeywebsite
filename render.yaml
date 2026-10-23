@@ -7,7 +7,8 @@ services:
     runtime: node
     region: oregon
     plan: pro
-    buildCommand: npm install && npx puppeteer browsers install chrome && npm run build
+    # postinstall installs the Chrome version required by Puppeteer.
+    buildCommand: npm ci && npm run build
     startCommand: node server.js
     envVars:
       - key: NODE_VERSION

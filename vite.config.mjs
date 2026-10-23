@@ -14,5 +14,15 @@ export default defineConfig({
     // scripts/prerender.js (line 15) keep working unchanged.
     outDir: 'build',
     sourcemap: true,
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            // Cache telemetry separately without delaying startup error tracking.
+            { name: 'sentry', test: /node_modules[\\/]@sentry[\\/]/ },
+          ],
+        },
+      },
+    },
   },
 });
