@@ -288,7 +288,7 @@
 .stat-lab-table thead th {
   background: var(--gradient-primary);
   color: var(--white);
-  padding: 16px 18px;
+  padding: 10px 10px;
   text-align: left;
   font-weight: 700;
   font-size: 0.85rem;
@@ -317,9 +317,14 @@
 }
 
 .stat-lab-table td {
-  padding: 14px 18px;
+  padding: 8px 10px;
   color: var(--text-primary);
   vertical-align: middle;
+}
+
+.stat-lab-table th:first-child,
+.stat-lab-table td:first-child {
+  white-space: nowrap;
 }
 
 .stat-lab-table td:first-child {
@@ -435,12 +440,12 @@
   }
 
   .stat-lab-table thead th {
-    padding: 8px 12px;
+    padding: 7px 8px;
     font-size: 0.75rem;
   }
 
   .stat-lab-table td {
-    padding: 8px 12px;
+    padding: 7px 8px;
     font-size: 0.85rem;
   }
 }
@@ -478,3 +483,4 @@
   font-size: 0.75rem;
   color: var(--asu-gold);
 }
+
