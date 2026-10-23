@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const EXPECTED_NODE_VERSION = "24.20.0";
+const EXPECTED_NODE_VERSION = "24.22.1";
 const EXPECTED_NODE_MAJOR = "24";
 
 function readTrimmed(root, relativePath) {
