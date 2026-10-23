@@ -123,13 +123,26 @@ ${pages
 });
 
 // Serve the React application's static files from the 'build' directory
-app.use(express.static(path.join(__dirname, "..", "build")));
+app.use(express.static(path.join(__dirname, "..", "build"), {
+  setHeaders(res, filePath) {
+    if (filePath.endsWith(".html")) {
+      res.setHeader("Cache-Control", "no-cache");
+    }
+  },
+}));
+
+// A removed build asset must not fall through to the SPA's HTML response.
+app.use("/assets", (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  res.sendStatus(404);
+});
 
 // Sentry Error Handler must be after all controllers and before other error middleware (if any)
 Sentry.setupExpressErrorHandler(app);
 
 // For any other request, serve the React app's index.html file
 app.get("*", (req, res) => {
+  res.setHeader("Cache-Control", "no-cache");
   res.sendFile(path.join(__dirname, "..", "build", "index.html"));
 });
 
