@@ -88,6 +88,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  jest.restoreAllMocks();
   delete process.env.CACHE_DIR;
   if (tmpDir && fs.existsSync(tmpDir)) {
     fs.rmSync(tmpDir, { recursive: true, force: true });
@@ -143,10 +144,13 @@ describe('getDataStatus', () => {
   });
 
   test('reports the bundled recruiting roster as an alerting fallback dataset', () => {
+    const snapshotPath = require.resolve('../data/asu_recruiting_fallback.json');
+    jest.spyOn(Date, 'now').mockReturnValue(fs.statSync(snapshotPath).mtimeMs + HOUR_MS);
     const recruiting = datasetByName('recruiting');
     expect(recruiting.source).toBe('fallback');
     expect(recruiting.file).toBe('data/asu_recruiting_fallback.json');
     expect(recruiting.alert).toBe(true);
+    expect(recruiting.ageMs).toBe(HOUR_MS);
     expect(recruiting.status).toBe('ok');
   });
 

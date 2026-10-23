@@ -32,10 +32,8 @@ jobs:
       - name: Build
         run: CI=true npm run build
 
-      # Held at critical: post-Vite the remaining high finding is
-      # path-to-regexp transitive via Express, tracked separately.
-      - name: Audit critical vulnerabilities
-        run: npm audit --audit-level=critical
+      - name: Audit dependency vulnerabilities
+        run: npm audit --audit-level=moderate
 
       - name: Unit tests
         run: CI=true npm test -- --watchAll=false

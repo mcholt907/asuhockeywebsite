@@ -42,6 +42,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  jest.restoreAllMocks();
   delete process.env.CACHE_DIR;
   if (tmpDir && fs.existsSync(tmpDir)) {
     fs.rmSync(tmpDir, { recursive: true, force: true });
@@ -132,6 +133,8 @@ describe('checkDataStaleness', () => {
   });
 
   test('does not alert while the bundled recruiting fallback is fresh', () => {
+    const snapshotPath = require.resolve('../data/asu_recruiting_fallback.json');
+    jest.spyOn(Date, 'now').mockReturnValue(fs.statSync(snapshotPath).mtimeMs + HOUR_MS);
     const alerts = maintenance.checkDataStaleness();
     expect(alerts.find((a) => a.name === 'recruiting')).toBeUndefined();
   });
