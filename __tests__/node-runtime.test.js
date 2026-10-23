@@ -14,8 +14,8 @@ const launcherPath = path.resolve(
 const windowsTest = process.platform === "win32" ? test : test.skip;
 
 function createRuntimeFixture({
-  nvmVersion = "24.20.0",
-  launcherVersion = "24.20.0",
+  nvmVersion = "24.22.1",
+  launcherVersion = "24.22.1",
 } = {}) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "node-runtime-"));
   fs.mkdirSync(path.join(root, ".github", "workflows"), { recursive: true });
@@ -24,15 +24,15 @@ function createRuntimeFixture({
     path.join(root, "package.json"),
     JSON.stringify({ engines: { node: "24.x" } }),
   );
-  fs.writeFileSync(path.join(root, ".node-version"), "24.20.0\n");
+  fs.writeFileSync(path.join(root, ".node-version"), "24.22.1\n");
   fs.writeFileSync(path.join(root, ".nvmrc"), `${nvmVersion}\n`);
   fs.writeFileSync(
     path.join(root, ".github", "workflows", "ci.yml"),
-    "node-version: 24.20.0\nnode-version: 24.20.0\n",
+    "node-version: 24.22.1\nnode-version: 24.22.1\n",
   );
   fs.writeFileSync(
     path.join(root, "render.yaml"),
-    "- key: NODE_VERSION\n  value: 24.20.0\n",
+    "- key: NODE_VERSION\n  value: 24.22.1\n",
   );
   fs.writeFileSync(
     path.join(root, "scripts", "refresh-and-push.cmd"),
@@ -75,13 +75,13 @@ function runLauncher(
 }
 
 describe("Node runtime contract", () => {
-  test("accepts Node 24.20.0 when every runtime declaration agrees", () => {
+  test("accepts Node 24.22.1 when every runtime declaration agrees", () => {
     const root = createRuntimeFixture();
     try {
-      const result = runVerifier(root, "v24.20.0");
+      const result = runVerifier(root, "v24.22.1");
 
       expect(result.status).toBe(0);
-      expect(result.stdout).toContain("Node runtime verified: v24.20.0");
+      expect(result.stdout).toContain("Node runtime verified: v24.22.1");
       expect(result.stderr).toBe("");
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
@@ -95,7 +95,7 @@ describe("Node runtime contract", () => {
 
       expect(result.status).not.toBe(0);
       expect(result.stderr).toContain(
-        "Node v22.15.0 is unsupported; install Node v24.20.0",
+        "Node v22.15.0 is unsupported; install Node v24.22.1",
       );
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
@@ -105,11 +105,11 @@ describe("Node runtime contract", () => {
   test("rejects drift between checked-in runtime declarations", () => {
     const root = createRuntimeFixture({ nvmVersion: "22.15.0" });
     try {
-      const result = runVerifier(root, "v24.20.0");
+      const result = runVerifier(root, "v24.22.1");
 
       expect(result.status).not.toBe(0);
       expect(result.stderr).toContain(
-        ".nvmrc declares 22.15.0; expected 24.20.0",
+        ".nvmrc declares 22.15.0; expected 24.22.1",
       );
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
@@ -119,11 +119,11 @@ describe("Node runtime contract", () => {
   test("rejects drift in the Windows refresh launcher pin", () => {
     const root = createRuntimeFixture({ launcherVersion: "22.15.0" });
     try {
-      const result = runVerifier(root, "v24.20.0");
+      const result = runVerifier(root, "v24.22.1");
 
       expect(result.status).not.toBe(0);
       expect(result.stderr).toContain(
-        "Windows refresh launcher declares 22.15.0; expected 24.20.0",
+        "Windows refresh launcher declares 22.15.0; expected 24.22.1",
       );
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
@@ -138,7 +138,7 @@ describe("Windows refresh launcher", () => {
 
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain(
-      `Node v24.20.0 was not found at ${missingRuntime}`,
+      `Node v24.22.1 was not found at ${missingRuntime}`,
     );
   });
 
