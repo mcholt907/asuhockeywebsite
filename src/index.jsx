@@ -6,6 +6,9 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { NotificationProvider } from './context/NotificationContext';
+import { installPreloadRecovery } from './utils/preloadRecovery';
+
+installPreloadRecovery(import.meta.url);
 
 const isProd = process.env.NODE_ENV === 'production';
 
