@@ -23,7 +23,7 @@ Priorities: CF%, FF%, shot share, goal differential, game xG differential, indiv
 - [x] Build four responsive views with functional filters, sorting, accessible labels, chart alternatives, provenance and glossary. No new dependencies.
 - [x] Add desktop/footer navigation, mobile navigation, prerender route, and a Stats-page link.
 - [x] Verify calculations and interactions with Jest; run frontend suite, typecheck and production build. Inspect desktop/mobile with Playwright, including navigation and overflow.
-- [ ] Review diff independently, commit only task files, push, open PR, attach it, and enable auto-merge after checks according to repository guidance.
+- [x] Review diff independently, commit only task files, push, open PR, attach it, and enable auto-merge after checks according to repository guidance.
 
 ## Live integration follow-up
 
@@ -36,9 +36,11 @@ Use historical verified numbers rather than invented examples or an unvalidated 
 ## Verification results
 
 - Frontend Jest: 14 suites, 57 tests passed (7 new analytics tests).
+- Server Jest: 22 suites, 276 tests passed. Temporary Git fixture tests required running outside the Windows sandbox.
 - `npm run typecheck`: passed.
 - `npm run build`: passed including all eight prerendered routes.
 - Local Playwright/Chrome: all four views checked at 320, 700, 780, 900 and 1100px; additional team checks at 390, 800, 1024 and 1440px. No page overflow or runtime errors. Mobile navigation remains horizontally scrollable at 320px and Analytics is reachable.
 - Browser interactions: venue filter, selected-game fallback and selection, player position/search, and mobile Analytics navigation passed. Sorting verified in Jest.
 - Independent read-only review verified the source figures and calculations, and reviewed the tablet navigation correction. No remaining material findings.
 - Layout correction: constrain header transitions to colors/opacity and reserve logo space with compact links at 780–1100px. Before/after measurements verified no logo overlap.
+- CI initially passed E2E but was blocked by a pre-existing high-severity Zod advisory in Puppeteer's dependency tree. Updating the lockfile within the existing Puppeteer 25.x range selected Puppeteer 25.16.0 and Zod 4.6.7. The moderate-or-higher audit now passes; six low-severity findings remain in the existing Jest/deepmerge tree. No forced breaking downgrade was applied.
