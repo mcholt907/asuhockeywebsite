@@ -15,7 +15,7 @@ const baseUrl = `http://localhost:${PORT}`;
 // the SPA fallback template for routes not yet written. Rendering it first
 // made every later route start from Home's prerendered <head> (e.g. its hero
 // image preload leaked onto every page).
-const routes = ['/news', '/schedule', '/roster', '/stats', '/recruiting', '/alumni', '/'];
+const routes = ['/news', '/schedule', '/roster', '/stats', '/analytics', '/recruiting', '/alumni', '/'];
 const buildDir = path.join(__dirname, '..', 'build');
 
 async function prerender() {

@@ -48,6 +48,7 @@ const navItems = [
     { path: '/schedule', label: 'Schedule', icon: icons.schedule },
     { path: '/roster', label: 'Roster', icon: icons.roster },
     { path: '/stats', label: 'Stats', icon: icons.stats },
+    { path: '/analytics', label: 'Analytics', icon: icons.stats },
     { path: '/recruiting', label: 'Recruiting', icon: icons.recruiting },
     { path: '/alumni', label: 'Alumni', icon: icons.alumni },
 ];
