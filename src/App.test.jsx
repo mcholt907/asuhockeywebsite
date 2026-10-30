@@ -13,6 +13,7 @@ jest.mock('./pages/Roster', () => () => null);
 jest.mock('./pages/Schedule', () => () => null);
 jest.mock('./pages/Recruiting', () => () => null);
 jest.mock('./pages/Stats', () => () => null);
+jest.mock('./pages/Analytics', () => () => null);
 jest.mock('./pages/Alumni', () => () => null);
 
 import App from './App';

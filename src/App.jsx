@@ -15,6 +15,7 @@ const Roster = lazy(() => import('./pages/Roster'));
 const Schedule = lazy(() => import('./pages/Schedule'));
 const Recruiting = lazy(() => import('./pages/Recruiting'));
 const Stats = lazy(() => import('./pages/Stats'));
+const Analytics = lazy(() => import('./pages/Analytics'));
 const Alumni = lazy(() => import('./pages/Alumni'));
 
 function AppInner() {
@@ -52,6 +53,7 @@ function AppInner() {
                 <li><NavLink to="/schedule">Schedule</NavLink></li>
                 <li><NavLink to="/roster">Roster</NavLink></li>
                 <li><NavLink to="/stats">Stats</NavLink></li>
+                <li><NavLink to="/analytics">Analytics</NavLink></li>
                 <li><NavLink to="/recruiting">Recruiting</NavLink></li>
                 <li><NavLink to="/alumni">Where Are They Now?</NavLink></li>
               </ul>
@@ -69,6 +71,7 @@ function AppInner() {
               <Route path="/recruiting" element={<Recruiting />} />
               <Route path="/alumni" element={<Alumni />} />
               <Route path="/stats" element={<Stats />} />
+              <Route path="/analytics" element={<Analytics />} />
               {/* Hidden for now
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
@@ -91,6 +94,7 @@ function AppInner() {
                   <li><NavLink to="/schedule">Schedule</NavLink></li>
                   <li><NavLink to="/roster">Roster</NavLink></li>
                   <li><NavLink to="/stats">Stats</NavLink></li>
+                  <li><NavLink to="/analytics">Analytics</NavLink></li>
                   <li><NavLink to="/recruiting">Recruiting</NavLink></li>
                   <li><NavLink to="/alumni">Where Are They Now?</NavLink></li>
                 </ul>

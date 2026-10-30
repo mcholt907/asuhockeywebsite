@@ -1,6 +1,7 @@
 // src/pages/Stats.jsx
 import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
+import { Link } from "react-router-dom";
 import SortableTable from "../components/SortableTable";
 import { useStats } from "../hooks/queries/useStats";
 import { SEASON_SHORT } from "../config/season";
@@ -152,7 +153,8 @@ function Stats() {
       </Helmet>
       <div className="stat-lab-header">
         <h1>ASU Hockey Player Stats</h1>
-        <p className="subtitle">Advanced Analytics & Team Leaders</p>
+        <p className="subtitle">Player Statistics & Team Leaders</p>
+        <Link to="/analytics">Explore the advanced analytics prototype</Link>
       </div>
 
       {isPriorSeason && seasonLabel && (

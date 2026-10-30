@@ -32,6 +32,7 @@ describe("MobileBottomNav", () => {
       "Schedule",
       "Roster",
       "Stats",
+      "Analytics",
       "Recruiting",
       "Alumni",
     ]);

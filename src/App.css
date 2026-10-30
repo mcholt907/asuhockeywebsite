@@ -203,7 +203,7 @@ header {
   text-transform: uppercase;
   letter-spacing: 0.03em;
   border-radius: var(--border-radius-sm);
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
   position: relative;
   opacity: 0.9;
   white-space: nowrap;
@@ -385,6 +385,18 @@ footer {
 
 /* Media Queries */
 /* --- Responsive Header (bottom nav handles navigation below 780px) --- */
+@media (min-width: 780px) and (max-width: 1100px) {
+  /* Reserve the absolute logo's space when all eight links are visible. */
+  .header-container {
+    padding-left: 88px;
+  }
+
+  .main-nav ul li a {
+    padding: 10px 8px;
+    font-size: 15px;
+  }
+}
+
 @media (max-width: 779px) {
   :root {
     --header-height: 60px;
