@@ -141,12 +141,17 @@ router.get("/transfers", async (req, res) => {
 router.get("/alumni", async (req, res) => {
   try {
     console.log("[API /alumni] Fetching alumni data...");
-    let alumniData = await scrapeAlumniData();
+    // Attach the optional filter's recovery immediately, including when it
+    // rejects before alumni finishes or after alumni has already failed.
+    let [alumniData, recruitingData] = await Promise.all([
+      scrapeAlumniData(),
+      fetchRecruitingData().catch((error) => {
+        console.error("[API /alumni] Recruit filter skipped:", error.message);
+        return null;
+      }),
+    ]);
     try {
-      alumniData = excludeCommittedRecruits(
-        alumniData,
-        await fetchRecruitingData(),
-      );
+      alumniData = excludeCommittedRecruits(alumniData, recruitingData);
     } catch (error) {
       // Recruiting data is only a filter here; serve alumni unfiltered.
       console.error("[API /alumni] Recruit filter skipped:", error.message);

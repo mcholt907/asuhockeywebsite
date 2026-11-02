@@ -1,10 +1,7 @@
 // news.js — news aggregation (thesundevils.com website-api + CHN HTML)
 const cheerio = require("cheerio");
 const config = require("../../config/scraper-config");
-const {
-  requestWithRetry,
-  delayBetweenRequests,
-} = require("../lib/request-helper");
+const { requestWithRetry } = require("../lib/request-helper");
 const { createCachedScraper } = require("./create-cached-scraper");
 
 // thesundevils.com runs on the WMT Digital / Nuxt platform, which serves all
@@ -206,9 +203,11 @@ function sortArticles(articles) {
 }
 
 async function scrapeAllNews() {
-  const sunDevilsArticles = await scrapeSunDevilsNewsList();
-  await delayBetweenRequests();
-  const chnArticles = await scrapeCHN();
+  // Independent hosts: neither source needs to wait for the other's response.
+  const [sunDevilsArticles, chnArticles] = await Promise.all([
+    scrapeSunDevilsNewsList(),
+    scrapeCHN(),
+  ]);
   const allArticles = dedupeArticles([...sunDevilsArticles, ...chnArticles]);
   sortArticles(allArticles);
   return allArticles;
