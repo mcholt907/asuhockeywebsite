@@ -29,7 +29,7 @@ Scope: all production async call sites in `server/`, `src/`, root scripts and
       hits, and failure behavior with the targeted tests.
 - [x] Run server/frontend suites, typecheck and production build (288 server
   tests, 57 frontend tests; all eight routes prerendered).
-- [ ] Review scraper reliability and full diff, commit only task files, push,
+- [x] Review scraper reliability and full diff, commit only task files, push,
       open PR and enable auto-merge after CI.
 
 ## Deliberately preserved ordering
@@ -61,3 +61,20 @@ Pre-existing, outside async-order scope: schedule links depend on global `tr`
 selection, exact Box/Metrics labels and date-bearing URLs. A future reliability
 change can validate the schedule table and warn about missing completed-game
 links; this change does not alter selectors.
+
+## CI audit follow-up
+
+PR #113's first CI run passed E2E but failed `npm audit --audit-level=moderate`
+before unit tests ran. Update follow-redirects to 1.16.2 in the lockfile and
+upgrade Jest/babel-jest together to 30.5.2 so their glob consumers use named
+exports. Require glob ^14.0.3 and minimatch ^11.0.4 via overrides; forcing these
+modern exports into Jest 29's callable glob/minimatch consumers would break
+compatibility. Regenerate the lockfile and verify the full suites and build.
+
+The audit threshold remains moderate. The remaining low findings come from
+Jest's deepmerge dependency, whose current release has no upstream patch.
+
+Upstream advisories: [follow-redirects](https://github.com/advisories/GHSA-mrwp-f3q8-3g9p),
+[minimatch](https://github.com/advisories/GHSA-g3hv-75wg-m249),
+[glob](https://github.com/advisories/GHSA-3g3m-2fjr-6pw4),
+[deepmerge](https://github.com/advisories/GHSA-gcqx-w48m-w2h4).
