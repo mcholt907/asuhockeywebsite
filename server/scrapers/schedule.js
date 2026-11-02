@@ -214,8 +214,7 @@ async function scrapeUSCHORecord() {
   }
 }
 
-async function enrichScheduleWithCHNLinks(games) {
-  const { linkMap, npi, krach } = await scrapeCHNScheduleLinks();
+function enrichScheduleWithCHNLinks(games, { linkMap, npi, krach }) {
   for (const game of games) {
     if (game.date && linkMap[game.date]) {
       game.box_link = linkMap[game.date].box_link;
@@ -226,7 +225,17 @@ async function enrichScheduleWithCHNLinks(games) {
 }
 
 async function scrapeScheduleWithExtras() {
-  const games = await scrapeSunDevilsSchedule(config.seasons.current);
+  // These sources use different hosts and only depend on each other at merge time.
+  const sources = await Promise.allSettled([
+    scrapeSunDevilsSchedule(config.seasons.current),
+    scrapeCHNScheduleLinks(),
+    scrapeUSCHORecord(),
+  ]);
+  // Keep the cache's in-flight guard until optional requests also finish,
+  // even if the required schedule fails before they do.
+  const failedSource = sources.find((source) => source.status === "rejected");
+  if (failedSource) throw failedSource.reason;
+  const [games, chnLinks, teamRecord] = sources.map((source) => source.value);
   if (!games || games.length === 0) {
     return { games: games || [], team_record: null };
   }
@@ -234,8 +243,7 @@ async function scrapeScheduleWithExtras() {
     games: enriched,
     npi,
     krach,
-  } = await enrichScheduleWithCHNLinks(games);
-  const teamRecord = await scrapeUSCHORecord();
+  } = enrichScheduleWithCHNLinks(games, chnLinks);
   return { games: enriched, team_record: { ...teamRecord, npi, krach } };
 }
 
