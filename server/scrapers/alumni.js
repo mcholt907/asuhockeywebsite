@@ -285,8 +285,15 @@ async function scrapePage(url, type) {
     const $el = $(el);
     const text = $el.text().trim().toLowerCase();
     const href = $el.attr("href") || "";
+    // EP renders a real href even on the final page's disabled Next link.
+    // Match the semantic suffix rather than the site's generated CSS prefix.
+    const disabled =
+      $el.attr("aria-disabled") === "true" ||
+      ($el.attr("class") || "")
+        .split(/\s+/)
+        .some((name) => name === "disabled" || name.endsWith("_disabled"));
 
-    if (text === "next" && href.includes("page=")) {
+    if (!disabled && text === "next" && href.includes("page=")) {
       nextPage = href.startsWith("http")
         ? href
         : `https://www.eliteprospects.com${href}`;
@@ -382,4 +389,4 @@ async function scrapeAlumniData() {
   return fetchAlumni();
 }
 
-module.exports = { scrapeAlumniData };
+module.exports = { scrapeAlumniData, scrapeAlumniLive };

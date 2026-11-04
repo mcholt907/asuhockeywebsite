@@ -9,7 +9,7 @@ process.env.SCRAPER_PUPPETEER_FALLBACK =
 
 const fs = require("fs");
 const path = require("path");
-const { scrapeAlumniData } = require("../server/scrapers/alumni");
+const { scrapeAlumniLive } = require("../server/scrapers/alumni");
 
 const FALLBACK_FILE = path.join(
   __dirname,
@@ -22,7 +22,9 @@ const FALLBACK_FILE = path.join(
   console.log("[refresh-alumni] Running live scrape...");
   let data;
   try {
-    data = await scrapeAlumniData();
+    // Publishing must fail on a failed scrape. The serving API intentionally
+    // recovers with cache/fallback data, which must never count as a refresh.
+    data = await scrapeAlumniLive();
   } catch (err) {
     console.error("[refresh-alumni] Scrape threw:", err.message);
     process.exit(1);

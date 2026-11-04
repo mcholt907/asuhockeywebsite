@@ -4,6 +4,10 @@ setlocal
 set "NODE_RUNTIME=%LOCALAPPDATA%\Programs\node-v24.22.1-win-x64"
 if defined ASU_REFRESH_NODE_DIR set "NODE_RUNTIME=%ASU_REFRESH_NODE_DIR%"
 
+rem A system-wide install can satisfy the same pin without a duplicate portable
+rem install. An explicit override remains authoritative, including when invalid.
+if not defined ASU_REFRESH_NODE_DIR if not exist "%NODE_RUNTIME%\node.exe" if exist "%ProgramFiles%\nodejs\node.exe" set "NODE_RUNTIME=%ProgramFiles%\nodejs"
+
 if not exist "%NODE_RUNTIME%\node.exe" (
   echo Node v24.22.1 was not found at %NODE_RUNTIME% 1>&2
   echo Install the pinned runtime before running the refresh task. 1>&2
