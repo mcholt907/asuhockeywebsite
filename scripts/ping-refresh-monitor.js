@@ -1,37 +1,47 @@
-// Dead-man's-switch check-in for the daily all-data refresh task
-// (scripts/refresh-and-push.cmd). Pings a Sentry Cron Monitor so a run
-// that never happens (for example, the machine is asleep at 06:00) or fails
-// part-way raises an alert within the monitor's grace period, instead of
-// silently serving stale fallback JSON until data-status.js marks it stale.
-//
-// Setup (one-time): in Sentry, create a Cron Monitor (Crons → Add Monitor,
-// schedule: daily at 06:00 America/Phoenix, grace period approximately 12h),
-// then copy its HTTP check-in URL into .env as SENTRY_CRON_MONITOR_URL.
-// Unset URL = check-ins are skipped, so the refresh flow still works
-// without Sentry configured.
-//
-// Usage: node scripts/ping-refresh-monitor.js [ok|error]
-require("dotenv").config();
+// Report runner completion separately from production delivery.
+require("dotenv").config({ quiet: true });
+const { sendSentryCheckIn } = require("./lib/sentry-monitor");
 
-const baseUrl = process.env.SENTRY_CRON_MONITOR_URL;
-const status = process.argv[2] === "error" ? "error" : "ok";
-
-if (!baseUrl) {
-  console.log(
-    "[refresh-monitor] SENTRY_CRON_MONITOR_URL not set; skipping check-in",
-  );
-  process.exit(0);
+async function pingRefreshMonitor({
+  status,
+  environment = process.env,
+  fetchImpl = fetch,
+} = {}) {
+  if (!["ok", "error"].includes(status))
+    throw new Error("Expected ok or error");
+  const dsn = environment.SENTRY_DSN || environment.REACT_APP_SENTRY_DSN;
+  if (dsn) {
+    await sendSentryCheckIn({
+      dsn,
+      monitorSlug: "hockey-daily-refresh",
+      status,
+      schedule: "0 6 * * *",
+      timezone: "America/Phoenix",
+      checkinMargin: 720,
+      maxRuntime: 30,
+      fetchImpl,
+    });
+  } else if (environment.SENTRY_CRON_MONITOR_URL) {
+    const url = new URL(environment.SENTRY_CRON_MONITOR_URL);
+    url.searchParams.set("status", status);
+    const response = await fetchImpl(url, {
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!response.ok)
+      throw new Error(`Monitor rejected check-in (HTTP ${response.status})`);
+  } else {
+    throw new Error(
+      "SENTRY_DSN is required; refresh monitoring is not configured",
+    );
+  }
+  console.log(`[refresh-monitor] check-in accepted (${status})`);
 }
 
-const url = `${baseUrl}${baseUrl.includes("?") ? "&" : "?"}status=${status}`;
-
-fetch(url, { signal: AbortSignal.timeout(15000) })
-  .then((res) => {
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    console.log(`[refresh-monitor] check-in sent (${status})`);
-  })
-  .catch((err) => {
-    // Never fail the refresh over a monitoring ping — a missed check-in
-    // already raises the alert on Sentry's side.
-    console.error(`[refresh-monitor] check-in failed: ${err.message}`);
+if (require.main === module) {
+  pingRefreshMonitor({ status: process.argv[2] }).catch((error) => {
+    console.error(`[refresh-monitor] ${error.message}`);
+    // The runner treats monitoring failures nonfatally and records them.
+    process.exitCode = 1;
   });
+}
+module.exports = { pingRefreshMonitor };

@@ -5,6 +5,9 @@ import { __setMockPathname } from 'react-router-dom';
 
 // Use manual mock from __mocks__ directory
 jest.mock('react-router-dom');
+jest.mock('./hooks/queries/useDataStatus', () => ({
+  useDataStatus: () => ({ data: undefined, isError: false }),
+}));
 // The router mock renders every Route. Shell tests only need the layout,
 // so avoid mounting all seven lazy pages and their queries.
 jest.mock('./pages/Home', () => () => null);

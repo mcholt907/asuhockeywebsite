@@ -323,4 +323,4 @@ async function scrapeTransferData() {
   return fetchTransfers();
 }
 
-module.exports = { scrapeTransferData };
+module.exports = { scrapeTransferData, scrapeTransfersLive };

@@ -6,6 +6,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { queryClient } from './hooks/queries/queryClient';
 import GlobalNotificationBanner from './components/GlobalNotificationBanner';
 import MobileBottomNav from './components/MobileBottomNav';
+import DataFreshnessBanner from './components/DataFreshnessBanner';
 import './App.css';
 
 // Page Components — code-split per route
@@ -62,6 +63,7 @@ function AppInner() {
         </header>
 
         <main id="main-content">
+          <DataFreshnessBanner />
           <Suspense fallback={<div className="page-container"><p className="loading-message">Loading...</p></div>}>
             <Routes>
               <Route path="/" element={<Home />} />

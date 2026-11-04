@@ -155,3 +155,18 @@ export interface StatsResponse {
   source?: string;
   timestamp?: string;
 }
+
+export interface DatasetFreshness {
+  name: string;
+  status: 'ok' | 'stale' | 'missing' | 'unknown';
+  timestamp: string | null;
+  staleAfterMs: number;
+  ageMs: number | null;
+  alert: boolean;
+  source: string | null;
+}
+
+export interface DataStatusResponse {
+  generatedAt: string;
+  datasets: DatasetFreshness[];
+}

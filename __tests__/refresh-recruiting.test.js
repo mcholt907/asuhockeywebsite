@@ -44,7 +44,7 @@ test("bundled recruiting fallback passes automated publish health", () => {
   );
 
   expect(() =>
-    assertAutomatedRecruitingSnapshot(fallback, FUTURE_SEASONS),
+    assertAutomatedRecruitingSnapshot(fallback.recruiting || fallback, FUTURE_SEASONS),
   ).not.toThrow();
 });
 
@@ -58,7 +58,9 @@ test("writes a complete valid recruiting snapshot", async () => {
       fallbackFile: file,
     });
 
-    expect(JSON.parse(fs.readFileSync(file, "utf8"))).toEqual(valid);
+    const written = JSON.parse(fs.readFileSync(file, "utf8"));
+    expect(written.recruiting).toEqual(valid);
+    expect(Date.parse(written.lastUpdated)).toBeGreaterThanOrEqual(Date.now() - 1000);
     expect(fs.readdirSync(directory)).toEqual(["fallback.json"]);
   } finally {
     fs.rmSync(directory, { recursive: true, force: true });
@@ -100,7 +102,7 @@ test("publishes every supported source-faithful hockey position", async () => {
     ).resolves.toEqual(snapshot);
 
     expect(
-      JSON.parse(fs.readFileSync(file, "utf8"))["2027-2028"].map(
+      JSON.parse(fs.readFileSync(file, "utf8")).recruiting["2027-2028"].map(
         ({ position }) => position,
       ),
     ).toEqual(positions);
@@ -157,7 +159,7 @@ test("preserves every prior profile by normalized player link when enrichment is
       current_team: "",
     })),
   };
-  fs.writeFileSync(file, JSON.stringify(previous));
+  fs.writeFileSync(file, JSON.stringify({ lastUpdated: '2026-11-03T12:00:00Z', recruiting: previous }));
 
   try {
     const published = await refreshRecruitingSnapshot({
@@ -182,8 +184,8 @@ test("preserves every prior profile by normalized player link when enrichment is
       },
     ]);
     const written = JSON.parse(fs.readFileSync(file, "utf8"));
-    expect(written).toEqual(published);
-    expect(written["2027-2028"][0]).toMatchObject({
+    expect(written.recruiting).toEqual(published);
+    expect(written.recruiting["2027-2028"][0]).toMatchObject({
       player_link:
         "https://www.eliteprospects.com/player/1/jane/?utm_source=refresh",
       player_photo: "https://files.eliteprospects.com/layout/players/jane.jpg",
@@ -265,7 +267,7 @@ test("allows a formerly nonempty far-future season to become empty when the over
       }),
     ).resolves.toEqual(valid);
 
-    expect(JSON.parse(fs.readFileSync(file, "utf8"))).toEqual(valid);
+    expect(JSON.parse(fs.readFileSync(file, "utf8")).recruiting).toEqual(valid);
   } finally {
     fs.rmSync(directory, { recursive: true, force: true });
   }

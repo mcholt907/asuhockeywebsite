@@ -7,4 +7,5 @@ export const queryKeys = {
   alumni:    ['alumni'],
   transfers: ['transfers'],
   stats:     ['stats'],
+  dataStatus: ['dataStatus'],
 };

@@ -24,6 +24,7 @@ const router = express.Router();
 // Data freshness status — reports per-dataset age/source so silent
 // staleness (broken selectors, dead refresh jobs) is observable.
 router.get("/status", (req, res) => {
+  res.set("Cache-Control", "no-store");
   try {
     res.json({
       generatedAt: new Date().toISOString(),

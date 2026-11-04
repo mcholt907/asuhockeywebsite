@@ -8,6 +8,7 @@ import type {
   StandingsResponse,
   StatsResponse,
   ScheduleResponse,
+  DataStatusResponse,
 } from '../types/api';
 
 // `process.env.REACT_APP_API_URL` was the CRA-era reader; this is the
@@ -68,4 +69,15 @@ export const getSchedule = async (): Promise<ScheduleResponse> => {
     throw new Error('Invalid data format from /api/schedule');
   }
   return response.data;
+};
+
+export const getDataStatus = async (): Promise<DataStatusResponse> => {
+  const response = await axios.get<DataStatusResponse>(`${API_BASE_URL}/status`);
+  const data = response.data;
+  if (!data || !Array.isArray(data.datasets) ||
+      !data.datasets.every(dataset => dataset && typeof dataset.name === 'string' &&
+        ['ok', 'stale', 'missing', 'unknown'].includes(dataset.status))) {
+    throw new Error('Invalid data format from /api/status');
+  }
+  return data;
 };

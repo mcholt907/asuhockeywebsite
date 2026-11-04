@@ -132,10 +132,9 @@ describe('checkDataStaleness', () => {
     expect(alerts.find((a) => a.name === 'roster')).toBeUndefined();
   });
 
-  test('does not alert while the bundled recruiting fallback is fresh', () => {
-    const snapshotPath = require.resolve('../data/asu_recruiting_fallback.json');
-    jest.spyOn(Date, 'now').mockReturnValue(fs.statSync(snapshotPath).mtimeMs + HOUR_MS);
+  test('alerts when a dataset timestamp is unknown', () => {
+    fs.writeFileSync(path.join(tmpDir, 'asu_hockey_news'), JSON.stringify({ data: ['article'], timestamp: 'invalid' }));
     const alerts = maintenance.checkDataStaleness();
-    expect(alerts.find((a) => a.name === 'recruiting')).toBeUndefined();
+    expect(alerts.find((a) => a.name === 'news')).toMatchObject({ status: 'unknown' });
   });
 });
