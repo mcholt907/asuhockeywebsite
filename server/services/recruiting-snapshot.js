@@ -31,11 +31,17 @@ function validateRecruitingSnapshot(data, seasons) {
 function readRecruitingSnapshot(filePath, seasons) {
   try {
     const parsed = JSON.parse(fs.readFileSync(filePath, "utf8"));
-    return validateRecruitingSnapshot(parsed, seasons) ? parsed : null;
+    const recruiting = unwrapRecruitingSnapshot(parsed);
+    return validateRecruitingSnapshot(recruiting, seasons) ? recruiting : null;
   } catch (error) {
     console.warn(`[Recruiting Snapshot] Unavailable: ${error.message}`);
     return null;
   }
 }
 
-module.exports = { validateRecruitingSnapshot, readRecruitingSnapshot };
+// Older snapshots are plain season maps. Preserve the public season-map API.
+function unwrapRecruitingSnapshot(snapshot) {
+  return snapshot?.recruiting ?? snapshot;
+}
+
+module.exports = { validateRecruitingSnapshot, readRecruitingSnapshot, unwrapRecruitingSnapshot };

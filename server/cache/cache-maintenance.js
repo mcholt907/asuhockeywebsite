@@ -96,7 +96,7 @@ function checkDataStaleness() {
   const alerts = [];
   for (const dataset of getDataStatus()) {
     if (!dataset.alert) continue;
-    if (dataset.status !== 'stale' && dataset.status !== 'missing') continue;
+    if (!['stale', 'missing', 'unknown'].includes(dataset.status)) continue;
 
     const ageDays = dataset.ageMs != null ? (dataset.ageMs / DAY_MS).toFixed(1) : 'unknown';
     const message = `[cache-maintenance] dataset '${dataset.name}' is ${dataset.status} (age: ${ageDays} days, source: ${dataset.source})`;

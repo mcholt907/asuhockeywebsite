@@ -7,6 +7,7 @@ process.env.SCRAPER_PUPPETEER_FALLBACK ??= "true";
 const config = require("../config/scraper-config");
 const {
   validateRecruitingSnapshot,
+  unwrapRecruitingSnapshot,
 } = require("../server/services/recruiting-snapshot");
 const {
   assertAutomatedRecruitingSnapshot,
@@ -32,7 +33,7 @@ function readExistingSnapshot(fallbackFile, fileSystem) {
   try {
     const parsed = JSON.parse(readFileSync(fallbackFile, "utf8"));
     return parsed && typeof parsed === "object" && !Array.isArray(parsed)
-      ? parsed
+      ? unwrapRecruitingSnapshot(parsed)
       : null;
   } catch (error) {
     if (error.code !== "ENOENT") {
@@ -133,7 +134,10 @@ async function refreshRecruitingSnapshot({
 
   fileSystem.mkdirSync(fallbackDirectory, { recursive: true });
   try {
-    fileSystem.writeFileSync(tempFile, JSON.stringify(publishData, null, 2));
+    fileSystem.writeFileSync(tempFile, JSON.stringify({
+      lastUpdated: new Date().toISOString(),
+      recruiting: publishData,
+    }, null, 2));
     fileSystem.renameSync(tempFile, fallbackFile);
   } catch (error) {
     try {

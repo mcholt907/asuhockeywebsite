@@ -59,7 +59,17 @@ Inspect the latest task result with:
 Get-ScheduledTaskInfo -TaskName 'ASU Hockey Data Refresh'
 ```
 
-Detailed runner output is appended to `.refresh-log.txt`. The Sentry Cron Monitor is the dead-man's switch for successful daily executions, including no-op runs; configure it for daily 06:00 America/Phoenix with an approximately 12-hour grace period using `SENTRY_CRON_MONITOR_URL`.
+Detailed runner output is appended to `.refresh-log.txt`. `scripts/ping-refresh-monitor.js` uses `SENTRY_DSN` (or the existing `REACT_APP_SENTRY_DSN`) to send verified check-ins and automatically configure Sentry's `hockey-daily-refresh` monitor: daily 06:00 America/Phoenix with a 12-hour missed-run grace period. This detects a PC that never runs the task, including launcher failures before logging starts. Unconfigured or rejected check-ins are logged as monitoring failures. A legacy `SENTRY_CRON_MONITOR_URL` is supported when no DSN is set.
+
+### Production freshness monitoring
+
+The separate `Production data freshness` GitHub Actions workflow checks the deployed `/api/status` every hour at minute 17 and can be run manually. It has no scraper or npm dependency installation and continues while the Windows PC is offline. Configure the repository Actions secret `SENTRY_DSN` using the same site's DSN. The check independently validates all eight dataset timestamps, rejects missing/unknown/stale data and old policies permitting more than 48 hours, and reports to Sentry's `hockey-production-freshness` monitor. Network, response, or monitoring failures also fail the GitHub job. An hourly monitor check-in has a 60-minute missed-run grace period to accommodate GitHub scheduling delays.
+
+In Sentry, verify that both monitor incidents are connected to an enabled alert with your preferred notification recipient. Accepted ingest check-ins do not prove email delivery. Monitor administration and recipient settings require an authenticated Sentry session or a token with the appropriate permissions; the ingest DSN cannot read or change them.
+
+Daily roster/alumni/transfers/recruiting datasets become stale after 48 hours; news/schedule/stats/standings retain their stricter 24-hour limit. `/api/status` disables HTTP caching, follows the source actually served, and treats unverified timestamps as unknown. Recruiting fallback files persist `{lastUpdated, recruiting}`; the API still returns the original season map. Checkout/deployment file times never count as proof of a scrape. Transfer and alumni publishing require direct live scrapes, preserving previous snapshots on failure.
+
+Affected pages display a warning with the actual last-checked time while retaining the last good data. A failed freshness request shows that verification is unavailable. Healthy routes and the static analytics prototype have no warning.
 
 At season rollover, update `config.FUTURE_SEASONS` in `config/scraper-config.js` so recruiting refreshes query the intended future classes.
 

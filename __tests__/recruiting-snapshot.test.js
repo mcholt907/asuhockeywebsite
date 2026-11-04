@@ -50,6 +50,8 @@ test("reads a valid snapshot and rejects an invalid file", () => {
   };
   fs.writeFileSync(file, JSON.stringify(valid));
   expect(readRecruitingSnapshot(file, seasons)).toEqual(valid);
+  fs.writeFileSync(file, JSON.stringify({ lastUpdated: '2026-11-04T15:33:33Z', recruiting: valid }));
+  expect(readRecruitingSnapshot(file, seasons)).toEqual(valid);
   fs.writeFileSync(file, JSON.stringify({ "2027-2028": [] }));
   expect(readRecruitingSnapshot(file, seasons)).toBeNull();
   fs.rmSync(dir, { recursive: true, force: true });

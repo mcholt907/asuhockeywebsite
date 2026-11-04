@@ -9,7 +9,7 @@ process.env.SCRAPER_PUPPETEER_FALLBACK =
 
 const fs = require("fs");
 const path = require("path");
-const { scrapeTransferData } = require("../server/scrapers/transfers");
+const { scrapeTransfersLive } = require("../server/scrapers/transfers");
 
 const FALLBACK_FILE = path.join(
   __dirname,
@@ -22,7 +22,8 @@ const FALLBACK_FILE = path.join(
   console.log("[refresh-transfers] Running live scrape...");
   let data;
   try {
-    data = await scrapeTransferData();
+    // Serving recovers with cached data; publishing must require a new scrape.
+    data = await scrapeTransfersLive();
   } catch (err) {
     console.error("[refresh-transfers] Scrape threw:", err.message);
     process.exit(1);

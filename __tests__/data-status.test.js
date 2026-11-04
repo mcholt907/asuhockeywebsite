@@ -133,7 +133,7 @@ describe('getDataStatus', () => {
     expect(typeof transfers.ageMs).toBe('number');
   });
 
-  test('prefers the fresher of cache vs fallback', () => {
+  test('uses a fresh transfers cache before the bundled fallback', () => {
     // Cache much fresher than the committed fallback's lastUpdated.
     // Keep the synthetic cache newer than a fallback generated immediately
     // before this validation suite runs.
@@ -143,15 +143,56 @@ describe('getDataStatus', () => {
     expect(transfers.status).toBe('ok');
   });
 
-  test('reports the bundled recruiting roster as an alerting fallback dataset', () => {
-    const snapshotPath = require.resolve('../data/asu_recruiting_fallback.json');
-    jest.spyOn(Date, 'now').mockReturnValue(fs.statSync(snapshotPath).mtimeMs + HOUR_MS);
-    const recruiting = datasetByName('recruiting');
-    expect(recruiting.source).toBe('fallback');
-    expect(recruiting.file).toBe('data/asu_recruiting_fallback.json');
-    expect(recruiting.alert).toBe(true);
-    expect(recruiting.ageMs).toBe(HOUR_MS);
-    expect(recruiting.status).toBe('ok');
+  test('legacy recruiting snapshot age remains unknown after deployment rewrites its mtime', () => {
+    const rootDir = createStandingsRoot(standingsSnapshot());
+    fs.writeFileSync(path.join(rootDir, 'data/asu_recruiting_fallback.json'), JSON.stringify({ '2027-2028': [{ name: 'Jane', player_link: '/player/1/jane' }], '2028-2029': [] }));
+    try {
+      const recruiting = datasetByName('recruiting', { rootDir });
+      expect(recruiting).toMatchObject({ source: 'fallback', status: 'unknown', timestamp: null, ageMs: null, alert: true });
+    } finally { fs.rmSync(rootDir, { recursive: true, force: true }); }
+  });
+
+  test.each(['roster', 'alumni', 'transfers', 'recruiting'])('daily %s becomes stale after 48 hours', (name) => {
+    const rootDir = createStandingsRoot(standingsSnapshot());
+    const timestamp = new Date(Date.now() - 49 * HOUR_MS).toISOString();
+    const payloads = { alumni: { skaters: [], goalies: [], lastUpdated: timestamp }, transfers: { incoming: [], outgoing: [], lastUpdated: timestamp }, recruiting: { lastUpdated: timestamp, recruiting: { '2027-2028': [{ name: 'Jane', player_link: '/player/1/jane' }], '2028-2029': [] } } };
+    if (name === 'roster') writeCacheEntry('asu_hockey_roster', 49 * HOUR_MS);
+    else fs.writeFileSync(path.join(rootDir, `data/asu_${name}_fallback.json`), JSON.stringify(payloads[name]));
+    try { expect(datasetByName(name, { rootDir }).status).toBe('stale'); }
+    finally { fs.rmSync(rootDir, { recursive: true, force: true }); }
+  });
+
+  test.each([null, '', 'invalid', new Date(Date.now() + DAY_MS).toISOString()])('invalid cache timestamp %s cannot report healthy', (timestamp) => {
+    fs.writeFileSync(path.join(tmpDir, 'asu_hockey_news'), JSON.stringify({ timestamp, data: ['article'] }));
+    expect(datasetByName('news').status).toBe('unknown');
+  });
+
+  test.each([undefined, null, '', 'invalid', new Date(Date.now() + DAY_MS).toISOString()])('fallback timestamp %s cannot report healthy after a fresh checkout', (lastUpdated) => {
+    const rootDir = createStandingsRoot(standingsSnapshot());
+    fs.writeFileSync(path.join(rootDir, 'data/asu_transfers_fallback.json'), JSON.stringify({ incoming: [], outgoing: [], lastUpdated }));
+    try { expect(datasetByName('transfers', { rootDir })).toMatchObject({ status: 'unknown', ageMs: null }); }
+    finally { fs.rmSync(rootDir, { recursive: true, force: true }); }
+  });
+
+  test('daily dataset remains healthy at the 48-hour boundary while news is overdue', () => {
+    jest.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-11-04T16:00:00Z'));
+    writeCacheEntry('asu_hockey_roster', 48 * HOUR_MS);
+    writeCacheEntry('asu_hockey_news', 25 * HOUR_MS);
+    expect(datasetByName('roster').status).toBe('ok');
+    expect(datasetByName('news').status).toBe('stale');
+  });
+
+  test('production transfers reports older bundled source rather than an expired but newer cache', () => {
+    const rootDir = createStandingsRoot(standingsSnapshot());
+    fs.writeFileSync(path.join(rootDir, 'data/asu_transfers_fallback.json'), JSON.stringify({ incoming: [], outgoing: [], lastUpdated: new Date(Date.now() - 4 * DAY_MS).toISOString() }));
+    writeCacheEntry('asu_transfers', 25 * HOUR_MS);
+    try { expect(datasetByName('transfers', { rootDir, environment: { NODE_ENV: 'production' } })).toMatchObject({ source: 'fallback', status: 'stale' }); }
+    finally { fs.rmSync(rootDir, { recursive: true, force: true }); }
+  });
+
+  test('production recruiting always reports bundled source even with a fresh cache', () => {
+    writeCacheEntry('asu_hockey_recruiting', 0, DAY_MS, { '2027-2028': [{ name: 'Jane', player_link: '/player/1/jane' }], '2028-2029': [] });
+    expect(datasetByName('recruiting', { environment: { NODE_ENV: 'production' } }).source).toBe('fallback');
   });
 
   test('uses the season-scoped standings cache key and bundled fallback', () => {

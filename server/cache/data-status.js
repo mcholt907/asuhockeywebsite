@@ -11,17 +11,14 @@ const { getCacheMeta, CACHE_DIR } = require('./caching-system');
 const {
   validateStandingsSnapshot,
 } = require('../services/standings-snapshot');
+const { validateRecruitingSnapshot, unwrapRecruitingSnapshot } = require('../services/recruiting-snapshot');
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
 const ROOT_DIR = path.join(__dirname, '..', '..');
 const COOLDOWN_TTL_MS = 24 * HOUR_MS; // mirrors server/lib/request-helper.js
 
-// staleAfterMs â‰ˆ 2â€“3Ã— each dataset's refresh cadence (see scheduler.js).
-// Transfers/alumni run from bundled fallback JSON in production (EP 403s
-// cloud IPs); that JSON refreshes weekly via scripts/refresh-and-push.cmd,
-// so its threshold is 3 weeks. `alert: false` datasets are hand-maintained
-// and reported for visibility only.
+// Frequent datasets use 24 hours; daily runner/scheduler datasets get 48 hours.
 const DATASETS = [
   { name: 'news', cacheKey: 'asu_hockey_news', staleAfterMs: DAY_MS, alert: true },
   { name: 'schedule', cacheKey: () => `asu_hockey_schedule_${config.seasons.current}`, staleAfterMs: DAY_MS, alert: true },
@@ -34,10 +31,10 @@ const DATASETS = [
     staleAfterMs: DAY_MS,
     alert: true,
   },
-  { name: 'roster', cacheKey: 'asu_hockey_roster', staleAfterMs: 3 * DAY_MS, alert: true },
-  { name: 'transfers', cacheKey: 'asu_transfers', fallbackFile: 'data/asu_transfers_fallback.json', staleAfterMs: 21 * DAY_MS, alert: true },
-  { name: 'alumni', cacheKey: 'asu_alumni', fallbackFile: 'data/asu_alumni_fallback.json', staleAfterMs: 21 * DAY_MS, alert: true },
-  { name: 'recruiting', cacheKey: 'asu_hockey_recruiting', fallbackFile: 'data/asu_recruiting_fallback.json', staleAfterMs: 21 * DAY_MS, alert: true },
+  { name: 'roster', cacheKey: 'asu_hockey_roster', staleAfterMs: 2 * DAY_MS, alert: true },
+  { name: 'transfers', cacheKey: 'asu_transfers', fallbackFile: 'data/asu_transfers_fallback.json', staleAfterMs: 2 * DAY_MS, alert: true },
+  { name: 'alumni', cacheKey: 'asu_alumni', fallbackFile: 'data/asu_alumni_fallback.json', staleAfterMs: 2 * DAY_MS, alert: true },
+  { name: 'recruiting', cacheKey: 'asu_hockey_recruiting', fallbackFile: 'data/asu_recruiting_fallback.json', staleAfterMs: 2 * DAY_MS, alert: true },
 ];
 
 function resolveCacheKey(dataset) {
@@ -45,31 +42,26 @@ function resolveCacheKey(dataset) {
   return typeof dataset.cacheKey === 'function' ? dataset.cacheKey() : dataset.cacheKey;
 }
 
-// Fallback JSON freshness: prefer the embedded lastUpdated written by the
-// refresh scripts; fall back to file mtime for files without one.
-function readFallbackMeta(
-  relPath,
-  { rootDir = ROOT_DIR, fileSystem = fs } = {},
-) {
+// File times change at checkout/deploy and cannot prove a successful scrape.
+function timestampMeta(timestamp) {
+  const parsed = typeof timestamp === 'string' && timestamp.trim() ? Date.parse(timestamp) : NaN;
+  const ageMs = Date.now() - parsed;
+  return {
+    timestamp: typeof timestamp === 'string' && timestamp.trim() ? timestamp : null,
+    ageMs: Number.isFinite(ageMs) && ageMs >= 0 ? ageMs : null,
+  };
+}
+
+function readFallbackMeta(relPath, { rootDir = ROOT_DIR, fileSystem = fs } = {}) {
   const filePath = path.join(rootDir, relPath);
   try {
     if (!fileSystem.existsSync(filePath)) return null;
-    const stat = fileSystem.statSync(filePath);
-    let lastUpdated = null;
-    try {
-      const parsed = JSON.parse(fileSystem.readFileSync(filePath, 'utf8'));
-      lastUpdated = parsed.lastUpdated || null;
-    } catch (_) {
-      // Unparseable fallback â€” report mtime-based age below.
-    }
-    const ts = lastUpdated ? new Date(lastUpdated).getTime() : stat.mtimeMs;
-    return {
-      file: relPath,
-      timestamp: lastUpdated || new Date(stat.mtimeMs).toISOString(),
-      ageMs: Number.isFinite(ts) ? Date.now() - ts : null,
-    };
-  } catch (error) {
-    console.error(`[Data Status] Failed to read fallback meta for ${relPath}:`, error.message);
+    const parsed = JSON.parse(fileSystem.readFileSync(filePath, 'utf8'));
+    if (relPath.includes('recruiting') && !validateRecruitingSnapshot(unwrapRecruitingSnapshot(parsed), config.FUTURE_SEASONS)) return null;
+    if (relPath.includes('transfers') && (!Array.isArray(parsed.incoming) || !Array.isArray(parsed.outgoing))) return null;
+    if (relPath.includes('alumni') && (!Array.isArray(parsed.skaters) || !Array.isArray(parsed.goalies))) return null;
+    return { file: relPath, ...timestampMeta(parsed.lastUpdated) };
+  } catch (_) {
     return null;
   }
 }
@@ -108,11 +100,9 @@ function readStandingsCacheMeta(
       return null;
     }
 
-    const cacheTime = new Date(parsed.timestamp).getTime();
     return {
       key: cacheKey,
-      timestamp: parsed.timestamp || null,
-      ageMs: Number.isFinite(cacheTime) ? Date.now() - cacheTime : null,
+      ...timestampMeta(parsed.timestamp),
       cacheDuration: parsed.cacheDuration,
       sizeBytes: stat.size,
     };
@@ -128,16 +118,12 @@ function readStandingsFallbackMeta(
   const fallbackFile = path.join(rootDir, relPath);
   try {
     if (!fileSystem.existsSync(fallbackFile)) return null;
-    const stat = fileSystem.statSync(fallbackFile);
     const snapshot = JSON.parse(fileSystem.readFileSync(fallbackFile, 'utf8'));
     if (!validateStandingsSnapshot(snapshot)) return null;
 
-    const timestamp = snapshot.lastUpdated || new Date(stat.mtimeMs).toISOString();
-    const parsedTime = new Date(timestamp).getTime();
     return {
       file: relPath,
-      timestamp,
-      ageMs: Number.isFinite(parsedTime) ? Date.now() - parsedTime : null,
+      ...timestampMeta(snapshot.lastUpdated),
     };
   } catch (_) {
     return null;
@@ -145,7 +131,7 @@ function readStandingsFallbackMeta(
 }
 
 function statusFor(ageMs, staleAfterMs) {
-  if (ageMs === null || ageMs === undefined) return 'unknown';
+  if (!Number.isFinite(ageMs) || ageMs < 0) return 'unknown';
   if (staleAfterMs && ageMs > staleAfterMs) return 'stale';
   return 'ok';
 }
@@ -159,6 +145,7 @@ function getDataStatus({
   rootDir = ROOT_DIR,
   cacheDir = CACHE_DIR,
   fileSystem = fs,
+  environment = process.env,
 } = {}) {
   return DATASETS.map((dataset) => {
     const base = { name: dataset.name, staleAfterMs: dataset.staleAfterMs, alert: dataset.alert };
@@ -173,11 +160,12 @@ function getDataStatus({
     }
 
     const cacheKey = resolveCacheKey(dataset);
-    const cacheMeta = cacheKey
+    let cacheMeta = cacheKey
       ? dataset.validateStandings
         ? readStandingsCacheMeta(cacheKey, { cacheDir, fileSystem })
         : getCacheMeta(cacheKey)
       : null;
+    if (cacheMeta) cacheMeta = { ...cacheMeta, ...timestampMeta(cacheMeta.timestamp) };
     const fallbackMeta = dataset.fallbackFile
       ? dataset.validateStandings
         ? readStandingsFallbackMeta(dataset.fallbackFile, {
@@ -187,11 +175,23 @@ function getDataStatus({
         : readFallbackMeta(dataset.fallbackFile, { rootDir, fileSystem })
       : null;
 
-    // Report whichever source is fresher â€” in production the EP scrapers
-    // never write cache (fallback-only mode), so fallback is the live source.
+    // Mirror serving precedence, rather than selecting the newest file.
+    // Recruiting short-circuits to fallback in production; alumni/transfers
+    // check fresh cache before the fallback-only branch of the shared pipeline.
+    const cloudMode = environment.NODE_ENV === 'production' || environment.IS_PRERENDER === 'true';
+    const fallbackOnly = cloudMode && (
+      dataset.name === 'recruiting' ||
+      (dataset.name === 'transfers' && environment.TRANSFER_SCRAPE_LIVE !== 'true') ||
+      (dataset.name === 'alumni' && environment.ALUMNI_SCRAPE_LIVE !== 'true')
+    );
+    const freshCache = cacheMeta && (cacheMeta.ageMs === null || cacheMeta.ageMs <= cacheMeta.cacheDuration);
+    const useCache = cacheMeta && (
+      dataset.name === 'recruiting' && cloudMode ? false :
+      !fallbackOnly || freshCache || !fallbackMeta
+    );
     let source = null;
     let meta = null;
-    if (cacheMeta && (!fallbackMeta || (cacheMeta.ageMs ?? Infinity) <= (fallbackMeta.ageMs ?? Infinity))) {
+    if (useCache) {
       source = 'cache';
       meta = { key: cacheMeta.key, timestamp: cacheMeta.timestamp, ageMs: cacheMeta.ageMs };
     } else if (fallbackMeta) {
