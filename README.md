@@ -42,6 +42,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\install-refresh-
 
 The installer requires Git, Node/npm, an authenticated GitHub CLI (`gh auth status`), and permission to register a Scheduled Task. It clones or updates an isolated runner, runs `npm ci`, copies the environment file without displaying its contents, writes the `.refresh-runner` safety marker, and registers `ASU Hockey Data Refresh` with wake, network, and missed-start handling. Never point the runner at the working repository, inside it, or at one of its parent directories.
 
+The launcher uses the pinned portable Node installation, or the system installation at `%ProgramFiles%\nodejs` when the portable copy is absent. Both must pass the exact runtime verifier. `ASU_REFRESH_NODE_DIR` explicitly overrides this selection. After changing the Node pin, update the runner checkout and ensure a matching runtime is installed; launcher failures can occur before `.refresh-log.txt` is opened, so also check `LastTaskResult`.
+
 Each run executes `npm run refresh-data` and permits commits containing exactly these four generated files:
 
 - `data/asu_alumni_fallback.json`
@@ -129,4 +131,4 @@ npm run refresh-standings   # latest played-season NCHC table only
 
 Production serves `data/nchc_standings_fallback.json` when USCHO has no current NCHC table or every overall record is `0-0-0`, and switches after the first completed game by any NCHC member.
 
-`npm run refresh-recruiting` performs a direct, uncached all-season scrape and enables Puppeteer request fallback by default, allowing a residential machine to retry Elite Prospects 403 responses through headless Chrome. It never treats cached or bundled data as a successful live refresh. The command refuses to run when `NODE_ENV=production` or `IS_PRERENDER=true`, preserving the existing bundled snapshot in those environments.
+`npm run refresh-alumni` and `npm run refresh-recruiting` perform direct, uncached scrapes and enable Puppeteer request fallback by default, allowing a residential machine to retry Elite Prospects 403 responses through headless Chrome. They never treat cached or bundled data as a successful live refresh. The recruiting command refuses to run when `NODE_ENV=production` or `IS_PRERENDER=true`, preserving the existing bundled snapshot in those environments.

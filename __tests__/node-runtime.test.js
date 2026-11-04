@@ -7,10 +7,7 @@ const verifierPath = path.resolve(
   __dirname,
   "../scripts/verify-node-runtime.js",
 );
-const launcherPath = path.resolve(
-  __dirname,
-  "../scripts/refresh-and-push.cmd",
-);
+const launcherPath = path.resolve(__dirname, "../scripts/refresh-and-push.cmd");
 const windowsTest = process.platform === "win32" ? test : test.skip;
 
 function createRuntimeFixture({
@@ -51,7 +48,7 @@ function runVerifier(root, nodeVersion) {
 
 function runLauncher(
   nodeDirectory,
-  { verifierSource = "process.exit(0);\n" } = {},
+  { verifierSource = "process.exit(0);\n", environment = {} } = {},
 ) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "node-launcher-"));
   const fixtureLauncher = path.join(directory, "refresh-and-push.cmd");
@@ -63,11 +60,25 @@ function runLauncher(
     fixtureScript,
     "(Get-Command node.exe).Source | Write-Output\n",
   );
-  const result = spawnSync("cmd.exe", ["/d", "/c", fixtureLauncher], {
+  // cmd.exe initializes ProgramFiles itself, so set the fixture path inside
+  // the shell rather than relying on its inherited environment.
+  const wrapper = path.join(directory, "run.cmd");
+  fs.writeFileSync(
+    wrapper,
+    [
+      "@echo off",
+      environment.ProgramFiles
+        ? `set "ProgramFiles=${environment.ProgramFiles}"`
+        : "",
+      'call "%~dp0refresh-and-push.cmd"',
+    ].join("\r\n"),
+  );
+  const result = spawnSync("cmd.exe", ["/d", "/c", wrapper], {
     encoding: "utf8",
     env: {
       ...process.env,
       ASU_REFRESH_NODE_DIR: nodeDirectory,
+      ...environment,
     },
   });
   fs.rmSync(directory, { recursive: true, force: true });
@@ -132,15 +143,37 @@ describe("Node runtime contract", () => {
 });
 
 describe("Windows refresh launcher", () => {
-  windowsTest("fails before PowerShell when the pinned runtime is missing", () => {
-    const missingRuntime = path.join(os.tmpdir(), "missing-node-runtime");
-    const result = runLauncher(missingRuntime);
+  windowsTest(
+    "uses the system installation when the default portable runtime is absent",
+    () => {
+      const root = fs.mkdtempSync(path.join(os.tmpdir(), "system-node-"));
+      const runtime = path.join(root, "nodejs", "node.exe");
+      fs.mkdirSync(path.dirname(runtime));
+      fs.copyFileSync(process.execPath, runtime);
+      try {
+        const result = runLauncher("", {
+          environment: { LOCALAPPDATA: root, ProgramFiles: root },
+        });
+        expect(result.status).toBe(0);
+        expect(result.stdout.trim()).toBe(runtime);
+      } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+      }
+    },
+  );
 
-    expect(result.status).not.toBe(0);
-    expect(result.stderr).toContain(
-      `Node v24.22.1 was not found at ${missingRuntime}`,
-    );
-  });
+  windowsTest(
+    "fails before PowerShell when the pinned runtime is missing",
+    () => {
+      const missingRuntime = path.join(os.tmpdir(), "missing-node-runtime");
+      const result = runLauncher(missingRuntime);
+
+      expect(result.status).not.toBe(0);
+      expect(result.stderr).toContain(
+        `Node v24.22.1 was not found at ${missingRuntime}`,
+      );
+    },
+  );
 
   windowsTest("places the pinned runtime first on PATH", () => {
     const runtime = path.dirname(process.execPath);
