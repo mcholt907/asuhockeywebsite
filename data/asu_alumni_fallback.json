@@ -122,7 +122,7 @@
       "league": "Denmark",
       "leagueUrl": "https://www.eliteprospects.com/league/denmark/stats",
       "isTotals": false,
-      "gp": "15",
+      "gp": "16",
       "g": "4",
       "a": "5",
       "tp": "9",
@@ -186,7 +186,7 @@
       "league": "AHL",
       "leagueUrl": "https://www.eliteprospects.com/league/ahl/stats",
       "isTotals": false,
-      "gp": "10",
+      "gp": "11",
       "g": "3",
       "a": "4",
       "tp": "7",
@@ -426,7 +426,7 @@
       "league": "AHL",
       "leagueUrl": "https://www.eliteprospects.com/league/ahl/stats",
       "isTotals": false,
-      "gp": "10",
+      "gp": "11",
       "g": "0",
       "a": "4",
       "tp": "4",
@@ -481,6 +481,22 @@
       "pim": "31"
     },
     {
+      "name": "Noah Powell",
+      "position": "RW",
+      "playerUrl": "https://www.eliteprospects.com/player/674718/noah-powell",
+      "playerId": "674718",
+      "team": "Lehigh Valley Phantoms",
+      "teamUrl": "https://www.eliteprospects.com/team/17333/lehigh-valley-phantoms",
+      "league": "AHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/ahl/stats",
+      "isTotals": false,
+      "gp": "9",
+      "g": "2",
+      "a": "1",
+      "tp": "3",
+      "pim": "34"
+    },
+    {
       "name": "Josh Doan",
       "position": "W/C",
       "playerUrl": "https://www.eliteprospects.com/player/201817/josh-doan",
@@ -490,7 +506,7 @@
       "league": "NHL",
       "leagueUrl": "https://www.eliteprospects.com/league/nhl/stats",
       "isTotals": false,
-      "gp": "14",
+      "gp": "15",
       "g": "2",
       "a": "1",
       "tp": "3",
@@ -538,27 +554,27 @@
       "league": "ECHL",
       "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
       "isTotals": false,
-      "gp": "5",
+      "gp": "6",
       "g": "2",
       "a": "0",
       "tp": "2",
       "pim": "8"
     },
     {
-      "name": "Noah Powell",
-      "position": "RW",
-      "playerUrl": "https://www.eliteprospects.com/player/674718/noah-powell",
-      "playerId": "674718",
-      "team": "Lehigh Valley Phantoms",
-      "teamUrl": "https://www.eliteprospects.com/team/17333/lehigh-valley-phantoms",
-      "league": "AHL",
-      "leagueUrl": "https://www.eliteprospects.com/league/ahl/stats",
+      "name": "Louie Rowe",
+      "position": "F",
+      "playerUrl": "https://www.eliteprospects.com/player/155027/louie-rowe",
+      "playerId": "155027",
+      "team": "Jackson Generals",
+      "teamUrl": "https://www.eliteprospects.com/team/50728/jackson-generals",
+      "league": "MIHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/mihl/stats",
       "isTotals": false,
-      "gp": "8",
+      "gp": "3",
       "g": "1",
       "a": "1",
       "tp": "2",
-      "pim": "34"
+      "pim": "0"
     },
     {
       "name": "Joel Kjellberg",
@@ -618,27 +634,11 @@
       "league": "AHL",
       "leagueUrl": "https://www.eliteprospects.com/league/ahl/stats",
       "isTotals": false,
-      "gp": "10",
+      "gp": "11",
       "g": "0",
       "a": "2",
       "tp": "2",
-      "pim": "9"
-    },
-    {
-      "name": "Louie Rowe",
-      "position": "F",
-      "playerUrl": "https://www.eliteprospects.com/player/155027/louie-rowe",
-      "playerId": "155027",
-      "team": "Jackson Generals",
-      "teamUrl": "https://www.eliteprospects.com/team/50728/jackson-generals",
-      "league": "MIHL",
-      "leagueUrl": "https://www.eliteprospects.com/league/mihl/stats",
-      "isTotals": false,
-      "gp": "3",
-      "g": "1",
-      "a": "0",
-      "tp": "1",
-      "pim": "0"
+      "pim": "13"
     },
     {
       "name": "Cruz Lucius",
@@ -842,7 +842,7 @@
       "league": "ECHL",
       "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
       "isTotals": false,
-      "gp": "5",
+      "gp": "6",
       "g": "0",
       "a": "0",
       "tp": "0",
@@ -976,9 +976,9 @@
       "league": "NHL",
       "leagueUrl": "https://www.eliteprospects.com/league/nhl/stats",
       "isTotals": false,
-      "gp": "7",
-      "gaa": "3.96",
-      "svPct": ".880"
+      "gp": "8",
+      "gaa": "3.53",
+      "svPct": ".889"
     },
     {
       "name": "Zakari Brice",
@@ -1009,5 +1009,5 @@
       "svPct": "-"
     }
   ],
-  "lastUpdated": "2026-11-04T15:32:11.982Z"
+  "lastUpdated": "2026-11-05T13:01:03.618Z"
 }
