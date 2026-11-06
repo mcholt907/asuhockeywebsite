@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-11-05T13:02:32.139Z",
+  "lastUpdated": "2026-11-06T13:03:01.951Z",
   "recruiting": {
     "2027-2028": [
       {
@@ -97,7 +97,7 @@
         "weight": "170",
         "shoots": "R",
         "player_link": "https://www.eliteprospects.com/player/576997/dylan-krayer",
-        "player_photo": "https://files.eliteprospects.com/layout/players/17-krayer,-dylan-(31)-ep.jpg",
+        "player_photo": "https://files.eliteprospects.com/layout/players/dylan-krayer-576997-20261104214559.jpg",
         "current_team": "Tri-City Storm"
       },
       {
@@ -199,6 +199,20 @@
         "player_link": "https://www.eliteprospects.com/player/690044/cade-nystrom",
         "player_photo": "https://files.eliteprospects.com/layout/players/30-nystrom,-cade-(29)-ep.jpg",
         "current_team": "Team Shattuck St. Mary"
+      },
+      {
+        "number": "",
+        "name": "Peter Green",
+        "position": "D",
+        "age": "17",
+        "birth_year": "2009",
+        "birthplace": "Toronto, ON, CAN",
+        "height": "6'0\"",
+        "weight": "190",
+        "shoots": "R",
+        "player_link": "https://www.eliteprospects.com/player/987181/peter-green",
+        "player_photo": "https://files.eliteprospects.com/layout/players/n4-green,-peter-(28)-ep.jpg",
+        "current_team": "Brampton Steelheads"
       },
       {
         "number": "",
