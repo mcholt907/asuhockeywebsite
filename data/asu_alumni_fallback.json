@@ -234,10 +234,10 @@
       "league": "USports",
       "leagueUrl": "https://www.eliteprospects.com/league/usports/stats",
       "isTotals": false,
-      "gp": "6",
-      "g": "3",
+      "gp": "7",
+      "g": "4",
       "a": "2",
-      "tp": "5",
+      "tp": "6",
       "pim": "0"
     },
     {
@@ -737,22 +737,6 @@
       "pim": "0"
     },
     {
-      "name": "Demetrios Koumontzis",
-      "position": "LW/D",
-      "playerUrl": "https://www.eliteprospects.com/player/354063/demetrios-koumontzis",
-      "playerId": "354063",
-      "team": "Greensboro Gargoyles",
-      "teamUrl": "https://www.eliteprospects.com/team/43333/greensboro-gargoyles",
-      "league": "ECHL",
-      "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
-      "isTotals": false,
-      "gp": "7",
-      "g": "0",
-      "a": "1",
-      "tp": "1",
-      "pim": "8"
-    },
-    {
       "name": "Ryan O'Reilly",
       "position": "W/C",
       "playerUrl": "https://www.eliteprospects.com/player/276199/ryan-o-reilly",
@@ -767,6 +751,22 @@
       "a": "1",
       "tp": "1",
       "pim": "9"
+    },
+    {
+      "name": "Demetrios Koumontzis",
+      "position": "LW/D",
+      "playerUrl": "https://www.eliteprospects.com/player/354063/demetrios-koumontzis",
+      "playerId": "354063",
+      "team": "Greensboro Gargoyles",
+      "teamUrl": "https://www.eliteprospects.com/team/43333/greensboro-gargoyles",
+      "league": "ECHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
+      "isTotals": false,
+      "gp": "8",
+      "g": "0",
+      "a": "1",
+      "tp": "1",
+      "pim": "10"
     },
     {
       "name": "Ryan Alexander",
@@ -858,7 +858,7 @@
       "league": "KHL",
       "leagueUrl": "https://www.eliteprospects.com/league/khl/stats",
       "isTotals": false,
-      "gp": "16",
+      "gp": "17",
       "g": "0",
       "a": "0",
       "tp": "0",
@@ -897,6 +897,20 @@
       "svPct": ".926"
     },
     {
+      "name": "Ben Kraws",
+      "position": "G",
+      "playerUrl": "https://www.eliteprospects.com/player/276203/ben-kraws",
+      "playerId": "276203",
+      "team": "South Carolina Stingrays",
+      "teamUrl": "https://www.eliteprospects.com/team/252/south-carolina-stingrays",
+      "league": "ECHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
+      "isTotals": false,
+      "gp": "4",
+      "gaa": "2.23",
+      "svPct": ".920"
+    },
+    {
       "name": "T.J. Semptimphelter",
       "position": "G",
       "playerUrl": "https://www.eliteprospects.com/player/201792/t-j-semptimphelter",
@@ -906,9 +920,9 @@
       "league": "totals",
       "leagueUrl": "",
       "isTotals": true,
-      "gp": "3",
-      "gaa": "2.71",
-      "svPct": ".925"
+      "gp": "4",
+      "gaa": "3.29",
+      "svPct": ".912"
     },
     {
       "name": "T.J. Semptimphelter",
@@ -934,37 +948,9 @@
       "league": "ECHL",
       "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
       "isTotals": false,
-      "gp": "3",
-      "gaa": "2.71",
-      "svPct": ".925"
-    },
-    {
-      "name": "Ben Kraws",
-      "position": "G",
-      "playerUrl": "https://www.eliteprospects.com/player/276203/ben-kraws",
-      "playerId": "276203",
-      "team": "South Carolina Stingrays",
-      "teamUrl": "https://www.eliteprospects.com/team/252/south-carolina-stingrays",
-      "league": "ECHL",
-      "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
-      "isTotals": false,
       "gp": "4",
-      "gaa": "2.23",
-      "svPct": ".920"
-    },
-    {
-      "name": "Gibson Homer",
-      "position": "G",
-      "playerUrl": "https://www.eliteprospects.com/player/511952/gibson-homer",
-      "playerId": "511952",
-      "team": "Providence College",
-      "teamUrl": "https://www.eliteprospects.com/team/713/providence-college",
-      "league": "NCAA",
-      "leagueUrl": "https://www.eliteprospects.com/league/ncaa/stats",
-      "isTotals": false,
-      "gp": "1",
-      "gaa": "2.01",
-      "svPct": ".900"
+      "gaa": "3.29",
+      "svPct": ".912"
     },
     {
       "name": "Joey Daccord",
@@ -979,6 +965,20 @@
       "gp": "8",
       "gaa": "3.53",
       "svPct": ".889"
+    },
+    {
+      "name": "Gibson Homer",
+      "position": "G",
+      "playerUrl": "https://www.eliteprospects.com/player/511952/gibson-homer",
+      "playerId": "511952",
+      "team": "Providence College",
+      "teamUrl": "https://www.eliteprospects.com/team/713/providence-college",
+      "league": "NCAA",
+      "leagueUrl": "https://www.eliteprospects.com/league/ncaa/stats",
+      "isTotals": false,
+      "gp": "2",
+      "gaa": "3.92",
+      "svPct": ".838"
     },
     {
       "name": "Zakari Brice",
@@ -1009,5 +1009,5 @@
       "svPct": "-"
     }
   ],
-  "lastUpdated": "2026-11-05T13:01:03.618Z"
+  "lastUpdated": "2026-11-06T13:01:03.907Z"
 }

@@ -1,6 +1,6 @@
 {
   "season": "2026-2027",
-  "lastUpdated": "2026-11-05T13:02:34.999Z",
+  "lastUpdated": "2026-11-06T13:03:05.970Z",
   "teams": [
     {
       "rank": "1",
@@ -28,10 +28,10 @@
     },
     {
       "rank": "4",
-      "team": "St. Cloud State",
+      "team": "Colorado College",
       "pts": "3",
       "confRecord": "1-1-0",
-      "overallRecord": "3-4-0",
+      "overallRecord": "6-2-0",
       "isASU": false
     },
     {
@@ -52,14 +52,22 @@
     },
     {
       "rank": "7",
-      "team": "Colorado College",
+      "team": "St. Cloud State",
       "pts": "3",
       "confRecord": "1-1-0",
-      "overallRecord": "6-2-0",
+      "overallRecord": "3-4-0",
       "isASU": false
     },
     {
       "rank": "8",
+      "team": "North Dakota",
+      "pts": "0",
+      "confRecord": "0-0-0",
+      "overallRecord": "4-3-0",
+      "isASU": false
+    },
+    {
+      "rank": "9",
       "team": "Western Michigan",
       "pts": "0",
       "confRecord": "0-0-0",
@@ -67,19 +75,11 @@
       "isASU": false
     },
     {
-      "rank": "9",
+      "rank": "10",
       "team": "Omaha",
       "pts": "0",
       "confRecord": "0-2-0",
       "overallRecord": "2-4-0",
-      "isASU": false
-    },
-    {
-      "rank": "10",
-      "team": "North Dakota",
-      "pts": "0",
-      "confRecord": "0-0-0",
-      "overallRecord": "4-3-0",
       "isASU": false
     }
   ]
