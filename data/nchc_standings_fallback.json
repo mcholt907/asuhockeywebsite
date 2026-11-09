@@ -1,29 +1,29 @@
 {
   "season": "2026-2027",
-  "lastUpdated": "2026-11-08T13:02:23.781Z",
+  "lastUpdated": "2026-11-09T13:02:42.612Z",
   "teams": [
     {
       "rank": "1",
       "team": "Denver",
-      "pts": "9",
-      "confRecord": "3-0-0",
-      "overallRecord": "6-2-1",
+      "pts": "11",
+      "confRecord": "4-0-0",
+      "overallRecord": "7-2-1",
       "isASU": false
     },
     {
       "rank": "2",
-      "team": "Minnesota Duluth",
-      "pts": "6",
-      "confRecord": "2-2-0",
-      "overallRecord": "7-3-2",
-      "isASU": false
-    },
-    {
-      "rank": "3",
       "team": "Miami",
       "pts": "6",
       "confRecord": "2-2-0",
       "overallRecord": "7-3-0",
+      "isASU": false
+    },
+    {
+      "rank": "3",
+      "team": "Minnesota Duluth",
+      "pts": "6",
+      "confRecord": "2-2-0",
+      "overallRecord": "7-3-2",
       "isASU": false
     },
     {
@@ -36,11 +36,11 @@
     },
     {
       "rank": "5",
-      "team": "St. Cloud State",
+      "team": "Arizona State",
       "pts": "4",
-      "confRecord": "1-2-1",
-      "overallRecord": "3-5-1",
-      "isASU": false
+      "confRecord": "1-3-0",
+      "overallRecord": "5-5-0",
+      "isASU": true
     },
     {
       "rank": "6",
@@ -52,10 +52,10 @@
     },
     {
       "rank": "7",
-      "team": "Colorado College",
-      "pts": "3",
-      "confRecord": "1-1-0",
-      "overallRecord": "7-2-1",
+      "team": "St. Cloud State",
+      "pts": "4",
+      "confRecord": "1-2-1",
+      "overallRecord": "3-5-1",
       "isASU": false
     },
     {
@@ -68,11 +68,11 @@
     },
     {
       "rank": "9",
-      "team": "Arizona State",
+      "team": "Colorado College",
       "pts": "3",
-      "confRecord": "1-2-0",
-      "overallRecord": "5-4-0",
-      "isASU": true
+      "confRecord": "1-1-0",
+      "overallRecord": "7-2-1",
+      "isASU": false
     },
     {
       "rank": "10",
