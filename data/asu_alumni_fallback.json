@@ -106,7 +106,7 @@
       "league": "ECHL",
       "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
       "isTotals": false,
-      "gp": "9",
+      "gp": "10",
       "g": "6",
       "a": "3",
       "tp": "9",
@@ -282,11 +282,11 @@
       "league": "EIHL",
       "leagueUrl": "https://www.eliteprospects.com/league/eihl/stats",
       "isTotals": false,
-      "gp": "7",
+      "gp": "8",
       "g": "1",
       "a": "4",
       "tp": "5",
-      "pim": "2"
+      "pim": "4"
     },
     {
       "name": "Justin Kipkie",
@@ -330,11 +330,11 @@
       "league": "ECHL",
       "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
       "isTotals": false,
-      "gp": "8",
+      "gp": "9",
       "g": "3",
       "a": "1",
       "tp": "4",
-      "pim": "8"
+      "pim": "10"
     },
     {
       "name": "David Hymovitch",
@@ -362,7 +362,7 @@
       "league": "NHL",
       "leagueUrl": "https://www.eliteprospects.com/league/nhl/stats",
       "isTotals": false,
-      "gp": "16",
+      "gp": "17",
       "g": "3",
       "a": "1",
       "tp": "4",
@@ -426,11 +426,11 @@
       "league": "totals",
       "leagueUrl": "",
       "isTotals": true,
-      "gp": "8",
+      "gp": "9",
       "g": "1",
       "a": "3",
       "tp": "4",
-      "pim": "6"
+      "pim": "8"
     },
     {
       "name": "Jackson Niedermayer",
@@ -458,11 +458,11 @@
       "league": "ECHL",
       "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
       "isTotals": false,
-      "gp": "6",
+      "gp": "7",
       "g": "1",
       "a": "3",
       "tp": "4",
-      "pim": "6"
+      "pim": "8"
     },
     {
       "name": "Noah Beck",
@@ -495,6 +495,22 @@
       "a": "4",
       "tp": "4",
       "pim": "9"
+    },
+    {
+      "name": "Jack Becker",
+      "position": "C/RW",
+      "playerUrl": "https://www.eliteprospects.com/player/248382/jack-becker",
+      "playerId": "248382",
+      "team": "Texas Stars",
+      "teamUrl": "https://www.eliteprospects.com/team/4516/texas-stars",
+      "league": "AHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/ahl/stats",
+      "isTotals": false,
+      "gp": "13",
+      "g": "0",
+      "a": "4",
+      "tp": "4",
+      "pim": "15"
     },
     {
       "name": "Ty Murchison",
@@ -561,22 +577,6 @@
       "pim": "9"
     },
     {
-      "name": "Jack Becker",
-      "position": "C/RW",
-      "playerUrl": "https://www.eliteprospects.com/player/248382/jack-becker",
-      "playerId": "248382",
-      "team": "Texas Stars",
-      "teamUrl": "https://www.eliteprospects.com/team/4516/texas-stars",
-      "league": "AHL",
-      "leagueUrl": "https://www.eliteprospects.com/league/ahl/stats",
-      "isTotals": false,
-      "gp": "13",
-      "g": "0",
-      "a": "3",
-      "tp": "3",
-      "pim": "15"
-    },
-    {
       "name": "Justin Cloutier",
       "position": "RW",
       "playerUrl": "https://www.eliteprospects.com/player/649101/justin-cloutier",
@@ -619,6 +619,70 @@
       "leagueUrl": "https://www.eliteprospects.com/league/mihl/stats",
       "isTotals": false,
       "gp": "3",
+      "g": "1",
+      "a": "1",
+      "tp": "2",
+      "pim": "0"
+    },
+    {
+      "name": "Wade Murphy",
+      "position": "RW/LW",
+      "playerUrl": "https://www.eliteprospects.com/player/48368/wade-murphy",
+      "playerId": "48368",
+      "team": "",
+      "teamUrl": "",
+      "league": "totals",
+      "leagueUrl": "",
+      "isTotals": true,
+      "gp": "6",
+      "g": "1",
+      "a": "1",
+      "tp": "2",
+      "pim": "4"
+    },
+    {
+      "name": "Wade Murphy",
+      "position": "RW/LW",
+      "playerUrl": "https://www.eliteprospects.com/player/48368/wade-murphy",
+      "playerId": "48368",
+      "team": "Wichita Thunder",
+      "teamUrl": "https://www.eliteprospects.com/team/836/wichita-thunder",
+      "league": "ECHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
+      "isTotals": false,
+      "gp": "5",
+      "g": "1",
+      "a": "1",
+      "tp": "2",
+      "pim": "4"
+    },
+    {
+      "name": "Wade Murphy",
+      "position": "RW/LW",
+      "playerUrl": "https://www.eliteprospects.com/player/48368/wade-murphy",
+      "playerId": "48368",
+      "team": "San Jose Barracuda",
+      "teamUrl": "https://www.eliteprospects.com/team/18741/san-jose-barracuda",
+      "league": "AHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/ahl/stats",
+      "isTotals": false,
+      "gp": "1",
+      "g": "0",
+      "a": "0",
+      "tp": "0",
+      "pim": "0"
+    },
+    {
+      "name": "Ethan Szmagaj",
+      "position": "D",
+      "playerUrl": "https://www.eliteprospects.com/player/359533/ethan-szmagaj",
+      "playerId": "359533",
+      "team": "Orlando Solar Bears",
+      "teamUrl": "https://www.eliteprospects.com/team/11331/orlando-solar-bears",
+      "league": "ECHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
+      "isTotals": false,
+      "gp": "8",
       "g": "1",
       "a": "1",
       "tp": "2",
@@ -730,59 +794,11 @@
       "league": "ECHL",
       "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
       "isTotals": false,
-      "gp": "4",
-      "g": "0",
-      "a": "1",
-      "tp": "1",
-      "pim": "7"
-    },
-    {
-      "name": "Wade Murphy",
-      "position": "RW/LW",
-      "playerUrl": "https://www.eliteprospects.com/player/48368/wade-murphy",
-      "playerId": "48368",
-      "team": "",
-      "teamUrl": "",
-      "league": "totals",
-      "leagueUrl": "",
-      "isTotals": true,
       "gp": "5",
       "g": "0",
       "a": "1",
       "tp": "1",
-      "pim": "2"
-    },
-    {
-      "name": "Wade Murphy",
-      "position": "RW/LW",
-      "playerUrl": "https://www.eliteprospects.com/player/48368/wade-murphy",
-      "playerId": "48368",
-      "team": "Wichita Thunder",
-      "teamUrl": "https://www.eliteprospects.com/team/836/wichita-thunder",
-      "league": "ECHL",
-      "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
-      "isTotals": false,
-      "gp": "4",
-      "g": "0",
-      "a": "1",
-      "tp": "1",
-      "pim": "2"
-    },
-    {
-      "name": "Wade Murphy",
-      "position": "RW/LW",
-      "playerUrl": "https://www.eliteprospects.com/player/48368/wade-murphy",
-      "playerId": "48368",
-      "team": "San Jose Barracuda",
-      "teamUrl": "https://www.eliteprospects.com/team/18741/san-jose-barracuda",
-      "league": "AHL",
-      "leagueUrl": "https://www.eliteprospects.com/league/ahl/stats",
-      "isTotals": false,
-      "gp": "1",
-      "g": "0",
-      "a": "0",
-      "tp": "0",
-      "pim": "0"
+      "pim": "7"
     },
     {
       "name": "Lukas Sillinger",
@@ -831,22 +847,6 @@
       "a": "0",
       "tp": "0",
       "pim": "2"
-    },
-    {
-      "name": "Ethan Szmagaj",
-      "position": "D",
-      "playerUrl": "https://www.eliteprospects.com/player/359533/ethan-szmagaj",
-      "playerId": "359533",
-      "team": "Orlando Solar Bears",
-      "teamUrl": "https://www.eliteprospects.com/team/11331/orlando-solar-bears",
-      "league": "ECHL",
-      "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
-      "isTotals": false,
-      "gp": "7",
-      "g": "0",
-      "a": "0",
-      "tp": "0",
-      "pim": "0"
     },
     {
       "name": "Timothy Lovell",
@@ -906,9 +906,9 @@
       "league": "ECHL",
       "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
       "isTotals": false,
-      "gp": "2",
-      "gaa": "2.01",
-      "svPct": ".926"
+      "gp": "3",
+      "gaa": "2.34",
+      "svPct": ".923"
     },
     {
       "name": "T.J. Semptimphelter",
@@ -967,6 +967,48 @@
       "svPct": ".881"
     },
     {
+      "name": "Evan Debrouwer",
+      "position": "G",
+      "playerUrl": "https://www.eliteprospects.com/player/240037/evan-debrouwer",
+      "playerId": "240037",
+      "team": "",
+      "teamUrl": "",
+      "league": "totals",
+      "leagueUrl": "",
+      "isTotals": true,
+      "gp": "1",
+      "gaa": "3.00",
+      "svPct": ".842"
+    },
+    {
+      "name": "Evan Debrouwer",
+      "position": "G",
+      "playerUrl": "https://www.eliteprospects.com/player/240037/evan-debrouwer",
+      "playerId": "240037",
+      "team": "Strathroy Jets",
+      "teamUrl": "https://www.eliteprospects.com/team/34988/strathroy-jets",
+      "league": "NPHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/nphl/stats",
+      "isTotals": false,
+      "gp": "0",
+      "gaa": "-",
+      "svPct": "-"
+    },
+    {
+      "name": "Evan Debrouwer",
+      "position": "G",
+      "playerUrl": "https://www.eliteprospects.com/player/240037/evan-debrouwer",
+      "playerId": "240037",
+      "team": "Stoney Creek Tigers",
+      "teamUrl": "https://www.eliteprospects.com/team/19089/stoney-creek-tigers",
+      "league": "ACH",
+      "leagueUrl": "https://www.eliteprospects.com/league/ach/stats",
+      "isTotals": false,
+      "gp": "1",
+      "gaa": "3.00",
+      "svPct": ".842"
+    },
+    {
       "name": "Gibson Homer",
       "position": "G",
       "playerUrl": "https://www.eliteprospects.com/player/511952/gibson-homer",
@@ -993,21 +1035,7 @@
       "gp": "-",
       "gaa": "-",
       "svPct": "-"
-    },
-    {
-      "name": "Evan Debrouwer",
-      "position": "G",
-      "playerUrl": "https://www.eliteprospects.com/player/240037/evan-debrouwer",
-      "playerId": "240037",
-      "team": "Strathroy Jets",
-      "teamUrl": "https://www.eliteprospects.com/team/34988/strathroy-jets",
-      "league": "NPHL",
-      "leagueUrl": "https://www.eliteprospects.com/league/nphl/stats",
-      "isTotals": false,
-      "gp": "0",
-      "gaa": "-",
-      "svPct": "-"
     }
   ],
-  "lastUpdated": "2026-11-08T13:01:04.664Z"
+  "lastUpdated": "2026-11-09T13:01:06.422Z"
 }
