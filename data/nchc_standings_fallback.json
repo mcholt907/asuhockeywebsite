@@ -1,6 +1,6 @@
 {
   "season": "2026-2027",
-  "lastUpdated": "2026-11-09T13:02:42.612Z",
+  "lastUpdated": "2026-11-10T22:36:00.592Z",
   "teams": [
     {
       "rank": "1",
@@ -44,14 +44,6 @@
     },
     {
       "rank": "6",
-      "team": "North Dakota",
-      "pts": "4",
-      "confRecord": "1-0-1",
-      "overallRecord": "5-3-1",
-      "isASU": false
-    },
-    {
-      "rank": "7",
       "team": "St. Cloud State",
       "pts": "4",
       "confRecord": "1-2-1",
@@ -59,19 +51,27 @@
       "isASU": false
     },
     {
-      "rank": "8",
-      "team": "St. Thomas",
-      "pts": "3",
-      "confRecord": "1-1-0",
-      "overallRecord": "4-4-0",
+      "rank": "7",
+      "team": "North Dakota",
+      "pts": "4",
+      "confRecord": "1-0-1",
+      "overallRecord": "5-3-1",
       "isASU": false
     },
     {
-      "rank": "9",
+      "rank": "8",
       "team": "Colorado College",
       "pts": "3",
       "confRecord": "1-1-0",
       "overallRecord": "7-2-1",
+      "isASU": false
+    },
+    {
+      "rank": "9",
+      "team": "St. Thomas",
+      "pts": "3",
+      "confRecord": "1-1-0",
+      "overallRecord": "4-4-0",
       "isASU": false
     },
     {

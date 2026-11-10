@@ -561,6 +561,22 @@
       "pim": "38"
     },
     {
+      "name": "Ethan Szmagaj",
+      "position": "D",
+      "playerUrl": "https://www.eliteprospects.com/player/359533/ethan-szmagaj",
+      "playerId": "359533",
+      "team": "Orlando Solar Bears",
+      "teamUrl": "https://www.eliteprospects.com/team/11331/orlando-solar-bears",
+      "league": "ECHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
+      "isTotals": false,
+      "gp": "9",
+      "g": "1",
+      "a": "2",
+      "tp": "3",
+      "pim": "0"
+    },
+    {
       "name": "Ryan O'Reilly",
       "position": "W/C",
       "playerUrl": "https://www.eliteprospects.com/player/276199/ryan-o-reilly",
@@ -570,7 +586,7 @@
       "league": "ECHL",
       "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
       "isTotals": false,
-      "gp": "10",
+      "gp": "11",
       "g": "0",
       "a": "3",
       "tp": "3",
@@ -670,22 +686,6 @@
       "g": "0",
       "a": "0",
       "tp": "0",
-      "pim": "0"
-    },
-    {
-      "name": "Ethan Szmagaj",
-      "position": "D",
-      "playerUrl": "https://www.eliteprospects.com/player/359533/ethan-szmagaj",
-      "playerId": "359533",
-      "team": "Orlando Solar Bears",
-      "teamUrl": "https://www.eliteprospects.com/team/11331/orlando-solar-bears",
-      "league": "ECHL",
-      "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
-      "isTotals": false,
-      "gp": "8",
-      "g": "1",
-      "a": "1",
-      "tp": "2",
       "pim": "0"
     },
     {
@@ -858,7 +858,7 @@
       "league": "KHL",
       "leagueUrl": "https://www.eliteprospects.com/league/khl/stats",
       "isTotals": false,
-      "gp": "17",
+      "gp": "18",
       "g": "0",
       "a": "0",
       "tp": "0",
@@ -1037,5 +1037,5 @@
       "svPct": "-"
     }
   ],
-  "lastUpdated": "2026-11-09T13:01:06.422Z"
+  "lastUpdated": "2026-11-10T22:34:26.032Z"
 }
