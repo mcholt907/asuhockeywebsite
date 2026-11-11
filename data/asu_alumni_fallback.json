@@ -90,7 +90,7 @@
       "league": "USHL",
       "leagueUrl": "https://www.eliteprospects.com/league/ushl/stats",
       "isTotals": false,
-      "gp": "18",
+      "gp": "19",
       "g": "4",
       "a": "7",
       "tp": "11",
@@ -170,10 +170,10 @@
       "league": "AHL",
       "leagueUrl": "https://www.eliteprospects.com/league/ahl/stats",
       "isTotals": false,
-      "gp": "14",
-      "g": "2",
+      "gp": "15",
+      "g": "3",
       "a": "6",
-      "tp": "8",
+      "tp": "9",
       "pim": "14"
     },
     {
@@ -186,11 +186,11 @@
       "league": "AHL",
       "leagueUrl": "https://www.eliteprospects.com/league/ahl/stats",
       "isTotals": false,
-      "gp": "13",
+      "gp": "14",
       "g": "3",
       "a": "4",
       "tp": "7",
-      "pim": "8"
+      "pim": "10"
     },
     {
       "name": "Alex Young",
@@ -1037,5 +1037,5 @@
       "svPct": "-"
     }
   ],
-  "lastUpdated": "2026-11-10T22:34:26.032Z"
+  "lastUpdated": "2026-11-11T13:01:03.726Z"
 }
