@@ -58,7 +58,7 @@
       "league": "HockeyAllsvenskan",
       "leagueUrl": "https://www.eliteprospects.com/league/hockeyallsvenskan/stats",
       "isTotals": false,
-      "gp": "17",
+      "gp": "18",
       "g": "3",
       "a": "13",
       "tp": "16",
@@ -94,6 +94,38 @@
       "g": "4",
       "a": "7",
       "tp": "11",
+      "pim": "4"
+    },
+    {
+      "name": "Matthew Kopperud",
+      "position": "C/LW",
+      "playerUrl": "https://www.eliteprospects.com/player/324180/matthew-kopperud",
+      "playerId": "324180",
+      "team": "Rødovre Mighty Bulls",
+      "teamUrl": "https://www.eliteprospects.com/team/4571/rodovre-mighty-bulls",
+      "league": "Denmark",
+      "leagueUrl": "https://www.eliteprospects.com/league/denmark/stats",
+      "isTotals": false,
+      "gp": "17",
+      "g": "5",
+      "a": "5",
+      "tp": "10",
+      "pim": "8"
+    },
+    {
+      "name": "Alex Young",
+      "position": "C/W",
+      "playerUrl": "https://www.eliteprospects.com/player/351179/alex-young",
+      "playerId": "351179",
+      "team": "Rapid City Rush",
+      "teamUrl": "https://www.eliteprospects.com/team/2707/rapid-city-rush",
+      "league": "ECHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
+      "isTotals": false,
+      "gp": "8",
+      "g": "4",
+      "a": "6",
+      "tp": "10",
       "pim": "4"
     },
     {
@@ -145,22 +177,6 @@
       "pim": "6"
     },
     {
-      "name": "Matthew Kopperud",
-      "position": "C/LW",
-      "playerUrl": "https://www.eliteprospects.com/player/324180/matthew-kopperud",
-      "playerId": "324180",
-      "team": "Rødovre Mighty Bulls",
-      "teamUrl": "https://www.eliteprospects.com/team/4571/rodovre-mighty-bulls",
-      "league": "Denmark",
-      "leagueUrl": "https://www.eliteprospects.com/league/denmark/stats",
-      "isTotals": false,
-      "gp": "16",
-      "g": "4",
-      "a": "5",
-      "tp": "9",
-      "pim": "4"
-    },
-    {
       "name": "Robert Mastrosimone",
       "position": "LW/C",
       "playerUrl": "https://www.eliteprospects.com/player/385680/robert-mastrosimone",
@@ -170,7 +186,7 @@
       "league": "AHL",
       "leagueUrl": "https://www.eliteprospects.com/league/ahl/stats",
       "isTotals": false,
-      "gp": "15",
+      "gp": "16",
       "g": "3",
       "a": "6",
       "tp": "9",
@@ -186,27 +202,11 @@
       "league": "AHL",
       "leagueUrl": "https://www.eliteprospects.com/league/ahl/stats",
       "isTotals": false,
-      "gp": "14",
-      "g": "3",
+      "gp": "15",
+      "g": "4",
       "a": "4",
-      "tp": "7",
+      "tp": "8",
       "pim": "10"
-    },
-    {
-      "name": "Alex Young",
-      "position": "C/W",
-      "playerUrl": "https://www.eliteprospects.com/player/351179/alex-young",
-      "playerId": "351179",
-      "team": "Rapid City Rush",
-      "teamUrl": "https://www.eliteprospects.com/team/2707/rapid-city-rush",
-      "league": "ECHL",
-      "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
-      "isTotals": false,
-      "gp": "7",
-      "g": "2",
-      "a": "5",
-      "tp": "7",
-      "pim": "2"
     },
     {
       "name": "Filips Buncis",
@@ -239,6 +239,22 @@
       "a": "5",
       "tp": "6",
       "pim": "2"
+    },
+    {
+      "name": "Josh Doan",
+      "position": "W/C",
+      "playerUrl": "https://www.eliteprospects.com/player/201817/josh-doan",
+      "playerId": "201817",
+      "team": "Buffalo Sabres",
+      "teamUrl": "https://www.eliteprospects.com/team/53/buffalo-sabres",
+      "league": "NHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/nhl/stats",
+      "isTotals": false,
+      "gp": "18",
+      "g": "4",
+      "a": "1",
+      "tp": "5",
+      "pim": "6"
     },
     {
       "name": "Ty Nash",
@@ -287,6 +303,22 @@
       "a": "4",
       "tp": "5",
       "pim": "4"
+    },
+    {
+      "name": "Jack Becker",
+      "position": "C/RW",
+      "playerUrl": "https://www.eliteprospects.com/player/248382/jack-becker",
+      "playerId": "248382",
+      "team": "Texas Stars",
+      "teamUrl": "https://www.eliteprospects.com/team/4516/texas-stars",
+      "league": "AHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/ahl/stats",
+      "isTotals": false,
+      "gp": "14",
+      "g": "1",
+      "a": "4",
+      "tp": "5",
+      "pim": "15"
     },
     {
       "name": "Justin Kipkie",
@@ -351,22 +383,6 @@
       "a": "1",
       "tp": "4",
       "pim": "0"
-    },
-    {
-      "name": "Josh Doan",
-      "position": "W/C",
-      "playerUrl": "https://www.eliteprospects.com/player/201817/josh-doan",
-      "playerId": "201817",
-      "team": "Buffalo Sabres",
-      "teamUrl": "https://www.eliteprospects.com/team/53/buffalo-sabres",
-      "league": "NHL",
-      "leagueUrl": "https://www.eliteprospects.com/league/nhl/stats",
-      "isTotals": false,
-      "gp": "17",
-      "g": "3",
-      "a": "1",
-      "tp": "4",
-      "pim": "4"
     },
     {
       "name": "Matthew Romer",
@@ -497,22 +513,6 @@
       "pim": "9"
     },
     {
-      "name": "Jack Becker",
-      "position": "C/RW",
-      "playerUrl": "https://www.eliteprospects.com/player/248382/jack-becker",
-      "playerId": "248382",
-      "team": "Texas Stars",
-      "teamUrl": "https://www.eliteprospects.com/team/4516/texas-stars",
-      "league": "AHL",
-      "leagueUrl": "https://www.eliteprospects.com/league/ahl/stats",
-      "isTotals": false,
-      "gp": "13",
-      "g": "0",
-      "a": "4",
-      "tp": "4",
-      "pim": "15"
-    },
-    {
       "name": "Ty Murchison",
       "position": "D",
       "playerUrl": "https://www.eliteprospects.com/player/512190/ty-murchison",
@@ -554,11 +554,11 @@
       "league": "ECHL",
       "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
       "isTotals": false,
-      "gp": "10",
+      "gp": "11",
       "g": "2",
       "a": "1",
       "tp": "3",
-      "pim": "38"
+      "pim": "40"
     },
     {
       "name": "Ethan Szmagaj",
@@ -650,7 +650,7 @@
       "league": "totals",
       "leagueUrl": "",
       "isTotals": true,
-      "gp": "6",
+      "gp": "7",
       "g": "1",
       "a": "1",
       "tp": "2",
@@ -666,7 +666,7 @@
       "league": "ECHL",
       "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
       "isTotals": false,
-      "gp": "5",
+      "gp": "6",
       "g": "1",
       "a": "1",
       "tp": "2",
@@ -805,6 +805,22 @@
       "position": "W/C",
       "playerUrl": "https://www.eliteprospects.com/player/287466/lukas-sillinger",
       "playerId": "287466",
+      "team": "",
+      "teamUrl": "",
+      "league": "totals",
+      "leagueUrl": "",
+      "isTotals": true,
+      "gp": "8",
+      "g": "0",
+      "a": "1",
+      "tp": "1",
+      "pim": "2"
+    },
+    {
+      "name": "Lukas Sillinger",
+      "position": "W/C",
+      "playerUrl": "https://www.eliteprospects.com/player/287466/lukas-sillinger",
+      "playerId": "287466",
       "team": "Allen Americans",
       "teamUrl": "https://www.eliteprospects.com/team/4558/allen-americans",
       "league": "ECHL",
@@ -815,6 +831,22 @@
       "a": "1",
       "tp": "1",
       "pim": "2"
+    },
+    {
+      "name": "Lukas Sillinger",
+      "position": "W/C",
+      "playerUrl": "https://www.eliteprospects.com/player/287466/lukas-sillinger",
+      "playerId": "287466",
+      "team": "Rapid City Rush",
+      "teamUrl": "https://www.eliteprospects.com/team/2707/rapid-city-rush",
+      "league": "ECHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
+      "isTotals": false,
+      "gp": "-",
+      "g": "-",
+      "a": "-",
+      "tp": "-",
+      "pim": "-"
     },
     {
       "name": "Ryan Alexander",
@@ -883,6 +915,20 @@
   ],
   "goalies": [
     {
+      "name": "Connor Hasley",
+      "position": "G",
+      "playerUrl": "https://www.eliteprospects.com/player/415041/connor-hasley",
+      "playerId": "415041",
+      "team": "Wichita Thunder",
+      "teamUrl": "https://www.eliteprospects.com/team/836/wichita-thunder",
+      "league": "ECHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
+      "isTotals": false,
+      "gp": "4",
+      "gaa": "2.02",
+      "svPct": ".928"
+    },
+    {
       "name": "Ben Kraws",
       "position": "G",
       "playerUrl": "https://www.eliteprospects.com/player/276203/ben-kraws",
@@ -895,20 +941,6 @@
       "gp": "5",
       "gaa": "1.99",
       "svPct": ".928"
-    },
-    {
-      "name": "Connor Hasley",
-      "position": "G",
-      "playerUrl": "https://www.eliteprospects.com/player/415041/connor-hasley",
-      "playerId": "415041",
-      "team": "Wichita Thunder",
-      "teamUrl": "https://www.eliteprospects.com/team/836/wichita-thunder",
-      "league": "ECHL",
-      "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
-      "isTotals": false,
-      "gp": "3",
-      "gaa": "2.34",
-      "svPct": ".923"
     },
     {
       "name": "T.J. Semptimphelter",
@@ -1037,5 +1069,5 @@
       "svPct": "-"
     }
   ],
-  "lastUpdated": "2026-11-11T13:01:03.726Z"
+  "lastUpdated": "2026-11-12T13:01:00.296Z"
 }

@@ -1,6 +1,6 @@
 {
   "season": "2026-2027",
-  "lastUpdated": "2026-11-11T13:02:33.994Z",
+  "lastUpdated": "2026-11-12T13:02:44.769Z",
   "teams": [
     {
       "rank": "1",
@@ -12,18 +12,18 @@
     },
     {
       "rank": "2",
-      "team": "Miami",
-      "pts": "6",
-      "confRecord": "2-2-0",
-      "overallRecord": "7-3-0",
-      "isASU": false
-    },
-    {
-      "rank": "3",
       "team": "Minnesota Duluth",
       "pts": "6",
       "confRecord": "2-2-0",
       "overallRecord": "7-3-2",
+      "isASU": false
+    },
+    {
+      "rank": "3",
+      "team": "Miami",
+      "pts": "6",
+      "confRecord": "2-2-0",
+      "overallRecord": "7-3-0",
       "isASU": false
     },
     {
