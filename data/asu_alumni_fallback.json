@@ -11,9 +11,9 @@
       "leagueUrl": "https://www.eliteprospects.com/league/germany3/stats",
       "isTotals": false,
       "gp": "15",
-      "g": "12",
+      "g": "11",
       "a": "23",
-      "tp": "35",
+      "tp": "34",
       "pim": "2"
     },
     {
@@ -250,7 +250,7 @@
       "league": "NHL",
       "leagueUrl": "https://www.eliteprospects.com/league/nhl/stats",
       "isTotals": false,
-      "gp": "18",
+      "gp": "19",
       "g": "4",
       "a": "1",
       "tp": "5",
@@ -426,7 +426,7 @@
       "league": "NCAA",
       "leagueUrl": "https://www.eliteprospects.com/league/ncaa/stats",
       "isTotals": false,
-      "gp": "8",
+      "gp": "9",
       "g": "1",
       "a": "3",
       "tp": "4",
@@ -442,7 +442,7 @@
       "league": "totals",
       "leagueUrl": "",
       "isTotals": true,
-      "gp": "9",
+      "gp": "10",
       "g": "1",
       "a": "3",
       "tp": "4",
@@ -474,7 +474,7 @@
       "league": "ECHL",
       "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
       "isTotals": false,
-      "gp": "7",
+      "gp": "8",
       "g": "1",
       "a": "3",
       "tp": "4",
@@ -586,11 +586,11 @@
       "league": "ECHL",
       "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
       "isTotals": false,
-      "gp": "11",
+      "gp": "12",
       "g": "0",
       "a": "3",
       "tp": "3",
-      "pim": "9"
+      "pim": "11"
     },
     {
       "name": "Justin Cloutier",
@@ -952,9 +952,9 @@
       "league": "totals",
       "leagueUrl": "",
       "isTotals": true,
-      "gp": "4",
-      "gaa": "3.29",
-      "svPct": ".912"
+      "gp": "5",
+      "gaa": "3.03",
+      "svPct": ".916"
     },
     {
       "name": "T.J. Semptimphelter",
@@ -980,9 +980,9 @@
       "league": "ECHL",
       "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
       "isTotals": false,
-      "gp": "4",
-      "gaa": "3.29",
-      "svPct": ".912"
+      "gp": "5",
+      "gaa": "3.03",
+      "svPct": ".916"
     },
     {
       "name": "Joey Daccord",
@@ -1069,5 +1069,5 @@
       "svPct": "-"
     }
   ],
-  "lastUpdated": "2026-11-12T13:01:00.296Z"
+  "lastUpdated": "2026-11-13T14:07:33.621Z"
 }
