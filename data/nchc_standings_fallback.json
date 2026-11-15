@@ -1,61 +1,61 @@
 {
   "season": "2026-2027",
-  "lastUpdated": "2026-11-14T13:02:49.777Z",
+  "lastUpdated": "2026-11-15T13:02:41.107Z",
   "teams": [
     {
       "rank": "1",
-      "team": "Denver",
-      "pts": "11",
-      "confRecord": "4-0-0",
-      "overallRecord": "8-2-1",
+      "team": "Minnesota Duluth",
+      "pts": "12",
+      "confRecord": "4-2-0",
+      "overallRecord": "9-3-2",
       "isASU": false
     },
     {
       "rank": "2",
-      "team": "Minnesota Duluth",
-      "pts": "9",
-      "confRecord": "3-2-0",
-      "overallRecord": "8-3-2",
+      "team": "Denver",
+      "pts": "11",
+      "confRecord": "4-0-0",
+      "overallRecord": "9-2-1",
       "isASU": false
     },
     {
       "rank": "3",
-      "team": "Omaha",
-      "pts": "8",
-      "confRecord": "2-2-1",
-      "overallRecord": "4-4-1",
+      "team": "North Dakota",
+      "pts": "10",
+      "confRecord": "3-0-1",
+      "overallRecord": "7-3-1",
       "isASU": false
     },
     {
       "rank": "4",
-      "team": "North Dakota",
-      "pts": "7",
-      "confRecord": "2-0-1",
-      "overallRecord": "6-3-1",
+      "team": "Miami",
+      "pts": "9",
+      "confRecord": "3-3-0",
+      "overallRecord": "8-4-0",
       "isASU": false
     },
     {
       "rank": "5",
-      "team": "Miami",
-      "pts": "6",
-      "confRecord": "2-3-0",
-      "overallRecord": "7-4-0",
+      "team": "Omaha",
+      "pts": "8",
+      "confRecord": "2-3-1",
+      "overallRecord": "4-5-1",
       "isASU": false
     },
     {
       "rank": "6",
       "team": "Western Michigan",
-      "pts": "5",
-      "confRecord": "1-1-1",
-      "overallRecord": "7-2-1",
+      "pts": "7",
+      "confRecord": "2-1-1",
+      "overallRecord": "8-2-1",
       "isASU": false
     },
     {
       "rank": "7",
       "team": "St. Cloud State",
       "pts": "4",
-      "confRecord": "1-3-1",
-      "overallRecord": "3-6-1",
+      "confRecord": "1-4-1",
+      "overallRecord": "3-7-1",
       "isASU": false
     },
     {
@@ -69,17 +69,17 @@
     {
       "rank": "9",
       "team": "Colorado College",
-      "pts": "3",
-      "confRecord": "1-2-0",
-      "overallRecord": "7-3-1",
+      "pts": "4",
+      "confRecord": "1-3-0",
+      "overallRecord": "7-4-1",
       "isASU": false
     },
     {
       "rank": "10",
       "team": "St. Thomas",
       "pts": "3",
-      "confRecord": "1-2-0",
-      "overallRecord": "4-5-0",
+      "confRecord": "1-3-0",
+      "overallRecord": "4-6-0",
       "isASU": false
     }
   ]
