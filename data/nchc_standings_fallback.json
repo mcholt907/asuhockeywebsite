@@ -1,6 +1,6 @@
 {
   "season": "2026-2027",
-  "lastUpdated": "2026-11-15T13:02:41.107Z",
+  "lastUpdated": "2026-11-16T14:22:47.053Z",
   "teams": [
     {
       "rank": "1",
@@ -60,19 +60,19 @@
     },
     {
       "rank": "8",
-      "team": "Arizona State",
-      "pts": "4",
-      "confRecord": "1-3-0",
-      "overallRecord": "5-5-0",
-      "isASU": true
-    },
-    {
-      "rank": "9",
       "team": "Colorado College",
       "pts": "4",
       "confRecord": "1-3-0",
       "overallRecord": "7-4-1",
       "isASU": false
+    },
+    {
+      "rank": "9",
+      "team": "Arizona State",
+      "pts": "4",
+      "confRecord": "1-3-0",
+      "overallRecord": "5-5-0",
+      "isASU": true
     },
     {
       "rank": "10",
