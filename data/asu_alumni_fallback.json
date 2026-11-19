@@ -76,8 +76,8 @@
       "isTotals": false,
       "gp": "15",
       "g": "4",
-      "a": "12",
-      "tp": "16",
+      "a": "13",
+      "tp": "17",
       "pim": "18"
     },
     {
@@ -90,11 +90,11 @@
       "league": "ECHL",
       "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
       "isTotals": false,
-      "gp": "10",
-      "g": "5",
-      "a": "6",
-      "tp": "11",
-      "pim": "4"
+      "gp": "11",
+      "g": "6",
+      "a": "7",
+      "tp": "13",
+      "pim": "8"
     },
     {
       "name": "Ryder Betzold",
@@ -138,7 +138,7 @@
       "league": "Denmark",
       "leagueUrl": "https://www.eliteprospects.com/league/denmark/stats",
       "isTotals": false,
-      "gp": "17",
+      "gp": "18",
       "g": "5",
       "a": "5",
       "tp": "10",
@@ -202,7 +202,7 @@
       "league": "AHL",
       "leagueUrl": "https://www.eliteprospects.com/league/ahl/stats",
       "isTotals": false,
-      "gp": "18",
+      "gp": "19",
       "g": "3",
       "a": "6",
       "tp": "9",
@@ -225,6 +225,22 @@
       "pim": "10"
     },
     {
+      "name": "Joshua Niedermayer",
+      "position": "D",
+      "playerUrl": "https://www.eliteprospects.com/player/505291/joshua-niedermayer",
+      "playerId": "505291",
+      "team": "Colgate Univ.",
+      "teamUrl": "https://www.eliteprospects.com/team/913/colgate-univ",
+      "league": "NCAA",
+      "leagueUrl": "https://www.eliteprospects.com/league/ncaa/stats",
+      "isTotals": false,
+      "gp": "12",
+      "g": "1",
+      "a": "7",
+      "tp": "8",
+      "pim": "2"
+    },
+    {
       "name": "Jack Becker",
       "position": "C/RW",
       "playerUrl": "https://www.eliteprospects.com/player/248382/jack-becker",
@@ -239,22 +255,6 @@
       "a": "5",
       "tp": "7",
       "pim": "15"
-    },
-    {
-      "name": "Joshua Niedermayer",
-      "position": "D",
-      "playerUrl": "https://www.eliteprospects.com/player/505291/joshua-niedermayer",
-      "playerId": "505291",
-      "team": "Colgate Univ.",
-      "teamUrl": "https://www.eliteprospects.com/team/913/colgate-univ",
-      "league": "NCAA",
-      "leagueUrl": "https://www.eliteprospects.com/league/ncaa/stats",
-      "isTotals": false,
-      "gp": "12",
-      "g": "1",
-      "a": "6",
-      "tp": "7",
-      "pim": "2"
     },
     {
       "name": "Filips Buncis",
@@ -273,6 +273,22 @@
       "pim": "6"
     },
     {
+      "name": "Josh Doan",
+      "position": "W/C",
+      "playerUrl": "https://www.eliteprospects.com/player/201817/josh-doan",
+      "playerId": "201817",
+      "team": "Buffalo Sabres",
+      "teamUrl": "https://www.eliteprospects.com/team/53/buffalo-sabres",
+      "league": "NHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/nhl/stats",
+      "isTotals": false,
+      "gp": "21",
+      "g": "4",
+      "a": "2",
+      "tp": "6",
+      "pim": "8"
+    },
+    {
       "name": "Wade Murphy",
       "position": "RW/LW",
       "playerUrl": "https://www.eliteprospects.com/player/48368/wade-murphy",
@@ -282,11 +298,11 @@
       "league": "totals",
       "leagueUrl": "",
       "isTotals": true,
-      "gp": "10",
+      "gp": "11",
       "g": "3",
       "a": "3",
       "tp": "6",
-      "pim": "6"
+      "pim": "8"
     },
     {
       "name": "Wade Murphy",
@@ -298,11 +314,11 @@
       "league": "ECHL",
       "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
       "isTotals": false,
-      "gp": "9",
+      "gp": "10",
       "g": "3",
       "a": "3",
       "tp": "6",
-      "pim": "6"
+      "pim": "8"
     },
     {
       "name": "Wade Murphy",
@@ -335,22 +351,6 @@
       "a": "6",
       "tp": "6",
       "pim": "28"
-    },
-    {
-      "name": "Josh Doan",
-      "position": "W/C",
-      "playerUrl": "https://www.eliteprospects.com/player/201817/josh-doan",
-      "playerId": "201817",
-      "team": "Buffalo Sabres",
-      "teamUrl": "https://www.eliteprospects.com/team/53/buffalo-sabres",
-      "league": "NHL",
-      "leagueUrl": "https://www.eliteprospects.com/league/nhl/stats",
-      "isTotals": false,
-      "gp": "20",
-      "g": "4",
-      "a": "1",
-      "tp": "5",
-      "pim": "6"
     },
     {
       "name": "Ty Nash",
@@ -394,11 +394,11 @@
       "league": "EIHL",
       "leagueUrl": "https://www.eliteprospects.com/league/eihl/stats",
       "isTotals": false,
-      "gp": "10",
+      "gp": "11",
       "g": "1",
       "a": "4",
       "tp": "5",
-      "pim": "6"
+      "pim": "8"
     },
     {
       "name": "Jackson Niedermayer",
@@ -463,6 +463,22 @@
       "a": "5",
       "tp": "5",
       "pim": "8"
+    },
+    {
+      "name": "Max Balinson",
+      "position": "D",
+      "playerUrl": "https://www.eliteprospects.com/player/190029/max-balinson",
+      "playerId": "190029",
+      "team": "Düsseldorfer EG",
+      "teamUrl": "https://www.eliteprospects.com/team/133/dusseldorfer-eg",
+      "league": "DEL2",
+      "leagueUrl": "https://www.eliteprospects.com/league/del2/stats",
+      "isTotals": false,
+      "gp": "16",
+      "g": "0",
+      "a": "5",
+      "tp": "5",
+      "pim": "11"
     },
     {
       "name": "Sam Court",
@@ -593,22 +609,6 @@
       "pim": "8"
     },
     {
-      "name": "Max Balinson",
-      "position": "D",
-      "playerUrl": "https://www.eliteprospects.com/player/190029/max-balinson",
-      "playerId": "190029",
-      "team": "Düsseldorfer EG",
-      "teamUrl": "https://www.eliteprospects.com/team/133/dusseldorfer-eg",
-      "league": "DEL2",
-      "leagueUrl": "https://www.eliteprospects.com/league/del2/stats",
-      "isTotals": false,
-      "gp": "15",
-      "g": "0",
-      "a": "4",
-      "tp": "4",
-      "pim": "11"
-    },
-    {
       "name": "Noah Powell",
       "position": "RW",
       "playerUrl": "https://www.eliteprospects.com/player/674718/noah-powell",
@@ -650,7 +650,7 @@
       "league": "ECHL",
       "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
       "isTotals": false,
-      "gp": "9",
+      "gp": "10",
       "g": "1",
       "a": "2",
       "tp": "3",
@@ -705,6 +705,22 @@
       "pim": "0"
     },
     {
+      "name": "Joey Raats",
+      "position": "D",
+      "playerUrl": "https://www.eliteprospects.com/player/142426/joey-raats",
+      "playerId": "142426",
+      "team": "Fresno Falcons",
+      "teamUrl": "https://www.eliteprospects.com/team/49937/fresno-falcons",
+      "league": "FPHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/fphl/stats",
+      "isTotals": false,
+      "gp": "4",
+      "g": "0",
+      "a": "2",
+      "tp": "2",
+      "pim": "4"
+    },
+    {
       "name": "Joel Kjellberg",
       "position": "D",
       "playerUrl": "https://www.eliteprospects.com/player/566399/joel-kjellberg",
@@ -735,6 +751,54 @@
       "a": "2",
       "tp": "2",
       "pim": "23"
+    },
+    {
+      "name": "Lukas Sillinger",
+      "position": "W/C",
+      "playerUrl": "https://www.eliteprospects.com/player/287466/lukas-sillinger",
+      "playerId": "287466",
+      "team": "",
+      "teamUrl": "",
+      "league": "totals",
+      "leagueUrl": "",
+      "isTotals": true,
+      "gp": "9",
+      "g": "0",
+      "a": "2",
+      "tp": "2",
+      "pim": "2"
+    },
+    {
+      "name": "Lukas Sillinger",
+      "position": "W/C",
+      "playerUrl": "https://www.eliteprospects.com/player/287466/lukas-sillinger",
+      "playerId": "287466",
+      "team": "Allen Americans",
+      "teamUrl": "https://www.eliteprospects.com/team/4558/allen-americans",
+      "league": "ECHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
+      "isTotals": false,
+      "gp": "8",
+      "g": "0",
+      "a": "1",
+      "tp": "1",
+      "pim": "2"
+    },
+    {
+      "name": "Lukas Sillinger",
+      "position": "W/C",
+      "playerUrl": "https://www.eliteprospects.com/player/287466/lukas-sillinger",
+      "playerId": "287466",
+      "team": "Rapid City Rush",
+      "teamUrl": "https://www.eliteprospects.com/team/2707/rapid-city-rush",
+      "league": "ECHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
+      "isTotals": false,
+      "gp": "1",
+      "g": "0",
+      "a": "1",
+      "tp": "1",
+      "pim": "0"
     },
     {
       "name": "Austin Zemlak",
@@ -785,6 +849,22 @@
       "pim": "2"
     },
     {
+      "name": "Cole Helm",
+      "position": "F",
+      "playerUrl": "https://www.eliteprospects.com/player/512363/cole-helm",
+      "playerId": "512363",
+      "team": "Mansfield Barracuda",
+      "teamUrl": "https://www.eliteprospects.com/team/42989/mansfield-barracuda",
+      "league": "MountainHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/mountainhl/stats",
+      "isTotals": false,
+      "gp": "1",
+      "g": "0",
+      "a": "1",
+      "tp": "1",
+      "pim": "0"
+    },
+    {
       "name": "Anthony Dowd",
       "position": "D",
       "playerUrl": "https://www.eliteprospects.com/player/599134/anthony-dowd",
@@ -799,54 +879,6 @@
       "a": "1",
       "tp": "1",
       "pim": "0"
-    },
-    {
-      "name": "Lukas Sillinger",
-      "position": "W/C",
-      "playerUrl": "https://www.eliteprospects.com/player/287466/lukas-sillinger",
-      "playerId": "287466",
-      "team": "",
-      "teamUrl": "",
-      "league": "totals",
-      "leagueUrl": "",
-      "isTotals": true,
-      "gp": "8",
-      "g": "0",
-      "a": "1",
-      "tp": "1",
-      "pim": "2"
-    },
-    {
-      "name": "Lukas Sillinger",
-      "position": "W/C",
-      "playerUrl": "https://www.eliteprospects.com/player/287466/lukas-sillinger",
-      "playerId": "287466",
-      "team": "Allen Americans",
-      "teamUrl": "https://www.eliteprospects.com/team/4558/allen-americans",
-      "league": "ECHL",
-      "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
-      "isTotals": false,
-      "gp": "8",
-      "g": "0",
-      "a": "1",
-      "tp": "1",
-      "pim": "2"
-    },
-    {
-      "name": "Lukas Sillinger",
-      "position": "W/C",
-      "playerUrl": "https://www.eliteprospects.com/player/287466/lukas-sillinger",
-      "playerId": "287466",
-      "team": "Rapid City Rush",
-      "teamUrl": "https://www.eliteprospects.com/team/2707/rapid-city-rush",
-      "league": "ECHL",
-      "leagueUrl": "https://www.eliteprospects.com/league/echl/stats",
-      "isTotals": false,
-      "gp": "-",
-      "g": "-",
-      "a": "-",
-      "tp": "-",
-      "pim": "-"
     },
     {
       "name": "Ryan Alexander",
@@ -879,22 +911,6 @@
       "a": "0",
       "tp": "0",
       "pim": "2"
-    },
-    {
-      "name": "Joey Raats",
-      "position": "D",
-      "playerUrl": "https://www.eliteprospects.com/player/142426/joey-raats",
-      "playerId": "142426",
-      "team": "Fresno Falcons",
-      "teamUrl": "https://www.eliteprospects.com/team/49937/fresno-falcons",
-      "league": "FPHL",
-      "leagueUrl": "https://www.eliteprospects.com/league/fphl/stats",
-      "isTotals": false,
-      "gp": "2",
-      "g": "0",
-      "a": "0",
-      "tp": "0",
-      "pim": "4"
     },
     {
       "name": "Timothy Lovell",
@@ -1085,5 +1101,5 @@
       "svPct": "-"
     }
   ],
-  "lastUpdated": "2026-11-16T14:20:57.770Z"
+  "lastUpdated": "2026-11-19T13:01:02.812Z"
 }
