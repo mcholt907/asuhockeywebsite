@@ -42,10 +42,10 @@
       "league": "USHL",
       "leagueUrl": "https://www.eliteprospects.com/league/ushl/stats",
       "isTotals": false,
-      "gp": "16",
+      "gp": "17",
       "g": "8",
-      "a": "13",
-      "tp": "21",
+      "a": "14",
+      "tp": "22",
       "pim": "10"
     },
     {
@@ -241,6 +241,22 @@
       "pim": "2"
     },
     {
+      "name": "Josh Doan",
+      "position": "W/C",
+      "playerUrl": "https://www.eliteprospects.com/player/201817/josh-doan",
+      "playerId": "201817",
+      "team": "Buffalo Sabres",
+      "teamUrl": "https://www.eliteprospects.com/team/53/buffalo-sabres",
+      "league": "NHL",
+      "leagueUrl": "https://www.eliteprospects.com/league/nhl/stats",
+      "isTotals": false,
+      "gp": "22",
+      "g": "4",
+      "a": "3",
+      "tp": "7",
+      "pim": "8"
+    },
+    {
       "name": "Jack Becker",
       "position": "C/RW",
       "playerUrl": "https://www.eliteprospects.com/player/248382/jack-becker",
@@ -271,22 +287,6 @@
       "a": "6",
       "tp": "7",
       "pim": "6"
-    },
-    {
-      "name": "Josh Doan",
-      "position": "W/C",
-      "playerUrl": "https://www.eliteprospects.com/player/201817/josh-doan",
-      "playerId": "201817",
-      "team": "Buffalo Sabres",
-      "teamUrl": "https://www.eliteprospects.com/team/53/buffalo-sabres",
-      "league": "NHL",
-      "leagueUrl": "https://www.eliteprospects.com/league/nhl/stats",
-      "isTotals": false,
-      "gp": "21",
-      "g": "4",
-      "a": "2",
-      "tp": "6",
-      "pim": "8"
     },
     {
       "name": "Wade Murphy",
@@ -522,7 +522,7 @@
       "league": "NCAA",
       "leagueUrl": "https://www.eliteprospects.com/league/ncaa/stats",
       "isTotals": false,
-      "gp": "7",
+      "gp": "8",
       "g": "2",
       "a": "2",
       "tp": "4",
@@ -721,22 +721,6 @@
       "pim": "4"
     },
     {
-      "name": "Joel Kjellberg",
-      "position": "D",
-      "playerUrl": "https://www.eliteprospects.com/player/566399/joel-kjellberg",
-      "playerId": "566399",
-      "team": "Northeastern Univ.",
-      "teamUrl": "https://www.eliteprospects.com/team/1465/northeastern-univ",
-      "league": "NCAA",
-      "leagueUrl": "https://www.eliteprospects.com/league/ncaa/stats",
-      "isTotals": false,
-      "gp": "8",
-      "g": "0",
-      "a": "2",
-      "tp": "2",
-      "pim": "2"
-    },
-    {
       "name": "Teddy Lagerback",
       "position": "RW",
       "playerUrl": "https://www.eliteprospects.com/player/587534/teddy-lagerback",
@@ -751,6 +735,22 @@
       "a": "2",
       "tp": "2",
       "pim": "23"
+    },
+    {
+      "name": "Joel Kjellberg",
+      "position": "D",
+      "playerUrl": "https://www.eliteprospects.com/player/566399/joel-kjellberg",
+      "playerId": "566399",
+      "team": "Northeastern Univ.",
+      "teamUrl": "https://www.eliteprospects.com/team/1465/northeastern-univ",
+      "league": "NCAA",
+      "leagueUrl": "https://www.eliteprospects.com/league/ncaa/stats",
+      "isTotals": false,
+      "gp": "9",
+      "g": "0",
+      "a": "2",
+      "tp": "2",
+      "pim": "2"
     },
     {
       "name": "Lukas Sillinger",
@@ -1101,5 +1101,5 @@
       "svPct": "-"
     }
   ],
-  "lastUpdated": "2026-11-19T13:01:02.812Z"
+  "lastUpdated": "2026-11-20T13:01:00.789Z"
 }
