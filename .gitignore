@@ -75,3 +75,6 @@ Thumbs.db
 # Local git worktrees
 .worktrees/
 worktrees/
+
+# Nested agent tooling clone (never tracked; formerly a stray gitlink)
+.agent/superpowers-temp/
