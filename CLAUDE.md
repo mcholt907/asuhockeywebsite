@@ -92,6 +92,16 @@ Root utility scripts for editing this file:
 - `clean-recruiting.js` — clean/validate recruiting data
 - `add-current-team.js` — manage current season roster entries
 
+## Game Line Charts
+
+`/schedule` game cards show a **Lines** link (next to Box/Metrics, and even
+before a result exists) when `src/data/lineCharts.json` maps the game's date
+(`YYYY-MM-DD`) to an image under `public/assets/line-charts/<season>/`. Add or
+replace one with `npm run add-line-chart -- <image> <YYYY-MM-DD> "<Opponent>"`
+(or the `/add-line-chart` skill), which converts the image to WebP and updates
+the manifest. `__tests__/line-charts.test.js` fails if the manifest and the
+image files drift apart.
+
 ## Data Refresh Workflow
 
 Recruiting, alumni, and transfer data are scraped from EliteProspects, which
@@ -160,7 +170,7 @@ classes.
 
 - `/` — Home (next game, team record, news grid, standings)
 - `/news` — News feed: hybrid magazine layout (hero card → wide+stacked row → 3-col compact grid → older stories list)
-- `/schedule` — Game schedule with results and team record widget
+- `/schedule` — Game schedule with results, team record widget, and per-game Box/Metrics/Lines links
 - `/roster` — Team roster with position filtering and nationality flags
 - `/stats` — Player statistics with sortable columns (skaters / goalies)
 - `/recruiting` — Recruiting tracker grouped by position, sorted by last name, with birth year

@@ -1,6 +1,9 @@
 import React, { useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { useSchedule } from "../hooks/queries/useSchedule";
+// Game date (YYYY-MM-DD) -> public path of that game's line chart image.
+// Maintained by `npm run add-line-chart`; see scripts/add-line-chart.js.
+import lineCharts from "../data/lineCharts.json";
 import {
   SEASON_FULL,
   SEASON_SHORT,
@@ -260,6 +263,10 @@ function Schedule() {
       ) : (
         <ul className="schedule-list">
           {games.map((game, index) => {
+            // Line charts are posted on game day, so they can appear before
+            // a result exists.
+            const lineChart = lineCharts[game.date];
+            const hasLinks = game.box_link || game.metrics_link || lineChart;
             return (
               <li
                 key={`${game.date}-${game.opponent}-${index}`}
@@ -290,19 +297,21 @@ function Schedule() {
                   )}
                 </div>
                 <div className="game-location">{game.location}</div>
-                {game.result && (
+                {(game.result || lineChart) && (
                   <div className="game-result-col">
-                    <div
-                      className={`result-badge result-badge-${game.result.charAt(0).toLowerCase()}`}
-                    >
-                      <span className="result-badge-letter">
-                        {game.result.charAt(0)}
-                      </span>
-                      <span className="result-badge-score">
-                        {game.result.slice(2)}
-                      </span>
-                    </div>
-                    {(game.box_link || game.metrics_link) && (
+                    {game.result && (
+                      <div
+                        className={`result-badge result-badge-${game.result.charAt(0).toLowerCase()}`}
+                      >
+                        <span className="result-badge-letter">
+                          {game.result.charAt(0)}
+                        </span>
+                        <span className="result-badge-score">
+                          {game.result.slice(2)}
+                        </span>
+                      </div>
+                    )}
+                    {hasLinks && (
                       <div className="game-links">
                         {game.box_link && (
                           <a
@@ -322,6 +331,17 @@ function Schedule() {
                             className="game-link-pill"
                           >
                             Metrics
+                          </a>
+                        )}
+                        {lineChart && (
+                          <a
+                            href={lineChart}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="game-link-pill"
+                            title="Game-day line chart"
+                          >
+                            Lines
                           </a>
                         )}
                       </div>

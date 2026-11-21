@@ -59,6 +59,7 @@
     "refresh-transfers": "node scripts/refresh-transfers.js",
     "refresh-recruiting": "node scripts/refresh-recruiting.js",
     "refresh-standings": "node scripts/refresh-standings.js",
+    "add-line-chart": "node scripts/add-line-chart.js",
     "refresh-data": "npm run refresh-alumni && npm run refresh-transfers && npm run refresh-recruiting && npm run refresh-standings",
     "typecheck": "tsc --noEmit"
   },

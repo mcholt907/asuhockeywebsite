@@ -1,56 +1,63 @@
-import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
-import { HelmetProvider } from 'react-helmet-async';
-import Schedule from '../Schedule';
-import { renderWithQueryClient } from '../../test-utils/renderWithQueryClient';
+import React from "react";
+import { screen, waitFor } from "@testing-library/react";
+import { HelmetProvider } from "react-helmet-async";
+import Schedule from "../Schedule";
+import { renderWithQueryClient } from "../../test-utils/renderWithQueryClient";
 
 // Mock the API service
-jest.mock('../../services/api', () => ({
+jest.mock("../../services/api", () => ({
   getSchedule: jest.fn(),
 }));
 
-import { getSchedule } from '../../services/api';
+// Fixed line-chart manifest so tests don't depend on the committed charts.
+jest.mock("../../data/lineCharts.json", () => ({
+  "2024-02-02": "/assets/line-charts/2023-2024/2024-02-02-denver.webp",
+  "2024-02-09": "/assets/line-charts/2023-2024/2024-02-09-north-dakota.webp",
+}));
 
-const renderSchedule = () => renderWithQueryClient(
-  <HelmetProvider>
-    <Schedule />
-  </HelmetProvider>
-);
+import { getSchedule } from "../../services/api";
 
-describe('Schedule Page', () => {
+const renderSchedule = () =>
+  renderWithQueryClient(
+    <HelmetProvider>
+      <Schedule />
+    </HelmetProvider>,
+  );
+
+describe("Schedule Page", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should render loading state initially', () => {
+  it("should render loading state initially", () => {
     getSchedule.mockImplementation(() => new Promise(() => {}));
-    
+
     renderSchedule();
-    
+
     expect(screen.getByText(/loading schedule/i)).toBeInTheDocument();
   });
 
-  it('renders games with the calculated overall-only record and no absent optional links', async () => {
+  it("renders games with the calculated overall-only record and no absent optional links", async () => {
     const mockScheduleData = {
       data: [
-        { 
-          date: '2024-01-15', 
-          opponent: 'University of Arizona', 
-          status: 'Home',
-          time: '7:00 PM',
-          location: 'Mullett Arena',
-          result: 'W 3-1'
+        {
+          date: "2024-01-15",
+          opponent: "University of Arizona",
+          status: "Home",
+          time: "7:00 PM",
+          location: "Mullett Arena",
+          result: "W 3-1",
         },
-        { 
-          date: '2024-01-20', 
-          opponent: 'Boston University', 
-          status: 'Away',
-          time: '6:00 PM',
-          location: 'Agganis Arena'
-        }
+        {
+          date: "2024-01-20",
+          opponent: "Boston University",
+          status: "Away",
+          time: "6:00 PM",
+          location: "Agganis Arena",
+        },
       ],
-      source: 'api',
-      timestamp: '2024-01-15T00:00:00Z'
+      source: "api",
+      timestamp: "2024-01-15T00:00:00Z",
     };
 
     getSchedule.mockResolvedValue(mockScheduleData);
@@ -58,19 +65,90 @@ describe('Schedule Page', () => {
     renderSchedule();
 
     await waitFor(() => {
-      expect(screen.getByText('ASU Hockey Schedule & Results')).toBeInTheDocument();
+      expect(
+        screen.getByText("ASU Hockey Schedule & Results"),
+      ).toBeInTheDocument();
       expect(screen.getByText(/University of Arizona/i)).toBeInTheDocument();
       expect(screen.getByText(/Boston University/i)).toBeInTheDocument();
     });
-    expect(screen.getByText('Overall')).toBeInTheDocument();
-    expect(screen.getByText('1-0')).toBeInTheDocument();
-    expect(screen.queryByText('NCHC')).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: /box/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: /metrics/i })).not.toBeInTheDocument();
+    expect(screen.getByText("Overall")).toBeInTheDocument();
+    expect(screen.getByText("1-0")).toBeInTheDocument();
+    expect(screen.queryByText("NCHC")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /box/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /metrics/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /lines/i }),
+    ).not.toBeInTheDocument();
   });
 
-  it('should render error message when API call fails', async () => {
-    getSchedule.mockRejectedValue(new Error('Failed to fetch schedule'));
+  it("links a completed game to its line chart alongside Box and Metrics", async () => {
+    getSchedule.mockResolvedValue({
+      data: [
+        {
+          date: "2024-02-02",
+          opponent: "Denver",
+          status: "Home",
+          location: "Mullett Arena",
+          result: "L 2-4",
+          box_link:
+            "https://www.collegehockeynews.com/box/final/20240202/den/asu/",
+        },
+      ],
+      source: "api",
+      timestamp: "2024-02-03T00:00:00Z",
+    });
+    renderSchedule();
+
+    const linesLink = await screen.findByRole("link", { name: /lines/i });
+    expect(linesLink).toHaveAttribute(
+      "href",
+      "/assets/line-charts/2023-2024/2024-02-02-denver.webp",
+    );
+    expect(linesLink).toHaveAttribute("target", "_blank");
+    expect(linesLink).toHaveAttribute("rel", "noopener noreferrer");
+    expect(screen.getByRole("link", { name: /box/i })).toBeInTheDocument();
+    expect(screen.getByText("2-4")).toBeInTheDocument();
+  });
+
+  it("shows the line chart link on game day before a result is posted", async () => {
+    getSchedule.mockResolvedValue({
+      data: [
+        {
+          date: "2024-02-09",
+          opponent: "North Dakota",
+          status: "Away",
+          time: "6:07 PM",
+          location: "Ralph Engelstad Arena",
+        },
+        {
+          date: "2024-02-10",
+          opponent: "North Dakota",
+          status: "Away",
+          time: "5:07 PM",
+          location: "Ralph Engelstad Arena",
+        },
+      ],
+      source: "api",
+      timestamp: "2024-02-09T00:00:00Z",
+    });
+    const { container } = renderSchedule();
+
+    const linesLinks = await screen.findAllByRole("link", { name: /lines/i });
+    expect(linesLinks).toHaveLength(1);
+    expect(linesLinks[0]).toHaveAttribute(
+      "href",
+      "/assets/line-charts/2023-2024/2024-02-09-north-dakota.webp",
+    );
+    expect(container.querySelector(".result-badge")).not.toBeInTheDocument();
+    expect(screen.getByText("6:07 PM")).toBeInTheDocument();
+  });
+
+  it("should render error message when API call fails", async () => {
+    getSchedule.mockRejectedValue(new Error("Failed to fetch schedule"));
 
     renderSchedule();
 
@@ -79,64 +157,78 @@ describe('Schedule Page', () => {
     });
   });
 
-  it('should render Box and Metrics links for completed games', async () => {
+  it("should render Box and Metrics links for completed games", async () => {
     const mockScheduleData = {
       data: [
         {
-          date: '2024-01-15',
-          opponent: 'Penn State',
-          status: 'Home',
-          time: '7:00 PM',
-          location: 'Mullett Arena',
-          result: 'W 4-1',
-          box_link: 'https://www.collegehockeynews.com/box/final/20240115/psu/asu/',
-          metrics_link: 'https://www.collegehockeynews.com/box/metrics.php?gd=12345',
+          date: "2024-01-15",
+          opponent: "Penn State",
+          status: "Home",
+          time: "7:00 PM",
+          location: "Mullett Arena",
+          result: "W 4-1",
+          box_link:
+            "https://www.collegehockeynews.com/box/final/20240115/psu/asu/",
+          metrics_link:
+            "https://www.collegehockeynews.com/box/metrics.php?gd=12345",
         },
       ],
-      source: 'api',
-      timestamp: '2024-01-15T00:00:00Z',
+      source: "api",
+      timestamp: "2024-01-15T00:00:00Z",
     };
 
     getSchedule.mockResolvedValue(mockScheduleData);
     renderSchedule();
 
     await waitFor(() => {
-      const boxLink = screen.getByRole('link', { name: /box/i });
-      const metricsLink = screen.getByRole('link', { name: /metrics/i });
-      expect(boxLink).toHaveAttribute('href', 'https://www.collegehockeynews.com/box/final/20240115/psu/asu/');
-      expect(boxLink).toHaveAttribute('target', '_blank');
-      expect(metricsLink).toHaveAttribute('href', 'https://www.collegehockeynews.com/box/metrics.php?gd=12345');
-      expect(metricsLink).toHaveAttribute('target', '_blank');
+      const boxLink = screen.getByRole("link", { name: /box/i });
+      const metricsLink = screen.getByRole("link", { name: /metrics/i });
+      expect(boxLink).toHaveAttribute(
+        "href",
+        "https://www.collegehockeynews.com/box/final/20240115/psu/asu/",
+      );
+      expect(boxLink).toHaveAttribute("target", "_blank");
+      expect(metricsLink).toHaveAttribute(
+        "href",
+        "https://www.collegehockeynews.com/box/metrics.php?gd=12345",
+      );
+      expect(metricsLink).toHaveAttribute("target", "_blank");
     });
   });
 
-  it('should render 4-row record widget when team_record is provided', async () => {
+  it("should render 4-row record widget when team_record is provided", async () => {
     const mockScheduleData = {
       data: [
-        { date: '2024-01-15', opponent: 'Denver', status: 'Home', time: '7:00 PM', location: 'Mullett Arena' }
+        {
+          date: "2024-01-15",
+          opponent: "Denver",
+          status: "Home",
+          time: "7:00 PM",
+          location: "Mullett Arena",
+        },
       ],
       team_record: {
         overall: { wins: 14, losses: 19, ties: 1 },
-        conf:    { wins: 7,  losses: 14, ties: 1 },
-        home:    { wins: 9,  losses: 10, ties: 1 },
-        away:    { wins: 5,  losses: 9,  ties: 0 },
+        conf: { wins: 7, losses: 14, ties: 1 },
+        home: { wins: 9, losses: 10, ties: 1 },
+        away: { wins: 5, losses: 9, ties: 0 },
       },
-      source: 'api',
-      timestamp: '2024-01-15T00:00:00Z',
+      source: "api",
+      timestamp: "2024-01-15T00:00:00Z",
     };
 
     getSchedule.mockResolvedValue(mockScheduleData);
     renderSchedule();
 
     await waitFor(() => {
-      expect(screen.getByText('Overall')).toBeInTheDocument();
-      expect(screen.getByText('NCHC')).toBeInTheDocument();
-      expect(screen.getAllByText('Home').length).toBeGreaterThan(0);
-      expect(screen.getAllByText('Away').length).toBeGreaterThan(0);
-      expect(screen.getByText('14-19-1')).toBeInTheDocument();
-      expect(screen.getByText('7-14-1')).toBeInTheDocument();
-      expect(screen.getByText('9-10-1')).toBeInTheDocument();
-      expect(screen.getByText('5-9')).toBeInTheDocument(); // ties=0 omitted
+      expect(screen.getByText("Overall")).toBeInTheDocument();
+      expect(screen.getByText("NCHC")).toBeInTheDocument();
+      expect(screen.getAllByText("Home").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("Away").length).toBeGreaterThan(0);
+      expect(screen.getByText("14-19-1")).toBeInTheDocument();
+      expect(screen.getByText("7-14-1")).toBeInTheDocument();
+      expect(screen.getByText("9-10-1")).toBeInTheDocument();
+      expect(screen.getByText("5-9")).toBeInTheDocument(); // ties=0 omitted
     });
   });
 
@@ -144,7 +236,13 @@ describe('Schedule Page', () => {
   // the reset the record reads 0-0 before the opener and is this season's.
   const unplayedSchedule = (overall) => ({
     data: [
-      { date: '2026-10-02', opponent: 'Lindenwood', status: 'Away', time: '5:00 PM', location: 'Centene Community Ice Center' }
+      {
+        date: "2026-10-02",
+        opponent: "Lindenwood",
+        status: "Away",
+        time: "5:00 PM",
+        location: "Centene Community Ice Center",
+      },
     ],
     team_record: {
       overall,
@@ -152,26 +250,32 @@ describe('Schedule Page', () => {
       home: { wins: 0, losses: 0, ties: 0 },
       away: { wins: 0, losses: 0, ties: 0 },
     },
-    source: 'api',
-    timestamp: '2026-09-30T00:00:00Z',
+    source: "api",
+    timestamp: "2026-09-30T00:00:00Z",
   });
 
-  it('labels a 0-0 record before the opener as the current season, not last season\'s final', async () => {
-    getSchedule.mockResolvedValue(unplayedSchedule({ wins: 0, losses: 0, ties: 0 }));
+  it("labels a 0-0 record before the opener as the current season, not last season's final", async () => {
+    getSchedule.mockResolvedValue(
+      unplayedSchedule({ wins: 0, losses: 0, ties: 0 }),
+    );
     renderSchedule();
 
     await waitFor(() => {
-      expect(screen.getByText('Team Record')).toBeInTheDocument();
+      expect(screen.getByText("Team Record")).toBeInTheDocument();
     });
     expect(screen.queryByText(/Final\)/)).not.toBeInTheDocument();
   });
 
-  it('labels a non-empty record before the opener as last season\'s final', async () => {
-    getSchedule.mockResolvedValue(unplayedSchedule({ wins: 14, losses: 21, ties: 1 }));
+  it("labels a non-empty record before the opener as last season's final", async () => {
+    getSchedule.mockResolvedValue(
+      unplayedSchedule({ wins: 14, losses: 21, ties: 1 }),
+    );
     renderSchedule();
 
     await waitFor(() => {
-      expect(screen.getByText(/Team Record \(\d{4}-\d{2} Final\)/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Team Record \(\d{4}-\d{2} Final\)/),
+      ).toBeInTheDocument();
     });
   });
 });
