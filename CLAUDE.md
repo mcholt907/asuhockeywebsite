@@ -54,7 +54,7 @@ npm run build      # Outputs to build/ (gitignored; Render rebuilds on deploy)
 npm test
 
 # Run a single unit test file
-npm test -- --testPathPattern="UpcomingGames"
+npm test -- --testPathPatterns="UpcomingGames"
 
 # Run server-side Node/Express unit tests (separate Jest config)
 npx jest --config jest.server.config.js

@@ -45,7 +45,7 @@ edit the manifest or the image folder by hand.
 4. **Verify:**
    ```bash
    npx jest --config jest.server.config.js __tests__/line-charts.test.js
-   npm test -- --testPathPattern="Schedule"
+   npm test -- --testPathPatterns="Schedule"
    ```
    The first test fails if the manifest and the image folder drift apart.
 
