@@ -99,9 +99,14 @@ async function addLineChart({ image, date, opponent, rootDir = ROOT_DIR }) {
   fs.mkdirSync(path.dirname(outputFile), { recursive: true });
 
   const sharp = require("sharp");
+  // libvips' operation cache keeps input and output files open, and Windows
+  // refuses to rename or delete an open file. This one-shot conversion gains
+  // nothing from the cache, so turn it off.
+  sharp.cache(false);
   const tempFile = `${outputFile}.tmp`;
+  let info;
   try {
-    await sharp(image)
+    info = await sharp(image)
       .rotate()
       .resize({ width: MAX_WIDTH, withoutEnlargement: true })
       .webp({ quality: WEBP_QUALITY })
@@ -124,13 +129,12 @@ async function addLineChart({ image, date, opponent, rootDir = ROOT_DIR }) {
     }
   }
 
-  const { width, height } = await sharp(outputFile).metadata();
   return {
     publicPath,
     outputFile,
     replaced,
-    width,
-    height,
+    width: info.width,
+    height: info.height,
     bytes: fs.statSync(outputFile).size,
   };
 }
