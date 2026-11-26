@@ -41,6 +41,38 @@ jobs:
       - name: Server tests
         run: npx jest --config jest.server.config.js --runInBand
 
+  # The data-refresh runner is a Windows machine that runs this server suite
+  # before every data commit, so a test that fails only on Windows silently
+  # stops production data updates. Run the same suite on Windows here so that
+  # failure shows up on the pull request instead.
+  server-windows:
+    name: server-windows
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.22.1
+          cache: npm
+
+      # Server tests need no browser, so skip the Puppeteer Chrome postinstall.
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Server tests
+        run: npx jest --config jest.server.config.js --runInBand
+        env:
+          # The hosted runner's default TEMP is an 8.3 short path
+          # (C:\Users\RUNNER~1\...) that PowerShell expands to the long name,
+          # so path comparisons in the installer tests differ. The refresh
+          # machine's TEMP has no short-name alias; use a long path here too.
+          TEMP: ${{ runner.temp }}
+          TMP: ${{ runner.temp }}
+
   e2e:
     name: e2e
     runs-on: ubuntu-latest

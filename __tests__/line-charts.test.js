@@ -14,6 +14,12 @@ const {
 
 const ROOT = path.join(__dirname, "..");
 
+// libvips' cache holds image files open; on Windows (the data-refresh
+// runner) that makes deleting the temp directory or a replaced chart fail.
+beforeAll(() => {
+  sharp.cache(false);
+});
+
 describe("line chart naming", () => {
   it("assigns fall games to the season starting that year", () => {
     expect(seasonForDate("2026-10-02")).toBe("2026-2027");
@@ -67,7 +73,10 @@ describe("committed line chart manifest", () => {
     const files = fs
       .readdirSync(assetRoot, { recursive: true })
       .filter((file) => String(file).endsWith(".webp"))
-      .map((file) => `/assets/line-charts/${String(file).split(path.sep).join("/")}`);
+      .map(
+        (file) =>
+          `/assets/line-charts/${String(file).split(path.sep).join("/")}`,
+      );
     expect(files.sort()).toEqual(Object.values(manifest).sort());
   });
 });
@@ -137,7 +146,12 @@ describe("addLineChart", () => {
 
   it("keeps the manifest sorted by game date", async () => {
     for (const date of ["2026-11-21", "2026-10-02", "2027-01-08"]) {
-      await addLineChart({ image: sourceImage, date, opponent: "Denver", rootDir });
+      await addLineChart({
+        image: sourceImage,
+        date,
+        opponent: "Denver",
+        rootDir,
+      });
     }
     const manifest = JSON.parse(
       fs.readFileSync(path.join(rootDir, MANIFEST_PATH), "utf8"),
