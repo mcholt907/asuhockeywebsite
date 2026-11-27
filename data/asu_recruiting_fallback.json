@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-11-20T13:02:36.232Z",
+  "lastUpdated": "2026-11-27T13:02:37.667Z",
   "recruiting": {
     "2027-2028": [
       {
@@ -29,6 +29,20 @@
         "player_link": "https://www.eliteprospects.com/player/863782/henry-chmiel",
         "player_photo": "https://files.eliteprospects.com/layout/players/8-chmiel,-henry-(38)-ep.jpg",
         "current_team": "Prince Albert Raiders"
+      },
+      {
+        "number": "",
+        "name": "Peter Green",
+        "position": "D",
+        "age": "17",
+        "birth_year": "2009",
+        "birthplace": "Toronto, ON, CAN",
+        "height": "6'0\"",
+        "weight": "190",
+        "shoots": "R",
+        "player_link": "https://www.eliteprospects.com/player/987181/peter-green",
+        "player_photo": "https://files.eliteprospects.com/layout/players/n4-green,-peter-(28)-ep.jpg",
+        "current_team": "Brampton Steelheads"
       },
       {
         "number": "",
@@ -116,6 +130,20 @@
       },
       {
         "number": "",
+        "name": "Henry Lechner",
+        "position": "LW",
+        "age": "20",
+        "birth_year": "2006",
+        "birthplace": "Bloomington, MN, USA",
+        "height": "6'1\"",
+        "weight": "201",
+        "shoots": "R",
+        "player_link": "https://www.eliteprospects.com/player/793906/henry-lechner",
+        "player_photo": "https://files.eliteprospects.com/layout/players/henry-lechner-793906-20261103200204.jpg",
+        "current_team": "Cedar Rapids RoughRiders"
+      },
+      {
+        "number": "",
         "name": "Colton Lien",
         "position": "F",
         "age": "17",
@@ -125,7 +153,7 @@
         "weight": "190",
         "shoots": "L",
         "player_link": "https://www.eliteprospects.com/player/934676/colton-lien",
-        "player_photo": "https://files.eliteprospects.com/layout/players/14-lien,-colton-(43)-ep.jpg",
+        "player_photo": "https://files.eliteprospects.com/layout/players/colton-lien-934676-20261120175553.jpg",
         "current_team": "Kelowna Rockets"
       },
       {
@@ -199,20 +227,6 @@
         "player_link": "https://www.eliteprospects.com/player/690044/cade-nystrom",
         "player_photo": "https://files.eliteprospects.com/layout/players/30-nystrom,-cade-(29)-ep.jpg",
         "current_team": "Team Shattuck St. Mary"
-      },
-      {
-        "number": "",
-        "name": "Peter Green",
-        "position": "D",
-        "age": "17",
-        "birth_year": "2009",
-        "birthplace": "Toronto, ON, CAN",
-        "height": "6'0\"",
-        "weight": "190",
-        "shoots": "R",
-        "player_link": "https://www.eliteprospects.com/player/987181/peter-green",
-        "player_photo": "https://files.eliteprospects.com/layout/players/n4-green,-peter-(28)-ep.jpg",
-        "current_team": "Brampton Steelheads"
       },
       {
         "number": "",
