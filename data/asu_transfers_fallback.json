@@ -1,6 +1,16 @@
 {
   "incoming": [
     {
+      "playerName": "Henry Lechner",
+      "position": "F",
+      "playerUrl": "https://www.eliteprospects.com/player/793906/henry-lechner",
+      "playerId": "793906",
+      "team": "Cedar Rapids RoughRiders",
+      "teamUrl": "https://www.eliteprospects.com/team/783/cedar-rapids-roughriders",
+      "transferDate": "2026-11-21",
+      "direction": "incoming"
+    },
+    {
       "playerName": "Peter Green",
       "position": "D",
       "playerUrl": "https://www.eliteprospects.com/player/987181/peter-green",
@@ -463,5 +473,5 @@
       "direction": "outgoing"
     }
   ],
-  "lastUpdated": "2026-11-20T13:01:05.300Z"
+  "lastUpdated": "2026-11-27T13:01:14.299Z"
 }
